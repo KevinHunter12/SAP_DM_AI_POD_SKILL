@@ -1,9 +1,9 @@
 ---
 name: pod-plugin
-description: Create SAP Digital Manufacturing POD 1.0 and POD 2.0 plugins with proper architecture. **ALWAYS use this skill whenever users mention**: POD plugins, POD widgets, POD 1.0, POD 2.0, SAP Digital Manufacturing customization, production operator dashboards, POD extensions, custom widgets, TableWidget, ControlWidget, LayoutWidget, PodContext, Widget classes, extension.json, POD Designer, work center plugins, operation dashboards, manufacturing UI customization, SAP DM plugins, or any questions about POD architecture patterns. Expert in both legacy POD 1.0 (UI5 component-based) and modern POD 2.0 (ES6 class-based) plugin development. **Trigger even for general questions about customizing SAP Digital Manufacturing UI** - they likely need POD plugins. Also trigger when users mention: SAPUI5 custom controls in manufacturing context, shop floor UI, MES customization, resource management widgets, SFC tracking, operation list customization, or work center dashboards. **CRITICAL**: Warns about webapp/ folder anti-pattern that breaks POD plugin uploads. **Automatically creates deployment zip file** when plugin is complete. **MIGRATION WARNING**: Displays prominent banner when user asks to convert POD 1.0 to POD 2.0, explaining that re-architecting is better than direct conversion.
-version: 9.4.0
+description: Create SAP Digital Manufacturing POD 1.0 and POD 2.0 plugins with proper architecture. **ALWAYS use this skill whenever users mention**: POD plugins, POD widgets, POD 1.0, POD 2.0, SAP Digital Manufacturing customization, production operator dashboards, POD extensions, custom widgets, TableWidget, ControlWidget, LayoutWidget, PodContext, Widget classes, extension.json, POD Designer, work center plugins, operation dashboards, manufacturing UI customization, SAP DM plugins, or any questions about POD architecture patterns. Expert in both legacy POD 1.0 (UI5 component-based) and modern POD 2.0 (ES6 class-based) plugin development. **Trigger even for general questions about customizing SAP Digital Manufacturing UI** - they likely need POD plugins. Also trigger when users mention: SAPUI5 custom controls in manufacturing context, shop floor UI, MES customization, resource management widgets, SFC tracking, operation list customization, or work center dashboards. **CRITICAL**: Warns about webapp/ folder anti-pattern that breaks POD plugin uploads. **Automatically creates deployment zip file** when plugin is complete. **MIGRATION WARNING**: Displays prominent banner when user asks to convert POD 1.0 to POD 2.0, explaining that re-architecting is better than direct conversion. **ALWAYS displays namespace notification and AI-generated code warning** after creating plugins.
+version: 9.5.0
 author: Claude
-tags: [sap, digital-manufacturing, pod, plugin, pod2, no-binding-in-widgetproperty, no-parent-spreading, getDefaultConfig-official-pattern, getI18nText-method, stringpropertyeditor-no-default, callback-parameter-order, real-world-patterns, widget-architecture, createView-before-onInit, no-webapp-folder, pod-vs-sapui5, auto-deployment-zip, migration-warning, pod1-to-pod2]
+tags: [sap, digital-manufacturing, pod, plugin, pod2, no-binding-in-widgetproperty, no-parent-spreading, getDefaultConfig-official-pattern, getI18nText-method, stringpropertyeditor-no-default, callback-parameter-order, real-world-patterns, widget-architecture, createView-before-onInit, no-webapp-folder, pod-vs-sapui5, auto-deployment-zip, migration-warning, pod1-to-pod2, namespace-notification, ai-code-warning]
 compatibility:
   environment: SAP Business Technology Platform (BTP) with SAP Digital Manufacturing
   requirements:
@@ -591,6 +591,119 @@ Ready to upload to SAP DM Extension Center!
 
 ---
 
+## 🚨 CRITICAL: After Creating a Plugin - Required Notifications
+
+### 1. Namespace Notification Template
+
+**ALWAYS include this notification after generating a POD 2.0 plugin:**
+
+```
+═══════════════════════════════════════════════════════════════
+🎯 NAMESPACE INFORMATION - REQUIRED FOR UPLOAD
+═══════════════════════════════════════════════════════════════
+
+Your plugin uses the following namespace:
+
+  📋 Namespace: [namespace-folder]
+  📂 Module Path: [namespace-folder]/plugins/[pluginname]
+  🏷️  Type: [namespace-with-dots].plugins.[pluginname]
+
+⚠️  IMPORTANT: When uploading to SAP Digital Manufacturing Extension Center,
+    you will be asked to provide the namespace.
+
+    USE THIS NAMESPACE: [namespace-folder]
+
+📝 Why You Need This:
+   - SAP DM requires namespace during extension upload
+   - Groups related plugins together
+   - Prevents naming conflicts
+   - Enables selective activation/deactivation
+
+💾 Make note of this namespace before uploading!
+═══════════════════════════════════════════════════════════════
+```
+
+**Example with actual values:**
+```
+═══════════════════════════════════════════════════════════════
+🎯 NAMESPACE INFORMATION - REQUIRED FOR UPLOAD
+═══════════════════════════════════════════════════════════════
+
+Your plugin uses the following namespace:
+
+  📋 Namespace: custom/pod2/acme
+  📂 Module Path: custom/pod2/acme/plugins/ProductionStatus
+  🏷️  Type: custom.pod2.acme.plugins.ProductionStatus
+
+⚠️  IMPORTANT: When uploading to SAP Digital Manufacturing Extension Center,
+    you will be asked to provide the namespace.
+
+    USE THIS NAMESPACE: custom/pod2/acme
+
+📝 Why You Need This:
+   - SAP DM requires namespace during extension upload
+   - Groups related plugins together
+   - Prevents naming conflicts
+   - Enables selective activation/deactivation
+
+💾 Make note of this namespace before uploading!
+═══════════════════════════════════════════════════════════════
+```
+
+---
+
+### 2. AI-Generated Code Warning
+
+**ALWAYS include this warning after generating ANY plugin code:**
+
+```
+╔═══════════════════════════════════════════════════════════════════════════╗
+║                                                                           ║
+║  ⚠️  CRITICAL: AI-GENERATED CODE - MANUAL REVIEW REQUIRED                ║
+║                                                                           ║
+║  This plugin was generated by AI and MUST be thoroughly reviewed         ║
+║  before use in any production environment.                               ║
+║                                                                           ║
+║  REQUIRED CHECKS BEFORE PRODUCTION USE:                                  ║
+║                                                                           ║
+║  ✅ Security Review                                                       ║
+║     • Validate all API calls and authentication                          ║
+║     • Check for injection vulnerabilities (SQL, XSS, etc.)               ║
+║     • Review error handling and sensitive data exposure                  ║
+║     • Verify input validation and sanitization                           ║
+║                                                                           ║
+║  ✅ Code Quality Review                                                   ║
+║     • Verify business logic correctness                                  ║
+║     • Check error handling and edge cases                                ║
+║     • Review performance implications                                    ║
+║     • Validate against company coding standards                          ║
+║                                                                           ║
+║  ✅ Functionality Testing                                                 ║
+║     • Test all user interactions and workflows                           ║
+║     • Verify integration with SAP DM APIs                                ║
+║     • Test with real production data scenarios                           ║
+║     • Validate PodContext subscriptions and data flow                    ║
+║                                                                           ║
+║  ✅ Deployment Validation                                                 ║
+║     • Test in development environment first                              ║
+║     • Verify extension.json structure                                    ║
+║     • Confirm namespace registration                                     ║
+║     • Test upload and activation process                                 ║
+║                                                                           ║
+║  ⚠️  DO NOT deploy AI-generated code directly to production without      ║
+║     thorough review by qualified developers and security team.           ║
+║                                                                           ║
+║  📋 RESPONSIBLE DEVELOPMENT:                                              ║
+║     • Have experienced SAPUI5/SAP DM developers review the code          ║
+║     • Perform security audit before production deployment                ║
+║     • Test thoroughly in non-production environments                     ║
+║     • Document all customizations and assumptions made                   ║
+║                                                                           ║
+╚═══════════════════════════════════════════════════════════════════════════╝
+```
+
+---
+
 ## Reference Documentation
 
 This skill includes comprehensive reference files:
@@ -635,5 +748,7 @@ This skill includes comprehensive reference files:
 7. ✅ **Remember** callback signature is `(value, path)` not `(path, value)`
 8. ✅ **Initialize** JSONModels in _createView(), not onInit()
 9. ✅ **Create deployment zip file** automatically when plugin is complete
+10. ✅ **Display namespace notification** after creating plugin (required for upload)
+11. ✅ **Display AI-generated code warning** after creating ANY plugin code
 
 📖 **For detailed help**, consult the reference documentation files above.
