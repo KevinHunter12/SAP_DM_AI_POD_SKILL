@@ -1,9 +1,9 @@
 ---
 name: pod-plugin
-description: Create SAP Digital Manufacturing POD 1.0 and POD 2.0 plugins with proper architecture. **ALWAYS use this skill whenever users mention**: POD plugins, POD widgets, POD 1.0, POD 2.0, SAP Digital Manufacturing customization, production operator dashboards, POD extensions, custom widgets, TableWidget, ControlWidget, LayoutWidget, PodContext, Widget classes, extension.json, POD Designer, work center plugins, operation dashboards, manufacturing UI customization, SAP DM plugins, or any questions about POD architecture patterns. Expert in both legacy POD 1.0 (UI5 component-based) and modern POD 2.0 (ES6 class-based) plugin development. **Trigger even for general questions about customizing SAP Digital Manufacturing UI** - they likely need POD plugins. Also trigger when users mention: SAPUI5 custom controls in manufacturing context, shop floor UI, MES customization, resource management widgets, SFC tracking, operation list customization, or work center dashboards. **CRITICAL**: Warns about webapp/ folder anti-pattern that breaks POD plugin uploads. **Automatically creates deployment zip file** when plugin is complete. **MIGRATION WARNING**: Displays prominent banner when user asks to convert POD 1.0 to POD 2.0, explaining that re-architecting is better than direct conversion. **ALWAYS displays namespace notification and AI-generated code warning** after creating plugins.
-version: 9.5.0
+description: Create SAP Digital Manufacturing POD 1.0 and POD 2.0 plugins with proper architecture. **ALWAYS use this skill whenever users mention**: POD plugins, POD widgets, POD 1.0, POD 2.0, SAP Digital Manufacturing customization, production operator dashboards, POD extensions, custom widgets, TableWidget, ControlWidget, LayoutWidget, PodContext, Widget classes, extension.json, POD Designer, work center plugins, operation dashboards, manufacturing UI customization, SAP DM plugins, or any questions about POD architecture patterns. Expert in both legacy POD 1.0 (UI5 component-based) and modern POD 2.0 (ES6 class-based) plugin development. **Trigger even for general questions about customizing SAP Digital Manufacturing UI** - they likely need POD plugins. Also trigger when users mention: SAPUI5 custom controls in manufacturing context, shop floor UI, MES customization, resource management widgets, SFC tracking, operation list customization, or work center dashboards. **CRITICAL**: Warns about webapp/ folder anti-pattern that breaks POD plugin uploads. **Automatically creates deployment zip file** when plugin is complete. **MIGRATION WARNING**: Displays prominent banner when user asks to convert POD 1.0 to POD 2.0, explaining that re-architecting is better than direct conversion. **ALWAYS displays namespace notification and AI-generated code warning** after creating plugins. **File structure aligned with official SAP POD 2.0 Developer's Guide** using widget/, action/, util/ folder pattern.
+version: 9.6.0
 author: Claude
-tags: [sap, digital-manufacturing, pod, plugin, pod2, no-binding-in-widgetproperty, no-parent-spreading, getDefaultConfig-official-pattern, getI18nText-method, stringpropertyeditor-no-default, callback-parameter-order, real-world-patterns, widget-architecture, createView-before-onInit, no-webapp-folder, pod-vs-sapui5, auto-deployment-zip, migration-warning, pod1-to-pod2, namespace-notification, ai-code-warning]
+tags: [sap, digital-manufacturing, pod, plugin, pod2, no-binding-in-widgetproperty, no-parent-spreading, getDefaultConfig-official-pattern, getI18nText-method, stringpropertyeditor-no-default, callback-parameter-order, real-world-patterns, widget-architecture, createView-before-onInit, no-webapp-folder, pod-vs-sapui5, auto-deployment-zip, migration-warning, pod1-to-pod2, namespace-notification, ai-code-warning, official-sap-structure, widget-action-util-folders]
 compatibility:
   environment: SAP Business Technology Platform (BTP) with SAP Digital Manufacturing
   requirements:
@@ -116,26 +116,46 @@ webapp/                  # ❌ WRONG! This breaks upload!
 └── controller/          # ❌ POD 2.0 uses single-file widgets
 ```
 
-### ✅ CORRECT POD 2.0 Plugin Structure:
+### ✅ CORRECT POD 2.0 Plugin Structure (Official SAP Pattern):
 ```
-yourplugin/              # Root project folder
+mycompany/               # Root project folder (your namespace prefix)
 ├── extension.json       # ← Must be at ROOT level!
-└── namespace/           # Your plugin namespace
-    └── plugins/
-        └── YourWidget.js
+├── widget/              # Widget folder (recommended by SAP)
+│   └── MyWidget.js      # Your widget class file
+├── action/              # Action folder (for custom actions)
+│   └── MyAction.js
+└── util/                # Utility folder (for reusable logic)
+    └── Helper.js
 ```
+
+**Key Points from Official SAP Documentation:**
+- Root folder name becomes your namespace prefix (e.g., `mycompany`)
+- Use `widget/`, `action/`, `util/` folders (SAP recommended pattern)
+- Module path example: `mycompany/widget/MyWidget`
+- Simple extensions can have just one folder or no folders
+- Complex extensions can have nested namespaces
 
 ### Why This Structure?
 - **POD plugins are extensions**, not standalone apps
 - Upload mechanism expects `extension.json` at root
+- Root folder name becomes your namespace (e.g., `mycompany/widget/MyWidget`)
 - Widgets are loaded dynamically by POD Designer
-- No Component.js/manifest.json needed
+- No Component.js/manifest.json/webapp/ needed
 
 ### Upload Will Fail If:
 - ❌ extension.json is inside webapp/ folder
 - ❌ You include manifest.json or Component.js
 - ❌ You use Component-based architecture
 - ❌ You try to use sap.ui.core.UIComponent
+- ❌ You don't follow the namespace/folder structure
+
+### Namespace Convention (from Official SAP Docs):
+- **Root folder** = namespace prefix (e.g., `mycompany`, `acme`, `customextension`)
+- **Subfolders** = module organization (`widget/`, `action/`, `util/`)
+- **Module path** = `rootfolder/subfolder/ClassName`
+- **Example**: If root is `mycompany` and widget is in `widget/MyWidget.js`:
+  - Module path: `mycompany/widget/MyWidget`
+  - Namespace: `mycompany.widget.MyWidget`
 
 **Remember**: If you're used to SAPUI5 apps, forget that structure entirely for POD plugins!
 

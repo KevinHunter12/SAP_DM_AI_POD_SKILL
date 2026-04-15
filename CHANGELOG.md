@@ -1,5 +1,67 @@
 # POD Plugin Skill - Update Changelog
 
+## Version 9.6.0 - 2026-04-15
+
+### 🔧 CORRECTION: File Structure Aligned with Official SAP Documentation
+
+This update corrects the file structure documentation to match the **official SAP POD 2.0 Developer's Guide**.
+
+---
+
+## ✅ Changes Made
+
+### 1. **Corrected File Structure Pattern (Based on Official SAP Docs)**
+
+**Issue:** Previous versions showed inconsistent folder structures that didn't match official SAP guidance.
+
+**Official SAP Pattern** (from "Set Up Your Project" section):
+```
+mycompany/               # Root folder = namespace prefix
+├── extension.json       # At root (REQUIRED)
+├── widget/              # Widgets folder (SAP recommended)
+│   └── MyWidget.js
+├── action/              # Actions folder (SAP recommended)
+│   └── MyAction.js
+└── util/                # Utilities folder (SAP recommended)
+    └── Helper.js
+```
+
+**Key Points from SAP Documentation:**
+- Root folder name becomes namespace prefix (e.g., `mycompany`, `acme`)
+- SAP recommends `widget/`, `action/`, `util/` subfolders
+- Module path format: `rootfolder/subfolder/ClassName`
+- Example: `mycompany/widget/MyWidget`
+- Simple extensions can use single folder or no folders
+
+**Updated Files:**
+1. **SKILL.md** - "FATAL MISTAKE #0" section
+   - Added official SAP structure pattern
+   - Added namespace convention explanation
+   - Added module path examples
+
+2. **references/glossary.md** - "File Structure" section
+   - Replaced custom examples with official SAP pattern
+   - Added module path convention details
+   - Maintained webapp/ anti-pattern warning
+   - Added alternative simple structure example
+
+3. **references/common-mistakes.md** - "Mistake #12"
+   - Updated with official SAP folder structure
+   - Added namespace convention details
+   - Added reference to official SAP Developer's Guide
+   - Clarified prevention steps
+
+---
+
+## 📖 Documentation Source
+
+These corrections are based on the **official SAP POD 2.0 Plugin Developer's Guide**:
+- Section: "Set Up Your Project"
+- Procedure: Steps 1-3 for organizing plugin structure
+- Example namespace: `myCompany/extension/widget/MyWidget`
+
+---
+
 ## Version 9.5.0 - 2026-04-15
 
 ### 🚨 CRITICAL: Restored Essential Deployment Notifications

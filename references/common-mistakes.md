@@ -536,21 +536,41 @@ POD 2.0 plugins are **extensions**, not SAPUI5 applications:
 
 ### The Fix ✅
 
+**Official SAP Pattern (from Developer's Guide):**
 ```
-yourplugin/              # Root project folder
+mycompany/               # Root folder = namespace prefix
 ├── extension.json       # ✅ At root level!
-└── namespace/           # Plugin namespace folder
-    └── plugins/
-        └── Widget.js
+├── widget/              # ✅ Widgets folder (SAP recommended)
+│   └── MyWidget.js
+├── action/              # ✅ Actions folder (SAP recommended)
+│   └── MyAction.js
+└── util/                # ✅ Utilities folder (SAP recommended)
+    └── Helper.js
+```
+
+**Module Path Convention:**
+- Root folder name becomes namespace prefix (e.g., `mycompany`, `acme`)
+- Use `widget/`, `action/`, `util/` subfolders (official SAP recommendation)
+- Module path format: `rootfolder/subfolder/ClassName`
+- Example: `mycompany/widget/MyWidget`
+
+**Alternative Simple Structure (single widget):**
+```
+simpleplugin/
+├── extension.json       # ✅ At root
+└── MyWidget.js          # ✅ Widget directly at root
 ```
 
 **Correct Zip Structure:**
 ```
 my-plugin.zip
 ├── extension.json       # ← First-level file
-└── namespace/
-    └── plugins/
-        └── Widget.js
+├── widget/
+│   └── MyWidget.js
+├── action/              # Optional
+│   └── MyAction.js
+└── util/                # Optional
+    └── Helper.js
 ```
 
 ### How to Fix Existing Plugin
@@ -586,11 +606,14 @@ POD plugins are **completely different** - they're dynamically loaded extensions
 - No manifest.json
 - No Component.js
 - extension.json goes at root
+- Use `widget/`, `action/`, `util/` folders (official SAP pattern)
+- Root folder name = namespace prefix
 - Widgets are single files (not view + controller)
 
 ### See Also
 - [Glossary: File Structure](glossary.md#file-structure)
 - [extension.json Structure](../SKILL.md#extensionjson-structure)
+- **Official SAP Developer's Guide**: "Set Up Your Project" section
 
 ---
 

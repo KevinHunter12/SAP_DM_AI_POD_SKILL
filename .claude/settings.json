@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Edit(~/.claude/skills/pod-plugin/**)"
+    ],
+    "additionalDirectories": [
+      "c:\\Users\\I331794\\.claude\\skills\\pod-plugin"
+    ]
+  }
+}

@@ -170,16 +170,25 @@ Key terms and definitions for SAP Digital Manufacturing POD plugin development.
 
 **CRITICAL**: POD plugins do NOT use webapp/ folder!
 
-### ✅ Correct Structure:
+### ✅ Correct Structure (Official SAP Pattern):
 ```
-my-custom-plugin/
+mycompany/                      # Root folder = namespace prefix
 ├── extension.json              # Widget registration (REQUIRED, at ROOT!)
-└── custom/                     # Namespace (your choice)
-    └── plugin/
-        ├── MyWidget.js         # Widget implementation
-        └── i18n/
-            └── i18n.properties
+├── widget/                     # Widgets folder (SAP recommended)
+│   ├── MyWidget.js             # Widget implementation
+│   └── i18n/
+│       └── i18n.properties     # Translations
+├── action/                     # Actions folder (SAP recommended)
+│   └── MyAction.js
+└── util/                       # Utilities folder (SAP recommended)
+    └── Helper.js
 ```
+
+**Module Path Convention:**
+- Root folder name = namespace prefix (e.g., `mycompany`, `acme`)
+- Subfolders = module organization (`widget/`, `action/`, `util/`)
+- Full module path: `mycompany/widget/MyWidget`
+- Example from official SAP docs: `myCompany/extension/widget/MyWidget`
 
 ### ❌ WRONG Structure (SAPUI5 App - Don't do this!):
 ```
@@ -192,19 +201,28 @@ my-custom-plugin/
 
 **Remember**: POD plugins ≠ SAPUI5 applications
 
-**Typical POD 2.0 Plugin Structure:**
+**Alternative Simple Structure (for single widget):**
+```
+simpleplugin/
+├── extension.json              # At root
+└── MyWidget.js                 # Widget directly at root
+```
+
+**ZIP File Structure for Upload:**
 ```
 plugin-name.zip
 ├── extension.json              # Widget registration (REQUIRED)
-├── plugins/
+├── widget/
 │   ├── MyWidget.js             # Widget class file
-│   ├── i18n/
-│   │   ├── i18n_en.properties  # English translations
-│   │   └── i18n_de.properties  # German translations (optional)
-│   └── thirdPartyLib/          # Third-party libraries (optional)
-│       ├── moment.min.js
-│       └── lodash.min.js
-└── README.md                    # Documentation (optional)
+│   └── i18n/
+│       ├── i18n_en.properties  # English translations
+│       └── i18n_de.properties  # German translations (optional)
+├── action/                     # Optional
+│   └── MyAction.js
+└── util/                       # Optional
+    └── thirdPartyLib/          # Third-party libraries (optional)
+        ├── moment.min.js
+        └── lodash.min.js
 ```
 
 ---
