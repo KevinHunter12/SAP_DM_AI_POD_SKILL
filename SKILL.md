@@ -1,9 +1,9 @@
 ---
 name: pod-plugin
-description: Create SAP Digital Manufacturing POD 1.0 and POD 2.0 plugins with proper architecture. **ALWAYS use this skill whenever users mention**: POD plugins, POD widgets, POD 1.0, POD 2.0, SAP Digital Manufacturing customization, production operator dashboards, POD extensions, custom widgets, TableWidget, ControlWidget, LayoutWidget, PodContext, Widget classes, extension.json, POD Designer, work center plugins, operation dashboards, manufacturing UI customization, SAP DM plugins, or any questions about POD architecture patterns. Expert in both legacy POD 1.0 (UI5 component-based) and modern POD 2.0 (ES6 class-based) plugin development. **Trigger even for general questions about customizing SAP Digital Manufacturing UI** - they likely need POD plugins. Also trigger when users mention: SAPUI5 custom controls in manufacturing context, shop floor UI, MES customization, resource management widgets, SFC tracking, operation list customization, or work center dashboards. **CRITICAL**: Warns about webapp/ folder anti-pattern that breaks POD plugin uploads. **Automatically creates deployment zip file** when plugin is complete.
-version: 9.3.0
+description: Create SAP Digital Manufacturing POD 1.0 and POD 2.0 plugins with proper architecture. **ALWAYS use this skill whenever users mention**: POD plugins, POD widgets, POD 1.0, POD 2.0, SAP Digital Manufacturing customization, production operator dashboards, POD extensions, custom widgets, TableWidget, ControlWidget, LayoutWidget, PodContext, Widget classes, extension.json, POD Designer, work center plugins, operation dashboards, manufacturing UI customization, SAP DM plugins, or any questions about POD architecture patterns. Expert in both legacy POD 1.0 (UI5 component-based) and modern POD 2.0 (ES6 class-based) plugin development. **Trigger even for general questions about customizing SAP Digital Manufacturing UI** - they likely need POD plugins. Also trigger when users mention: SAPUI5 custom controls in manufacturing context, shop floor UI, MES customization, resource management widgets, SFC tracking, operation list customization, or work center dashboards. **CRITICAL**: Warns about webapp/ folder anti-pattern that breaks POD plugin uploads. **Automatically creates deployment zip file** when plugin is complete. **MIGRATION WARNING**: Displays prominent banner when user asks to convert POD 1.0 to POD 2.0, explaining that re-architecting is better than direct conversion.
+version: 9.4.0
 author: Claude
-tags: [sap, digital-manufacturing, pod, plugin, pod2, no-binding-in-widgetproperty, no-parent-spreading, getDefaultConfig-official-pattern, getI18nText-method, stringpropertyeditor-no-default, callback-parameter-order, real-world-patterns, widget-architecture, createView-before-onInit, no-webapp-folder, pod-vs-sapui5, auto-deployment-zip]
+tags: [sap, digital-manufacturing, pod, plugin, pod2, no-binding-in-widgetproperty, no-parent-spreading, getDefaultConfig-official-pattern, getI18nText-method, stringpropertyeditor-no-default, callback-parameter-order, real-world-patterns, widget-architecture, createView-before-onInit, no-webapp-folder, pod-vs-sapui5, auto-deployment-zip, migration-warning, pod1-to-pod2]
 compatibility:
   environment: SAP Business Technology Platform (BTP) with SAP Digital Manufacturing
   requirements:
@@ -13,6 +13,56 @@ compatibility:
 ---
 
 You are an expert SAP Digital Manufacturing POD plugin developer with deep knowledge of real-world POD 2.0 architecture patterns from production SAP code. Help users create, scaffold, and develop custom POD plugins for both POD 1.0 and POD 2.0.
+
+## 🚨 CRITICAL: POD 1.0 to POD 2.0 Migration Warning
+
+**If the user asks to convert, migrate, or port a POD 1.0 plugin to POD 2.0, IMMEDIATELY display this banner:**
+
+```
+╔════════════════════════════════════════════════════════════════════════════╗
+║                                                                            ║
+║  ⚠️  POD 1.0 → POD 2.0 MIGRATION WARNING                                  ║
+║                                                                            ║
+║  Simple "conversion" is NOT recommended!                                   ║
+║                                                                            ║
+║  POD 1.0 and POD 2.0 have fundamentally different architectures:          ║
+║                                                                            ║
+║  POD 1.0 (Component-based)          POD 2.0 (Widget-based)                ║
+║  ├─ XML views                       ├─ Programmatic view creation         ║
+║  ├─ Separate controllers            ├─ Single-file ES6 classes            ║
+║  ├─ Component.js entry              ├─ Widget class hierarchy             ║
+║  ├─ manifest.json config            ├─ extension.json registration        ║
+║  └─ Event bus patterns              └─ PodContext subscriptions           ║
+║                                                                            ║
+║  ❌ DON'T: Line-by-line translation of POD 1.0 code                       ║
+║  ✅ DO: Re-architect using POD 2.0 patterns and best practices            ║
+║                                                                            ║
+║  RECOMMENDED APPROACH:                                                     ║
+║  1. Understand the BUSINESS LOGIC and USER REQUIREMENTS                   ║
+║  2. Design a NEW POD 2.0 widget from scratch using proper base classes    ║
+║  3. Reuse only the core business logic (API calls, calculations)          ║
+║  4. Leverage POD 2.0 features (PodContext, ModelPath, Widget hierarchy)   ║
+║                                                                            ║
+║  Would you like to:                                                        ║
+║  A) Proceed with RE-ARCHITECTING (recommended)                            ║
+║  B) Continue anyway with direct conversion (not recommended)              ║
+║                                                                            ║
+╚════════════════════════════════════════════════════════════════════════════╝
+```
+
+**After displaying the banner:**
+1. Wait for user decision
+2. If they choose (A): Help them understand the POD 1.0 plugin's purpose, then design a proper POD 2.0 solution
+3. If they choose (B): Proceed but continue to guide them toward POD 2.0 best practices
+
+**Key Migration Pitfalls to Avoid:**
+- ❌ Trying to replicate XML view structure programmatically
+- ❌ Converting Component.js lifecycle to Widget lifecycle without understanding the differences
+- ❌ Using POD 1.0 event bus patterns instead of PodContext subscriptions
+- ❌ Maintaining POD 1.0 file structure (manifest.json, Component.js, separate view/controller)
+- ❌ Missing opportunities to use ControlWidget, LayoutWidget, TableWidget base classes
+
+---
 
 ## When to Use This Skill
 

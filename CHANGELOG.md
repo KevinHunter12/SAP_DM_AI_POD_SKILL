@@ -1,5 +1,175 @@
 # POD Plugin Skill - Update Changelog
 
+## Version 9.4.0 - 2026-04-15
+
+### 🚨 POD 1.0 to POD 2.0 Migration Warning Banner
+
+This update adds a prominent warning banner that displays when users ask to convert/migrate POD 1.0 plugins to POD 2.0, guiding them toward re-architecting rather than direct conversion.
+
+---
+
+## ✅ Changes Made
+
+### 1. **New Migration Warning Banner**
+
+Added critical warning section immediately after skill introduction:
+
+**Location:** After line 15 in SKILL.md, before "When to Use This Skill"
+
+**Content:**
+- **Large ASCII art banner** (78 columns wide) with clear visual hierarchy
+- Side-by-side comparison of POD 1.0 vs POD 2.0 architectures
+- Clear ❌ DON'T vs ✅ DO guidance
+- 4-step recommended approach for re-architecting
+- User choice: (A) Re-architect (recommended) or (B) Convert anyway
+
+**Banner Format:**
+```
+╔════════════════════════════════════════════════════════════════════════════╗
+║                                                                            ║
+║  ⚠️  POD 1.0 → POD 2.0 MIGRATION WARNING                                  ║
+║                                                                            ║
+║  Simple "conversion" is NOT recommended!                                   ║
+║  ...                                                                       ║
+╚════════════════════════════════════════════════════════════════════════════╝
+```
+
+---
+
+### 2. **Key Architecture Differences Highlighted**
+
+**POD 1.0 (Component-based):**
+- XML views
+- Separate controllers
+- Component.js entry point
+- manifest.json configuration
+- Event bus patterns
+
+**POD 2.0 (Widget-based):**
+- Programmatic view creation
+- Single-file ES6 classes
+- Widget class hierarchy
+- extension.json registration
+- PodContext subscriptions
+
+---
+
+### 3. **Migration Pitfalls Documented**
+
+Added list of common mistakes to avoid:
+- ❌ Trying to replicate XML view structure programmatically
+- ❌ Converting Component.js lifecycle without understanding differences
+- ❌ Using POD 1.0 event bus instead of PodContext subscriptions
+- ❌ Maintaining POD 1.0 file structure (manifest.json, Component.js)
+- ❌ Missing opportunities to use ControlWidget, LayoutWidget, TableWidget base classes
+
+---
+
+### 4. **Recommended Approach**
+
+**4-Step Process:**
+1. Understand the BUSINESS LOGIC and USER REQUIREMENTS
+2. Design a NEW POD 2.0 widget from scratch using proper base classes
+3. Reuse only the core business logic (API calls, calculations)
+4. Leverage POD 2.0 features (PodContext, ModelPath, Widget hierarchy)
+
+---
+
+### 5. **User Interaction Flow**
+
+**When migration is requested:**
+1. ✅ Display banner immediately
+2. ✅ Wait for user decision
+3. ✅ If (A): Help understand purpose, then design proper POD 2.0 solution
+4. ✅ If (B): Proceed but continue guiding toward best practices
+
+---
+
+### 6. **Updated Frontmatter**
+
+**Description:** Added "**MIGRATION WARNING**: Displays prominent banner when user asks to convert POD 1.0 to POD 2.0, explaining that re-architecting is better than direct conversion."
+
+**Tags:** Added `migration-warning` and `pod1-to-pod2` tags
+
+**Version:** Bumped from 9.3.0 to 9.4.0
+
+---
+
+## 📊 Statistics
+
+- **Banner Size:** ~45 lines of ASCII art and guidance
+- **Files Modified:** 2 files (SKILL.md, CHANGELOG.md)
+- **New Section:** "POD 1.0 to POD 2.0 Migration Warning"
+- **Architecture Comparisons:** 5 key differences highlighted
+- **Migration Pitfalls:** 5 common mistakes documented
+
+---
+
+## 🎯 Benefits
+
+### For Users
+- ✅ Clear understanding that migration ≠ conversion
+- ✅ Awareness of fundamental architecture differences
+- ✅ Guidance toward better design decisions
+- ✅ Prevention of poor POD 2.0 implementations
+
+### For Plugin Quality
+- ✅ Encourages proper POD 2.0 patterns from the start
+- ✅ Avoids "translated" code that doesn't leverage POD 2.0 features
+- ✅ Results in cleaner, more maintainable plugins
+- ✅ Takes advantage of Widget class hierarchy benefits
+
+---
+
+## 🔑 Key Messages
+
+**The Problem:**
+Direct line-by-line conversion from POD 1.0 to POD 2.0 creates plugins that:
+- Don't leverage POD 2.0's widget architecture
+- Carry over Component-based patterns that don't fit
+- Miss opportunities for cleaner, simpler code
+- Are harder to maintain and extend
+
+**The Solution:**
+Re-architect by:
+1. Understanding what the plugin needs to DO (business requirements)
+2. Choosing the right POD 2.0 base class (ControlWidget, LayoutWidget, TableWidget)
+3. Reusing business logic while adopting POD 2.0 patterns
+4. Leveraging PodContext, ModelPath, and modern ES6 class features
+
+---
+
+## 💡 Why This Matters
+
+POD 1.0 → POD 2.0 is not just a version upgrade—it's an **architectural paradigm shift**:
+
+| Aspect | POD 1.0 | POD 2.0 |
+|--------|---------|---------|
+| Philosophy | Component-based | Widget-based |
+| Views | XML declarative | Programmatic JS |
+| Organization | Multi-file (view/controller) | Single-file class |
+| State | Event bus | PodContext subscriptions |
+| Inheritance | SAPUI5 Component | Widget base classes |
+
+Treating it as a simple conversion misses the opportunity to create better, cleaner plugins.
+
+---
+
+## ✨ Summary
+
+This update adds proactive guidance to prevent poorly designed POD 2.0 plugins created by direct conversion from POD 1.0. The prominent warning banner educates users about fundamental architecture differences and guides them toward re-architecting rather than translating.
+
+**Key Achievement:** Prevention of architectural anti-patterns through early intervention and education.
+
+---
+
+**Version:** 9.4.0
+**Date:** 2026-04-15
+**Status:** ✅ Production Ready
+**Feature:** POD 1.0 to POD 2.0 migration warning system
+
+---
+
 ## Version 9.3.0 - 2026-04-15
 
 ### 🚀 Auto-Deployment Package Feature
