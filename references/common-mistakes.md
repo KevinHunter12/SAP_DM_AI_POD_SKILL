@@ -502,6 +502,98 @@ class MyWidget extends Widget {
 
 ---
 
+## Mistake #12: Using webapp/ Folder Structure ❌ → ✅
+
+**Error**: `"Failed to create custom extension"` or plugin doesn't appear in POD Designer
+
+This is a **FATAL structural mistake** that breaks the plugin upload mechanism.
+
+```
+// ❌ WRONG - SAPUI5 application structure
+yourplugin/
+└── webapp/              # ❌ FATAL: Wrong structure!
+    ├── extension.json
+    ├── manifest.json    # ❌ Not needed
+    ├── Component.js     # ❌ Not needed
+    └── namespace/
+        └── plugins/
+            └── Widget.js
+```
+
+**Error Symptoms:**
+- Upload fails with "Failed to create custom extension"
+- Plugin doesn't appear in POD Designer
+- Silent failure during zip upload
+- Cryptic error about missing extension.json
+
+### Why It's Wrong
+
+POD 2.0 plugins are **extensions**, not SAPUI5 applications:
+- No manifest.json needed
+- No Component.js needed
+- No webapp/ folder structure
+- extension.json must be at ROOT level
+
+### The Fix ✅
+
+```
+yourplugin/              # Root project folder
+├── extension.json       # ✅ At root level!
+└── namespace/           # Plugin namespace folder
+    └── plugins/
+        └── Widget.js
+```
+
+**Correct Zip Structure:**
+```
+my-plugin.zip
+├── extension.json       # ← First-level file
+└── namespace/
+    └── plugins/
+        └── Widget.js
+```
+
+### How to Fix Existing Plugin
+
+If you already created webapp/ folder:
+
+```bash
+# Move everything up one level
+mv webapp/* .
+rmdir webapp
+
+# Verify structure
+ls -la
+# Should see: extension.json at root level
+```
+
+### Why SAPUI5 Developers Make This Mistake
+
+SAPUI5 applications use:
+```
+webapp/
+├── manifest.json
+├── Component.js
+└── view/
+```
+
+POD plugins are **completely different** - they're dynamically loaded extensions, not standalone apps.
+
+### Prevention
+
+✅ **Before creating a POD plugin, remember:**
+- No webapp/ folder
+- No manifest.json
+- No Component.js
+- extension.json goes at root
+- Widgets are single files (not view + controller)
+
+### See Also
+- [Glossary: File Structure](glossary.md#file-structure)
+- [extension.json Structure](../SKILL.md#extensionjson-structure)
+
+---
+
 ## Navigation
 
 📖 **Back to main skill**: [SKILL.md](../SKILL.md)

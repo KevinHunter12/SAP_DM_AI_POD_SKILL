@@ -1,5 +1,174 @@
 # POD Plugin Skill - Update Changelog
 
+## Version 9.2.0 - 2026-04-15
+
+### 🚨 Critical Anti-Pattern Warning Added
+
+This update addresses a fatal structural mistake that breaks POD plugin uploads: using webapp/ folder structure.
+
+---
+
+## ✅ Changes Made
+
+### 1. **New "FATAL MISTAKE #0" Warning Section**
+
+Added prominent warning section immediately after "Quick Decision Guide" in SKILL.md:
+
+**Location:** Lines 56-94 in SKILL.md
+
+**Content:**
+- ❌ Clear visual comparison showing wrong SAPUI5 app structure (webapp/, manifest.json, Component.js)
+- ✅ Correct POD 2.0 plugin structure (extension.json at root)
+- Explanation of why this structure is required
+- List of conditions that cause upload failure
+
+**Why This Matters:**
+- SAPUI5 developers naturally default to webapp/ structure
+- This mistake breaks plugin upload mechanism (silent or cryptic errors)
+- Fatal structural mistake that wastes developer time
+
+---
+
+### 2. **New Mistake #12 in common-mistakes.md**
+
+Added comprehensive documentation of the webapp/ folder anti-pattern:
+
+**File:** `references/common-mistakes.md`
+**Lines:** 504-573 (new section)
+
+**Content:**
+- Error symptoms (upload failures, missing plugins)
+- Why it's wrong (POD extensions vs SAPUI5 apps)
+- Correct structure with examples
+- Fix instructions for existing plugins
+- Prevention checklist
+- Why SAPUI5 developers make this mistake
+
+---
+
+### 3. **Enhanced File Structure in glossary.md**
+
+Updated glossary file structure section with anti-pattern warnings:
+
+**File:** `references/glossary.md`
+**Lines:** 169-185 (updated)
+
+**Content:**
+- **CRITICAL** warning at the top
+- ✅ Correct structure example
+- ❌ WRONG structure example with explanations
+- "POD plugins ≠ SAPUI5 applications" reminder
+
+---
+
+### 4. **POD vs SAPUI5 Comparison Table**
+
+Added comprehensive comparison table in SKILL.md:
+
+**Location:** After "POD 2.0 Architecture Overview" section
+
+**Content:**
+| Aspect | POD 2.0 Plugin ✅ | SAPUI5 Application ❌ |
+|--------|------------------|---------------------|
+| Structure | Flat, extension.json at root | webapp/ with manifest.json |
+| Entry Point | extension.json | Component.js |
+| Widget Definition | Single .js file with _createView() | Separate view + controller |
+| Registration | widgets array | Component routing |
+| Deployment | Upload to Extension Center | Deploy as app to BTP |
+| Lifecycle | Widget.onInit/onExit | Component lifecycle |
+| Context Access | PodContext.get() | Models in manifest |
+| Use Case | Extend POD Designer | Standalone application |
+
+**Key Takeaway:** "If you're building a POD plugin, forget SAPUI5 app conventions!"
+
+---
+
+### 5. **Updated Frontmatter**
+
+Enhanced skill description and tags:
+
+**Description:** Added "**CRITICAL**: Warns about webapp/ folder anti-pattern that breaks POD plugin uploads."
+
+**Tags:** Added `no-webapp-folder` and `pod-vs-sapui5` tags
+
+**Version:** Bumped from 9.1.0 to 9.2.0
+
+---
+
+## 📊 Statistics
+
+- **New Lines Added:** ~150+ lines of documentation
+- **Files Modified:** 4 files (SKILL.md, common-mistakes.md, glossary.md, CHANGELOG.md)
+- **New Mistake Documented:** Mistake #12 (was 11 mistakes, now 12)
+- **New Comparison Table:** POD vs SAPUI5 (8 aspects compared)
+
+---
+
+## 🎯 Benefits
+
+### For Developers
+- ✅ Immediate warning about most common structural mistake
+- ✅ Clear comparison showing POD vs SAPUI5 differences
+- ✅ Multiple touchpoints reinforce correct structure
+- ✅ "Why did upload fail?" is answered in troubleshooting
+
+### For the Skill
+- ✅ Catches fatal mistake early in development
+- ✅ Prevents wasted time on wrong structure
+- ✅ Reduces upload failure rate
+- ✅ Better first-time success rate
+
+---
+
+## 🔄 Implementation Priority
+
+Changes implemented in order of priority:
+
+1. **HIGH**: Added "FATAL MISTAKE #0" warning section (catches attention early)
+2. **HIGH**: Added Mistake #12 to common-mistakes.md (documents anti-pattern)
+3. **MEDIUM**: Added comparison table (helps developers understand differences)
+4. **MEDIUM**: Enhanced glossary.md file structure (reinforces correct structure)
+
+---
+
+## 📝 Root Cause Analysis
+
+### What Triggered This Update:
+
+Real-world mistake where developer created webapp/ folder, resulting in:
+- Upload failed with "Failed to create custom extension"
+- Hours wasted debugging
+- Plugin had to be completely restructured
+
+### Why This Pattern Exists:
+
+SAPUI5 developers have muscle memory for:
+```
+webapp/
+├── manifest.json
+├── Component.js
+└── view/
+```
+
+But POD plugins are **extensions**, not apps, requiring completely different structure.
+
+---
+
+## ✨ Summary
+
+This update adds critical preventive documentation to stop developers from making a fatal structural mistake. The webapp/ folder anti-pattern is now documented at multiple touchpoints with clear visual examples, comparisons, and fixes.
+
+**Key Achievement:** Zero structural errors achievable by following the updated warnings.
+
+---
+
+**Version:** 9.2.0
+**Date:** 2026-04-15
+**Status:** ✅ Production Ready
+**Improvement Source:** Real-world mistake analysis and skill_improvement_proposal.md
+
+---
+
 ## Version 9.1.0 - 2026-04-15
 
 ### 🎯 Major Restructuring - 89% Size Reduction

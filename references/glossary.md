@@ -168,6 +168,30 @@ Key terms and definitions for SAP Digital Manufacturing POD plugin development.
 
 ## File Structure
 
+**CRITICAL**: POD plugins do NOT use webapp/ folder!
+
+### ✅ Correct Structure:
+```
+my-custom-plugin/
+├── extension.json              # Widget registration (REQUIRED, at ROOT!)
+└── custom/                     # Namespace (your choice)
+    └── plugin/
+        ├── MyWidget.js         # Widget implementation
+        └── i18n/
+            └── i18n.properties
+```
+
+### ❌ WRONG Structure (SAPUI5 App - Don't do this!):
+```
+my-custom-plugin/
+└── webapp/                      # ❌ Breaks POD plugin upload!
+    ├── manifest.json           # ❌ Not needed
+    ├── Component.js            # ❌ Not needed
+    └── extension.json          # ❌ Wrong location!
+```
+
+**Remember**: POD plugins ≠ SAPUI5 applications
+
 **Typical POD 2.0 Plugin Structure:**
 ```
 plugin-name.zip

@@ -1,9 +1,9 @@
 ---
 name: pod-plugin
-description: Create SAP Digital Manufacturing POD 1.0 and POD 2.0 plugins with proper architecture. **ALWAYS use this skill whenever users mention**: POD plugins, POD widgets, POD 1.0, POD 2.0, SAP Digital Manufacturing customization, production operator dashboards, POD extensions, custom widgets, TableWidget, ControlWidget, LayoutWidget, PodContext, Widget classes, extension.json, POD Designer, work center plugins, operation dashboards, manufacturing UI customization, SAP DM plugins, or any questions about POD architecture patterns. Expert in both legacy POD 1.0 (UI5 component-based) and modern POD 2.0 (ES6 class-based) plugin development. **Trigger even for general questions about customizing SAP Digital Manufacturing UI** - they likely need POD plugins. Also trigger when users mention: SAPUI5 custom controls in manufacturing context, shop floor UI, MES customization, resource management widgets, SFC tracking, operation list customization, or work center dashboards.
-version: 9.1.0
+description: Create SAP Digital Manufacturing POD 1.0 and POD 2.0 plugins with proper architecture. **ALWAYS use this skill whenever users mention**: POD plugins, POD widgets, POD 1.0, POD 2.0, SAP Digital Manufacturing customization, production operator dashboards, POD extensions, custom widgets, TableWidget, ControlWidget, LayoutWidget, PodContext, Widget classes, extension.json, POD Designer, work center plugins, operation dashboards, manufacturing UI customization, SAP DM plugins, or any questions about POD architecture patterns. Expert in both legacy POD 1.0 (UI5 component-based) and modern POD 2.0 (ES6 class-based) plugin development. **Trigger even for general questions about customizing SAP Digital Manufacturing UI** - they likely need POD plugins. Also trigger when users mention: SAPUI5 custom controls in manufacturing context, shop floor UI, MES customization, resource management widgets, SFC tracking, operation list customization, or work center dashboards. **CRITICAL**: Warns about webapp/ folder anti-pattern that breaks POD plugin uploads.
+version: 9.2.0
 author: Claude
-tags: [sap, digital-manufacturing, pod, plugin, pod2, no-binding-in-widgetproperty, no-parent-spreading, getDefaultConfig-official-pattern, getI18nText-method, stringpropertyeditor-no-default, callback-parameter-order, real-world-patterns, widget-architecture, createView-before-onInit]
+tags: [sap, digital-manufacturing, pod, plugin, pod2, no-binding-in-widgetproperty, no-parent-spreading, getDefaultConfig-official-pattern, getI18nText-method, stringpropertyeditor-no-default, callback-parameter-order, real-world-patterns, widget-architecture, createView-before-onInit, no-webapp-folder, pod-vs-sapui5]
 compatibility:
   environment: SAP Business Technology Platform (BTP) with SAP Digital Manufacturing
   requirements:
@@ -53,7 +53,45 @@ You are an expert SAP Digital Manufacturing POD plugin developer with deep knowl
 
 ---
 
-## 🚨 CRITICAL: Two Fatal Mistakes to Avoid
+## 🚨 FATAL MISTAKE #0: POD Plugin ≠ SAPUI5 Application
+
+**CRITICAL**: POD 2.0 plugins are **NOT** SAPUI5 applications. They have completely different structure.
+
+### ❌ NEVER Create These (SAPUI5 App Structure):
+```
+webapp/                  # ❌ WRONG! This breaks upload!
+├── manifest.json        # ❌ NOT needed for POD plugins
+├── Component.js         # ❌ NOT needed for POD plugins
+├── view/                # ❌ POD 2.0 uses _createView() method
+└── controller/          # ❌ POD 2.0 uses single-file widgets
+```
+
+### ✅ CORRECT POD 2.0 Plugin Structure:
+```
+yourplugin/              # Root project folder
+├── extension.json       # ← Must be at ROOT level!
+└── namespace/           # Your plugin namespace
+    └── plugins/
+        └── YourWidget.js
+```
+
+### Why This Structure?
+- **POD plugins are extensions**, not standalone apps
+- Upload mechanism expects `extension.json` at root
+- Widgets are loaded dynamically by POD Designer
+- No Component.js/manifest.json needed
+
+### Upload Will Fail If:
+- ❌ extension.json is inside webapp/ folder
+- ❌ You include manifest.json or Component.js
+- ❌ You use Component-based architecture
+- ❌ You try to use sap.ui.core.UIComponent
+
+**Remember**: If you're used to SAPUI5 apps, forget that structure entirely for POD plugins!
+
+---
+
+## 🚨 CRITICAL: Two More Fatal Mistakes to Avoid
 
 ### Mistake #1: NEVER Use Binding Syntax in WidgetProperty!
 
@@ -161,6 +199,21 @@ plugins/
 - Registered via `extension.json`
 - Direct POD API access through PodContext
 - Programmatic view creation using `_createView()` method
+
+### POD 2.0 Plugin vs SAPUI5 Application
+
+| Aspect | POD 2.0 Plugin ✅ | SAPUI5 Application ❌ |
+|--------|------------------|---------------------|
+| **Structure** | Flat, extension.json at root | webapp/ folder with manifest.json |
+| **Entry Point** | extension.json | Component.js |
+| **Widget Definition** | Single .js file with _createView() | Separate view + controller |
+| **Registration** | widgets array in extension.json | Component routing |
+| **Deployment** | Upload to Extension Center | Deploy as app to BTP |
+| **Lifecycle** | Widget.onInit/onExit | Component lifecycle |
+| **Context Access** | PodContext.get() | Models in manifest |
+| **Use Case** | Extend POD Designer | Standalone application |
+
+**Key Takeaway**: If you're building a POD plugin, forget SAPUI5 app conventions!
 
 ### Widget Class Hierarchy
 
