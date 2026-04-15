@@ -1,5 +1,183 @@
 # POD Plugin Skill - Update Changelog
 
+## Version 9.1.0 - 2026-04-15
+
+### 🎯 Major Restructuring - 89% Size Reduction
+
+This update completely restructures the skill for better maintainability and faster loading. The main SKILL.md file has been reduced from 4,317 lines to 462 lines while preserving all content in organized reference files.
+
+---
+
+## ✅ Structural Changes
+
+### 1. **SKILL.md Streamlined** (CRITICAL)
+
+| Metric | Before | After | Change |
+|--------|--------|-------|--------|
+| Lines | 4,317 | 462 | **-89%** |
+| Load time | Slow | Fast | Improved |
+
+**What's now in SKILL.md:**
+- Quick Decision Guide (Q1 → Q2 → Q3 flow)
+- Top 2 critical mistakes (most common errors)
+- Core concepts overview
+- Complete basic example
+- Reference documentation index
+
+---
+
+### 2. **New Reference Files Created**
+
+All detailed content extracted to `references/` folder:
+
+| File | Content | Lines |
+|------|---------|-------|
+| `common-mistakes.md` | All 11 mistakes with fixes | ~500 |
+| `glossary.md` | Key terms and definitions | ~216 |
+| `widget-patterns.md` | Complete widget code patterns | ~722 |
+
+---
+
+### 3. **Files Reorganized**
+
+**Moved to `references/` with lowercase naming:**
+- `POD2-API-REFERENCE.md` → `references/pod2-api-reference.md`
+- `NAMESPACE-UPDATE.md` → `references/namespace-update.md`
+
+**Moved to `other-files/` (gitignored):**
+- `VERSION-3.0.0-UPDATES.md`
+- `VERSION-3.1.0-UPDATES.md`
+- `VERSION-3.2.0-UPDATES.md`
+- `SKILL.md.backup`
+- Old reference files (ApiClient-Reference.md, complete-patterns.md, etc.)
+- Implementation documentation
+
+---
+
+### 4. **New Files Added**
+
+- `.gitignore` - Ignores `other-files/`, backups, temp files
+- `references/glossary.md` - New comprehensive glossary
+- Navigation footers in all reference files
+
+---
+
+## ✅ Content Improvements
+
+### 1. **Quick Decision Guide**
+
+New decision tree at the top of SKILL.md:
+
+```
+Q1: New plugin or maintaining existing?
+    → New → Use POD 2.0 → Continue to Q2
+    → Existing POD 1.0 → See legacy docs
+
+Q2: What kind of UI do you need?
+    → Single control → ControlWidget
+    → Container → LayoutWidget
+    → Data table → TableWidget
+    → No UI → ContentHandler
+
+Q3: Need to call APIs?
+    → Custom/external → RestClient
+    → SAP DM public → ApiClient
+```
+
+---
+
+### 2. **Enhanced Frontmatter**
+
+Added `compatibility` field:
+
+```yaml
+compatibility:
+  environment: SAP Business Technology Platform (BTP) with SAP Digital Manufacturing
+  requirements:
+    - SAP DM POD Designer access
+    - Extension Center upload permissions
+    - SAPUI5 knowledge (recommended)
+```
+
+---
+
+### 3. **Fixed Code Examples**
+
+- Added missing `MessageToast` import to basic example
+- All examples now have complete, working imports
+
+---
+
+### 4. **Navigation Footers**
+
+All reference files now include navigation back to main skill and links to other references:
+
+```markdown
+## Navigation
+📖 **Back to main skill**: [SKILL.md](../SKILL.md)
+**Other references**:
+- [Common Mistakes](common-mistakes.md)
+- [Widget Patterns](widget-patterns.md)
+```
+
+---
+
+### 5. **Consistent Naming Convention**
+
+All files in `references/` now use lowercase with dashes:
+- `common-mistakes.md`
+- `glossary.md`
+- `widget-patterns.md`
+- `pod2-api-reference.md`
+- `namespace-update.md`
+
+---
+
+## 📁 New Folder Structure
+
+```
+pod-plugin/
+├── SKILL.md                    # Main skill (462 lines)
+├── README.md                   # Updated documentation
+├── CHANGELOG.md                # This file
+├── .gitignore                  # Git ignore rules
+├── references/                 # All reference documentation
+│   ├── common-mistakes.md      # 11 common mistakes
+│   ├── glossary.md             # Key terms
+│   ├── widget-patterns.md      # Widget code patterns
+│   ├── pod2-api-reference.md   # Complete API docs
+│   └── namespace-update.md     # Import path changes
+└── other-files/                # Non-essential (gitignored)
+    └── ...
+```
+
+---
+
+## 🎯 Benefits
+
+### For Claude (AI)
+- ✅ Faster skill loading (462 vs 4,317 lines)
+- ✅ Better context efficiency
+- ✅ Progressive disclosure - loads references only when needed
+
+### For Users
+- ✅ Quick Decision Guide for fast navigation
+- ✅ Clear reference structure
+- ✅ Easier to find specific information
+
+### For Maintenance
+- ✅ Modular organization
+- ✅ Easy to update individual sections
+- ✅ Consistent naming conventions
+
+---
+
+**Version:** 9.1.0
+**Date:** 2026-04-15
+**Status:** ✅ Production Ready
+
+---
+
 ## Version 5.0.0 - 2026-03-16
 
 ### 🎯 Major Architecture Update - Real-World POD 2.0 Patterns
