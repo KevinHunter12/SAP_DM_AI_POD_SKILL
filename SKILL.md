@@ -1,9 +1,9 @@
 ---
 name: pod-plugin
-description: Create SAP Digital Manufacturing POD 1.0 and POD 2.0 plugins with proper architecture. **ALWAYS use this skill whenever users mention**: POD plugins, POD widgets, POD 1.0, POD 2.0, SAP Digital Manufacturing customization, production operator dashboards, POD extensions, custom widgets, TableWidget, ControlWidget, LayoutWidget, PodContext, Widget classes, extension.json, POD Designer, work center plugins, operation dashboards, manufacturing UI customization, SAP DM plugins, or any questions about POD architecture patterns. Expert in both legacy POD 1.0 (UI5 component-based) and modern POD 2.0 (ES6 class-based) plugin development. **Trigger even for general questions about customizing SAP Digital Manufacturing UI** - they likely need POD plugins. Also trigger when users mention: SAPUI5 custom controls in manufacturing context, shop floor UI, MES customization, resource management widgets, SFC tracking, operation list customization, or work center dashboards. **CRITICAL**: Warns about webapp/ folder anti-pattern that breaks POD plugin uploads.
-version: 9.2.0
+description: Create SAP Digital Manufacturing POD 1.0 and POD 2.0 plugins with proper architecture. **ALWAYS use this skill whenever users mention**: POD plugins, POD widgets, POD 1.0, POD 2.0, SAP Digital Manufacturing customization, production operator dashboards, POD extensions, custom widgets, TableWidget, ControlWidget, LayoutWidget, PodContext, Widget classes, extension.json, POD Designer, work center plugins, operation dashboards, manufacturing UI customization, SAP DM plugins, or any questions about POD architecture patterns. Expert in both legacy POD 1.0 (UI5 component-based) and modern POD 2.0 (ES6 class-based) plugin development. **Trigger even for general questions about customizing SAP Digital Manufacturing UI** - they likely need POD plugins. Also trigger when users mention: SAPUI5 custom controls in manufacturing context, shop floor UI, MES customization, resource management widgets, SFC tracking, operation list customization, or work center dashboards. **CRITICAL**: Warns about webapp/ folder anti-pattern that breaks POD plugin uploads. **Automatically creates deployment zip file** when plugin is complete.
+version: 9.3.0
 author: Claude
-tags: [sap, digital-manufacturing, pod, plugin, pod2, no-binding-in-widgetproperty, no-parent-spreading, getDefaultConfig-official-pattern, getI18nText-method, stringpropertyeditor-no-default, callback-parameter-order, real-world-patterns, widget-architecture, createView-before-onInit, no-webapp-folder, pod-vs-sapui5]
+tags: [sap, digital-manufacturing, pod, plugin, pod2, no-binding-in-widgetproperty, no-parent-spreading, getDefaultConfig-official-pattern, getI18nText-method, stringpropertyeditor-no-default, callback-parameter-order, real-world-patterns, widget-architecture, createView-before-onInit, no-webapp-folder, pod-vs-sapui5, auto-deployment-zip]
 compatibility:
   environment: SAP Business Technology Platform (BTP) with SAP Digital Manufacturing
   requirements:
@@ -468,6 +468,79 @@ sap.ui.define([
 
 ---
 
+## Creating Deployment Package
+
+**CRITICAL**: When you finish creating or modifying a plugin, **ALWAYS create the deployment zip file automatically** before completing the task.
+
+### Automatic Zip Creation Steps
+
+1. **Verify Structure First**
+   ```bash
+   # Check that extension.json is at root
+   ls -la
+   # Should show: extension.json, plugins/ folder (and optionally namespace folder)
+   ```
+
+2. **Create Zip File**
+   
+   **Windows (PowerShell):**
+   ```powershell
+   # From plugin root directory
+   Compress-Archive -Path extension.json,<namespace-folder> -DestinationPath <plugin-name>.zip -Force
+   ```
+   
+   **Mac/Linux:**
+   ```bash
+   # From plugin root directory
+   zip -r <plugin-name>.zip extension.json <namespace-folder>/
+   ```
+
+3. **Verify Zip Contents**
+   ```bash
+   # Windows
+   Expand-Archive -Path <plugin-name>.zip -DestinationPath temp-verify -Force
+   ls temp-verify
+   rm -r temp-verify
+   
+   # Mac/Linux
+   unzip -l <plugin-name>.zip
+   ```
+
+4. **Confirm to User**
+   After creating the zip, tell the user:
+   - ✅ Zip file location and name
+   - ✅ Confirm correct structure (extension.json at root)
+   - ✅ Ready for upload to Extension Center
+
+### Example Output Message
+
+```
+✅ Plugin complete! Deployment package created:
+
+📦 File: my-custom-plugin.zip
+📁 Location: /path/to/plugin/my-custom-plugin.zip
+📊 Size: 15.2 KB
+
+Structure verified:
+  ✓ extension.json at root
+  ✓ custom/plugins/MyWidget.js
+  ✓ custom/plugins/i18n/i18n_en.properties
+
+Ready to upload to SAP DM Extension Center!
+```
+
+### When to Create Zip
+
+**ALWAYS create the zip when:**
+- ✅ New plugin created from scratch
+- ✅ Existing plugin modified (widgets, actions, code changes)
+- ✅ Plugin structure corrected/fixed
+- ✅ User asks "is it ready?" or "can I deploy now?"
+
+**Do NOT wait for user to ask** - proactively create the deployment package as the final step of plugin development.
+
+---
+
 ## Reference Documentation
 
 This skill includes comprehensive reference files:
@@ -511,5 +584,6 @@ This skill includes comprehensive reference files:
 6. ✅ **Always** unsubscribe from PodContext in onExit()
 7. ✅ **Remember** callback signature is `(value, path)` not `(path, value)`
 8. ✅ **Initialize** JSONModels in _createView(), not onInit()
+9. ✅ **Create deployment zip file** automatically when plugin is complete
 
 📖 **For detailed help**, consult the reference documentation files above.
