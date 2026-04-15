@@ -168,12 +168,12 @@ Key terms and definitions for SAP Digital Manufacturing POD plugin development.
 
 ## File Structure
 
-**CRITICAL**: POD plugins do NOT use webapp/ folder!
+**CRITICAL**: POD plugins do NOT use webapp/ folder! extension.json must be INSIDE the namespace folder!
 
 ### ✅ Correct Structure (Official SAP Pattern):
 ```
-mycompany/                      # Root folder = namespace prefix
-├── extension.json              # Widget registration (REQUIRED, at ROOT!)
+mycompany/                      # Namespace folder (your project root)
+├── extension.json              # ← INSIDE the namespace folder!
 ├── widget/                     # Widgets folder (SAP recommended)
 │   ├── MyWidget.js             # Widget implementation
 │   └── i18n/
@@ -185,10 +185,11 @@ mycompany/                      # Root folder = namespace prefix
 ```
 
 **Module Path Convention:**
-- Root folder name = namespace prefix (e.g., `mycompany`, `acme`)
+- Namespace folder = top-level folder (e.g., `mycompany/`, `acme/`)
+- extension.json = inside namespace folder at root level
 - Subfolders = module organization (`widget/`, `action/`, `util/`)
 - Full module path: `mycompany/widget/MyWidget`
-- Example from official SAP docs: `myCompany/extension/widget/MyWidget`
+- Module paths in extension.json are relative to extension.json location
 
 ### ❌ WRONG Structure (SAPUI5 App - Don't do this!):
 ```
@@ -199,30 +200,48 @@ my-custom-plugin/
     └── extension.json          # ❌ Wrong location!
 ```
 
+### ❌ WRONG Structure (extension.json outside namespace):
+```
+├── extension.json               # ❌ WRONG! Causes "Missing file" error!
+└── mycompany/
+    └── widget/
+        └── MyWidget.js
+```
+**Why this fails:** Module path is `mycompany/widget/MyWidget`, but extension.json is outside the namespace folder. Relative paths don't resolve correctly.
+
 **Remember**: POD plugins ≠ SAPUI5 applications
 
 **Alternative Simple Structure (for single widget):**
 ```
 simpleplugin/
-├── extension.json              # At root
+├── extension.json              # At root of namespace folder
 └── MyWidget.js                 # Widget directly at root
 ```
 
 **ZIP File Structure for Upload:**
 ```
-plugin-name.zip
-├── extension.json              # Widget registration (REQUIRED)
-├── widget/
-│   ├── MyWidget.js             # Widget class file
-│   └── i18n/
-│       ├── i18n_en.properties  # English translations
-│       └── i18n_de.properties  # German translations (optional)
-├── action/                     # Optional
-│   └── MyAction.js
-└── util/                       # Optional
-    └── thirdPartyLib/          # Third-party libraries (optional)
-        ├── moment.min.js
-        └── lodash.min.js
+mycompany.zip
+└── mycompany/                  # ← Namespace folder IS the zip content
+    ├── extension.json          # ← Inside namespace folder
+    ├── widget/
+    │   ├── MyWidget.js         # Widget class file
+    │   └── i18n/
+    │       ├── i18n_en.properties  # English translations
+    │       └── i18n_de.properties  # German translations (optional)
+    ├── action/                 # Optional
+    │   └── MyAction.js
+    └── util/                   # Optional
+        └── thirdPartyLib/      # Third-party libraries (optional)
+            ├── moment.min.js
+            └── lodash.min.js
+```
+
+**How to Create Correct Zip:**
+```bash
+# From PARENT directory of namespace folder
+zip -r mycompany.zip mycompany/
+# or PowerShell:
+Compress-Archive -Path mycompany -DestinationPath mycompany.zip
 ```
 
 ---

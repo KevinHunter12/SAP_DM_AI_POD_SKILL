@@ -502,7 +502,115 @@ class MyWidget extends Widget {
 
 ---
 
-## Mistake #12: Using webapp/ Folder Structure ❌ → ✅
+## Mistake #12: extension.json Outside Namespace Folder ❌ → ✅
+
+**Error**: `"Failed to load module"`, `"Missing file"`, or plugin widgets don't appear in POD Designer
+
+This is a **CRITICAL packaging mistake** that breaks module path resolution.
+
+```
+// ❌ WRONG - extension.json at zip root
+mycompany.zip
+├── extension.json           # ❌ Outside namespace folder!
+└── mycompany/
+    └── widget/
+        └── MyWidget.js
+```
+
+**Error Symptoms:**
+- Upload succeeds but widgets don't load
+- "Failed to load module" errors in browser console
+- Extension appears in Extension Center but widgets missing from POD Designer
+- Module path errors like "mycompany/widget/MyWidget not found"
+
+### Why It's Wrong
+
+**Module paths in extension.json are relative to extension.json's location!**
+
+If extension.json contains:
+```json
+{
+  "widgets": [{
+    "modulePath": "mycompany/widget/MyWidget"
+  }]
+}
+```
+
+And extension.json is at zip root (outside `mycompany/`), the Extension Center looks for:
+- `<extension-root>/mycompany/widget/MyWidget.js`
+
+But the file is actually at:
+- `<extension-root>/mycompany/mycompany/widget/MyWidget.js` ❌ (path is wrong!)
+
+### The Fix ✅
+
+**extension.json must be INSIDE the namespace folder:**
+
+```
+mycompany.zip
+└── mycompany/               # ← Namespace folder in zip
+    ├── extension.json       # ← Inside namespace folder
+    └── widget/
+        └── MyWidget.js
+```
+
+Now the module path `mycompany/widget/MyWidget` resolves correctly from extension.json's location.
+
+### How to Create Correct Zip
+
+**From PARENT directory of namespace folder:**
+
+```bash
+# Mac/Linux
+zip -r mycompany.zip mycompany/
+
+# Windows PowerShell
+Compress-Archive -Path mycompany -DestinationPath mycompany.zip
+```
+
+**❌ DON'T do this:**
+```bash
+# Wrong - zips contents instead of folder
+cd mycompany
+zip -r ../mycompany.zip *
+```
+
+### How to Fix Existing Plugin
+
+If you already created the wrong structure:
+
+```bash
+# Extract and fix
+unzip mycompany.zip -d temp
+mkdir temp/fixed
+mv temp/mycompany temp/fixed/
+mv temp/extension.json temp/fixed/mycompany/
+
+# Rezip correctly
+cd temp/fixed
+zip -r ../../mycompany-fixed.zip mycompany/
+cd ../..
+rm -r temp
+```
+
+### Prevention
+
+✅ **Before zipping:**
+1. Verify extension.json is inside namespace folder
+2. cd to PARENT directory of namespace folder
+3. Zip the namespace folder itself: `zip -r name.zip namespacefolder/`
+4. Verify zip contents: first entry should be the namespace folder
+
+### See Also
+- [Glossary: File Structure](glossary.md#file-structure)
+- [SKILL.md: Deployment Package Creation](../SKILL.md#creating-deployment-package)
+- [Mistake #13: webapp/ folder](common-mistakes.md#mistake-13-using-webapp-folder-structure)
+
+---
+
+## Mistake #13: Using webapp/ Folder Structure ❌ → ✅
+
+## Mistake #13: Using webapp/ Folder Structure ❌ → ✅
 
 **Error**: `"Failed to create custom extension"` or plugin doesn't appear in POD Designer
 
@@ -532,14 +640,14 @@ POD 2.0 plugins are **extensions**, not SAPUI5 applications:
 - No manifest.json needed
 - No Component.js needed
 - No webapp/ folder structure
-- extension.json must be at ROOT level
+- extension.json must be inside namespace folder at root level
 
 ### The Fix ✅
 
 **Official SAP Pattern (from Developer's Guide):**
 ```
-mycompany/               # Root folder = namespace prefix
-├── extension.json       # ✅ At root level!
+mycompany/               # Namespace folder
+├── extension.json       # ✅ Inside namespace folder
 ├── widget/              # ✅ Widgets folder (SAP recommended)
 │   └── MyWidget.js
 ├── action/              # ✅ Actions folder (SAP recommended)
@@ -549,28 +657,29 @@ mycompany/               # Root folder = namespace prefix
 ```
 
 **Module Path Convention:**
-- Root folder name becomes namespace prefix (e.g., `mycompany`, `acme`)
+- Namespace folder becomes namespace prefix (e.g., `mycompany`, `acme`)
 - Use `widget/`, `action/`, `util/` subfolders (official SAP recommendation)
-- Module path format: `rootfolder/subfolder/ClassName`
+- Module path format: `namespacefolder/subfolder/ClassName`
 - Example: `mycompany/widget/MyWidget`
 
 **Alternative Simple Structure (single widget):**
 ```
 simpleplugin/
-├── extension.json       # ✅ At root
+├── extension.json       # ✅ At root of namespace folder
 └── MyWidget.js          # ✅ Widget directly at root
 ```
 
 **Correct Zip Structure:**
 ```
-my-plugin.zip
-├── extension.json       # ← First-level file
-├── widget/
-│   └── MyWidget.js
-├── action/              # Optional
-│   └── MyAction.js
-└── util/                # Optional
-    └── Helper.js
+mycompany.zip
+└── mycompany/           # ← Namespace folder in zip
+    ├── extension.json   # ← Inside namespace folder
+    ├── widget/
+    │   └── MyWidget.js
+    ├── action/
+    │   └── MyAction.js
+    └── util/
+        └── Helper.js
 ```
 
 ### How to Fix Existing Plugin
@@ -584,7 +693,7 @@ rmdir webapp
 
 # Verify structure
 ls -la
-# Should see: extension.json at root level
+# Should see: extension.json at root level of namespace folder
 ```
 
 ### Why SAPUI5 Developers Make This Mistake
@@ -605,15 +714,16 @@ POD plugins are **completely different** - they're dynamically loaded extensions
 - No webapp/ folder
 - No manifest.json
 - No Component.js
-- extension.json goes at root
+- extension.json goes inside namespace folder
 - Use `widget/`, `action/`, `util/` folders (official SAP pattern)
-- Root folder name = namespace prefix
+- Namespace folder name = namespace prefix
 - Widgets are single files (not view + controller)
 
 ### See Also
 - [Glossary: File Structure](glossary.md#file-structure)
 - [extension.json Structure](../SKILL.md#extensionjson-structure)
 - **Official SAP Developer's Guide**: "Set Up Your Project" section
+- [Mistake #12: extension.json placement](common-mistakes.md#mistake-12-extensionjson-outside-namespace-folder)
 
 ---
 

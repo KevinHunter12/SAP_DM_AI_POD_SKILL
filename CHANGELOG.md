@@ -1,5 +1,102 @@
 # POD Plugin Skill - Update Changelog
 
+## Version 9.7.0 - 2026-04-15
+
+### 🚨 CRITICAL FIX: extension.json Placement Correction
+
+This update fixes a **CRITICAL packaging error** that caused all plugins to fail loading with "Missing file" errors.
+
+---
+
+## ✅ Changes Made
+
+### 1. **CRITICAL: Fixed extension.json Placement**
+
+**The Problem** (identified by user testing):
+Previous documentation incorrectly showed extension.json at the wrong level, causing module path resolution failures.
+
+**What Was Wrong:**
+```
+❌ mycompany.zip
+├── extension.json       # WRONG! Outside namespace folder
+└── mycompany/
+    └── widget/
+        └── MyWidget.js
+```
+
+**Why It Failed:**
+- Module paths in extension.json are relative to extension.json's location
+- If extension.json contains path `mycompany/widget/MyWidget`
+- But extension.json is outside `mycompany/` folder
+- Path resolution fails: looks for `<root>/mycompany/widget/MyWidget.js`
+- But file is at `<root>/mycompany/mycompany/widget/MyWidget.js` ❌
+
+**What Is Correct:**
+```
+✅ mycompany.zip
+└── mycompany/           # Namespace folder IS the zip content
+    ├── extension.json   # INSIDE namespace folder
+    └── widget/
+        └── MyWidget.js
+```
+
+**Why This Works:**
+- extension.json is inside `mycompany/`
+- Module path `mycompany/widget/MyWidget` resolves correctly from extension.json location
+- Extension Center finds the widget file at expected path
+
+### 2. **Updated All Documentation**
+
+**SKILL.md changes:**
+- Corrected file structure showing extension.json inside namespace folder
+- Added visual comparison: WRONG vs CORRECT zip structures
+- Updated deployment package creation with correct zip commands
+- Added explicit "zip the namespace folder itself" instruction
+- Clarified module path resolution relative to extension.json
+
+**references/glossary.md changes:**
+- Corrected file structure section
+- Added warning about extension.json placement
+- Added example showing why wrong placement fails
+- Updated zip creation commands
+
+**references/common-mistakes.md changes:**
+- Added NEW Mistake #12: "extension.json Outside Namespace Folder"
+  - Detailed explanation of module path resolution
+  - Error symptoms and debugging steps
+  - Fix instructions for existing plugins
+- Renumbered old Mistake #12 (webapp/ folder) to Mistake #13
+
+### 3. **Added New Mistake #12**
+
+Complete documentation of the extension.json placement error:
+- Error symptoms: "Failed to load module", "Missing file", widgets don't appear
+- Why it fails: relative path resolution from extension.json
+- How to fix: move extension.json inside namespace folder
+- Prevention: always zip the namespace folder itself
+- Verification steps to check zip contents
+
+---
+
+## 📋 Impact
+
+This was a **CRITICAL** error that would cause **100% of plugins** created using the previous documentation to fail at runtime.
+
+**Affected Versions:** v9.0.0 - v9.6.0
+
+**Symptoms:**
+- Extension uploads successfully to Extension Center
+- But widgets don't appear in POD Designer
+- Browser console shows "Failed to load module" errors
+- Module path resolution fails silently
+
+**Resolution:**
+Users must:
+1. Repackage existing plugins with extension.json inside namespace folder
+2. Upload corrected zip files to Extension Center
+
+---
+
 ## Version 9.6.0 - 2026-04-15
 
 ### 🔧 CORRECTION: File Structure Aligned with Official SAP Documentation
