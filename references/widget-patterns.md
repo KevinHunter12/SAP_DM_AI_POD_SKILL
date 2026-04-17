@@ -811,23 +811,24 @@ sap.ui.define([
         }
 
         // ✅ STEP 4: Use inherited getI18nText() in UI creation
+        // CRITICAL: ALWAYS use method calls in _createView() - binding syntax doesn't work!
         _createView() {
             const oConfig = this.getConfig();
 
             return new VBox(oConfig.id, {
                 items: [
-                    // Method 1: Use inherited getI18nText()
+                    // ✅ CORRECT: Use inherited getI18nText() method
                     new Label({ 
                         text: this.getI18nText("label.welcome") 
                     }),
                     
-                    // Method 2: Use binding syntax for controls
+                    // ✅ CORRECT: Use method call, not binding
                     new Button({
-                        text: "{i18n>button.submit}",
+                        text: this.getI18nText("button.submit"),  // Method call!
                         press: () => this._onButtonPress()
                     }),
                     
-                    // Method 3: With parameters
+                    // ✅ CORRECT: With parameters
                     new Label({ 
                         text: this.getI18nText("label.itemCount", [5]) 
                     })
@@ -850,41 +851,64 @@ sap.ui.define([
 });
 ```
 
-### Three Ways to Use i18n
+### How to Use i18n - CRITICAL Rules
 
-POD 2.0 provides three methods for using internationalized text:
+**🚨 CRITICAL: NEVER use binding syntax `"{i18n>key}"` during `_createView()`!**
 
-#### Method 1: Inherited `this.getI18nText()` (Recommended)
+The i18n model is NOT available during view creation, so binding syntax will fail silently or cause errors.
+
+#### ✅ CORRECT: Use Method Calls (ALWAYS)
+
+POD 2.0 provides two methods for using internationalized text:
+
+#### Method 1: Inherited `this.getI18nText()` (Recommended for widgets)
 
 ```javascript
-// Available anywhere in widget instance
+// ✅ CORRECT: Available anywhere in widget instance
 const sText = this.getI18nText("myWidget.greeting");
 const sWithParams = this.getI18nText("myWidget.title", [arg1, arg2]);
+
+// ✅ CORRECT: In _createView()
+_createView() {
+    return new Button({
+        text: this.getI18nText("button.submit")  // Method call works!
+    });
+}
 ```
 
-**Use when:** You're inside widget instance methods
+**Use when:** You're inside widget instance methods (including `_createView()`)
 
 #### Method 2: Static `PodContext.getI18nText()`
 
 ```javascript
-// Static method, works anywhere
+// ✅ CORRECT: Static method, works anywhere
 const sText = PodContext.getI18nText("myWidget.error");
 const sWithParams = PodContext.getI18nText("myWidget.message", [count]);
 ```
 
 **Use when:** You need i18n in static methods or outside widget context
 
-#### Method 3: Binding Syntax `"{i18n>key}"`
+#### ❌ WRONG: Binding Syntax During View Creation
 
 ```javascript
-// In control properties
-new Button({
-    text: "{i18n>myWidget.button.label}",
-    tooltip: "{i18n>myWidget.button.tooltip}"
-});
+// ❌ WRONG: This does NOT work in _createView()!
+_createView() {
+    return new Button({
+        text: "{i18n>button.submit}"  // Model not available yet!
+    });
+}
 ```
 
-**Use when:** Creating SAPUI5 controls with property bindings
+**Why this fails:** The i18n model isn't registered until AFTER `_createView()` completes, so bindings fail to resolve.
+
+#### ⚠️ Binding Syntax MAY Work After onInit() (Not Recommended)
+
+Binding syntax `"{i18n>key}"` might work for controls created dynamically AFTER `onInit()`, but:
+- **Method calls are safer and more consistent**
+- **Always works, regardless of timing**
+- **No dependency on model availability**
+
+**Bottom line:** Always use method calls (`this.getI18nText()` or `PodContext.getI18nText()`)
 
 ### File Structure
 

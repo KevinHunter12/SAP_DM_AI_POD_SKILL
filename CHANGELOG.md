@@ -1,5 +1,170 @@
 # POD Plugin Skill - Update Changelog
 
+## Version 16.0.0 - 2026-04-17 🚨 **CRITICAL FIX**
+
+### 🔥 CRITICAL FIX: i18n Binding Syntax Documentation Correction
+
+**Fixed misleading documentation that caused widgets to fail due to incorrect i18n usage pattern.**
+
+This critical release corrects documentation that incorrectly suggested binding syntax `"{i18n>key}"` could be used during `_createView()`. This pattern does NOT work because the i18n model is not available during view creation phase.
+
+---
+
+## ⚠️ WHAT WAS FIXED
+
+### 1. Widget Patterns Documentation (CORRECTED)
+
+**File**: [references/widget-patterns.md](references/widget-patterns.md)
+
+**Problem**: Documentation showed "Method 3: Binding Syntax" as a valid option for use in `_createView()`:
+```javascript
+// ❌ WRONG - This was shown in docs but doesn't work!
+_createView() {
+    return new Button({
+        text: "{i18n>button.submit}"  // Model not available yet!
+    });
+}
+```
+
+**Fix**: Now clearly emphasizes that binding syntax does NOT work in `_createView()`:
+```javascript
+// ✅ CORRECT - Use method calls in _createView()
+_createView() {
+    return new Button({
+        text: this.getI18nText("button.submit")  // Works!
+    });
+}
+```
+
+**New Section**: "How to Use i18n - CRITICAL Rules"
+- ✅ Method 1: `this.getI18nText()` (recommended for widgets)
+- ✅ Method 2: `PodContext.getI18nText()` (for static methods)
+- ❌ Binding syntax `"{i18n>key}"` - NEVER use in `_createView()`
+- Clear explanation: i18n model loaded AFTER `_createView()` completes
+
+---
+
+### 2. Main Skill Documentation (UPDATED)
+
+**File**: [skill.md](skill.md) - **Step 3: Add i18n Support**
+
+**Added CRITICAL i18n Rules Section:**
+- 🚨 **ALWAYS** use `this.getI18nText(key)` method calls in `_createView()`
+- 🚨 **NEVER** use binding syntax `"{i18n>key}"` in `_createView()` - model not ready yet!
+- Clear explanation of when i18n model becomes available
+- Method calls work everywhere; bindings only work after initialization
+
+**Updated Version & Description:**
+- Version: 16.0.0
+- Description: Enhanced with critical warning about i18n binding syntax limitations
+
+---
+
+## 🎯 WHY THIS MATTERS
+
+**Impact**: Previous documentation caused generated widgets to:
+- Fail to display translated text (showed "{i18n>key}" literally)
+- Cause binding resolution errors
+- Work inconsistently depending on timing
+
+**Root Cause**: The POD 2.0 framework registers i18n models AFTER `_createView()` completes, so bindings created during view creation cannot resolve to i18n model data.
+
+**Solution**: Always use method calls (`this.getI18nText()`) during `_createView()` phase. Bindings may work for dynamically created controls after `onInit()`, but method calls are safer and more consistent.
+
+---
+
+## 📝 DOCUMENTATION UPDATES SUMMARY
+
+| File | Lines Changed | Change Type |
+|------|--------------|-------------|
+| `references/widget-patterns.md` | Lines 814-889 | Corrected example code & renamed section to "How to Use i18n - CRITICAL Rules" |
+| `skill.md` | Lines 589-628 | Added 🚨 CRITICAL i18n Rules section with clear do's/don'ts |
+| `skill.md` | Line 4 (description) | Enhanced with binding syntax warning |
+| `skill.md` | Line 5 (version) | Bumped to 16.0.0 |
+| `CHANGELOG.md` | Top section | Added this version entry |
+
+---
+
+## ✅ CORRECT PATTERN (As of v16.0.0)
+
+```javascript
+import I18nResourceModel from "sap/dm/dme/pod2/model/I18nResourceModel";
+
+class MyWidget extends Widget {
+    // 1. Static private i18n model
+    static #oI18nModel = new I18nResourceModel({
+        bundleName: "your.namespace.i18n.i18n"
+    });
+    
+    // 2. Static getter for framework
+    static getI18nModel() {
+        return this.#oI18nModel;
+    }
+    
+    // 3. ✅ ALWAYS use method calls in _createView()
+    _createView() {
+        return new Button({
+            text: this.getI18nText("button.submit")  // ✅ Method call works!
+        });
+    }
+    
+    // ❌ NEVER do this in _createView()
+    _createViewWrong() {
+        return new Button({
+            text: "{i18n>button.submit}"  // ❌ Model not available yet!
+        });
+    }
+}
+```
+
+---
+
+## 🔧 MIGRATION GUIDE
+
+If you have existing widgets using binding syntax in `_createView()`, update them:
+
+**Before (v15.0.0 and earlier - WRONG):**
+```javascript
+_createView() {
+    return new VBox(oConfig.id, {
+        items: [
+            new Label({ text: "{i18n>label.title}" }),
+            new Button({ text: "{i18n>button.submit}" })
+        ]
+    });
+}
+```
+
+**After (v16.0.0 - CORRECT):**
+```javascript
+_createView() {
+    return new VBox(oConfig.id, {
+        items: [
+            new Label({ text: this.getI18nText("label.title") }),
+            new Button({ text: this.getI18nText("button.submit") })
+        ]
+    });
+}
+```
+
+---
+
+## 📌 QUICK REFERENCE
+
+**When to use each method:**
+
+| Method | Use When | Works In _createView()? |
+|--------|----------|------------------------|
+| `this.getI18nText(key)` | Inside widget instance methods | ✅ YES - Recommended |
+| `PodContext.getI18nText(key)` | Static methods, outside widget | ✅ YES - Alternative |
+| `"{i18n>key}"` binding | Dynamic controls after onInit() | ❌ NO - Don't use! |
+
+**Bottom Line**: Always use method calls. They work everywhere, every time.
+
+---
+
+---
+
 ## Version 15.0.0 - 2026-04-17 🚀 **NEW FEATURE**
 
 ### 🔥 NEW FEATURE: SAP Digital Manufacturing API Integration Reference
