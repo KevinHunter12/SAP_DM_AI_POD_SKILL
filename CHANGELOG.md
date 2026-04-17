@@ -1,5 +1,422 @@
 # POD Plugin Skill - Update Changelog
 
+## Version 10.0.0 - 2026-04-17
+
+### 🚨 CRITICAL FIX: Zip Structure Completely WRONG - Fixed!
+
+This is a **MAJOR BREAKING CHANGE** that fixes a fundamental error about zip file structure. Previous versions (9.0.0 - 9.10.0) had the zip structure COMPLETELY WRONG!
+
+---
+
+## ✅ The Critical Fix
+
+### ❌ WRONG (Versions 9.0.0 - 9.10.0):
+```
+mycompany.zip
+└── mycompany/              # ❌ WRONG! No namespace folder wrapper!
+    ├── extension.json
+    └── widget/
+```
+
+### ✅ CORRECT (Version 10.0.0+):
+```
+mycompany.zip
+├── extension.json          # ✅ CORRECT - at zip root!
+├── widget/
+└── action/
+```
+
+---
+
+## 🔍 What Was Wrong
+
+**The Fundamental Error:**
+- Previous versions said extension.json must be INSIDE a namespace folder in the zip
+- This was completely wrong!
+- extension.json must be at the ZIP ROOT, no namespace folder wrapper
+
+**Why This Matters:**
+- The namespace (e.g., `mycompany`) is a PATH PREFIX in module paths
+- It's NOT a folder structure in the zip
+- Module path `mycompany/widget/MyWidget` means:
+  - Namespace prefix: `mycompany`
+  - Actual path in zip: `widget/MyWidget.js`
+  - NOT: `mycompany/widget/MyWidget.js` in zip
+
+**The Confusion:**
+- Working directory IS the namespace folder during development
+- But when zipping, you zip the CONTENTS, not the folder itself
+- extension.json ends up at zip root, files at root level
+
+---
+
+## ✅ Changes Made
+
+### 1. **Fixed All Zip Structure Examples**
+
+**Updated in SKILL.md:**
+- Section: "🚨 CRITICAL: When You Create the ZIP for Upload" (line ~239)
+- Section: "❌ WRONG ZIP Structure" vs "✅ CORRECT ZIP Structure" (line ~265)
+- Section: "Why This Structure?" explanation (line ~278)
+- Section: "Creating Deployment Package" zip commands (line ~790)
+
+**All now show:**
+```
+mycompany.zip
+├── extension.json          # At root!
+├── widget/
+└── action/
+```
+
+---
+
+### 2. **Fixed Zip Creation Commands**
+
+**NEW (CORRECT) Commands:**
+
+**Windows (PowerShell):**
+```powershell
+$NAMESPACE = Split-Path -Leaf (Get-Location)
+Compress-Archive -Path extension.json,widget,action,i18n,util -DestinationPath "$NAMESPACE.zip" -Force
+```
+
+**Mac/Linux:**
+```bash
+NAMESPACE=$(basename $(pwd))
+zip -r "$NAMESPACE.zip" extension.json widget action i18n util
+```
+
+**Key Point:** Zip the CONTENTS of working directory, NOT the folder itself!
+
+---
+
+### 3. **Fixed Verification Commands**
+
+**NEW verification:**
+```bash
+unzip -l mycompany.zip
+# First line should be: extension.json (NOT mycompany/extension.json!)
+```
+
+Verification now checks that extension.json is at zip root.
+
+---
+
+### 4. **Fixed Mistake #13 in common-mistakes.md**
+
+**Title changed:**
+- OLD: "extension.json Outside Namespace Folder"
+- NEW: "extension.json NOT at Zip Root"
+
+**Explanation completely rewritten:**
+- Now correctly explains extension.json must be at zip root
+- Shows correct zip commands
+- Explains namespace is a path prefix, not a folder
+
+---
+
+### 5. **Updated Namespace Convention Explanation**
+
+**OLD (WRONG):**
+- "Namespace folder = top-level folder in zip"
+- "extension.json inside namespace folder"
+
+**NEW (CORRECT):**
+- "Namespace = prefix used in module paths"
+- "extension.json at zip root level"
+- "Namespace is a path prefix, not a folder wrapper"
+
+---
+
+## 📊 Impact
+
+**Breaking Change:**
+- Any plugins created with versions 9.0.0 - 9.10.0 have WRONG zip structure
+- They need to be re-zipped correctly
+
+**How to Fix Old Plugins:**
+```bash
+# If you have: mycompany.zip with mycompany/extension.json inside
+unzip mycompany.zip -d temp
+cd temp/mycompany
+zip -r ../../mycompany-fixed.zip extension.json widget action i18n util
+cd ../..
+rm -r temp
+```
+
+**Files Updated:**
+- `SKILL.md` - All zip structure examples and commands
+- `references/common-mistakes.md` - Mistake #13 completely rewritten
+- Version bumped to 10.0.0 (major version due to breaking change)
+
+**Critical Note:**
+The namespace (e.g., `mycompany`) is used in:
+- Module paths: `mycompany/widget/MyWidget`
+- Type identifiers: `mycompany.widget.MyWidget`
+- Zip file name: `mycompany.zip`
+
+But it's NOT a folder in the zip! extension.json and files are at zip root.
+
+---
+
+## Version 9.10.0 - 2026-04-17
+
+### ✅ Zip Creation Now Happens INSIDE Working Directory
+
+This update changes the zip creation process to create the deployment package INSIDE the working directory (namespace folder) instead of requiring users to cd to the parent directory.
+
+---
+
+## ✅ Changes Made
+
+### 1. **Updated "Creating Deployment Package" Section**
+
+**Old Approach** (required cd to parent):
+```bash
+cd ..
+zip -r mycompany.zip mycompany/
+```
+
+**New Approach** (creates zip in working directory):
+```bash
+# Automatically detects namespace and creates proper structure
+NAMESPACE=$(basename $(pwd))
+mkdir -p "temp_$NAMESPACE/$NAMESPACE"
+find . -maxdepth 1 ! -name "temp_$NAMESPACE" ! -name "." -exec cp -r {} "temp_$NAMESPACE/$NAMESPACE/" \;
+(cd "temp_$NAMESPACE" && zip -r "../$NAMESPACE.zip" "$NAMESPACE/")
+rm -rf "temp_$NAMESPACE"
+```
+
+**Why This Is Better:**
+- ✅ Users don't need to cd to parent directory
+- ✅ Zip file is created in working directory (easier to find)
+- ✅ Still maintains correct structure (namespace folder at zip root)
+- ✅ Auto-detects namespace from current folder name
+- ✅ Cleaner workflow - stay in your working directory
+
+---
+
+### 2. **Updated Both Windows and Mac/Linux Commands**
+
+**Windows (PowerShell):**
+```powershell
+$NAMESPACE = Split-Path -Leaf (Get-Location)
+New-Item -ItemType Directory -Path "temp_$NAMESPACE/$NAMESPACE" -Force
+Copy-Item -Path * -Destination "temp_$NAMESPACE/$NAMESPACE" -Recurse -Exclude "temp_$NAMESPACE"
+Compress-Archive -Path "temp_$NAMESPACE/$NAMESPACE" -DestinationPath "$NAMESPACE.zip" -Force
+Remove-Item -Path "temp_$NAMESPACE" -Recurse -Force
+```
+
+**Mac/Linux:**
+```bash
+NAMESPACE=$(basename $(pwd))
+mkdir -p "temp_$NAMESPACE/$NAMESPACE"
+find . -maxdepth 1 ! -name "temp_$NAMESPACE" ! -name "." -exec cp -r {} "temp_$NAMESPACE/$NAMESPACE/" \;
+(cd "temp_$NAMESPACE" && zip -r "../$NAMESPACE.zip" "$NAMESPACE/")
+rm -rf "temp_$NAMESPACE"
+```
+
+**How It Works:**
+1. Detects namespace from current folder name
+2. Creates temporary folder structure: `temp_namespace/namespace/`
+3. Copies all working directory contents into nested namespace folder
+4. Creates zip from temp folder (so zip root is the namespace folder)
+5. Cleans up temporary folder
+6. Result: `namespace.zip` in working directory with correct structure
+
+---
+
+### 3. **Updated Early Mention of Zip Creation**
+
+Updated section around line 239 to reflect new approach:
+```bash
+# Commands create zip INSIDE working directory with proper namespace structure
+# See detailed zip creation steps below
+```
+
+No longer mentions cd to parent directory.
+
+---
+
+## 📊 Impact
+
+**Benefits:**
+- ✅ Simpler workflow - no directory changes needed
+- ✅ Zip file stays in working directory
+- ✅ Automatic namespace detection
+- ✅ Still creates correct structure (namespace folder at root)
+- ✅ Cross-platform commands (Windows PowerShell + Mac/Linux bash)
+
+**Zip Structure (unchanged):**
+```
+mycompany.zip
+└── mycompany/              # ← Namespace folder at zip root
+    ├── extension.json
+    ├── widget/
+    └── action/
+```
+
+**Files Updated:**
+- `SKILL.md` - Updated "Creating Deployment Package" section and early zip mention
+- Version bumped to 9.10.0
+
+---
+
+## Version 9.9.0 - 2026-04-17
+
+### 🚨 CRITICAL: Mandatory Namespace Detection Before File Generation
+
+This update adds **MANDATORY namespace detection** as Step 0 to ensure correct module paths in extension.json.
+
+---
+
+## ✅ Changes Made
+
+### 1. **NEW SECTION: 🚨 STEP 0: ALWAYS Detect the Namespace First!**
+
+**Added mandatory first step to SKILL.md** (after "File Generation" section):
+
+**What It Does:**
+- Forces detection of working directory name using `basename $(pwd)`
+- This detected name becomes the namespace used in extension.json
+- Prevents using generic placeholders like "custom/pod2/something" or "mycompany"
+- Shows exact commands to run and how to use the result
+
+**Why This Is Critical:**
+- Working directory name = namespace
+- Module paths must start with the actual folder name
+- SAP DM looks for files relative to the namespace
+- Wrong namespace = "file not found" errors on upload
+
+**Example Workflow:**
+```bash
+$ pwd
+/home/user/myproject
+
+$ basename $(pwd)
+myproject  # ← THIS is your namespace!
+
+# extension.json must use:
+"modulePath": "myproject/widget/MyWidget"
+"type": "myproject.widget.MyWidget"
+```
+
+---
+
+### 2. **Updated Quick Start Section**
+
+**Added Step 0 before Step 1:**
+```bash
+# Step 0: Detect your namespace (REQUIRED FIRST!)
+NAMESPACE=$(basename $(pwd))
+echo "Using namespace: $NAMESPACE"
+```
+
+Makes it impossible to miss - namespace detection is now the very first step in Quick Start.
+
+---
+
+### 3. **Added Pre-Deployment Validation Checklist**
+
+**New section before "Creating Deployment Package":**
+
+```bash
+# 1. Get namespace from folder
+NAMESPACE=$(basename $(pwd))
+
+# 2. Check extension.json contains the correct namespace
+grep "\"modulePath\": \"$NAMESPACE/" extension.json
+grep "\"type\": \"$NAMESPACE." extension.json
+
+# 3. Verify files exist at paths specified in extension.json
+```
+
+Provides validation commands to verify namespace correctness before deployment.
+
+---
+
+### 4. **Updated Complete Basic Example**
+
+**Added namespace detection steps:**
+
+**Step 1: Detect namespace**
+```bash
+# Assume working directory is: /home/user/myawesomeplugin
+NAMESPACE=$(basename $(pwd))  # Result: myawesomeplugin
+```
+
+**Step 2: Create extension.json with detected namespace**
+```json
+{
+  "widgets": [{
+    "modulePath": "myawesomeplugin/widget/BasicPlugin",  // ← Uses detected name
+    "type": "myawesomeplugin.widget.BasicPlugin"          // ← Uses detected name
+  }]
+}
+```
+
+Shows concrete example of how detected namespace appears in extension.json.
+
+---
+
+### 5. **Updated Final Reminders**
+
+**Namespace detection is now #1** (most important):
+
+```markdown
+1. ✅ **ALWAYS** detect working directory name FIRST and use it as namespace
+   ```bash
+   basename $(pwd)  # Use this exact result in extension.json
+   ```
+```
+
+Moved to top of reminders list to emphasize priority.
+
+---
+
+### 6. **Added Mistake #0 to common-mistakes.md**
+
+**NEW: First mistake in the list:**
+
+## Mistake #0: Using Generic Namespace Instead of Working Directory Name
+
+**Shows:**
+- ❌ WRONG: Using generic namespaces like "custom/pod2/mywidget"
+- ✅ CORRECT: Detect with `basename $(pwd)` and use result
+- Why it matters: Module resolution, file not found errors
+- The Rule: Run `basename $(pwd)` FIRST, use result everywhere
+
+**Complete with:**
+- Example commands
+- Validation steps
+- Prevention checklist
+- Explanation of why this causes "file not found" errors
+
+---
+
+## 📊 Impact
+
+**These changes make namespace detection:**
+
+1. **Mandatory** (Step 0, not optional)
+2. **Prominent** (in multiple critical sections)
+3. **Actionable** (show exact bash commands)
+4. **Validated** (checklist before deployment)
+5. **First** (appears as #1 in Final Reminders and Mistake #0)
+
+**Prevents:**
+- Using generic placeholder namespaces
+- Module path mismatches
+- "File not found" errors during upload
+- Wrong namespace in extension.json
+
+**Files Updated:**
+- `SKILL.md` - Added 4 new sections about namespace detection
+- `references/common-mistakes.md` - Added Mistake #0 as first entry
+- Version bumped to 9.9.0
+
+---
+
 ## Version 9.8.0 - 2026-04-17
 
 ### 🚨 CRITICAL FIX: No Namespace Folder Creation During File Generation

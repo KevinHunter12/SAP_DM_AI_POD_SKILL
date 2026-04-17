@@ -4,7 +4,81 @@ Complete guide to the most common POD plugin development mistakes and their solu
 
 ---
 
-## Mistake #0: Creating Namespace Folder During File Generation ❌ → ✅ (CRITICAL!)
+## Mistake #0: Using Generic Namespace Instead of Working Directory Name
+
+**Error**: Module path doesn't match actual folder structure, causing "file not found" errors on upload
+
+**This is a critical mistake!** The working directory name IS the namespace. Using generic placeholders like "custom/pod2/something" or "mycompany" instead of detecting the actual folder name causes module resolution failures.
+
+### ❌ WRONG - Using generic namespace
+```json
+// extension.json - Using generic namespace
+{
+  "widgets": [{
+    "modulePath": "custom/pod2/mywidget/widget/MyWidget",  // ❌ Generic!
+    "type": "custom.pod2.mywidget.widget.MyWidget"
+  }]
+}
+```
+
+### ✅ CORRECT - Detect and use actual working directory name
+
+```bash
+# ALWAYS detect working directory first!
+$ pwd
+/home/user/mycompany
+
+$ basename $(pwd)
+mycompany  # ← THIS is your namespace!
+
+// extension.json - Using detected namespace
+{
+  "widgets": [{
+    "modulePath": "mycompany/widget/MyWidget",  // ✅ Matches folder!
+    "type": "mycompany.widget.MyWidget"
+  }]
+}
+```
+
+### Why This Matters:
+
+1. **Working directory name = namespace** - The folder you're in IS your namespace
+2. **Module paths must start with the actual folder name** - SAP DM resolves paths relative to this
+3. **SAP DM looks for files relative to the namespace** - Wrong namespace breaks module loading
+4. **Wrong namespace = "file not found" errors on upload** - Extension Center can't find your files
+
+### The Rule: Run `basename $(pwd)` FIRST, use result everywhere!
+
+**Mandatory First Step:**
+```bash
+# Get working directory name - this IS your namespace
+NAMESPACE=$(basename $(pwd))
+echo "Using namespace: $NAMESPACE"
+
+# Use this in extension.json:
+# "modulePath": "$NAMESPACE/widget/MyWidget"
+# "type": "$NAMESPACE.widget.MyWidget"
+```
+
+**Never use:**
+- ❌ Generic placeholders: `custom/pod2/something`, `mycompany`, `acme`
+- ❌ Nested paths that don't match working directory
+- ❌ Hardcoded namespace values
+
+**Always use:**
+- ✅ Actual working directory name detected with `basename $(pwd)`
+- ✅ Module paths that start with detected namespace
+- ✅ Validation before deployment
+
+### Prevention:
+1. Run `basename $(pwd)` BEFORE generating any files
+2. Store result in variable: `NAMESPACE=$(basename $(pwd))`
+3. Use `$NAMESPACE` in all module paths and type identifiers
+4. Validate with: `grep "\"modulePath\": \"$NAMESPACE/" extension.json`
+
+---
+
+## Mistake #1: Creating Namespace Folder During File Generation ❌ → ✅ (CRITICAL!)
 
 **Error**: Files generated in wrong location (e.g., `mycompany/extension.json` instead of `extension.json`)
 
@@ -584,17 +658,17 @@ class MyWidget extends Widget {
 
 ---
 
-## Mistake #13: extension.json Outside Namespace Folder ❌ → ✅
+## Mistake #13: extension.json NOT at Zip Root ❌ → ✅
 
 **Error**: `"Failed to load module"`, `"Missing file"`, or plugin widgets don't appear in POD Designer
 
 This is a **CRITICAL packaging mistake** that breaks module path resolution.
 
 ```
-// ❌ WRONG - extension.json at zip root
+// ❌ WRONG - extension.json inside namespace folder wrapper
 mycompany.zip
-├── extension.json           # ❌ Outside namespace folder!
-└── mycompany/
+└── mycompany/               # ❌ Wrong! No namespace folder wrapper!
+    ├── extension.json       # ❌ NOT at zip root!
     └── widget/
         └── MyWidget.js
 ```
@@ -607,7 +681,9 @@ mycompany.zip
 
 ### Why It's Wrong
 
-**Module paths in extension.json are relative to extension.json's location!**
+**extension.json MUST be at the zip root, NOT inside a namespace folder!**
+
+The namespace in module paths (e.g., `mycompany/widget/MyWidget`) is just a prefix in the path, NOT a folder wrapper in the zip.
 
 If extension.json contains:
 ```json
@@ -618,59 +694,58 @@ If extension.json contains:
 }
 ```
 
-And extension.json is at zip root (outside `mycompany/`), the Extension Center looks for:
-- `<extension-root>/mycompany/widget/MyWidget.js`
-
-But the file is actually at:
-- `<extension-root>/mycompany/mycompany/widget/MyWidget.js` ❌ (path is wrong!)
+And extension.json is inside a `mycompany/` folder in the zip, the Extension Center looks for:
+- `mycompany/widget/MyWidget.js` relative to extension.json location
+- But since extension.json is already in `mycompany/`, it looks for `mycompany/mycompany/widget/MyWidget.js` ❌
 
 ### The Fix ✅
 
-**extension.json must be INSIDE the namespace folder:**
+**extension.json must be at ZIP ROOT:**
 
 ```
 mycompany.zip
-└── mycompany/               # ← Namespace folder in zip
-    ├── extension.json       # ← Inside namespace folder
-    └── widget/
-        └── MyWidget.js
+├── extension.json           # ✅ CORRECT - at zip root!
+├── widget/
+│   └── MyWidget.js
+├── action/
+│   └── MyAction.js
+└── util/
+    └── Helper.js
 ```
 
-Now the module path `mycompany/widget/MyWidget` resolves correctly from extension.json's location.
+Now the module path `mycompany/widget/MyWidget` is just a namespace-prefixed path. The files are at zip root: `widget/MyWidget.js`.
 
 ### How to Create Correct Zip
 
-**From PARENT directory of namespace folder:**
+**From INSIDE the working directory (namespace folder):**
 
 ```bash
-# Mac/Linux
-zip -r mycompany.zip mycompany/
+# Mac/Linux - Zip the CONTENTS
+NAMESPACE=$(basename $(pwd))
+zip -r "$NAMESPACE.zip" extension.json widget action i18n util
 
-# Windows PowerShell
-Compress-Archive -Path mycompany -DestinationPath mycompany.zip
+# Windows PowerShell - Zip the CONTENTS
+$NAMESPACE = Split-Path -Leaf (Get-Location)
+Compress-Archive -Path extension.json,widget,action,i18n,util -DestinationPath "$NAMESPACE.zip" -Force
 ```
 
 **❌ DON'T do this:**
 ```bash
-# Wrong - zips contents instead of folder
-cd mycompany
-zip -r ../mycompany.zip *
+# Wrong - creates namespace folder wrapper in zip
+cd ..
+zip -r mycompany.zip mycompany/
 ```
 
 ### How to Fix Existing Plugin
 
-If you already created the wrong structure:
+If you already created the wrong structure with namespace folder wrapper:
 
 ```bash
 # Extract and fix
 unzip mycompany.zip -d temp
-mkdir temp/fixed
-mv temp/mycompany temp/fixed/
-mv temp/extension.json temp/fixed/mycompany/
-
-# Rezip correctly
-cd temp/fixed
-zip -r ../../mycompany-fixed.zip mycompany/
+cd temp/mycompany
+# Rezip the contents directly (no wrapper)
+zip -r ../../mycompany-fixed.zip extension.json widget action i18n util
 cd ../..
 rm -r temp
 ```
@@ -678,10 +753,9 @@ rm -r temp
 ### Prevention
 
 ✅ **Before zipping:**
-1. Verify extension.json is inside namespace folder
-2. cd to PARENT directory of namespace folder
-3. Zip the namespace folder itself: `zip -r name.zip namespacefolder/`
-4. Verify zip contents: first entry should be the namespace folder
+1. cd to your working directory (namespace folder)
+2. Zip the CONTENTS: `zip -r name.zip extension.json widget action i18n util`
+3. Verify: `unzip -l name.zip` - first entry should be `extension.json` (NOT `name/extension.json`)
 
 ### See Also
 - [Glossary: File Structure](glossary.md#file-structure)
