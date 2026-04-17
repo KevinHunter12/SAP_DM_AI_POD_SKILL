@@ -679,7 +679,165 @@ your-plugin/
 
 ---
 
-## Mistake #13: Model Not Initialized Before _createView() ❌ → ✅
+## Mistake #12: Wrong PlacementType Import ❌ → ✅
+
+**Error**: `Module "sap/ui/core/library" failed to load`
+
+```javascript
+// ❌ WRONG - PlacementType is NOT in sap.ui.core!
+import coreLibrary from "sap/ui/core/library";
+const { PlacementType } = coreLibrary;
+
+// Usage - causes errors
+new Popover({
+    placement: PlacementType.Auto  // 💥 PlacementType is undefined!
+});
+
+// ✅ CORRECT - Import PlacementType directly from sap.m
+import PlacementType from "sap/m/PlacementType";
+
+// Usage - works correctly
+new Popover({
+    placement: PlacementType.Auto      // ✅ PlacementType.Auto
+    // Other values: PlacementType.Bottom, PlacementType.Top, etc.
+});
+```
+
+**Why this happens**: PlacementType is part of the sap.m library, not sap.ui.core. Many SAPUI5 enums live in the library that defines the controls using them.
+
+**Critical Rule**:
+- ✅ Import PlacementType from `"sap/m/PlacementType"`
+- ❌ DON'T import from `"sap/ui/core/library"`
+- Use directly as enum: `PlacementType.Auto`, `PlacementType.Bottom`, `PlacementType.Top`, etc.
+
+**Other Common Enum Imports:**
+```javascript
+// Correct imports for commonly used enums
+import ButtonType from "sap/m/ButtonType";         // Button types
+import ListMode from "sap/m/ListMode";             // List selection modes
+import MessageType from "sap/m/MessageType";       // Message types
+import ValueState from "sap/ui/core/ValueState";   // Value states (this one IS in core)
+```
+
+---
+
+## Mistake #13: Wrong ModelPath Constants ❌ → ✅
+
+**Error**: `Cannot read property 'resource' of undefined` or no subscription triggered
+
+```javascript
+// ❌ WRONG - These ModelPath constants DON'T EXIST!
+PodContext.subscribe(
+    ModelPath.SelectedWorkListItem,  // 💥 Doesn't exist!
+    (oItem, sPath) => {
+        console.log(oItem.sfc);  // oItem is undefined
+    },
+    this
+);
+
+PodContext.subscribe(
+    ModelPath.SelectedSfc,  // 💥 Doesn't exist!
+    (sSfc, sPath) => {
+        console.log(sSfc);  // Never fires
+    },
+    this
+);
+
+// ✅ CORRECT - Use exact constant names (PLURAL for arrays!)
+PodContext.subscribe(
+    ModelPath.SelectedWorkListItems,  // ✅ Note: Items (plural)!
+    (aItems, sPath) => {
+        // aItems is an ARRAY
+        const resources = Array.isArray(aItems) ? aItems : [];
+        resources.forEach(oItem => {
+            console.log(oItem.sfc);
+        });
+    },
+    this
+);
+
+// Get all work list items (also returns array)
+PodContext.subscribe(
+    ModelPath.WorkListItems,  // ✅ Items (plural)
+    (aItems, sPath) => {
+        console.log(`Total items: ${aItems.length}`);
+    },
+    this
+);
+```
+
+**Why this happens**: 
+1. Work list related paths return **arrays** (plural names), not single items
+2. There is no `SelectedWorkListItem` (singular) constant
+3. ModelPath constant names must match EXACTLY what's defined in the framework
+
+**Critical Rules**:
+- ✅ `ModelPath.SelectedWorkListItems` - Returns **array** of selected items
+- ✅ `ModelPath.WorkListItems` - Returns **array** of all items
+- ✅ `ModelPath.WorkListCount` - Returns **number**
+- ✅ `ModelPath.WorkListLoading` - Returns **boolean**
+- ❌ `ModelPath.SelectedWorkListItem` - Doesn't exist!
+- ❌ `ModelPath.SelectedSfc` - Doesn't exist!
+
+**Correct Usage Pattern:**
+```javascript
+// Subscribe to selected work list items
+PodContext.subscribe(
+    ModelPath.SelectedWorkListItems,
+    this._onWorkListSelectionChanged,
+    this
+);
+
+_onWorkListSelectionChanged(aSelectedItems, sPath) {
+    // ALWAYS validate - may be undefined, null, or empty array
+    const items = Array.isArray(aSelectedItems) ? aSelectedItems : [];
+    
+    if (items.length === 0) {
+        // No selection
+        return;
+    }
+    
+    // Process selected items
+    items.forEach(oItem => {
+        const sSfc = oItem.sfc;
+        const sResource = oItem.resource;
+        // ... use data
+    });
+}
+```
+
+**How to Find Correct Constants:**
+1. Always check [references/pod2-api-reference.md](pod2-api-reference.md#modelpath-constants) for exact constant names
+2. Look for "Items" (plural) suffix for arrays
+3. Check return type (array vs single object vs primitive)
+4. Use TypeScript definitions or JSDoc if available
+
+**Common ModelPath Constants (Correct Names):**
+```javascript
+// Work List (arrays)
+ModelPath.SelectedWorkListItems   // Array of selected items
+ModelPath.WorkListItems           // Array of all items
+ModelPath.WorkListCount           // Number
+ModelPath.WorkListLoading         // Boolean
+
+// Resources (arrays)
+ModelPath.FilterResources         // Array of selected resources
+ModelPath.CurrentResource         // Single resource object
+
+// Operations
+ModelPath.CurrentOperation        // Single operation object
+ModelPath.SelectedOperationActivities // Array
+```
+
+**Prevention:**
+- ✅ Check API reference before using any ModelPath constant
+- ✅ Use `Array.isArray()` to validate array responses
+- ✅ Test subscriptions to ensure they fire
+- ❌ DON'T assume singular/plural naming without verification
+
+---
+
+## Mistake #14: Model Not Initialized Before _createView() ❌ → ✅
 
 **Error**: Widget UI flashes/flickers repeatedly, or bindings like `{/layout}` don't work
 
@@ -759,7 +917,7 @@ class MyWidget extends Widget {
 
 ---
 
-## Mistake #14: extension.json NOT at Zip Root ❌ → ✅
+## Mistake #15: extension.json NOT at Zip Root ❌ → ✅
 
 **Error**: `"Failed to load module"`, `"Missing file"`, or plugin widgets don't appear in POD Designer
 
@@ -865,7 +1023,7 @@ rm -r temp
 
 ---
 
-## Mistake #15: Using webapp/ Folder Structure ❌ → ✅
+## Mistake #16: Using webapp/ Folder Structure ❌ → ✅
 
 ## Mistake #15: Using webapp/ Folder Structure ❌ → ✅
 

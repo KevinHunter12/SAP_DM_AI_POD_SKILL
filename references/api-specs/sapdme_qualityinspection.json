@@ -1,0 +1,1839 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "Quality inspection allows you to determine whether your company’s product consistently meets defined quality requirements. This service enables you to create inspection points, obtain information on inspection points, record and retrieve inspection results in SAP Digital Manufacturing and synchronize inspection results to integrated ERP systems.",
+    "version": "v1",
+    "title": "Quality Inspection",
+    "contact": {
+      "name": "SAP Digital Manufacturing Operations",
+      "email": "sap-dmoperation@sap.com"
+    }
+     },
+    "externalDocs": {
+        "description": "Prepare for API Integration",
+        "url": "https://help.sap.com/docs/sap-digital-manufacturing/operations-guide/prepare-for-api-integration"
+  },
+  "host": "hostname",
+  "basePath": "/",
+  "tags": [
+    {
+      "name": "Quality Inspection Integration Management",
+      "description": "Inspection Api Controller"
+    }
+  ],
+  "paths": {
+    "/lots/{inspectionLot}/operations/{inspectionOperation}/characteristics/{inspectionCharacteristic}/results": {
+      "post": {
+        "tags": [
+          "Single Results Recording"
+        ],
+        "summary": "Record single results for an inspection characteristics.",
+        "description": "Record single-value results for an inspection characteristic for a given inspection lot.",
+        "operationId": "updateSingleResultsUsingPOST_1",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "inspectionCharacteristic",
+            "in": "path",
+            "description": "The inspection characteristic for the operation",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "inspectionLot",
+            "in": "path",
+            "description": "The inspection lot for the operation",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "inspectionOperation",
+            "in": "path",
+            "description": "The operation/activity for which you want to record inspection results",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "request",
+            "description": "request",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/InspectionSingleResultRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Single results successfully created.",
+            "schema": {
+              "$ref": "#/definitions/InspectionSingleResultResponse"
+            }
+          },
+          "400": {
+            "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to call this resource.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Accessing the resource you are trying to reach is forbidden.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "One of the related elements is not found.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "An internal error occurred.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "deprecated": false
+      },
+      "get": {
+        "tags": [
+          "Get Inspection Single Results"
+        ],
+        "summary": "Retrieves single results for an inspection characteristic",
+        "description": "Retrieves single value results for an inspection characteristic of a given inspection lot.",
+        "operationId": "getSingleResultsUsingGET_1",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "inspectionCharacteristic",
+            "in": "path",
+            "description": "The inspection characteristic for which you want to retrieve inspection single results",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "inspectionLot",
+            "in": "path",
+            "description": "The inspection lot for which you want to retrieve inspection single results",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "inspectionOperation",
+            "in": "path",
+            "description": "The inspection operation/activity for which you want to retrieve inspection single results",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "plant",
+            "in": "query",
+            "description": "The plant for which the inspection results are retrieved",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "sfc",
+            "in": "query",
+            "description": "The SFC for which which the inspection results are retrieved",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "inspectionPoint",
+            "in": "query",
+            "description": "The inspection point number",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "pageNumber",
+            "in": "query",
+            "description": "The current page index (starts from 0). Default index is 0.",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "Specify the page size that determines the number of single value results that are displayed at one time in one page. Default is 50 and the maximum allowed is 100.",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "description": "Whether result set needs to be sorted",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Inspection single results have been retrieved successfully.",
+            "schema": {
+              "$ref": "#/definitions/Page_InspectionApiSingleResultResponse"
+            }
+          },
+          "400": {
+            "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to call this resource.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Accessing the resource you are trying to reach is forbidden.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "One of the related elements is not found.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "An internal error occurred.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/lots/{inspectionLot}": {
+      "get": {
+        "tags": [
+          "Get Inspection Lot"
+        ],
+        "summary": "Get inspection lot details.",
+        "description": "Get inspection lot information for a given inspection lot.",
+        "operationId": "getInspectionLotUsingGET_1",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "inspectionLot",
+            "in": "path",
+            "description": "The inspection lot for which you want to retrieve inspection information",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "plant",
+            "in": "query",
+            "description": "The plant where inspection lot information is retrieved",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "includingOperationsWithoutCharacteristic",
+            "in": "query",
+            "description": "Set it to 'true' if you want to include operations that don't have assigned characteristics in the response.",
+            "required": false,
+            "type": "boolean",
+            "default": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Inspection lot information has been retrieved successfully.",
+            "schema": {
+              "$ref": "#/definitions/InspectionLotResponse"
+            }
+          },
+          "400": {
+            "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to call this resource.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Accessing the resource you are trying to reach is forbidden.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "One of the related elements is not found.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "An internal error occurred.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/lots/{inspectionLot}/operations/{inspectionOperation}": {
+      "get": {
+        "tags": [
+          "Get Inspection Operation"
+        ],
+        "summary": "Get inspection operation information.",
+        "description": "Get inspection operation information for a specific inspection operation of an inspection lot.",
+        "operationId": "getInspectionOperationUsingGET_1",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "inspectionLot",
+            "in": "path",
+            "description": "The inspection lot for which you want to retrieve inspection operation information",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "inspectionOperation",
+            "in": "path",
+            "description": "The inspection operation/activity number",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "plant",
+            "in": "query",
+            "description": "The plant where inspection operation information is retrieved",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Inspection operation information has been retrieved successfully.",
+            "schema": {
+              "$ref": "#/definitions/InspectionOperationResponse"
+            }
+          },
+          "400": {
+            "description": "The HTTP request is bad or invalid and cannot be processed by the server. For example, the query parameter 'plant' is missing, or the length of path variables (inspection lot, inspection operation) exceeds the length limit.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to call this resource.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Accessing the resource you are trying to reach is forbidden.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "One of the related elements (plant, inspection lot, or inspection operation) is incorrect, or the path variable (inspection lot or inspection operation) is missing from your request URL.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "An internal error occurred.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/lots/{inspectionLot}/operations/{inspectionOperation}/characteristics": {
+      "get": {
+        "tags": [
+          "Get Inspection Characteristics"
+        ],
+        "summary": "Get all the inspection characteristics",
+        "description": "Get all the inspection characteristics for a specific inspection operation of an inspection lot.",
+        "operationId": "getInspectionCharacteristicsUsingGET_1",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "plant",
+            "in": "query",
+            "description": "The plant where inspection characteristics are retrieved.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "inspectionLot",
+            "in": "path",
+            "description": "The inspection lot for which you want to retrieve inspection characteristics.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "inspectionOperation",
+            "in": "path",
+            "description": "The inspection operation/activity number",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Inspection characteristics have been retrieved successfully.",
+            "schema": {
+              "$ref": "#/definitions/InspectionCharacteristicsResponse"
+            }
+          },
+          "400": {
+            "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to call this resource.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Accessing the resource you are trying to reach is forbidden.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "One of the related elements is not found.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "An internal error occurred.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/lots/{inspectionLot}/operations/{inspectionOperation}/results": {
+      "get": {
+        "tags": [
+          "Get Inspection Single Results"
+        ],
+        "summary": "Get inspection operation single results for inspection lot (multiple SFCs).",
+        "description": "Get recorded single results for an inspection operation for a given inspection lot for given multiple SFCs.",
+        "operationId": "getSingleResultsHistoryGET_1",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "plant",
+            "in": "query",
+            "description": "The plant in which the inspection results are retrieved.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "inspectionLot",
+            "in": "path",
+            "description": "The inspection lot number.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "inspectionOperation",
+            "in": "path",
+            "description": "The inspection operation/activity number",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "sfcs",
+            "in": "query",
+            "description": "The SFCs for which the inspection results are retrieved",
+            "required": true,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Inspection single results have been retrieved successfully.",
+            "schema": {
+              "$ref": "#/definitions/Page_InspectionApiResultHistoryResponse"
+            }
+          },
+          "400": {
+            "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to call this resource.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Accessing the resource you are trying to reach is forbidden.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "One of the related elements is not found.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "An internal error occurred.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/inspectionPointCombinations/{combinationId}/userFields": {
+      "get": {
+        "tags": [
+          "Get Inspection Point Field Combination"
+        ],
+        "summary": "Get inspection point field combination information.",
+        "description": "Get inspection point field combination information for a given field combination ID. The prerequisites of using the API is that you have configured inspection points in the Configure Inspection Points app in SAP Digital Manufacturing. This service is applicable to process orders and order-based production orders in integration with SAP S/4HANA.",
+        "operationId": "getInspectionFieldCombinationByCombinationIdUsingGET_1",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "combinationId",
+            "in": "path",
+            "description": "Inspection point field combination ID",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Inspection point field combination information has been retrieved successfully.",
+            "schema": {
+              "$ref": "#/definitions/InspectionFieldCombinationResponse"
+            }
+          },
+          "400": {
+            "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to call this resource.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Accessing the resource you are trying to reach is forbidden.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "One of the related elements is not found.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "An internal error occurred.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/lots/{inspectionLot}/operations/{inspectionOperation}/points": {
+      "post": {
+        "tags": [
+          "Create Inspection Point"
+        ],
+        "summary": "Create an inspection point.",
+        "description": "Create an inspection point for a given inspection operation of an inspection lot. The inspection point is created in SAP Digital Manufacturing only and is not synchronized to integrated ERP systems. /nThe prerequisites of using the API is that you have configured inspection points in the Configure Inspection Points app in SAP Digital Manufacturing. This service is applicable to process orders and order-based production orders in integration with SAP S/4HANA.",
+        "operationId": "createInspectionPointUsingPOST_1",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "inspectionLot",
+            "in": "path",
+            "description": "The inspection lot for which the inspection point is created",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "inspectionOperation",
+            "in": "path",
+            "description": "The inspection operation/activity for which the inspection point is created",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "request",
+            "description": "request",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CreateInspectionPointRequest"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Inspection point has been created successfully.",
+            "schema": {
+              "$ref": "#/definitions/InspectionPointResponse"
+            }
+          },
+          "400": {
+            "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to call this resource.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Accessing the resource you are trying to reach is forbidden.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "One of the related elements is not found.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "An internal error occurred.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/lots/{inspectionLot}/operations/{inspectionOperation}/points/createInERP": {
+      "post": {
+        "tags": [
+          "Synchronize Inspection Point"
+        ],
+        "summary": "Synchronizes the inspection point created in SAP Digital Manufacturing to the integrated ERP system. If the sync call succeeds, the inspection point is created in ERP.",
+        "description": "Synchronizes the created inspection point to the integrated ERP system for an inspection operation of a given inspection lot",
+        "operationId": "syncInspectionPoint2ERPUsingPOST_1",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "inspectionLot",
+            "in": "path",
+            "description": "The inspection lot for which the inspection point is synchronized",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "inspectionOperation",
+            "in": "path",
+            "description": "The inspection operation/activity for which the inspection point is synchronized",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "request",
+            "description": "request",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/SyncInspectionPointRequest"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Inspection point has been synchronized to integrated ERP system."
+          },
+          "400": {
+            "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to call this resource.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Accessing the resource you are trying to reach is forbidden.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "One of the related elements is not found.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "An internal error occurred.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/lots/{inspectionLot}/operations/{inspectionOperation}/results/recordInERP": {
+      "post": {
+        "tags": [
+          "Synchronize Inspection Single Results"
+        ],
+        "summary": "Synchronizes inspection single results to ERP",
+        "description": "Synchronizes inspection single results recorded in SAP Digital Manufacturing back to integrated ERP system for all characteristics under an inspection operation of a given inspection lot.",
+        "operationId": "syncSingleResults2ERPUsingPOST_1",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "inspectionLot",
+            "in": "path",
+            "description": "The inspection lot for which the single results are synchronized",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "inspectionOperation",
+            "in": "path",
+            "description": "The inspection operation/activity for which the single results are synchronized",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "request",
+            "description": "request",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/SyncSingleResultRequest"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Inspection single results have been synchronized to integrated ERP system."
+          },
+          "400": {
+            "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to call this resource.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Accessing the resource you are trying to reach is forbidden.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "One of the related elements is not found.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "An internal error occurred.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/mandatoryCharacteristics/checkResultsRecorded": {
+      "post": {
+        "tags": [
+          "Check The Mandatory Characteristics Inspected"
+        ],
+        "summary": "Check if the mandatory inspection characteristics are recorded for the given SFCs at the given steps",
+        "description": "Before synchronizing the inspection results recorded in SAP Digital Manufacturing back to the integrated ERP system, check if all the mandatory inspection characteristics have been inspected.",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "request",
+            "description": "Request to check the mandatory characteristics",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CheckResultsRecordedRequest"
+            }
+          },
+          {
+            "name": "Accept-Language",
+            "in": "header",
+            "description": "The Accept-Language request HTTP header indicates the natural language and locale that the client prefers. It's an ISO language-region code. Valid values: [en, en-US, de, hu, ko, fr, es, zh-CN, zh-TW, ja, ru, tr, pt, pl, sk, cz, it, th, bg, ro, sv].",
+            "required": false,
+            "type": "string",
+            "default": "en"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "The mandatory inspection characteristics check passed."
+          },
+          "200": {
+            "description": "There is at least one mandatory inspection characteristic that has not been inspected.",
+            "schema": {
+              "$ref": "#/definitions/CheckResultsRecordedFailureResponse"
+            }
+          },
+          "400": {
+            "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to call this resource.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Accessing the resource you are trying to reach is forbidden.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "One of the related elements is not found.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "An internal error occurred.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "deprecated": true
+      }
+    }
+  },
+  "securityDefinitions": {
+    "OauthClientCredentials": {
+      "type": "oauth2",
+      "tokenUrl":"https://{subdomain}.authentication.{tokenHost}/oauth/token",
+      "flow": "application"
+    }
+  },
+  "security": [
+    {
+      "OauthClientCredentials": []
+    }
+  ],
+  "definitions": {
+    "ErrorResponse": {
+      "type": "object",
+      "properties": {
+        "causeMessage": {
+          "type": "string",
+          "description": "Contains technical reason for the error."
+        },
+        "code": {
+          "type": "string",
+          "description": "Internal error message"
+        },
+        "correlationId": {
+          "type": "string",
+          "description": "Contains correlationId for the error."
+        },
+        "message": {
+          "type": "string",
+          "description": "Contains additional information, if any"
+        },
+        "status": {
+          "type": "integer",
+          "format": "int32",
+          "description": "HTTP status code"
+        }
+      },
+      "title": "ErrorResponse",
+      "description": "Error response."
+    },
+    "InspectionApiSingleResultRequest": {
+      "type": "object",
+      "properties": {
+        "characteristicAttributeCode": {
+          "type": "string",
+          "description": "The attribute code of the single result for qualitative characteristic"
+        },
+        "characteristicAttributeCodeGrp": {
+          "type": "string",
+          "description": "The attribute code group of the single result for qualitative characteristic"
+        },
+        "inspResultFrmtdMeasuredValue": {
+          "type": "string",
+          "description": "The formatted measured value of the single result for quantitative characteristic"
+        },
+        "inspectionResultText": {
+          "type": "string",
+          "description": "The comment text of the single result"
+        }
+      },
+      "title": "InspectionApiSingleResultRequest"
+    },
+    "InspectionSingleResultRequest": {
+      "type": "object",
+      "required": [
+        "plant",
+        "sfc",
+        "overwriteResult"
+      ],
+      "properties": {
+        "inspectionApiSingleResultRequests": {
+          "type": "array",
+          "description": "The list of single results to be recorded",
+          "items": {
+            "$ref": "#/definitions/InspectionApiSingleResultRequest"
+          }
+        },
+        "inspectionPoint": {
+          "type": "string",
+          "description": "The inspection point id for the inspection characteristic"
+        },
+        "overwriteResult": {
+          "type": "boolean",
+          "description": "Indicates if the existing single results need to be overwritten. If set to 'true', then the existing single results will be overwritten. If set to 'false', the new results will be appended to the existing ones."
+        },
+        "plant": {
+          "type": "string",
+          "description": "The plant for which the inspection results are recorded"
+        },
+        "sfc": {
+          "type": "string",
+          "description": "The SFC for which the inspection results are recorded"
+        }
+      },
+      "title": "InspectionSingleResultRequest",
+      "description": "This object represents a request to record single results for a characteristic."
+    },
+    "InspectionSingleResultResponse": {
+      "type": "object",
+      "title": "InspectionSingleResultResponse",
+      "description": "The object represents a record single result response."
+    },
+    "InspectionLotResponse": {
+      "type": "object",
+      "properties": {
+        "inspLotHasSubsets": {
+          "type": "boolean",
+          "description": "Indicates if the inspection point function is activated for the inspection lot. If set to 'true', it means that inspection points are enabled for the inspection lot."
+        },
+        "inspSubsetFieldCombination": {
+          "type": "string",
+          "description": "The identifier of Inspection Point Field Combination as maintained in the integrated ERP system"
+        },
+        "inspectionLot": {
+          "type": "string",
+          "description": "The inspection lot number"
+        },
+        "inspectionOperations": {
+          "type": "array",
+          "description": "The list of inspection operations under the inspection lot",
+          "items": {
+            "$ref": "#/definitions/InspectionApiOperationResponse"
+          }
+        }
+      },
+      "title": "InspectionLotResponse",
+      "description": "This object represents a response to reading an inspection lot."
+    },
+    "InspectionApiOperationResponse": {
+      "type": "object",
+      "properties": {
+        "inspectionLot": {
+          "type": "string",
+          "description": "The inspection lot number"
+        },
+        "inspectionOperation": {
+          "type": "string",
+          "description": "The inspection operation/activity number"
+        },
+        "inspectionOperationPlant": {
+          "type": "string",
+          "description": "The plant of the inspection operation"
+        }
+      },
+      "title": "InspectionApiOperationResponse"
+    },
+    "InspectionOperationResponse": {
+      "type": "object",
+      "properties": {
+        "inspectionCharacteristics": {
+          "type": "array",
+          "description": "The list of inspection characteristics under the inspection operation",
+          "items": {
+            "$ref": "#/definitions/InspectionApiCharacteristicResponse"
+          }
+        },
+        "inspectionLot": {
+          "type": "string",
+          "description": "The inspection lot number"
+        },
+        "inspectionOperation": {
+          "type": "string",
+          "description": "The inspection operation/activity number"
+        }
+      },
+      "title": "InspectionOperationResponse",
+      "description": "This object represents a response to reading an inspection operation."
+    },
+    "InspectionApiCharacteristicResponse": {
+      "type": "object",
+      "properties": {
+        "inspCharacteristicSampleSize": {
+          "type": "integer",
+          "format": "int32",
+          "description": "The sample size that has to be inspected for a characteristic"
+        },
+        "inspCharacteristicSampleUnit": {
+          "type": "string",
+          "description": "The sample unit of measure that is used to determine a sample for a characteristic"
+        },
+        "inspSpecFrmtdLowerLimit": {
+          "type": "string",
+          "description": "The formatted lower specification limit for a quantitative characteristic"
+        },
+        "inspSpecFrmtdUpperLimit": {
+          "type": "string",
+          "description": "The formatted upper specification limit for a quantitative characteristic"
+        },
+        "inspSpecHasLowerLimit": {
+          "type": "string",
+          "description": "Indicates whether the lower limit value is set. “X” means that the lower limit value is set, while empty value means the opposite."
+        },
+        "inspSpecHasUpperLimit": {
+          "type": "string",
+          "description": "Indicates whether the upper limit value is set. “X” means that the upper limit value is set, while empty value means the opposite."
+        },
+        "inspSpecIsQuantitative": {
+          "type": "boolean",
+          "description": "Indicates the inspection characteristic type. If set to 'true', it means the inspection characteristic is quantitative characteristic. Otherwise, it's means qualitative characteristic."
+        },
+        "inspectionCharacteristic": {
+          "type": "string",
+          "description": "The inspection characteristic number"
+        },
+        "inspectionLot": {
+          "type": "string",
+          "description": "The inspection lot number"
+        },
+        "inspectionSpecificationUnit": {
+          "type": "string",
+          "description": "The unit of measure of inspection values (target value, specification limits, etc.) for a quantitative characteristic"
+        },
+        "originResultsData": {
+          "type": "string",
+          "description": "Indicates the inspection results recording with automatic data transfer."
+        },
+        "selectedCodeSet": {
+          "type": "string",
+          "description": "The assigned selected set for a qualitative characteristic"
+        },
+        "selectedCodeSetPlant": {
+          "type": "string",
+          "description": "The plant of the assigned selected set"
+        }
+      },
+      "title": "InspectionApiCharacteristicResponse"
+    },
+    "InspectionCharacteristicsResponse": {
+      "type": "object",
+      "properties": {
+        "inspectionLot": {
+          "type": "string",
+          "description": "The inspection lot number"
+        },
+        "inspectionOperation": {
+          "type": "string",
+          "description": "The inspection operation/activity number"
+        },
+        "inspectionCharacteristics": {
+          "type": "array",
+          "description": "The list of inspection characteristics under the inspection operation",
+          "items": {
+            "$ref": "#/definitions/InspectionApiCharacteristicDTO"
+          }
+        }
+      },
+      "title": "InspectionCharacteristicsResponse",
+      "description": "This object represents a response to reading all inspection characteristics for an inspection operation."
+    },
+    "InspectionApiCharacteristicDTO": {
+      "type": "object",
+      "properties": {
+        "inspectionCharacteristic": {
+          "type": "string",
+          "description": "The inspection characteristic number"
+        },
+        "name": {
+          "type": "string",
+          "description": "The inspection characteristic specification text"
+        },
+        "isQuantitative": {
+          "type": "boolean",
+          "description": "Indicates the inspection characteristic type. If set to 'true', it means the inspection characteristic is quantitative characteristic. Otherwise, it means qualitative characteristic."
+        },
+        "sampleSize": {
+          "type": "integer",
+          "description": "The sample size that has to be inspected for a characteristic",
+          "format": "int32"
+        },
+        "sampleUnit": {
+          "type": "string",
+          "description": "The sample unit of measure that is used to determine a sample for a characteristic"
+        },
+        "specificationUnit": {
+          "type": "string",
+          "description": "The unit of measure of inspection values (target value, specification limits, etc.) for a quantitative characteristic"
+        },
+        "hasUpperLimit": {
+          "type": "boolean",
+          "description": "Indicates whether the upper limit value is set. “X” means that the upper limit value is set, while empty value means the opposite."
+        },
+        "formattedUpperLimit": {
+          "type": "string",
+          "description": "The formatted upper specification limit for a quantitative characteristic"
+        },
+        "hasLowerLimit": {
+          "type": "boolean",
+          "description": "Indicates whether the lower limit value is set. “X” means that the lower limit value is set, while empty value means the opposite."
+        },
+        "formattedLowerLimit": {
+          "type": "string",
+          "description": "The formatted lower specification limit for a quantitative characteristic"
+        },
+        "has1stUpperLimit": {
+          "type": "boolean",
+          "description": "Indicates whether the 1st upper limit value is set. “X” means that the 1st upper limit value is set, while empty value means the opposite."
+        },
+        "formatted1stUpperLimit": {
+          "type": "string",
+          "description": "The formatted 1st upper specification limit for a quantitative characteristic"
+        },
+        "has1stLowerLimit": {
+          "type": "boolean",
+          "description": "Indicates whether the 1st lower limit value is set. “X” means that the 1st lower limit value is set, while empty value means the opposite."
+        },
+        "formatted1stLowerLimit": {
+          "type": "string",
+          "description": "The formatted 1st lower specification limit for a quantitative characteristic"
+        },
+        "selectedCodeSet": {
+          "type": "string",
+          "description": "The assigned selected set for a qualitative characteristic"
+        },
+        "selectedCodeSetPlant": {
+          "type": "string",
+          "description": "The plant of the assigned selected set"
+        }
+      },
+      "title": "InspectionApiCharacteristicDTO",
+      "description": "This object represents an inspection characteristic."
+    },
+    "InspectionFieldCombinationResponse": {
+      "type": "object",
+      "properties": {
+        "activatedCombinationUserFields": {
+          "type": "array",
+          "description": "The list of activated combination user fields",
+          "items": {
+            "$ref": "#/definitions/InspectionPointCombinationUserFieldResponse"
+          }
+        },
+        "combinationId": {
+          "type": "string",
+          "description": "The inspection point field combination ID"
+        },
+        "selectedCodeSet": {
+          "type": "string",
+          "description": "The selected set from the usage decision catalog (catalog type 3) used for valuating inspection points"
+        },
+        "selectedCodeSetPlant": {
+          "type": "string",
+          "description": "The plant of the selected set used for valuating inspection point"
+        },
+        "valuationAcceptCode": {
+          "type": "string",
+          "description": "The accept code used for valuating inspection points"
+        },
+        "valuationAcceptCodeGroup": {
+          "type": "string",
+          "description": "The accept code group used for valuating inspection points"
+        },
+        "valuationRejectCode": {
+          "type": "string",
+          "description": "The reject code used for valuating inspection points"
+        },
+        "valuationRejectCodeGroup": {
+          "type": "string",
+          "description": "The reject code group used for valuating inspection points"
+        }
+      },
+      "title": "InspectionFieldCombinationResponse",
+      "description": "This object represents a response to reading an inspection point field combination."
+    },
+    "InspectionPointCombinationUserFieldResponse": {
+      "type": "object",
+      "properties": {
+        "fieldName": {
+          "type": "string",
+          "description": "The user field name"
+        },
+        "keyword": {
+          "type": "string",
+          "description": "The keyword of user field"
+        }
+      },
+      "title": "InspectionPointCombinationUserFieldResponse"
+    },
+    "CreateInspectionPointRequest": {
+      "type": "object",
+      "required": [
+        "plant",
+        "sfc"
+      ],
+      "properties": {
+        "inspectionPointUserField": {
+          "description": "The user fields that identify the inspection point",
+          "$ref": "#/definitions/InspectionPointUserField"
+        },
+        "plant": {
+          "type": "string",
+          "description": "The plant for which the inspection point is created",
+          "pattern": "^(?! )[0-9A-Z_$!)(+~@^=\\-*. ]+(?<! )$"
+        },
+        "sfc": {
+          "type": "string",
+          "description": "The SFC for which the inspection point is created"
+        }
+      },
+      "title": "CreateInspectionPointRequest",
+      "description": "This object represents a request to create an inspection point."
+    },
+    "InspectionPointResponse": {
+      "type": "object",
+      "properties": {
+        "inspSubsetLongNumericKey": {
+          "type": "string",
+          "description": "The inspection point field combination user field for numeric type of values that's up to 10 digits"
+        },
+        "inspSubsetShortNumericKey": {
+          "type": "string",
+          "description": "The inspection point field combination user field for numeric type of values that's up to 3 digits"
+        },
+        "inspSubsetUsageDcsnValuation": {
+          "type": "string",
+          "description": "The usage decision valuation code used for valuating inspection points"
+        },
+        "inspectionSubsetDate": {
+          "type": "string",
+          "description": "The inspection point field combination user field for date type of values"
+        },
+        "inspectionSubsetInternalId": {
+          "type": "string",
+          "description": "The inspection point sample number"
+        },
+        "inspectionSubsetLongCharKey": {
+          "type": "string",
+          "description": "The inspection point field combination user field for alphanumeric type of values that's up to 18 characters"
+        },
+        "inspectionSubsetShortCharKey": {
+          "type": "string",
+          "description": "The inspection point field combination user field for alphanumeric type of values that's up to 10 characters"
+        },
+        "inspectionSubsetTime": {
+          "type": "string",
+          "description": "The inspection point field combination user field for time type of values"
+        },
+        "sfcRef": {
+          "type": "string",
+          "description": "The SFC reference that identifies the SFC for which the inspection point is created"
+        }
+      },
+      "title": "InspectionPointResponse",
+      "description": "This object represents a response to create an inspection point."
+    },
+    "InspectionPointUserField": {
+      "type": "object",
+      "properties": {
+        "inspSubsetLongNumericKey": {
+          "type": "string",
+          "description": "The inspection point field combination user field for numeric type of values that's up to 10 digits. The field value can only be positive values that don't have decimals."
+        },
+        "inspSubsetShortNumericKey": {
+          "type": "string",
+          "description": "The inspection point field combination user field for numeric type of values that's up to 3 digits. The field value can only be positive values that don't have decimals."
+        },
+        "inspectionSubsetDate": {
+          "type": "string",
+          "description": "The inspection point field combination user field for date type of values. The format is 'yyyy-MM-dd'."
+        },
+        "inspectionSubsetLongCharKey": {
+          "type": "string",
+          "description": "The inspection point field combination user field for alphanumeric type of values that's up to 18 characters."
+        },
+        "inspectionSubsetShortCharKey": {
+          "type": "string",
+          "description": "The inspection point field combination user field for alphanumeric type of values that's up to 10 characters."
+        },
+        "inspectionSubsetTime": {
+          "type": "string",
+          "description": "The inspection point field combination user field for time type of values. The format is 'h:mm:ss a'."
+        }
+      },
+      "title": "InspectionPointUserField"
+    },
+    "Page_InspectionApiSingleResultResponse": {
+      "type": "object",
+      "properties": {
+        "content": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/InspectionApiSingleResultResponse"
+          }
+        },
+        "empty": {
+          "type": "boolean"
+        },
+        "first": {
+          "type": "boolean"
+        },
+        "last": {
+          "type": "boolean"
+        },
+        "number": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "numberOfElements": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "pageable": {
+          "$ref": "#/definitions/Pageable"
+        },
+        "size": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "sort": {
+          "$ref": "#/definitions/Sort"
+        },
+        "totalElements": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "totalPages": {
+          "type": "integer",
+          "format": "int32"
+        }
+      },
+      "title": "Page_InspectionApiSingleResultResponse"
+    },
+    "Page_InspectionApiResultHistoryResponse": {
+      "type": "object",
+      "properties": {
+        "totalPages": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "totalElements": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "number": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "size": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "numberOfElements": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "content": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/InspectionApiResultHistoryResponse"
+          }
+        },
+        "sort": {
+          "$ref": "#/definitions/Sort"
+        },
+        "first": {
+          "type": "boolean"
+        },
+        "last": {
+          "type": "boolean"
+        },
+        "pageable": {
+          "$ref": "#/definitions/Pageable"
+        },
+        "empty": {
+          "type": "boolean"
+        }
+      },
+      "title": "Page_InspectionApiResultHistoryResponse"
+    },
+    "InspectionApiResultHistoryResponse": {
+      "type": "object",
+      "properties": {
+        "sfc": {
+          "type": "string",
+          "description": "The SFC number"
+        },
+        "inspectionCharacteristicResults": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/InspectionApiSingleResultDTO"
+            }
+          },
+          "description": "This is a map object, The key is inspection characteristic number, value is the list of single results of this characteristic."
+        },
+        "inspectionPoint": {
+          "$ref": "#/definitions/InspectionPointDTO"
+        },
+        "isResultsConfirmed": {
+          "type": "boolean",
+          "description": "Indicates if the single results have been synchronized back to ERP side. If set to 'true', then the single results have been synchronized back to ERP."
+        }
+      },
+      "title": "InspectionApiResultHistoryResponse",
+      "description": "The object represents a response to reading inspection single history results for multiple SFCs."
+    },
+    "InspectionApiSingleResultDTO": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "The inspection single result value internal id"
+        },
+        "inspectionCharacteristic": {
+          "type": "string",
+          "description": "The inspection characteristic number"
+        },
+        "formattedMeasuredValue": {
+          "type": "string",
+          "description": "The formatted measured value of the single result for qualitative characteristic"
+        },
+        "characteristicAttributeCodeGrp": {
+          "type": "string",
+          "description": "The attribute code group of the single result for quantitative characteristic"
+        },
+        "characteristicAttributeCode": {
+          "type": "string",
+          "description": "The attribute code of the single result for quantitative characteristic"
+        },
+        "comment": {
+          "type": "string",
+          "description": "The comment text of the single result"
+        },
+        "valuationResult": {
+          "type": "string",
+          "description": "The valuation result of the valuation single result"
+        },
+        "creationDateTime": {
+          "type": "string",
+          "example": "2023-01-18T11:01:01.001Z",
+          "format": "date-time",
+          "description": "The creation date time of the single result recording in UTC. Format (ISO-8601): yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
+        },
+        "lastChangedDateTime": {
+          "type": "string",
+          "example": "2023-01-18T11:01:01.001Z",
+          "format": "date-time",
+          "description": "The last changed date time of the single result recording in UTC. Format (ISO-8601): yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
+        }
+      },
+      "title": "InspectionApiSingleResultDTO",
+      "description": "This object represents an inspection single result."
+    },
+    "InspectionPointDTO": {
+      "type": "object",
+      "properties": {
+        "inspectionSubsetInternalId": {
+          "type": "string",
+          "description": "The inspection point sample number"
+        },
+        "inspectionSubsetLongCharKey": {
+          "type": "string",
+          "description": "The inspection point field combination user field for alphanumeric type of values that's up to 18 characters"
+        },
+        "inspSubsetLongNumericKey": {
+          "type": "string",
+          "description": "The inspection point field combination user field for numeric type of values that's up to 10 digits"
+        },
+        "inspSubsetShortNumericKey": {
+          "type": "string",
+          "description": "TThe inspection point field combination user field for numeric type of values that's up to 3 digits"
+        },
+        "inspectionSubsetShortCharKey": {
+          "type": "string",
+          "description": "The inspection point field combination user field for alphanumeric type of values that's up to 10 characters"
+        },
+        "inspectionSubsetDate": {
+          "type": "string",
+          "example": "2023-01-18",
+          "format": "date",
+          "description": "The inspection point field combination user field for date type of values. Format (ISO-8601): yyyy-MM-dd"
+        },
+        "inspectionSubsetTime": {
+          "type": "string",
+          "example": "11:54:28 AM",
+          "format": "time",
+          "description": "The inspection point field combination user field for time type of values"
+        },
+        "inspectionPointValuationCode": {
+          "type": "string",
+          "description": "The valuation code of the inspection point"
+        },
+        "inspectionPointValuationText": {
+          "type": "string",
+          "description": "The valuation text of the inspection point in a specific language"
+        }
+      },
+      "title": "InspectionPointDTO",
+      "description": "This object represents a created inspection point."
+    },
+    "InspectionApiSingleResultResponse": {
+      "type": "object",
+      "required": [
+        "plant",
+        "sfc"
+      ],
+      "properties": {
+        "characteristicAttributeCode": {
+          "type": "string",
+          "description": "The attribute code of the single result for quantitative characteristic"
+        },
+        "characteristicAttributeCodeGrp": {
+          "type": "string",
+          "description": "The attribute code group of the single result for quantitative characteristic"
+        },
+        "inspResultFrmtdMeasuredValue": {
+          "type": "string",
+          "description": "The formatted measured value of the single result for qualitative characteristic"
+        },
+        "inspResultValueInternalId": {
+          "type": "string",
+          "description": "The inspection single result value number"
+        },
+        "inspectionCharacteristic": {
+          "type": "string",
+          "description": "The inspection characteristic number"
+        },
+        "inspectionLot": {
+          "type": "string",
+          "description": "The inspection lot number"
+        },
+        "inspectionResultText": {
+          "type": "string",
+          "description": "The comment text of the single result"
+        },
+        "inspectionValuationResult": {
+          "type": "string",
+          "description": "The valuation result of the single result"
+        },
+        "plant": {
+          "type": "string",
+          "description": "The plant for which the inspection results are retrieved",
+          "pattern": "^(?! )[0-9A-Z_$!)(+~@^=\\-*. ]+(?<! )$"
+        },
+        "sfc": {
+          "type": "string",
+          "description": "The SFC for which which the inspection results are retrieved"
+        }
+      },
+      "title": "InspectionApiSingleResultResponse",
+      "description": "The object represents a response to retrieve inspection single results for an inspection characteristic."
+    },
+    "Pageable": {
+      "type": "object",
+      "properties": {
+        "page": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "size": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "sort": {
+          "type": "string"
+        }
+      },
+      "title": "Pageable"
+    },
+    "Sort": {
+      "type": "object",
+      "properties": {
+        "empty": {
+          "type": "boolean"
+        },
+        "sorted": {
+          "type": "boolean"
+        },
+        "unsorted": {
+          "type": "boolean"
+        }
+      },
+      "title": "Sort"
+    },
+    "SyncInspectionPointRequest": {
+      "type": "object",
+      "required": [
+        "plant",
+        "sfc",
+        "inspectionPoint"
+      ],
+      "properties": {
+        "inspectionPoint": {
+          "type": "string",
+          "description": "The inspection point number"
+        },
+        "plant": {
+          "type": "string",
+          "description": "The plant for which the inspection point is created in integrated ERP system",
+          "pattern": "^(?! )[0-9A-Z_$!)(+~@^=\\-*. ]+(?<! )$"
+        },
+        "sfc": {
+          "type": "string",
+          "description": "The SFC for which the inspection point is created in integrated ERP system"
+        }
+      },
+      "title": "SyncInspectionPointRequest",
+      "description": "This object represents a request to create a inspection point in integrated ERP system."
+    },
+    "SyncSingleResultRequest": {
+      "type": "object",
+      "required": [
+        "plant",
+        "sfc"
+      ],
+      "properties": {
+        "inspectionPoint": {
+          "type": "string",
+          "description": "The inspection point number"
+        },
+        "plant": {
+          "type": "string",
+          "description": "The plant for which the inspection results are synchronized to integrated ERP system",
+          "pattern": "^(?! )[0-9A-Z_$!)(+~@^=\\-*. ]+(?<! )$"
+        },
+        "sfc": {
+          "type": "string",
+          "description": "The SFC for which which the inspection results are synchronized to integrated ERP system"
+        }
+      },
+      "title": "SyncSingleResultRequest",
+      "description": "This object represents a request to synchronize single results to the integrated ERP system."
+    },
+    "CheckResultsRecordedRequest": {
+      "type": "object",
+      "required": [
+        "plant",
+        "items"
+      ],
+      "properties": {
+        "plant": {
+          "type": "string",
+          "maxLength": 6,
+          "description": "The plant for which the inspection characteristics are to be checked.",
+          "pattern": "^(?! )[0-9A-Z_$!)(+~@^=\\-*. ]+(?<! )$"
+        },
+        "items": {
+          "type": "array",
+          "description": "The list of items to be checked",
+          "items": {
+            "$ref": "#/definitions/CheckResultsRecordedItem"
+          }
+        }
+      },
+      "title": "CheckResultsRecordedRequest",
+      "description": "This object represents a request to check if the mandatory characteristics on the given SFCs and given steps have been inspected."
+    },
+    "CheckResultsRecordedItem": {
+      "type": "object",
+      "required": [
+        "sfc",
+        "stepId"
+      ],
+      "properties": {
+        "sfc": {
+          "type": "string",
+          "description": "The SFC number"
+        },
+        "inspectionLot": {
+          "type": "string",
+          "maxLength": 12,
+          "description": "The inspection lot number. Either 'inspectionLot' or 'order' is required. If you provide the 'inspectionLot' field, then 'order' isn't required. If both fields are provided, priority is given to the 'inspectionLot' field."
+        },
+        "order": {
+          "type": "string",
+          "maxLength": 36,
+          "description": "The order for which the inspection characteristics are to be checked"
+        },
+        "stepId": {
+          "type": "string",
+          "maxLength": 9,
+          "description": "The routing step ID for which inspection characteristics are to be checked"
+        },
+        "inspectionPoint": {
+          "type": "string",
+          "maxLength": 6,
+          "description": "The inspection point number"
+        }
+      },
+      "title": "CheckResultsRecordedItem",
+      "description": "This object represents a request to check the inspection characteristics for the given SFC at a given step."
+    },
+    "CheckResultsRecordedFailureResponse": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string",
+          "description": "The error code"
+        },
+        "message": {
+          "type": "string",
+          "description": "The error message"
+        },
+        "correlationId": {
+          "type": "string",
+          "description": "The correlationId for the error"
+        }
+      },
+      "title": "CheckResultsRecordedFailureResponse",
+      "description": "The object represents a response returned when the check fails due to one or more mandatory inspection characteristics not being properly inspected."
+    }
+  },
+  "x-sap-shortText": "Perform quality inspection related activities",
+  "x-servers": [
+    {
+      "url": "https://api.{regionHost}/qualityInspection/v1",
+      "description": "Base URL",
+      "templates": {
+        "regionHost": {
+          "description": "The data center where SAP Digital Manufacturing is provisioned for your organization",
+          "enum": [
+            "eu10.dmc.cloud.sap",
+            "us10.dmc.cloud.sap",
+            "eu20.dmc.cloud.sap",
+            "us20.dmc.cloud.sap",
+            "test.eu10.dmc.cloud.sap",
+            "test.us10.dmc.cloud.sap",
+            "test.eu20.dmc.cloud.sap",
+            "test.us20.dmc.cloud.sap"
+          ],
+          "default": "eu10.dmc.cloud.sap"
+        },
+        "tokenHost": {
+          "description": "The authentication token server where SAP Digital Manufacturing is provisioned for your organization",
+          "enum": [
+            "eu10.hana.ondemand.com",
+            "us10.hana.ondemand.com",
+            "eu20.hana.ondemand.com",
+            "us20.hana.ondemand.com"
+          ],
+          "default": "eu10.hana.ondemand.com"
+        }
+      }
+    }
+  ]
+}

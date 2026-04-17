@@ -1,0 +1,952 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "You can use this service to create batches and obtain batch characteristics. You can create batches in DM and synchronize to integrated ERP systems.",
+        "version": "v2",
+        "title": "Batch",
+        "contact": {
+            "name": "SAP Digital Manufacturing Operations",
+            "email": "sap-dmoperation@sap.com"
+        }
+    },
+    "externalDocs": {
+        "description": "Prepare for API Integration",
+        "url": "https://help.sap.com/docs/sap-digital-manufacturing/operations-guide/prepare-for-api-integration"
+    },
+    "host": "hostname",
+    "basePath": "/",
+    "tags": [
+        {
+            "name": "Batch"
+        },
+        {
+            "name": "Batch Characteristics"
+        }
+    ],
+    "security": [
+        {
+            "OauthClientCredentials": []
+        }
+    ],
+    "consumes": [
+        "application/json"
+    ],
+    "produces": [
+        "application/json"
+    ],
+    "paths": {
+        "/batches": {
+            "post": {
+                "tags": [
+                    "Batch"
+                ],
+                "summary": "Creates a batch number for a given plant and material.",
+                "description": "There are synchronous and asynchronous types of batch creation. The type of batch creation used is determined by the numbering configuration (in the Manage Next Numbers app) for batch number. If the Source is \"ERP\", batch number is created in ERP system and synchronously transferred to SAP Digital Manufacturing. If the Source is \"Local\", batch number is firstly created in SAP Digital Manufacturing and then synchronized to ERP system.",
+                "operationId": "createBatchByMaterialUsingPOST_V2",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "request",
+                        "description": "request",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/CreateBatchByMaterialRequestV2"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Batch number successfully created.",
+                        "schema": {
+                            "$ref": "#/definitions/CreateBatchByMaterialResponseV2"
+                        }
+                    },
+                    "202": {
+                        "description": "Batch creation request has been accepted for asynchronous creation type.",
+                        "schema": {
+                            "$ref": "#/definitions/CreateBatchByMaterialResponseV2"
+                        }
+                    },
+                    "400": {
+                        "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponseV3"
+                        }
+                    },
+                    "401": {
+                        "description": "You are not authorized to call this resource.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponseV3"
+                        }
+                    },
+                    "403": {
+                        "description": "Accessing the resource you are trying to reach is forbidden.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponseV3"
+                        }
+                    },
+                    "404": {
+                        "description": "One of the related elements is not found.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponseV3"
+                        }
+                    },
+                    "409": {
+                        "description": "The batch already exists.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponseV3"
+                        }
+                    },
+                    "500": {
+                        "description": "An internal error occurred.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponseV3"
+                        }
+                    }
+                },
+                "deprecated": false
+            },
+            "get": {
+                "tags": [
+                    "Batch"
+                ],
+                "summary": "Retrieves batches and batch characteristics for a given plant and material.",
+                "description": "Use this API service to get batches and batch characteristic values for a specific material of a given plant from the local batch information downloaded from ERP. You can use the following fields to sort the retrieved batch numbers: 'batchNumber', 'productionDate' and 'shelfLifeExpirationDate'. ",
+                "operationId": "getBatchesUsingGET_V2",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "batchNumber",
+                        "in": "query",
+                        "description": "The batch number.",
+                        "required": false,
+                        "type": "string",
+                        "maxLength": 10,
+                        "minLength": 0
+                    },
+                    {
+                        "name": "includeCharacteristics",
+                        "in": "query",
+                        "description": "Indicates whether the result should include the batch characteristics or not.",
+                        "required": false,
+                        "type": "boolean"
+                    },
+                    {
+                        "name": "material",
+                        "in": "query",
+                        "description": "The material associated with the batch.",
+                        "required": true,
+                        "type": "string",
+                        "maxLength": 40,
+                        "minLength": 0
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "The page number you want to query. Number 0 is the first page. Example: https://xxx/v1/batches?plant=SHA4&material=BIKE_B&page=0&size=1",
+                        "required": false,
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    {
+                        "name": "plant",
+                        "in": "query",
+                        "description": "The plant name.",
+                        "required": true,
+                        "type": "string",
+                        "maxLength": 6,
+                        "minLength": 0
+                    },
+                    {
+                        "name": "size",
+                        "description": "The page size determines how many batches are displayed in one page. Default page size is 20.",
+                        "in": "query",
+                        "required": false,
+                        "type": "integer",
+                        "format": "int32",
+                        "default": 20,
+                        "maximum": 100,
+                        "minimum": 1
+                    },
+                    {
+                        "name": "sort",
+                        "description": "The retrieved batch numbers can be sorted using one or more of the following fields: 'batchNumber', 'productionDate', and 'shelfLifeExpirationDate'. Example: 'https://xxx/v2/batches?xxxx&sort=batchNumber,asc&sort=productionDate,desc'",
+                        "in": "query",
+                        "required": false,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Batch information has been retrieved successfully.",
+                        "schema": {
+                            "$ref": "#/definitions/Page_GetBatchesResponseV2"
+                        }
+                    },
+                    "400": {
+                        "description": "The HTTP request is invalid and it cannot be processed by the server.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponseV3"
+                        }
+                    },
+                    "401": {
+                        "description": "You are not authorized to call this resource.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponseV3"
+                        }
+                    },
+                    "403": {
+                        "description": "Accessing the resource you are trying to reach is forbidden.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponseV3"
+                        }
+                    },
+                    "500": {
+                        "description": "An internal error occurred.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponseV3"
+                        }
+                    }
+                }
+            }
+        },
+        "/batchCharacteristics": {
+            "get": {
+                "tags": [
+                    "Batch Characteristics"
+                ],
+                "summary": "Gets batch characteristics.",
+                "description": "Gets batch characteristics for a given batch number and material from integrated ERP. If the batch number is created in SAP Digital Manufacturing, it must be validated in ERP first, otherwise 400 response will be returned. To use this API, make sure the collaboration link 'COLLABORATION_BATCH_CHARACTERISTICS' is mapped to the directive 'BATCH_CHARACTERISTICS' or 'BATCH_CHARACTERISTICS_V2' in the Manage Collaboration Links app.",
+                "operationId": "getBatchCharacteristicsUsingGET_V2",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "batchNumber",
+                        "in": "query",
+                        "description": "The batch number.",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "material",
+                        "in": "query",
+                        "description": "The material associated with the batch.",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "plant",
+                        "in": "query",
+                        "description": "The plant name.",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Batch characteristics information has been retrieved successfully.",
+                        "schema": {
+                            "$ref": "#/definitions/GetBatchCharacteristicsApiResponseV2"
+                        }
+                    },
+                    "400": {
+                        "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponseV3"
+                        }
+                    },
+                    "401": {
+                        "description": "You are not authorized to call this resource.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponseV3"
+                        }
+                    },
+                    "403": {
+                        "description": "Accessing the resource you are trying to reach is forbidden.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponseV3"
+                        }
+                    },
+                    "404": {
+                        "description": "Batch characteristics information is not found.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponseV3"
+                        }
+                    },
+                    "500": {
+                        "description": "An internal error occurred.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponseV3"
+                        }
+                    }
+                },
+                "deprecated": false
+            },
+            "post": {
+                "tags": [
+                    "Batch Characteristics"
+                ],
+                "summary": "Create or update batch characteristics.",
+                "description": "Create or update batch characteristics for a given batch number, material and plant. If the batch number is created in SAP Digital Manufacturing, it must be validated in ERP first, otherwise 400 response will be returned.",
+                "operationId": "postBatchCharacteristicsUsingPOST_V2",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "request",
+                        "description": "Create/Update request payload.",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/PostBatchCharacteristicsRequestV2"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Batch characteristics have been created or updated in SAP Digital Manufacturing."
+                    },
+                    "400": {
+                        "description": "The HTTP request is invalid and cannot be processed by the server.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponseV3"
+                        }
+                    },
+                    "401": {
+                        "description": "You are not authenticated due to insufficient authorities or invalid token.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponseV3"
+                        }
+                    },
+                    "403": {
+                        "description": "You are not authorized to access the resource.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponseV3"
+                        }
+                    },
+                    "404": {
+                        "description": "Batch characteristics information is not found.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponseV3"
+                        }
+                    },
+                    "500": {
+                        "description": "An internal error occurred.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponseV3"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "securityDefinitions": {
+        "OauthClientCredentials": {
+            "type": "oauth2",
+            "tokenUrl": "https://{subdomain}.authentication.{tokenHost}/oauth/token",
+            "flow": "application"
+        }
+    },
+    "definitions": {
+        "PostBatchCharacteristicsRequestV2": {
+            "type": "object",
+            "required": [
+                "batchNumber",
+                "material",
+                "plant"
+            ],
+            "properties": {
+                "assignmentCharacteristicValues": {
+                    "type": "array",
+                    "description": "The batch characteristic values to be created or updated for the batch.",
+                    "items": {
+                        "$ref": "#/definitions/ClassificationAssignmentCharacteristicValueV2"
+                    }
+                },
+                "batchNumber": {
+                    "type": "string",
+                    "description": "The batch number.",
+                    "minLength": 0,
+                    "maxLength": 10
+                },
+                "material": {
+                    "type": "string",
+                    "description": "The material associated with the batch.",
+                    "minLength": 0,
+                    "maxLength": 40
+                },
+                "plant": {
+                    "type": "string",
+                    "description": "The plant name.",
+                    "minLength": 0,
+                    "maxLength": 6
+                }
+            },
+            "title": "PostBatchCharacteristicsRequest"
+        },
+        "ClassificationAssignmentCharacteristicValueV2": {
+            "type": "object",
+            "required": [
+                "characteristicName"
+            ],
+            "description": "For a specific characteristic, fill only one of the value fields (integerValueFrom, dateFrom, fltpValueFrom, timeFrom, charcValue).",
+            "properties": {
+                "characteristicName": {
+                    "type": "string",
+                    "description": "The batch characteristic name maintained in SAP Digital Manufacturing."
+                },
+                "charcValue": {
+                    "type": "string",
+                    "description": "Specify the value for the CHAR type of batch characteristics."
+                },
+                "dateFrom": {
+                    "type": "string",
+                    "format": "date",
+                    "example": "2022-06-22",
+                    "description": "Specify the value for DATE type of batch characteristics. Format (ISO-8601): yyyy-MM-dd."
+                },
+                "integerValueFrom": {
+                    "type": "integer",
+                    "format": "int64",
+                    "description": "Specify the value for NUM type of batch characteristics. The value must be an integer."
+                },
+                "fltpValueFrom": {
+                    "type": "number",
+                    "format": "double",
+                    "description": "Specify the value for NUM type of batch characteristics. The value must be a number with decimal places."
+                },
+                "timeFrom": {
+                    "type": "string",
+                    "description": "Specify the value for TIME type of batch characteristics. The format is HH:mm:ss."
+                }
+            },
+            "title": "ClassificationAssignmentCharacteristicValue"
+        },
+        "CreateBatchByMaterialRequestV2": {
+            "type": "object",
+            "required": [
+                "material",
+                "plant"
+            ],
+            "properties": {
+                "material": {
+                    "type": "string",
+                    "description": "The material associated with the batch."
+                },
+                "plant": {
+                    "type": "string",
+                    "description": "The plant name."
+                },
+                "extensionParameters": {
+                    "type": "array",
+                    "description": "The extension custom fields for batch creation.",
+                    "items": {
+                        "$ref": "#/definitions/AdditionalParameterV2"
+                    },
+                    "maxItems": 100
+                },
+                "batchAvailabilityDate": {
+                    "type": "string",
+                    "format": "date",
+                    "description": "The availability date of the batch. It indicates when the batch becomes available for use. Format (ISO-8601): yyyy-MM-dd.",
+                    "example": "2022-01-31"
+                },
+                "batchBySupplier": {
+                    "type": "string",
+                    "description": "The batch number provided by the vendor.",
+                    "minLength": 0,
+                    "maxLength": 15
+                },
+                "countryOfOrigin": {
+                    "type": "string",
+                    "description": "An ISO country code that specifies the material's country of origin. It normally indicates in which country the material is manufactured.",
+                    "minLength": 0,
+                    "maxLength": 3
+                },
+                "productionDate": {
+                    "type": "string",
+                    "format": "date",
+                    "description": "The production date of the batch. It indicates when the product is manufactured. Format (ISO-8601): yyyy-MM-dd.",
+                    "example": "2022-01-31"
+                },
+                "regionOfOrigin": {
+                    "type": "string",
+                    "description": "An ISO region code that specifies the material's region of origin. It normally indicates in which region the material is manufactured.",
+                    "minLength": 0,
+                    "maxLength": 3
+                },
+                "restricted": {
+                    "type": "boolean",
+                    "description": "Indicates if the batch is in restricted-use. The default value is 'false'."
+                },
+                "shelfLifeExpirationDate": {
+                    "type": "string",
+                    "format": "date",
+                    "description": "The shelf-life expiration or the best-before date of the batch. Format (ISO-8601): yyyy-MM-dd.",
+                    "example": "2022-01-31"
+                },
+                "supplier": {
+                    "type": "string",
+                    "description": "The account number of the vendor.",
+                    "minLength": 0,
+                    "maxLength": 10
+                }
+            },
+            "title": "CreateBatchByMaterialRequest"
+        },
+        "CreateBatchByMaterialResponseV2": {
+            "type": "object",
+            "properties": {
+                "batchNumber": {
+                    "type": "string",
+                    "description": "Batch number."
+                },
+                "material": {
+                    "type": "string",
+                    "description": "The material associated with the batch."
+                },
+                "validated": {
+                    "type": "string",
+                    "description": "The validated status of batch number in ERP system. \"Y\" indicates that the batch number is successfully created and is ready for use. \"N\" indicates an unvalidated status of batch number in ERP system.",
+                    "enum": [
+                        "N",
+                        "Y"
+                    ]
+                },
+                "batchAvailabilityDate": {
+                    "type": "string",
+                    "format": "date",
+                    "description": "The availability date of the batch. It indicates when the batch becomes available for use. Format (ISO-8601): yyyy-MM-dd.",
+                    "example": "2022-01-31"
+                },
+                "batchBySupplier": {
+                    "type": "string",
+                    "description": "The batch number provided by the vendor."
+                },
+                "countryOfOrigin": {
+                    "type": "string",
+                    "description": "An ISO country code that specifies the material's country of origin. It normally indicates in which country the material is manufactured."
+                },
+                "createdDateTime": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "The creation date and time of the batch in UTC. Format (ISO-8601): yyyy-MM-dd'T'HH:mm:ss.SSS'Z'.",
+                    "example": "2022-08-31T23:53:34.123Z"
+                },
+                "modifiedDateTime": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "The time when the batch was most recently changed in UTC. Format (ISO-8601): yyyy-MM-dd'T'HH:mm:ss.SSS'Z'.",
+                    "example": "2022-08-31T23:53:34.123Z"
+                },
+                "productionDate": {
+                    "type": "string",
+                    "format": "date",
+                    "description": "The production date of the batch. It indicates when the product is manufactured. Format (ISO-8601): yyyy-MM-dd.",
+                    "example": "2022-01-31"
+                },
+                "regionOfOrigin": {
+                    "type": "string",
+                    "description": "An ISO region code that specifies the material's region of origin. It normally indicates in which region the material is manufactured."
+                },
+                "restricted": {
+                    "type": "boolean",
+                    "description": "Indicates if the batch is in restricted-use. The default value is 'false'."
+                },
+                "shelfLifeExpirationDate": {
+                    "type": "string",
+                    "format": "date",
+                    "description": "The shelf-life expiration or the best-before date of the batch. Format (ISO-8601): yyyy-MM-dd.",
+                    "example": "2022-01-31"
+                },
+                "status": {
+                    "type": "string",
+                    "description": "The status of the batch in SAP Digital Manufacturing. There are 3 possible statuses: <br>1) CREATED: Indicates that the batch is created in SAP Digital Manufacturing, and is not yet synchronized to the integrated ERP system. Batch with this status is not ready for use; <br>2) INVALIDATED: Indicates that the batch is created in SAP Digital Manufacturing, however, the synchronization to the integrated ERP system failed. Batch with this status is not ready for use; <br>3) VALIDATED: Indicates that the batch is created in SAP Digital Manufacturing, and successfully sychronized to the integrated ERP system. Batch with this status is ready for use.",
+                    "enum": [
+                        "CREATED",
+                        "INVALIDATED",
+                        "VALIDATED"
+                    ]
+                },
+                "supplier": {
+                    "type": "string",
+                    "description": "The account number of the vendor."
+                }
+            },
+            "title": "CreateBatchByMaterialResponse"
+        },
+        "AllowedValueOptionV2": {
+            "type": "object",
+            "description": "Characteristic allowed options and default values.",
+            "properties": {
+                "positionNumber": {
+                    "type": "number",
+                    "format": "double",
+                    "description": "Characteristic allowed options and default values."
+                },
+                "value": {
+                    "type": "string",
+                    "description": "Characteristic allowed option value"
+                },
+                "isDefault": {
+                    "type": "boolean",
+                    "description": "Indicates if the option is set as the default value."
+                }
+            }
+        },
+        "BatchCharacteristicV2": {
+            "type": "object",
+            "properties": {
+                "allowedValueList": {
+                    "type": "object",
+                    "description": "Characteristic allowed options and default values.",
+                    "properties": {
+                        "allowedValueOptions": {
+                            "type": "array",
+                            "description": "Characteristic allowed options",
+                            "items": {
+                                "$ref": "#/definitions/AllowedValueOptionV2"
+                            }
+                        },
+                        "defaultValueStr": {
+                            "type": "array",
+                            "description": "Characteristic default values",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                },
+                "charcName": {
+                    "type": "string",
+                    "description": "Characteristic name."
+                },
+                "charcDesc": {
+                    "type": "string",
+                    "description": "Characteristic description."
+                },
+                "dataType": {
+                    "type": "string",
+                    "description": "Characteristic type.",
+                    "enum": [
+                        "CHAR",
+                        "NUM",
+                        "DATE",
+                        "TIME"
+                    ]
+                },
+                "uom": {
+                    "type": "string",
+                    "description": "Characteristic unit."
+                },
+                "decimalPlaces": {
+                    "type": "number",
+                    "description": "Characteristic decimal places, if any."
+                },
+                "batchCharcValues": {
+                    "type": "array",
+                    "description": "Characteristic values.",
+                    "items": {
+                        "$ref": "#/definitions/BatchCharcValueV2"
+                    }
+                }
+            },
+            "title": "BatchCharacteristic"
+        },
+        "BatchCharcValueV2": {
+            "type": "object",
+            "properties": {
+                "charcValue": {
+                    "type": "string",
+                    "description": "Value of a characteristic. If the characteristic has character format (CHAR), this field contains a single character string."
+                },
+                "currency": {
+                    "type": "string",
+                    "description": "Currency key. currency unit for currency field."
+                },
+                "currentValueFrom": {
+                    "type": "number",
+                    "description": "Lower boundary for currency field."
+                },
+                "currentValueTo": {
+                    "type": "number",
+                    "description": "Upper boundary for currency field."
+                },
+                "dateFrom": {
+                    "type": "string",
+                    "format": "date-time",
+                    "example": "2021-07-29T03:53:33Z",
+                    "description": "Lower Boundary for date range in UTC. Format (ISO-8601): yyyy-MM-dd'T'HH:mm:ss'Z'."
+                },
+                "dateTo": {
+                    "type": "string",
+                    "format": "date-time",
+                    "example": "2021-07-29T03:53:33Z",
+                    "description": "Upper Boundary for date range in UTC. Format (ISO-8601): yyyy-MM-dd'T'HH:mm:ss'Z'."
+                },
+                "decimalValueFrom": {
+                    "type": "number",
+                    "description": "Lower boundary for numeric field. This value is displayed only when there is no decimal place."
+                },
+                "decimalValueTo": {
+                    "type": "number",
+                    "description": "Upper boundary for numeric field. This value is displayed only when there is no decimal place."
+                },
+                "fltpValueFrom": {
+                    "type": "number",
+                    "description": "Lower boundary for numeric field. This value is displayed only when there are decimal places."
+                },
+                "fltpValueTo": {
+                    "type": "number",
+                    "description": "Upper boundary for numeric field. This value is displayed only when there are decimal places."
+                },
+                "fromValueUom": {
+                    "type": "string",
+                    "description": "Internal, language-independent, measurement unit format for numeric field."
+                },
+                "toValueUom": {
+                    "type": "string",
+                    "description": "Internal, language-independent, measurement unit format for numeric field."
+                },
+                "timeFrom": {
+                    "type": "string",
+                    "example": "18:53:33",
+                    "description": "Lower Boundary for time range. Format: HH:mm:ss."
+                },
+                "timeTo": {
+                    "type": "string",
+                    "example": "18:53:33",
+                    "description": "Lower Boundary for time range. Format: HH:mm:ss."
+                }
+            },
+            "title": "BatchCharcValue"
+        },
+        "ErrorResponseV3": {
+            "type": "object",
+            "properties": {
+                "causeMessage": {
+                    "type": "string",
+                    "description": "The technical reason for the error."
+                },
+                "code": {
+                    "type": "string",
+                    "description": "The internal error message."
+                },
+                "correlationId": {
+                    "type": "string",
+                    "description": "The correlation ID of the error."
+                },
+                "message": {
+                    "type": "string",
+                    "description": "Any additional information of the error."
+                },
+                "status": {
+                    "type": "integer",
+                    "format": "int32",
+                    "description": "HTTP status code."
+                }
+            },
+            "title": "ErrorResponse",
+            "description": "Error response."
+        },
+        "GetBatchCharacteristicsApiResponseV2": {
+            "type": "object",
+            "properties": {
+                "batchNumber": {
+                    "type": "string",
+                    "description": "Batch number."
+                },
+                "material": {
+                    "type": "string",
+                    "description": "The material associated with the batch."
+                },
+                "productionDate": {
+                    "type": "string",
+                    "example": "2021-07-29",
+                    "description": "Production date time in UTC. Format (ISO-8601): yyyy-MM-dd."
+                },
+                "shelfLifeExpirationDate": {
+                    "type": "string",
+                    "example": "2021-07-29",
+                    "description": "Shelf life expiration date time in UTC. Format (ISO-8601): yyyy-MM-dd."
+                },
+                "batchCharacteristics": {
+                    "type": "array",
+                    "description": "Batch characteristics.",
+                    "items": {
+                        "$ref": "#/definitions/BatchCharacteristicV2"
+                    }
+                }
+            },
+            "title": "GetBatchCharacteristicsApiResponse"
+        },
+        "AdditionalParameterV2": {
+            "type": "object",
+            "properties": {
+                "parameterName": {
+                    "type": "string",
+                    "description": "Name of the extension field."
+                },
+                "parameterValue": {
+                    "type": "string",
+                    "description": "Value of the extension field."
+                }
+            },
+            "title": "ExtensionParameter"
+        },
+        "GetBatchesResponseV2": {
+            "type": "object",
+            "properties": {
+                "batchCharacteristics": {
+                    "type": "array",
+                    "description": "The batch characteristics.",
+                    "items": {
+                        "$ref": "#/definitions/BatchCharacteristicV2"
+                    }
+                },
+                "batchNumber": {
+                    "type": "string",
+                    "description": "The batch number."
+                },
+                "material": {
+                    "type": "string",
+                    "description": "The material associated with the batch."
+                },
+                "status": {
+                    "type": "string",
+                    "description": "The status of the batch. There are 3 possible statuses: 1) 'CREATED': Indicates that the batch is just created in SAP Digital Manufacturing, but synchronization to the integrated ERP system is not yet started; 2) 'VALIDATED': Indicates that the batch is both created in SAP Digital Manufacturing, and synchronized to the integrated ERP system; 3) 'INVALIDATED': Indicates that the batch is created in SAP Digital Manufacturing, and sychronization to the integrated ERP system had been triggered, but failed.",
+                    "enum": [
+                        "CREATED",
+                        "VALIDATED",
+                        "INVALIDATED"
+                    ]
+                },
+                "productionDate": {
+                    "type": "string",
+                    "example": "2021-07-29",
+                    "format": "date",
+                    "description": "The production date of the batch in UTC. Format (ISO-8601): yyyy-MM-dd."
+                },
+                "shelfLifeExpirationDate": {
+                    "type": "string",
+                    "description": "The shelf life expiration date of the batch in UTC. Format (ISO-8601): yyyy-MM-dd.",
+                    "example": "2021-07-29",
+                    "format": "date"
+                },
+                "modifiedDateTime": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "The time when the batch was most recently changed in UTC. Format (ISO-8601): yyyy-MM-dd'T'HH:mm:ss.SSS'Z'.",
+                    "example": "2022-08-31T23:53:34.123Z"
+                },
+                "batchAvailabilityDate": {
+                    "type": "string",
+                    "format": "date",
+                    "description": "The availability date of the batch. It indicates when the batch becomes available for use. Format (ISO-8601): yyyy-MM-dd.",
+                    "example": "2022-01-31"
+                },
+                "restricted": {
+                    "type": "boolean",
+                    "description": "Indicates if the batch is in restricted-use. The default value is 'false'."
+                },
+                "supplier": {
+                    "type": "string",
+                    "description": "The account number of the vendor."
+                },
+                "batchBySupplier": {
+                    "type": "string",
+                    "description": "The batch number provided by the vendor."
+                },
+                "countryOfOrigin": {
+                    "type": "string",
+                    "description": "An ISO country code that specifies the material's country of origin. It normally indicates in which country the material is manufactured."
+                },
+                "regionOfOrigin": {
+                    "type": "string",
+                    "description": "An ISO region code that specifies the material's region of origin. It normally indicates in which region the material is manufactured."
+                }
+            },
+            "title": "GetBatchesResponse"
+        },
+        "Page_GetBatchesResponseV2": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "type": "array",
+                    "description": "The list of batches.",
+                    "items": {
+                        "$ref": "#/definitions/GetBatchesResponseV2"
+                    }
+                },
+                "number": {
+                    "description": "The current page number. The initial page number starts with '0'.",
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "numberOfElements": {
+                    "description": "The number of batches on the current page.",
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "totalElements": {
+                    "description": "The total number of batches that are returned.",
+                    "type": "integer",
+                    "format": "int64"
+                },
+                "totalPages": {
+                    "description": "The total number of pages that are returned.",
+                    "type": "integer",
+                    "format": "int32"
+                }
+            },
+            "title": "Page_GetBatchesResponse"
+        }
+    },
+    "x-sap-shortText": "Create batches and retrieve batch characteristics, update or sync batch information.",
+    "x-servers": [
+        {
+            "url": "https://api.{regionHost}/inventory/v2",
+            "description": "Base URL",
+            "templates": {
+                "regionHost": {
+                    "description": "The data center where SAP Digital Manufacturing is provisioned for your organization.",
+                    "enum": [
+                        "eu10.dmc.cloud.sap",
+                        "us10.dmc.cloud.sap",
+                        "eu20.dmc.cloud.sap",
+                        "us20.dmc.cloud.sap",
+                        "test.eu10.dmc.cloud.sap",
+                        "test.us10.dmc.cloud.sap",
+                        "test.eu20.dmc.cloud.sap",
+                        "test.us20.dmc.cloud.sap"
+                    ],
+                    "default": "test.eu10.dmc.cloud.sap"
+                },
+                "tokenHost": {
+                    "description": "The authentication token server where SAP Digital Manufacturing is provisioned for your organization.",
+                    "enum": [
+                        "eu10.hana.ondemand.com",
+                        "us10.hana.ondemand.com",
+                        "eu20.hana.ondemand.com",
+                        "us20.hana.ondemand.com"
+                    ],
+                    "default": "eu10.hana.ondemand.com"
+                }
+            }
+        }
+    ]
+}

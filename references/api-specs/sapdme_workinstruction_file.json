@@ -1,0 +1,239 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "Allows you to upload and download a file to Azure Blob Storage or AWS S3 storage. The URI of the file can be used during the creation of the Work Instruction Attachment.",
+    "version": "v1",
+    "title": "Work Instruction Attached File",
+    "contact": {
+      "name": "SAP Digital Manufacturing Operations",
+      "email": "sap-dmoperation@sap.com"
+    }
+  },
+  "host": "hostname",
+  "basePath": "/",
+  "tags": [
+    {
+      "name": "Attached File",
+      "description": "Allows you to upload and download a file for further use during the creation of a Work Instruction Attachment."
+    }
+  ],
+  "security": [
+    {
+      "OAuthSecurity": []
+    }
+  ],
+  "consumes": [
+    "multipart/form-data"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/file": {
+      "post": {
+        "tags": [
+          "Attached File"
+        ],
+        "summary": "Uploads a file for further use during the creation of the Work Instruction Attachment.",
+        "description": "This API is called to upload a file. The external URL of the uploaded file can be used during the creation of work instruction attachments.",
+        "operationId": "uploadFileUsingPOST_1",
+        "parameters": [
+          {
+            "in": "formData",
+            "name": "file",
+            "description": "The file to upload.",
+            "required": true,
+            "type": "file"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Message successfully processed.",
+            "schema": {
+              "$ref": "#/definitions/FileMetadata"
+            }
+          },
+          "400": {
+            "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to call this resource.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Accessing the resource you are trying to reach is forbidden.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "One of the related elements is not found.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "An internal error occurred.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "deprecated": false
+      },
+      "get": {
+        "tags": [
+          "Attached File"
+        ],
+        "summary": "Download a file content by provided external file URL.",
+        "description": "This API is called to download file content by using the provided external URL.",
+        "operationId": "downloadFileGET_1",
+        "parameters": [
+          {
+            "name": "externalFileUrl",
+            "in": "query",
+            "description": "The external url of the file to download",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Message successfully processed.",
+            "schema": {
+              "type": "string",
+              "format": "binary"
+            }
+          },
+          "400": {
+            "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to call this resource.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Accessing the resource you are trying to reach is forbidden.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "One of the related elements is not found.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "An internal error occured.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      }
+    }
+  },
+  "securityDefinitions": {
+    "OAuthSecurity": {
+      "type": "oauth2",
+      "tokenUrl": "https://{subdomain}.authentication.{regionHost}/oauth/token",
+      "flow": "application"
+    }
+  },
+  "definitions": {
+    "FileMetadata": {
+      "type": "object",
+      "properties": {
+        "mimeType": {
+          "type": "string",
+          "description": "The file media type.",
+          "example": "text/xml"
+        },
+        "externalFileUrl": {
+          "type": "string",
+          "description": "The URL of the file."
+        }
+      },
+      "title": "FileMetadata"
+    },
+    "ErrorResponse": {
+      "type": "object",
+      "required": [
+        "code",
+        "message",
+        "correlationId"
+      ],
+      "properties": {
+        "causeMessage": {
+          "type": "string",
+          "description": "Contains technical reason for the error."
+        },
+        "code": {
+          "type": "string",
+          "description": "Internal error message"
+        },
+        "correlationId": {
+          "type": "string",
+          "description": "Contains correlationId for the error."
+        },
+        "message": {
+          "type": "string",
+          "description": "Contains additional information, if any"
+        }
+      },
+      "title": "ErrorResponse",
+      "description": "Error response. "
+    }
+  },
+  "externalDocs": {
+    "description": "Prepare for API Integration",
+    "url": "https://help.sap.com/docs/sap-digital-manufacturing/operations-guide/prepare-for-api-integration"
+  },
+  "schemes": [
+    "https"
+  ],
+  "x-sap-shortText": "Upload File for Work Instruction Attachment",
+  "x-servers": [
+    {
+      "url": "https://api.{regionHost}/workinstruction/v1/workinstructions",
+      "description": "Base URL",
+      "templates": {
+        "regionHost": {
+          "description": "The data center where SAP Digital Manufacturing is provisioned for your organization",
+          "enum": [
+            "eu10.dmc.cloud.sap",
+            "eu20.dmc.cloud.sap",
+            "us10.dmc.cloud.sap",
+            "us20.dmc.cloud.sap",
+            "test.eu10.dmc.cloud.sap",
+            "test.eu20.dmc.cloud.sap",
+            "test.us10.dmc.cloud.sap",
+            "test.us20.dmc.cloud.sap"
+          ],
+          "default": "test.eu10.dmc.cloud.sap"
+        },
+        "tokenHost": {
+          "description": "The authentication server where SAP Digital Manufacturing is provisioned for your organization",
+          "enum": [
+            "eu10.hana.ondemand.com",
+            "eu20.hana.ondemand.com",
+            "us10.hana.ondemand.com",
+            "us20.hana.ondemand.com"
+          ],
+          "default": "eu10.hana.ondemand.com"
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,359 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "Master operation activity is used for creating of a master routing operation activity. This API is called to retrieve a master operation activity assigned to a specific step in a given order or SFC routing.",
+    "version": "v1",
+    "title": "Master Operation",
+    "contact": {
+      "name": "SAP Digital Manufacturing Operations",
+      "email": "sap-dmoperation@sap.com"
+    }
+  },
+  "host": "hostname",
+  "basePath": "/",
+  "tags": [
+    {
+      "name": "Operation",
+      "description": "Allows you to get master operation activity of specific step in given orders or SFCs routing."
+    }
+  ],
+  "security": [
+    {
+      "OAuthSecurity": []
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/masterOperation": {
+      "get": {
+        "tags": [
+          "Operation"
+        ],
+        "summary": "Finds a master operation activity by activityId, plant and order name or SFC name",
+        "description": "Retrieves master operation activity for the provided activityId, plant and order name or SFC name.",
+        "operationId": "findMasterOperationUsingGET_1",
+        "parameters": [
+          {
+            "name": "activityId",
+            "in": "query",
+            "description": "Routing activity id for which request is executed",
+            "required": true,
+            "type": "string",
+            "allowEmptyValue": false
+          },
+          {
+            "name": "order",
+            "in": "query",
+            "description": "Order for which request is executed. Either order or SFC must be specified.",
+            "required": false,
+            "type": "string",
+            "allowEmptyValue": false
+          },
+          {
+            "name": "plant",
+            "in": "query",
+            "description": "Plant for which request is executed",
+            "required": true,
+            "type": "string",
+            "allowEmptyValue": false
+          },
+          {
+            "in": "query",
+            "name": "routing",
+            "description": "Routing name for which request is executed",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "routingType",
+            "description": "Routing type. \nPossible values: \nPRODUCTION - Production Router; \nSHOP_ORDER - Shop Order-specific Router; \nSPECIAL - Special Operation Router; \nNC - NC (Rework) Router); \nDISPOSITION - Disposition Router (used in disposition groups); \nCONFIGURABLE - Configurable Router Type.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "routingVersion",
+            "description": "Routing version for which request is executed",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "sfc",
+            "in": "query",
+            "description": "SFC name for which request is executed. Either order or SFC must be specified.",
+            "required": false,
+            "type": "string",
+            "allowEmptyValue": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Message successfully processed.",
+            "schema": {
+              "$ref": "#/definitions/MasterOperationResponse"
+            }
+          },
+          "400": {
+            "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to call this resource.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Accessing the resource you are trying to reach is forbidden.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "One of the related elements is not found.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "An internal error occurred.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "deprecated": false
+      }
+    }
+  },
+  "securityDefinitions": {
+    "OAuthSecurity": {
+      "type": "oauth2",
+      "tokenUrl": "https://{subdomain}.authentication.{regionHost}/oauth/token",
+      "flow": "application"
+    }
+  },
+  "definitions": {
+    "MasterOperationResponse": {
+      "type": "object",
+      "properties": {
+        "currentVersion": {
+          "type": "boolean",
+          "description": "If true, then this is a current version of operation."
+        },
+        "customValues": {
+          "type": "array",
+          "description": "Custom values of the operation.",
+          "items": {
+            "$ref": "#/definitions/CustomValue"
+          }
+        },
+        "description": {
+          "type": "string",
+          "description": "The description of the operation."
+        },
+        "operation": {
+          "type": "string",
+          "description": "Name of the operation."
+        },
+        "plant": {
+          "type": "string",
+          "description": "The plant this operation is assigned to."
+        },
+        "requiredTimeInProcess": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Required time in process of this operation."
+        },
+        "resource": {
+          "description": " Resource type for this operation.",
+          "$ref": "#/definitions/ResourceTypeId"
+        },
+        "resourceType": {
+          "description": " Resource for this operation.",
+          "$ref": "#/definitions/ResourceTypeId"
+        },
+        "specialRouting": {
+          "description": "Special routing of the operation.",
+          "$ref": "#/definitions/Routing"
+        },
+        "status": {
+          "type": "string",
+          "description": "The status of the operation.",
+          "enum": [
+            "NEW",
+            "RELEASABLE",
+            "FROZEN",
+            "OBSOLETE",
+            "HOLD",
+            "HOLD_YIELD_RATE",
+            "HOLD_CONSEC_NC",
+            "HOLD_SPC_VIOL",
+            "HOLD_SPC_WARN"
+          ]
+        },
+        "type": {
+          "type": "string",
+          "description": "Indicates the type of operation.",
+          "enum": [
+            "NORMAL_OPERATION",
+            "SPECIAL_OPERATION",
+            "TEST_OPERATION"
+          ]
+        },
+        "version": {
+          "type": "string",
+          "description": "The operation version."
+        },
+        "workCenter": {
+          "description": "Work Center for this operation.",
+          "$ref": "#/definitions/WorkCenterId"
+        }
+      },
+      "title": "MasterOperationResponse"
+    },
+    "Routing": {
+      "type": "object",
+      "properties": {
+        "plant": {
+          "type": "string",
+          "description": "The plant this routing is assigned to."
+        },
+        "routing": {
+          "type": "string",
+          "description": "Name of the routing or recipe."
+        },
+        "routingType": {
+          "type": "string",
+          "description": "Indicates the type of routing or recipe.",
+          "enum": [
+            "PRODUCTION",
+            "NC",
+            "SPECIAL",
+            "DISPOSITION_FUNCTION",
+            "SFC_SPECIFIC",
+            "SHOPORDER_SPECIFIC",
+            "CONFIGURABLE",
+            "PRODUCTION_RECIPE",
+            "SHOPORDER_SPECIFIC_RECIPE"
+          ]
+        },
+        "version": {
+          "type": "string",
+          "description": "The routing version."
+        }
+      },
+      "title": "Routing"
+    },
+    "ResourceTypeId": {
+      "type": "object",
+      "properties": {
+        "resourceType": {
+          "type": "string",
+          "description": "The name of the resource type."
+        }
+      },
+      "title": "ResourceTypeId"
+    },
+    "WorkCenterId": {
+      "type": "object",
+      "properties": {
+        "workCenter": {
+          "type": "string",
+          "description": "The name of the work center."
+        }
+      },
+      "title": "WorkCenterId"
+    },
+    "CustomValue": {
+      "type": "object",
+      "properties": {
+        "attribute": {
+          "type": "string",
+          "description": "The attribute name."
+        },
+        "value": {
+          "type": "string",
+          "description": "The value of the attribute."
+        }
+      },
+      "title": "CustomValue"
+    },
+    "ErrorResponse": {
+      "type": "object",
+      "required": [
+        "code",
+        "message",
+        "correlationId"
+      ],
+      "properties": {
+        "causeMessage": {
+          "type": "string",
+          "description": "Contains technical reason for the error."
+        },
+        "code": {
+          "type": "string",
+          "description": "Internal error message"
+        },
+        "correlationId": {
+          "type": "string",
+          "description": "Contains correlationId for the error."
+        },
+        "message": {
+          "type": "string",
+          "description": "Contains additional information, if any"
+        }
+      },
+      "title": "ErrorResponse",
+      "description": "Error response. "
+    }
+  },
+  "externalDocs": {
+        "description": "Prepare for API Integration",
+        "url": "https://help.sap.com/docs/sap-digital-manufacturing/operations-guide/prepare-for-api-integration"
+  },
+  "schemes": [
+    "https"
+  ],
+  "x-sap-shortText": "Search and view information about master operations",
+  "x-servers": [
+    {
+      "url": "https://api.{regionHost}/masterOperation/v1",
+      "description": "Base URL",
+      "templates": {
+        "regionHost": {
+          "description": "The data center where SAP Digital Manufacturing is provisioned for your organization",
+          "enum": [
+            "eu10.dmc.cloud.sap",
+            "eu20.dmc.cloud.sap",
+            "us10.dmc.cloud.sap",
+            "us20.dmc.cloud.sap",
+            "test.eu10.dmc.cloud.sap",
+            "test.eu20.dmc.cloud.sap",
+            "test.us10.dmc.cloud.sap",
+            "test.us20.dmc.cloud.sap"
+          ],
+          "default": "test.eu10.dmc.cloud.sap"
+        },
+        "tokenHost": {
+          "description": "The authentication server where SAP Digital Manufacturing is provisioned for your organization",
+          "enum": [
+            "eu10.hana.ondemand.com",
+            "eu20.hana.ondemand.com",
+            "us10.hana.ondemand.com",
+            "us20.hana.ondemand.com"
+          ],
+          "default": "eu10.hana.ondemand.com"
+        }
+      }
+    }
+  ]
+}

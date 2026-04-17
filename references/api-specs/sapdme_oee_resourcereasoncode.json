@@ -1,0 +1,293 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Resource Reason Code",
+    "description": "Resource reason codes can be used when downtime or speed loss is reported on the resource.This API retrieves resource reason code using machine code and resource.",
+    "version": "v1",
+    "contact": {
+      "name": "SAP Digital Manufacturing Operations",
+      "email": "sap-dmoperation@sap.com"
+    }
+  },
+  "externalDocs": {
+    "description": "Prepare for API Integration",
+    "url": "https://help.sap.com/docs/sap-digital-manufacturing/operations-guide/prepare-for-api-integration"
+  },
+  "host": "hostname",
+  "basePath": "/",
+  "x-sap-shortText": "Retrieve resource reason code using machine code and resource.",
+  "x-servers": [
+    {
+      "url": "https://api.{regionHost}/resourceReasonCode",
+      "description": "Base URL",
+      "templates": {
+        "regionHost": {
+          "description": "The data center where SAP Digital Manufacturing is provisioned for your organization",
+          "enum": [
+            "eu10.dmc.cloud.sap",
+            "us10.dmc.cloud.sap",
+            "eu20.dmc.cloud.sap",
+            "us20.dmc.cloud.sap",
+            "test.eu10.dmc.cloud.sap",
+            "test.us10.dmc.cloud.sap",
+            "test.eu20.dmc.cloud.sap",
+            "test.us20.dmc.cloud.sap"
+          ],
+          "default": "test.eu10.dmc.cloud.sap"
+        },
+        "tokenHost": {
+          "description": "The authentication token server where SAP Digital Manufacturing is provisioned for your organization",
+          "enum": [
+            "eu10.hana.ondemand.com",
+            "us10.hana.ondemand.com",
+            "eu20.hana.ondemand.com",
+            "us20.hana.ondemand.com"
+          ],
+          "default": "eu10.hana.ondemand.com"
+        }
+      }
+    }
+  ],
+  "schemes": [
+    "https"
+  ],
+  "securityDefinitions": {
+    "OauthClientCredentials": {
+      "type": "oauth2",
+      "tokenUrl": "https://{subdomain}.authentication.{tokenHost}/oauth/token",
+      "flow": "application"
+    }
+  },
+  "security": [
+    {
+      "OauthClientCredentials": []
+    }
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "paths": {
+    "/v1/resourceReasonCodes": {
+      "get": {
+        "tags": [
+          "Resource Reason Code"
+        ],
+        "summary": "Retrieve resource reason code",
+        "description": "Retrieves resource reason code for the provided machine code and resource.",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "plant",
+            "description": "Plant for retrieving resource reason code.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "resource",
+            "description": "Resource name for retrieving resource reason code.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "machineCode",
+            "description": "Machine code name for retrieving resource reason code.",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Resource reason code fetched successfully.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/ResourceReasonCodeResponse"
+              }
+            }
+          },
+          "400": {
+            "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to call this resource.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Accessing the resource you are trying to reach is forbidden.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "One of the related elements is not found.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "There was an internal error somewhere in the call chain.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "ResourceReasonCodeResponse": {
+      "type": "object",
+      "properties": {
+        "resourceReasonCodeTranslationList": {
+          "type": "array",
+          "description": "List of resource reason code translations.",
+          "items": {
+            "$ref": "#/definitions/MultiLanguageDescription"
+          }
+        },
+        "description": {
+          "type": "string",
+          "description": "The description of resource reason code."
+        },
+        "sequence": {
+          "type": "number",
+          "description": "Sequence of resource reason code."
+        },
+        "keyId": {
+          "type": "number",
+          "description": "The unique key ID of the set of resource reason codes."
+        },
+        "reasonForVariance": {
+          "type": "string",
+          "description": "Reason Code For Variance."
+        },
+        "status": {
+          "type": "string",
+          "description": "The status of this resource reason code.",
+          "enum": [
+            "ENABLED",
+            "DISABLED"
+          ]
+        },
+        "timeElement": {
+          "description": "The reference to time element to which the resource reason code is attached.",
+          "$ref": "#/definitions/TimeElementId"
+        },
+        "reasonCode1": {
+          "type": "string",
+          "description": "Level 1 name of resource reason code hierarchy."
+        },
+        "reasonCode2": {
+          "type": "string",
+          "description": "Level 2 name of resource reason code hierarchy."
+        },
+        "reasonCode3": {
+          "type": "string",
+          "description": "Level 3 name of resource reason code hierarchy."
+        },
+        "reasonCode4": {
+          "type": "string",
+          "description": "Level 4 name of resource reason code hierarchy."
+        },
+        "reasonCode5": {
+          "type": "string",
+          "description": "Level 5 name of resource reason code hierarchy."
+        },
+        "reasonCode6": {
+          "type": "string",
+          "description": "Level 6 name of resource reason code hierarchy."
+        },
+        "reasonCode7": {
+          "type": "string",
+          "description": "Level 7 name of resource reason code hierarchy."
+        },
+        "reasonCode8": {
+          "type": "string",
+          "description": "Level 8 name of resource reason code hierarchy."
+        },
+        "reasonCode9": {
+          "type": "string",
+          "description": "Level 9 name of resource reason code hierarchy."
+        },
+        "reasonCode10": {
+          "type": "string",
+          "description": "Level 10 name of resource reason code hierarchy."
+        }
+      }
+    },
+    "MultiLanguageDescription": {
+      "type": "object",
+      "properties": {
+        "ref": {
+          "type": "string",
+          "description": "Unique Reference for the language description."
+        },
+        "locale": {
+          "type": "string",
+          "description": "Locale code for the language"
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of the reason code."
+        }
+      },
+      "title": "MultiLanguageDescription",
+      "description": "Description in multiple language."
+    },
+    "TimeElementId": {
+      "type": "object",
+      "properties": {
+        "ref": {
+          "type": "string",
+          "description": "Unique Reference for the Time Element identifier."
+        },
+        "plant": {
+          "type": "string",
+          "description": "Plant for the time element."
+        },
+        "timeElementName": {
+          "type": "string",
+          "description": "name of the Time element."
+        }
+      },
+      "title": "TimeElement Identifier",
+      "description": "Identifier for the Time element."
+    },
+    "ErrorResponse": {
+      "type": "object",
+      "properties": {
+        "causeMessage": {
+          "type": "string",
+          "description": "Contains technical reason for the error."
+        },
+        "code": {
+          "type": "string",
+          "description": "Internal error message"
+        },
+        "correlationId": {
+          "type": "string",
+          "description": "Contains correlationId for the error."
+        },
+        "message": {
+          "type": "string",
+          "description": "Contains additional information, if any"
+        }
+      },
+      "title": "ErrorResponse",
+      "description": "Error response."
+    }
+  }
+}

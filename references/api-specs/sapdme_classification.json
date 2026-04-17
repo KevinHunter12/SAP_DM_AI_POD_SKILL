@@ -1,0 +1,759 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Classification",
+    "description": "You can use this service to retrieve a list of classes and characteristics assigned to materials and class types. You can also retrieve the details of specific classes.",
+    "version": "v1",
+    "contact": {
+      "name": "SAP Digital Manufacturing Operations",
+      "email": "sap-dmoperation@sap.com"
+    }
+  },
+  "externalDocs": {
+    "description": "Prepare for API Integration",
+    "url": "https://help.sap.com/docs/sap-digital-manufacturing/operations-guide/prepare-for-api-integration"
+  },
+  "host": "hostname",
+  "basePath": "/",
+  "x-sap-shortText": "Obtain details on the classes and characteristics of the materials",
+  "x-servers": [
+    {
+      "url": "https://api.{regionHost}/classification/v1",
+      "description": "Base URL",
+      "templates": {
+        "regionHost": {
+          "description": "The data center where SAP Digital Manufacturing is provisioned for your organization",
+          "enum": [
+            "eu10.dmc.cloud.sap",
+            "us10.dmc.cloud.sap",
+            "eu20.dmc.cloud.sap",
+            "us20.dmc.cloud.sap",
+            "test.eu10.dmc.cloud.sap",
+            "test.us10.dmc.cloud.sap",
+            "test.eu20.dmc.cloud.sap",
+            "test.us20.dmc.cloud.sap"
+          ],
+          "default": "test.eu10.dmc.cloud.sap"
+        },
+        "tokenHost": {
+          "description": "The authentication token server where SAP Digital Manufacturing is provisioned for your organization",
+          "enum": [
+            "eu10.hana.ondemand.com",
+            "us10.hana.ondemand.com",
+            "eu20.hana.ondemand.com",
+            "us20.hana.ondemand.com"
+          ],
+          "default": "eu10.hana.ondemand.com"
+        }
+      }
+    }
+  ],
+  "schemes": [
+    "https"
+  ],
+  "securityDefinitions": {
+    "OauthClientCredentials": {
+      "type": "oauth2",
+      "tokenUrl": "https://{subdomain}.authentication.{tokenHost}/oauth/token",
+      "flow": "application"
+    }
+  },
+  "security": [
+    {
+      "OauthClientCredentials": []
+    }
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "tags": [
+    {
+      "name": "Classification",
+      "description": "Allows you to get a list of classes and characteristics by material and class type."
+    }
+  ],
+  "paths": {
+    "/read": {
+      "post": {
+        "tags": [
+          "Classification"
+        ],
+        "summary": "Retrieves classes and characteristics by materials, class type and classes.",
+        "description": "Retrieve a list of classes and characteristics by multiple material, class type and classes.",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "request",
+            "description": "Object represents the request for getAllAssignedObjects.",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/GetAllAssignedObjectsRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Classification read has been successful.",
+            "schema": {
+              "$ref": "#/definitions/ClassificationResponse"
+            }
+          },
+          "400": {
+            "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to call this resource.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Accessing the resource you are trying to reach is forbidden.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "One of the related elements is not found.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "There was an internal error somewhere in the call chain.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "GetAllAssignedObjectsRequest": {
+      "type": "object",
+      "description": "Object represents the request for getAllAssignedObjects.",
+      "required": [
+        "plant",
+        "objectKeys",
+        "objectType",
+        "classType"
+      ],
+      "properties": {
+        "plant": {
+          "description": "Plant",
+          "type": "string"
+        },
+        "objectKeys": {
+          "type": "array",
+          "description": "The object keys. \n Example: \n Name of the material",
+          "items": {
+            "type": "string"
+          }
+        },
+        "objectType": {
+          "description": "The object type. \n Allowed values are: \n MATERIAL",
+          "type": "string"
+        },
+        "classType": {
+          "description": "The classification class type. \n Allowed values are: \n 023(Batch), 001(Material) and 300(Variants).",
+          "type": "string"
+        },
+        "classes": {
+          "type": "array",
+          "description": "The classification class names.",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "ClassificationResponse": {
+      "type": "object",
+      "description": "The classification response",
+      "properties": {
+        "classificationAssignmentHeaders": {
+          "type": "array",
+          "description": "Classification assignment headers",
+          "items": {
+            "$ref": "#/definitions/ClassificationAssignmentHeader"
+          }
+        },
+        "classificationClasses": {
+          "type": "array",
+          "description": "Classification classes",
+          "items": {
+            "$ref": "#/definitions/ClassificationClass"
+          }
+        }
+      }
+    },
+    "ClassificationAssignmentHeader": {
+      "type": "object",
+      "description": "Response object for classification assignment header",
+      "properties": {
+        "assignmentId": {
+          "description": "Assignment ID",
+          "type": "string"
+        },
+        "classType": {
+          "description": "Class type",
+          "type": "string"
+        },
+        "classInternalId": {
+          "description": "Class internal ID",
+          "type": "string"
+        },
+        "objectKey": {
+          "description": "Object key",
+          "type": "string"
+        },
+        "objectType": {
+          "description": "Object type",
+          "type": "string"
+        },
+        "assignmentCreatedSite": {
+          "description": "Assignment created site",
+          "type": "string"
+        },
+        "status": {
+          "description": "Status",
+          "type": "string"
+        },
+        "standardClass": {
+          "description": "Standard class",
+          "type": "string"
+        },
+        "validFrom": {
+          "description": "Valid from",
+          "type": "string",
+          "format": "yyyy-MM-dd HH:mm:ss"
+        },
+        "validTo": {
+          "description": "Valid to",
+          "type": "string",
+          "format": "yyyy-MM-dd HH:mm:ss"
+        },
+        "assignmentCharacteristicValues": {
+          "type": "array",
+          "description": "Characteristic values of the material.",
+          "items": {
+            "$ref": "#/definitions/ClassificationAssignmentCharacteristicValue"
+          }
+        }
+      }
+    },
+    "ClassificationAssignmentCharacteristicValue": {
+      "type": "object",
+      "description": "Response object for classification assignment characteristic value.",
+      "properties": {
+        "assignmentId": {
+          "description": "Assignment ID",
+          "type": "string"
+        },
+        "charcInternalId": {
+          "description": "Local Characteristic internal ID",
+          "type": "string"
+        },
+        "valueCounter": {
+          "description": "Value counter",
+          "type": "string"
+        },
+        "classType": {
+          "description": "Class type",
+          "type": "string"
+        },
+        "charcValue": {
+          "description": "Characteristic value",
+          "type": "string"
+        },
+        "fltpValueFrom": {
+          "description": "From value (of type float)",
+          "type": "number",
+          "format": "float"
+        },
+        "fltpValueTo": {
+          "description": "To value (of type float)",
+          "type": "number",
+          "format": "float"
+        },
+        "decimalValueFrom": {
+          "description": "From value (of type decimal)",
+          "type": "number"
+        },
+        "decimalValueTo": {
+          "description": "From value (of type decimal)",
+          "type": "number"
+        },
+        "currentValueFrom": {
+          "description": "Current value from (of type decimal)",
+          "type": "number"
+        },
+        "currentValueTo": {
+          "description": "Current value to (of type decimal)",
+          "type": "number"
+        },
+        "fromValueUom": {
+          "description": "From value UOM",
+          "type": "string"
+        },
+        "toValueUom": {
+          "description": "To value UOM",
+          "type": "string"
+        },
+        "currency": {
+          "description": "Currency",
+          "type": "string"
+        },
+        "dateFrom": {
+          "description": "Date from",
+          "type": "string",
+          "format": "yyyy-MM-dd HH:mm:ss"
+        },
+        "dateTo": {
+          "description": "Date to",
+          "type": "string",
+          "format": "yyyy-MM-dd HH:mm:ss"
+        },
+        "timeFrom": {
+          "description": "Time from",
+          "type": "string",
+          "format": "yyyy-MM-dd HH:mm:ss"
+        },
+        "timeTo": {
+          "description": "Time to",
+          "type": "string",
+          "format": "yyyy-MM-dd HH:mm:ss"
+        },
+        "validFrom": {
+          "description": "Valid From",
+          "type": "string",
+          "format": "yyyy-MM-dd HH:mm:ss"
+        },
+        "validTo": {
+          "description": "Valid to",
+          "type": "string",
+          "format": "yyyy-MM-dd HH:mm:ss"
+        },
+        "deletionIndicator": {
+          "description": "Deletion indicator",
+          "type": "string"
+        }
+      }
+    },
+    "ClassificationClass": {
+      "type": "object",
+      "description": "Response object for classification class",
+      "properties": {
+        "classInternalId": {
+          "description": "Local class internal ID",
+          "type": "string"
+        },
+        "erpInternalId": {
+          "description": "ERP class internal ID",
+          "type": "string"
+        },
+        "name": {
+          "description": "Class name",
+          "type": "string"
+        },
+        "type": {
+          "description": "Class type",
+          "type": "string"
+        },
+        "typeName": {
+          "description": "Class type name",
+          "type": "string"
+        },
+        "status": {
+          "description": "Class status (of type int)",
+          "type": "integer"
+        },
+        "statusName": {
+          "description": "Class status name",
+          "type": "string"
+        },
+        "group": {
+          "description": "Class group",
+          "type": "string"
+        },
+        "groupName": {
+          "description": "Class group name",
+          "type": "string"
+        },
+        "localClass": {
+          "description": "Locally created class",
+          "type": "string"
+        },
+        "createdBy": {
+          "description": "Created by user",
+          "type": "string"
+        },
+        "createdDateTime": {
+          "description": "Created date time",
+          "type": "string",
+          "format": "yyyy-MM-dd HH:mm:ss"
+        },
+        "modifiedBy": {
+          "description": "Modified by user",
+          "type": "string"
+        },
+        "modifiedDateTime": {
+          "description": "Modified date time",
+          "type": "string",
+          "format": "yyyy-MM-dd HH:mm:ss"
+        },
+        "validityStartDate": {
+          "description": "Validity start date",
+          "type": "string",
+          "format": "yyyy-MM-dd HH:mm:ss"
+        },
+        "validityEndDate": {
+          "description": "Validity end date",
+          "type": "string",
+          "format": "yyyy-MM-dd HH:mm:ss"
+        },
+        "descriptionList": {
+          "type": "array",
+          "description": "List of descriptions",
+          "items": {
+            "$ref": "#/definitions/ClassificationClassDescription"
+          }
+        },
+        "characteristicList": {
+          "type": "array",
+          "description": "List of characteristics",
+          "items": {
+            "$ref": "#/definitions/CharacteristicMap"
+          }
+        },
+        "characteristicDetails": {
+          "type": "array",
+          "description": "Classification characteristics",
+          "items": {
+            "$ref": "#/definitions/ClassificationCharacteristic"
+          }
+        }
+      }
+    },
+    "ClassificationClassDescription": {
+      "type": "object",
+      "description": "Response object for classification class description",
+      "properties": {
+        "classDescription": {
+          "description": "Class description",
+          "type": "string"
+        },
+        "language": {
+          "description": "Language of the description",
+          "type": "string"
+        }
+      }
+    },
+    "CharacteristicMap": {
+      "type": "object",
+      "description": "Response object for characteristic map",
+      "properties": {
+        "charcInternalId": {
+          "description": "Characteristic internal ID",
+          "type": "string"
+        },
+        "position": {
+          "description": "Position (of type int)",
+          "type": "integer"
+        },
+        "deletionIndicator": {
+          "description": "Deletion indicator",
+          "type": "string"
+        },
+        "validityStartDate": {
+          "description": "Validity start date",
+          "type": "string",
+          "format": "yyyy-MM-dd HH:mm:ss"
+        },
+        "validityEndDate": {
+          "description": "Validity end date",
+          "type": "string",
+          "format": "yyyy-MM-dd HH:mm:ss"
+        }
+      }
+    },
+    "CharacteristicDescriptionList": {
+      "type": "object",
+      "description": "Response object for characteristic description list",
+      "properties": {
+        "characteristicDescription": {
+          "description": "Description for characteristics",
+          "type": "string"
+        },
+        "language": {
+          "description": "Language of the description",
+          "type": "string"
+        }
+      }
+    },
+    "ClassificationCharacteristicAllowedValue": {
+      "type": "object",
+      "description": "Response object for classification characteristic allowed values",
+      "properties": {
+        "positionNumber": {
+          "description": "Position number (of type int)",
+          "type": "integer"
+        },
+        "dependency": {
+          "description": "Dependency (of type int)",
+          "type": "integer"
+        },
+        "value": {
+          "description": "Value",
+          "type": "string"
+        },
+        "defaultValue": {
+          "description": "Default value",
+          "type": "boolean"
+        },
+        "numericFromValue": {
+          "description": "From value (of type decimal)",
+          "type": "number"
+        },
+        "numericFromValueUnit": {
+          "description": "From value unit",
+          "type": "string"
+        },
+        "numericToValue": {
+          "description": "To value (of type decimal)",
+          "type": "number"
+        },
+        "numericToValueUnit": {
+          "description": "To value unit",
+          "type": "string"
+        },
+        "fltpValueFrom": {
+          "description": "From value (of type float)",
+          "type": "number",
+          "format": "float"
+        },
+        "fltpValueTo": {
+          "description": "To value (of type float)",
+          "type": "number",
+          "format": "float"
+        },
+        "validityStartDate": {
+          "description": "Validity start date",
+          "type": "string",
+          "format": "yyyy-MM-dd HH:mm:ss"
+        },
+        "validityEndDate": {
+          "description": "Validity end date",
+          "type": "string",
+          "format": "yyyy-MM-dd HH:mm:ss"
+        },
+        "dateFrom": {
+          "description": "Date from",
+          "type": "string",
+          "format": "yyyy-MM-dd HH:mm:ss"
+        },
+        "dateTo": {
+          "description": "Date to",
+          "type": "string",
+          "format": "yyyy-MM-dd HH:mm:ss"
+        },
+        "timeFrom": {
+          "description": "Time from",
+          "type": "string",
+          "format": "yyyy-MM-dd HH:mm:ss"
+        },
+        "timeTo": {
+          "description": "Time to",
+          "type": "string",
+          "format": "yyyy-MM-dd HH:mm:ss"
+        }
+      }
+    },
+    "ClassificationCharacteristic": {
+      "type": "object",
+      "description": "Response object for classification class description",
+      "properties": {
+        "charcInternalId": {
+          "description": "Characteristic internal ID",
+          "type": "string"
+        },
+        "charcExternalId": {
+          "description": "Characteristic external ID",
+          "type": "string"
+        },
+        "name": {
+          "description": "Name",
+          "type": "string"
+        },
+        "positionNumber": {
+          "description": "Position number (of type int)",
+          "type": "integer"
+        },
+        "isPrintRelevant": {
+          "description": "Is print relevant",
+          "type": "string"
+        },
+        "isSearchRelevant": {
+          "description": "Is search relevant",
+          "type": "string"
+        },
+        "isDisplayRelevant": {
+          "description": "Is display relevant",
+          "type": "string"
+        },
+        "createdDateTime": {
+          "description": "Created date time",
+          "type": "string",
+          "format": "yyyy-MM-dd HH:mm:ss"
+        },
+        "modifiedDateTime": {
+          "description": "Modified date time",
+          "type": "string",
+          "format": "yyyy-MM-dd HH:mm:ss"
+        },
+        "validityStartDate": {
+          "description": "Validity start date",
+          "type": "string",
+          "format": "yyyy-MM-dd HH:mm:ss"
+        },
+        "validityEndDate": {
+          "description": "Validity end date",
+          "type": "string",
+          "format": "yyyy-MM-dd HH:mm:ss"
+        },
+        "status": {
+          "description": "Status",
+          "type": "string"
+        },
+        "statusName": {
+          "description": "Status name",
+          "type": "string"
+        },
+        "group": {
+          "description": "Group",
+          "type": "string"
+        },
+        "groupName": {
+          "description": "Group name",
+          "type": "string"
+        },
+        "dataType": {
+          "description": "Data type",
+          "type": "string",
+          "enum": [
+            "CHAR",
+            "NUM",
+            "DATE",
+            "TIME"
+          ]
+        },
+        "length": {
+          "description": "Length (of type decimal)",
+          "type": "number"
+        },
+        "decimalPlaces": {
+          "description": "Decimal places (of type decimal)",
+          "type": "number"
+        },
+        "exponentFormat": {
+          "description": "Exponent format (of type int)",
+          "type": "number"
+        },
+        "exponentValue": {
+          "description": "Class exponent value (of type decimal)",
+          "type": "number"
+        },
+        "uom": {
+          "description": "UOM",
+          "type": "string"
+        },
+        "isCaseSensitive": {
+          "description": "Is case sensitive",
+          "type": "string"
+        },
+        "isRequired": {
+          "description": "Is required",
+          "type": "string"
+        },
+        "isMultipleValuesAllowed": {
+          "description": "Multiple values allowed",
+          "type": "string"
+        },
+        "isValueIntervalAllowed": {
+          "description": "Value interval allowed",
+          "type": "string"
+        },
+        "isAdditionalValueAllowed": {
+          "description": "Additional value allowed",
+          "type": "string"
+        },
+        "isNegativeValueAllowed": {
+          "description": "Negative value allowed",
+          "type": "string"
+        },
+        "isReadOnly": {
+          "description": "Read only",
+          "type": "string"
+        },
+        "isHidden": {
+          "description": "Is hidden",
+          "type": "string"
+        },
+        "characteristicDescriptionList": {
+          "type": "array",
+          "description": "List of descriptions for characteristics",
+          "items": {
+            "$ref": "#/definitions/CharacteristicDescriptionList"
+          }
+        },
+        "allowedValueList": {
+          "type": "array",
+          "description": "List of allowed values",
+          "items": {
+            "$ref": "#/definitions/ClassificationCharacteristicAllowedValue"
+          }
+        },
+        "defaultValue": {
+          "type": "array",
+          "description": "Default values",
+          "items": {
+            "$ref": "#/definitions/ClassificationAssignmentCharacteristicValue"
+          }
+        }
+      }
+    },
+    "ErrorResponse": {
+      "type": "object",
+      "properties": {
+        "causeMessage": {
+          "type": "string",
+          "description": "Contains technical reason for the error."
+        },
+        "code": {
+          "type": "string",
+          "description": "Internal error message"
+        },
+        "correlationId": {
+          "type": "string",
+          "description": "Contains correlationId for the error."
+        },
+        "message": {
+          "type": "string",
+          "description": "Contains additional information, if any"
+        }
+      },
+      "title": "ErrorResponse",
+      "description": "Error response."
+    }
+  }
+}

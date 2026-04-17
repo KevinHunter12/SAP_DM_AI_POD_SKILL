@@ -1,0 +1,3973 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "The SAP Production Shop Floor Control (or SFC) is an identifier used to track a material throughout production. You can perform production operations on an SFC, such as start, complete, serialize, relabel, split, merge, scrap and setting quantity. The system allows you to define the material that will be processed, along with the location, the time, and the amount of work that is required. This API provides the functionality to work with SFCs.",
+        "version": "v1",
+        "title": "Shop Floor Control Production Activities",
+        "contact": {
+            "name": "SAP Digital Manufacturing Operations",
+            "email": "sap-dmoperation@sap.com"
+        }
+    },
+    "externalDocs": {
+        "description": "Prepare for API Integration",
+        "url": "https://help.sap.com/docs/sap-digital-manufacturing/operations-guide/prepare-for-api-integration"
+    },
+    "host": "hostname",
+    "basePath": "/",
+    "x-sap-shortText": "Perform production activities on a Shop Floor Control, such as start, complete, serialize, relabel, split, merge, scrap and set quantity",
+    "x-servers": [
+        {
+            "url": "https://api.{regionHost}/sfc/v1",
+            "description": "Base URL",
+            "templates": {
+                "regionHost": {
+                    "description": "The data center where SAP Digital Manufacturing is provisioned for your organization",
+                    "enum": [
+                        "eu10.dmc.cloud.sap",
+                        "eu20.dmc.cloud.sap",
+                        "us10.dmc.cloud.sap",
+                        "us20.dmc.cloud.sap",
+                        "test.eu10.dmc.cloud.sap",
+                        "test.eu20.dmc.cloud.sap",
+                        "test.us10.dmc.cloud.sap",
+                        "test.us20.dmc.cloud.sap"
+                    ],
+                    "default": "test.eu10.dmc.cloud.sap"
+                },
+                "tokenHost": {
+                    "description": "The authentication server where SAP Digital Manufacturing is provisioned for your organization",
+                    "enum": [
+                        "eu10.hana.ondemand.com",
+                        "eu20.hana.ondemand.com",
+                        "us10.hana.ondemand.com",
+                        "us20.hana.ondemand.com"
+                    ],
+                    "default": "eu10.hana.ondemand.com"
+                }
+            }
+        }
+    ],
+    "schemes": [
+        "https"
+    ],
+    "securityDefinitions": {
+        "OauthClientCredentials": {
+            "type": "oauth2",
+            "tokenUrl": "https://{subdomain}.authentication.{tokenHost}/oauth/token",
+            "flow": "application"
+        }
+    },
+    "security": [
+        {
+            "OauthClientCredentials": []
+        }
+    ],
+    "produces": [
+        "application/json"
+    ],
+    "consumes": [
+        "application/json"
+    ],
+    "tags": [
+        {
+            "name": "SFC Processing"
+        },
+        {
+            "name": "Production Details"
+        }
+    ],
+    "paths": {
+        "/sfcs/start": {
+            "post": {
+                "tags": [
+                    "SFC Processing"
+                ],
+                "summary": "Starts one or more SFCs at an operation activity and resource.",
+                "description": "Moves the SFC quantity from an in queue status to an in work status at the operation activity. Multiple SFCs are started as a single atomic unit, meaning failure to start one SFC fails the start for all SFCs.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "*/*"
+                ],
+                "parameters": [
+                    {
+                        "name": "async",
+                        "in": "query",
+                        "description": "Provide a Boolean value for the request to be processed asynchronously.",
+                        "required": false,
+                        "type": "boolean",
+                        "default": false
+                    },
+                    {
+                        "in": "body",
+                        "name": "request",
+                        "description": "The start SFC request object.",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/StartSfcRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The SFC start request has successfully completed.",
+                        "schema": {
+                            "$ref": "#/definitions/StartSfcResponse"
+                        }
+                    },
+                    "202": {
+                        "description": "Your request has been accepted for processing. To check the message status use the Monitor Integration Messages app."
+                    },
+                    "400": {
+                        "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+                        "schema": {
+                            "$ref": "#/definitions/errorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "You are not authorized to call this resource.",
+                        "schema": {
+                            "$ref": "#/definitions/errorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Accessing the resource you are trying to reach is forbidden.",
+                        "schema": {
+                            "$ref": "#/definitions/errorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "One of the related elements is not found.",
+                        "schema": {
+                            "$ref": "#/definitions/errorResponse"
+                        }
+                    },
+                    "409": {
+                        "description": "Requested operation has timed out. Please retry again.",
+                        "schema": {
+                            "$ref": "#/definitions/errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "There was an internal error somewhere in the call chain.",
+                        "schema": {
+                            "$ref": "#/definitions/errorResponse"
+                        }
+                    }
+                },
+                "deprecated": false
+            }
+        },
+        "/sfcs/serialize": {
+            "post": {
+                "tags": [
+                    "SFC Processing"
+                ],
+                "summary": "Serialize an SFC.",
+                "description": "Creates new SFCs with the quantity 1 from the given SFC. Decreases the original SFC quantity by the quantity of the created SFCs. If the SFC quantity becomes 0, then the SFC becomes invalid.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "*/*"
+                ],
+                "parameters": [
+                    {
+                        "name": "async",
+                        "in": "query",
+                        "description": "Provide a Boolean value for the request to be processed asynchronously.",
+                        "required": false,
+                        "type": "boolean",
+                        "default": false
+                    },
+                    {
+                        "in": "body",
+                        "name": "request",
+                        "description": "The request to serialize an SFC. If \"newSfcs\" and \"quantity\" parameters are empty, the number of new SFCs is equal to the given SFC quantity.",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/SerializeSfcRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The serialize SFC request has successfully completed.",
+                        "schema": {
+                            "$ref": "#/definitions/SerializeSfcResponse"
+                        }
+                    },
+                    "202": {
+                        "description": "Your request has been accepted for processing. To check the message status use the Monitor Integration Messages app."
+                    },
+                    "400": {
+                        "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+                        "schema": {
+                            "$ref": "#/definitions/ParametersValidationError"
+                        }
+                    },
+                    "401": {
+                        "description": "You are not authorized to call this resource.",
+                        "schema": {
+                            "$ref": "#/definitions/InvalidTokenException"
+                        }
+                    },
+                    "403": {
+                        "description": "Accessing the resource you are trying to reach is forbidden.",
+                        "schema": {
+                            "$ref": "#/definitions/InsufficientScopeException"
+                        }
+                    },
+                    "409": {
+                        "description": "Requested operation has timed out. Please retry again.",
+                        "schema": {
+                            "$ref": "#/definitions/errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "An internal error occured.",
+                        "schema": {
+                            "$ref": "#/definitions/error"
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "OauthClientCredentials": []
+                    }
+                ],
+                "deprecated": false
+            }
+        },
+        "/sfcs/merge": {
+            "post": {
+                "tags": [
+                    "SFC Processing"
+                ],
+                "summary": "Merge SFCs.",
+                "description": "Merges given SFCs into the parent SFC. Quantity of the parent SFC is increased by the total quantities of merged SFCs. Merged SFCs become invalid.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "*/*"
+                ],
+                "parameters": [
+                    {
+                        "name": "async",
+                        "in": "query",
+                        "description": "Provide a Boolean value for the request to be processed asynchronously.",
+                        "required": false,
+                        "type": "boolean",
+                        "default": false
+                    },
+                    {
+                        "in": "body",
+                        "name": "request",
+                        "description": "The request to merge SFCs.",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/MergeSfcRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Selected SFCs have been merged into the parent SFC.",
+                        "schema": {
+                            "$ref": "#/definitions/MergeSfcResponse"
+                        }
+                    },
+                    "202": {
+                        "description": "Your request has been accepted for processing. To check the message status use the Monitor Integration Messages app."
+                    },
+                    "400": {
+                        "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+                        "schema": {
+                            "$ref": "#/definitions/ParametersValidationError"
+                        }
+                    },
+                    "401": {
+                        "description": "You are not authorized to call this resource.",
+                        "schema": {
+                            "$ref": "#/definitions/InvalidTokenException"
+                        }
+                    },
+                    "403": {
+                        "description": "Accessing the resource you are trying to reach is forbidden.",
+                        "schema": {
+                            "$ref": "#/definitions/InsufficientScopeException"
+                        }
+                    },
+                    "500": {
+                        "description": "An internal error occured.",
+                        "schema": {
+                            "$ref": "#/definitions/error"
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "OauthClientCredentials": []
+                    }
+                ],
+                "deprecated": false
+            }
+        },
+        "/sfcs/split": {
+            "post": {
+                "tags": [
+                    "SFC Processing"
+                ],
+                "summary": "Split an SFC.",
+                "description": "Creates new SFCs with the quantity from the original SFC. Decreases the original SFC quantity by the quantity of the new SFCs. The original SFC quantity remains the same and the total quantity of the new SFCs can be greater than the original one in case of overproduction. The remaining quantity of the original SFC must be greater than 0.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "*/*"
+                ],
+                "parameters": [
+                    {
+                        "name": "async",
+                        "in": "query",
+                        "description": "Provide a Boolean value for the request to be processed asynchronously.",
+                        "required": false,
+                        "type": "boolean",
+                        "default": false
+                    },
+                    {
+                        "in": "body",
+                        "name": "request",
+                        "description": "The request to split an SFC.",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/SplitSfcRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The split SFC request has successfully completed.",
+                        "schema": {
+                            "$ref": "#/definitions/SplitSfcResponse"
+                        }
+                    },
+                    "202": {
+                        "description": "Your request has been accepted for processing. To check the message status use the Monitor Integration Messages app."
+                    },
+                    "400": {
+                        "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+                        "schema": {
+                            "$ref": "#/definitions/ParametersValidationError"
+                        }
+                    },
+                    "401": {
+                        "description": "You are not authorized to call this resource.",
+                        "schema": {
+                            "$ref": "#/definitions/InvalidTokenException"
+                        }
+                    },
+                    "403": {
+                        "description": "Accessing the resource you are trying to reach is forbidden.",
+                        "schema": {
+                            "$ref": "#/definitions/InsufficientScopeException"
+                        }
+                    },
+                    "409": {
+                        "description": "Requested operation has timed out. Please retry again.",
+                        "schema": {
+                            "$ref": "#/definitions/errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "An internal error occured.",
+                        "schema": {
+                            "$ref": "#/definitions/error"
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "OauthClientCredentials": []
+                    }
+                ],
+                "deprecated": false
+            }
+        },
+        "/sfcs/scrap": {
+            "post": {
+                "tags": [
+                    "SFC Processing"
+                ],
+                "summary": "Scraps one or more SFCs at an operation activity and resource.",
+                "description": "You scrap an SFC when the material is no longer viable for production. If the SFC is an assembly, then all assembled child SFCs are also scrapped. The status of each scrapped SFC is set to Scrapped.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "*/*"
+                ],
+                "parameters": [
+                    {
+                        "name": "async",
+                        "in": "query",
+                        "description": "Provide a Boolean value for the request to be processed asynchronously.",
+                        "required": false,
+                        "type": "boolean",
+                        "default": false
+                    },
+                    {
+                        "in": "body",
+                        "name": "request",
+                        "description": "The scrap SFC request object.",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/ScrapSfcRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The SFC scrap request has successfully completed.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "202": {
+                        "description": "Your request has been accepted for processing. To check the message status use the Monitor Integration Messages app."
+                    },
+                    "400": {
+                        "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+                        "schema": {
+                            "$ref": "#/definitions/errorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "You are not authorized to call this resource.",
+                        "schema": {
+                            "$ref": "#/definitions/errorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Accessing the resource you are trying to reach is forbidden.",
+                        "schema": {
+                            "$ref": "#/definitions/errorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "One of the related elements is not found.",
+                        "schema": {
+                            "$ref": "#/definitions/errorResponse"
+                        }
+                    },
+                    "409": {
+                        "description": "Requested operation has timed out. Please retry again.",
+                        "schema": {
+                            "$ref": "#/definitions/errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "There was an internal error somewhere in the call chain.",
+                        "schema": {
+                            "$ref": "#/definitions/errorResponse"
+                        }
+                    }
+                },
+                "deprecated": false
+            }
+        },
+        "/sfcs/relabel": {
+            "post": {
+                "tags": [
+                    "SFC Processing"
+                ],
+                "summary": "Relabel an SFC.",
+                "description": "Creates a new SFC with the given name and the same quantity as the given SFC. The original SFC becomes invalid.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "*/*"
+                ],
+                "parameters": [
+                    {
+                        "name": "async",
+                        "in": "query",
+                        "description": "Provide a Boolean value for the request to be processed asynchronously.",
+                        "required": false,
+                        "type": "boolean",
+                        "default": false
+                    },
+                    {
+                        "in": "body",
+                        "name": "request",
+                        "description": "The request to relabel an SFC.",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/RelabelSfcRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The relabel SFC request has successfully completed."
+                    },
+                    "202": {
+                        "description": "Your request has been accepted for processing. To check the message status use the Monitor Integration Messages app."
+                    },
+                    "400": {
+                        "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+                        "schema": {
+                            "$ref": "#/definitions/ParametersValidationError"
+                        }
+                    },
+                    "401": {
+                        "description": "You are not authorized to call this resource.",
+                        "schema": {
+                            "$ref": "#/definitions/InvalidTokenException"
+                        }
+                    },
+                    "403": {
+                        "description": "Accessing the resource you are trying to reach is forbidden.",
+                        "schema": {
+                            "$ref": "#/definitions/InsufficientScopeException"
+                        }
+                    },
+                    "409": {
+                        "description": "Requested operation has timed out. Please retry again.",
+                        "schema": {
+                            "$ref": "#/definitions/errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "An internal error occured.",
+                        "schema": {
+                            "$ref": "#/definitions/error"
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "OauthClientCredentials": []
+                    }
+                ],
+                "deprecated": false
+            }
+        },
+        "/sfcs/setQuantity": {
+            "post": {
+                "tags": [
+                    "SFC Processing"
+                ],
+                "summary": "Sets SFC quantities.",
+                "description": "Sets the new quantities of the SFCs.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "*/*"
+                ],
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "request",
+                        "description": "The request to set the SFC quantity.",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/SetSfcQuantityRequests"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The request to set the SFC quantity has been successfully completed."
+                    },
+                    "400": {
+                        "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+                        "schema": {
+                            "$ref": "#/definitions/ParametersValidationError"
+                        }
+                    },
+                    "404": {
+                        "description": "One of the related elements was not found.",
+                        "schema": {
+                            "$ref": "#/definitions/error"
+                        }
+                    },
+                    "500": {
+                        "description": "An internal error occurred.",
+                        "schema": {
+                            "$ref": "#/definitions/error"
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "OauthClientCredentials": []
+                    }
+                ],
+                "deprecated": false
+            }
+        },
+        "/sfcs/complete": {
+            "post": {
+                "tags": [
+                    "SFC Processing"
+                ],
+                "summary": "Completes one or more SFCs at an operation activity and resource.",
+                "description": "The SFCs are moved to the next operation activity, or set to the Done status if they have completed the last operation activity on the routing.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "*/*"
+                ],
+                "parameters": [
+                    {
+                        "name": "async",
+                        "in": "query",
+                        "description": "Provide a Boolean value for the request to be processed asynchronously.",
+                        "required": false,
+                        "type": "boolean",
+                        "default": false
+                    },
+                    {
+                        "in": "body",
+                        "name": "request",
+                        "description": "The complete SFC request object.",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/CompleteSfcRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The SFC complete request has successfully completed.",
+                        "schema": {
+                            "$ref": "#/definitions/CompleteSfcResponse"
+                        }
+                    },
+                    "202": {
+                        "description": "Your request has been accepted for processing. To check the message status use the Monitor Integration Messages app."
+                    },
+                    "400": {
+                        "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+                        "schema": {
+                            "$ref": "#/definitions/errorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "You are not authorized to call this resource.",
+                        "schema": {
+                            "$ref": "#/definitions/errorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Accessing the resource you are trying to reach is forbidden.",
+                        "schema": {
+                            "$ref": "#/definitions/errorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "One of the related elements is not found.",
+                        "schema": {
+                            "$ref": "#/definitions/errorResponse"
+                        }
+                    },
+                    "409": {
+                        "description": "Requested operation has timed out. Please retry again.",
+                        "schema": {
+                            "$ref": "#/definitions/errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "There was an internal error somewhere in the call chain.",
+                        "schema": {
+                            "$ref": "#/definitions/errorResponse"
+                        }
+                    }
+                },
+                "deprecated": false
+            }
+        },
+        "/sfcselect": {
+            "post": {
+                "tags": [
+                    "Production Details"
+                ],
+                "summary": "Trigger an SFC Selection event.",
+                "description": "Sends an SFC selection event to the message broker to be consumed and sent to the Pods subscribing to the selection event. PODs can subscribe to the selection event by enabling Notifications for the SFC Select Event in the POD Designer. The receiving POD User Interface will select the SFC.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "*/*"
+                ],
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "request",
+                        "description": "request",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/AutomationSfcSelectRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success. Message has been sent"
+                    },
+                    "400": {
+                        "description": "The http request is bad or invalid and can not be processed by the server.",
+                        "schema": {
+                            "$ref": "#/definitions/error"
+                        }
+                    },
+                    "401": {
+                        "description": "You are not authorized to call or view this resource."
+                    },
+                    "403": {
+                        "description": "Accessing the resource you are trying to reach is forbidden."
+                    },
+                    "404": {
+                        "description": "The resource you are trying to reach is not found.",
+                        "schema": {
+                            "$ref": "#/definitions/error"
+                        }
+                    },
+                    "500": {
+                        "description": "There was an internal error somewhere in the call chain.",
+                        "schema": {
+                            "$ref": "#/definitions/error"
+                        }
+                    }
+                },
+                "deprecated": false
+            }
+        },
+        "/sfcdetail": {
+            "get": {
+                "tags": [
+                    "Production Details"
+                ],
+                "summary": "Retrieves SFC details for an SFC.",
+                "description": "SFC details includes information about the SFC, including the SFC status, material, order, routing, and routing steps. The sfcdetail API returns all operation activity/step IDs from the requested SFC, which can be any status. This endpoint is now deprecated, please use the successor API <a href=https://api.sap.com/api/sapdme_sfc_v2/resource/getSfcDetailUsingGET>Get SFC details</a>",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "plant",
+                        "in": "query",
+                        "description": "The plant in which the SFC is in work.",
+                        "required": true,
+                        "type": "string",
+                        "maxLength": 6
+                    },
+                    {
+                        "name": "sfc",
+                        "in": "query",
+                        "description": "The SFC for which the details are requested.",
+                        "required": true,
+                        "type": "string",
+                        "maxLength": 128
+                    },
+                    {
+                        "name": "allRouterVersions",
+                        "in": "query",
+                        "description": "By default, set to true. A true value indicates that data for all router versions is retrieved. A false value returns data for only the current router version, and thus can be used to enhance performance in certain cases.",
+                        "required": false,
+                        "type": "boolean",
+                        "default": true,
+                        "x-example": "false"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The SFC details request has successfully completed.",
+                        "schema": {
+                            "$ref": "#/definitions/SfcDetailResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+                        "schema": {
+                            "$ref": "#/definitions/error"
+                        }
+                    },
+                    "401": {
+                        "description": "You are not authorized to call or view this resource."
+                    },
+                    "403": {
+                        "description": "Accessing the resource you are trying to reach is forbidden."
+                    },
+                    "404": {
+                        "description": "A manufacturing object referenced in the request, such as SFC, BOM, or operation activity, does not exist.",
+                        "schema": {
+                            "$ref": "#/definitions/error"
+                        }
+                    },
+                    "500": {
+                        "description": "There was an internal server error.",
+                        "schema": {
+                            "$ref": "#/definitions/error"
+                        }
+                    }
+                },
+                "deprecated": true
+            }
+        },
+        "/sfcData": {
+            "get": {
+                "tags": [
+                    "Production Details"
+                ],
+                "summary": "Retrieves SFC data based on either the SFC ID or the serial number.",
+                "description": "Retrieves information about the status, bill of materials (BOM), quantity, order, material, routing, and routing steps of a specific SFC. It returns the IDs of all operation activities/steps associated with the requested SFC, regardless of their status. To get the information of an SFC, you must provide either the SFC ID or the serial number.",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "plant",
+                        "in": "query",
+                        "description": "Specify the plant where the SFC is currently being processed.",
+                        "required": true,
+                        "type": "string",
+                        "maxLength": 6
+                    },
+                    {
+                        "name": "sfc",
+                        "in": "query",
+                        "description": "Specify the SFC for which the user requests details.",
+                        "type": "string",
+                        "maxLength": 128
+                    },
+                    {
+                        "name": "serialNumber",
+                        "in": "query",
+                        "description": "Specify the serial number of the SFC for which the user requests details.",
+                        "type": "string",
+                        "maxLength": 18
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The request to fetch SFC data has been completed.",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/SfcSimpleDetailResponse"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Your HTTP request is either in the wrong format or it's invalid, and it cannot be processed.",
+                        "schema": {
+                            "$ref": "#/definitions/error"
+                        }
+                    },
+                    "401": {
+                        "description": "The SFC you are trying to invalidate cannot be found.",
+                        "schema": {
+                            "$ref": "#/definitions/error"
+                        }
+                    },
+                    "403": {
+                        "description": "The SFC you are trying to invalidate cannot be found.",
+                        "schema": {
+                            "$ref": "#/definitions/error"
+                        }
+                    },
+                    "404": {
+                        "description": "The serial number or SFC you are trying to access cannot be found.",
+                        "schema": {
+                            "$ref": "#/definitions/error"
+                        }
+                    },
+                    "500": {
+                        "description": "An internal server error has occurred.",
+                        "schema": {
+                            "$ref": "#/definitions/error"
+                        }
+                    }
+                },
+                "deprecated": false
+            }
+        },
+        "/sfcs/invalidate": {
+            "patch": {
+                "tags": [
+                    "SFC Invalidate"
+                ],
+                "summary": "Invalidate an SFC in a specific plant.",
+                "description": "This enables the invalidate of a specific SFC at a designated plant. You can only invalidate an SFC if it is in one of the statuses: New, In-Queue, or Hold.",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "plant",
+                        "in": "query",
+                        "description": "Provide the specific plant for invalidating the SFC.",
+                        "required": true,
+                        "type": "string",
+                        "maxLength": 6
+                    },
+                    {
+                        "name": "sfc",
+                        "in": "query",
+                        "description": "Name of the SFC to be invalidated.",
+                        "required": true,
+                        "type": "string",
+                        "maxLength": 128
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "SFC has been invalidated. You can verify the invalidated status by checking the response body for the SFC.",
+                        "schema": {
+                            "$ref": "#/definitions/DeleteSfcResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Your HTTP request is either in the wrong format or it's invalid, and it cannot be processed.",
+                        "schema": {
+                            "$ref": "#/definitions/error"
+                        }
+                    },
+                    "401": {
+                        "description": "The SFC you are trying to invalidate cannot be found.",
+                        "schema": {
+                            "$ref": "#/definitions/error"
+                        }
+                    },
+                    "403": {
+                        "description": "The SFC you are trying to invalidate cannot be found.",
+                        "schema": {
+                            "$ref": "#/definitions/error"
+                        }
+                    },
+                    "404": {
+                        "description": "The SFC you are trying to invalidate cannot be found.",
+                        "schema": {
+                            "$ref": "#/definitions/error"
+                        }
+                    },
+                    "500": {
+                        "description": "An internal server error has occurred.",
+                        "schema": {
+                            "$ref": "#/definitions/error"
+                        }
+                    }
+                },
+                "deprecated": false
+            }
+        },
+        "/sfcsInWork": {
+            "get": {
+                "tags": [
+                    "Production Details"
+                ],
+                "summary": "Get SFCs at Resource.",
+                "description": "Retrieves all the SFCs that are in work at a given resource. A resource may have the capacity of working on one or many SFCs at the same time. SFCs on a relaxed flow router are not retrieved.",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "resource",
+                        "in": "path",
+                        "description": "The resource where SFCs can be in work.",
+                        "required": true,
+                        "type": "string",
+                        "pattern": "^(?! )[0-9A-Z_$!)(+~@^=\\-*. ]+(?<! )$",
+                        "minLength": 1,
+                        "maxLength": 36
+                    },
+                    {
+                        "name": "plant",
+                        "in": "query",
+                        "description": "The plant where the resource is.",
+                        "required": true,
+                        "type": "string",
+                        "pattern": "^(?! )[0-9A-Z_$!)(+~@^=\\-*. ]+(?<! )$",
+                        "minLength": 1,
+                        "maxLength": 6
+                    },
+                    {
+                        "name": "page.offset",
+                        "in": "query",
+                        "required": false,
+                        "minimum": 0,
+                        "type": "integer",
+                        "description": "The offset that determines the first item to be returned in the first page (skip).",
+                        "format": "int32",
+                        "default": 0
+                    },
+                    {
+                        "name": "page.size",
+                        "in": "query",
+                        "required": false,
+                        "maximum": 1000,
+                        "minimum": 1,
+                        "type": "integer",
+                        "description": "The number of items to return in each page (top).",
+                        "format": "int32",
+                        "default": 100
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The in work SFC(s), if any, at the given resource are retrieved.",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/ActiveSfcResponse"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "The HTTP request is bad or contains invalid inputs and cannot be processed by the server.",
+                        "schema": {
+                            "$ref": "#/definitions/ParametersValidationError"
+                        }
+                    },
+                    "404": {
+                        "description": "One of the related elements (e.g. plant, resource) you are trying to reach is not found.",
+                        "schema": {
+                            "$ref": "#/definitions/error"
+                        }
+                    },
+                    "401": {
+                        "description": "You are not authorized to call or view this resource."
+                    },
+                    "403": {
+                        "description": "Accessing the resource you are trying to reach is forbidden."
+                    },
+                    "500": {
+                        "description": "There was an internal server error.",
+                        "schema": {
+                            "$ref": "#/definitions/error"
+                        }
+                    }
+                },
+                "deprecated": false
+            }
+        },
+        
+        "/sfcs/signoff": {
+            "post": {
+                "tags": [
+                    "SFC Processing"
+                ],
+                "summary": "Signoff one or more SFCs at an operation activity and resource.",
+                "description": "The SFCs in Active state are moved back in queue at the same operation activity",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "async",
+                        "in": "query",
+                        "description": "Provide a Boolean value for the request to be processed asynchronously.",
+                        "required": false,
+                        "type": "boolean",
+                        "default": false
+                    },
+                    {
+                        "in": "body",
+                        "name": "request",
+                        "description": "The Signoff SFC request object.",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/SignoffSfcRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The SFC signoff request has successfully completed.",
+                        "schema": {
+                            "$ref": "#/definitions/SignoffSfcResponse"
+                        }
+                    },
+                    "202": {
+                        "description": "Your request has been accepted for processing. To check the message status use the Monitor Integration Messages app."
+                    },
+                    "400": {
+                        "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+                        "schema": {
+                            "$ref": "#/definitions/errorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "You are not authorized to call this resource.",
+                        "schema": {
+                            "$ref": "#/definitions/errorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Accessing the resource you are trying to reach is forbidden.",
+                        "schema": {
+                            "$ref": "#/definitions/errorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "One of the related elements is not found.",
+                        "schema": {
+                            "$ref": "#/definitions/errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "There was an internal error somewhere in the call chain.",
+                        "schema": {
+                            "$ref": "#/definitions/errorResponse"
+                        }
+                    }
+                },
+                "deprecated": false
+            }
+        },
+        "/batch": {
+            "put": {
+                "tags": [
+                    "Production Details"
+                ],
+                "summary": "Update SFC default batch ID.",
+                "description": "Update SFC default batch ID with a given batch ID. The given batch ID is checked for validity against valid batch IDs based on the SFC material.",
+                "operationId": "createPodConfigurationUsingPOST",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "request",
+                        "description": "request",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/SfcBatchRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully updated the SFC batch ID.",
+                        "schema": {
+                            "$ref": "#/definitions/SfcBatchResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "The http request is bad or invalid and can not be processed by the server.",
+                        "schema": {
+                            "$ref": "#/definitions/error"
+                        }
+                    },
+                    "401": {
+                        "description": "You are not authorized to call this resource."
+                    },
+                    "403": {
+                        "description": "Accessing the resource you are trying to reach is forbidden."
+                    },
+                    "404": {
+                        "description": "The SFC can not be found or related objects can not be found.",
+                        "schema": {
+                            "$ref": "#/definitions/error"
+                        }
+                    },
+                    "500": {
+                        "description": "There was an internal error somewhere in the call chain.",
+                        "schema": {
+                            "$ref": "#/definitions/error"
+                        }
+                    }
+                }
+            }
+        },
+    "/worklist/sfcs/$count": {
+      "get": {
+        "tags": [
+          "Production Details"
+        ],
+        "summary": "Retrieves the number of SFCs in the work list.",
+        "description": "Return the number of SFCs in the work list for the given plant and other optional filter criteria. This endpoint is now deprecated, please use the 'totalElements' field from the successor API <a href=https://api.sap.com/api/sapdme_sfc_v2/resource/getSfcWorkListV2UsingGET>Get SFC Worklist</a>",
+        "operationId": "getSfcWorkListCountUsingGET",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "allSfcSteps",
+            "in": "query",
+            "description": "By default set to false. A true value is required if quantity decoupled process industry SFCs need to be counted.",
+            "required": false,
+            "type": "boolean",
+            "x-example": "false"
+          },
+          {
+            "name": "filter.material",
+            "in": "query",
+            "description": "The material name filter.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "filter.materialRevision",
+            "in": "query",
+            "description": "The material revision filter.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "filter.operation",
+            "in": "query",
+            "description": "The operation name filter where an sfc is in queue, inwork, or completePending.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "filter.order",
+            "in": "query",
+            "description": "The Order filter.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "filter.orderPlannedEndDateTime",
+            "in": "query",
+            "description": "Filters for orders planned before the order planned end date time.",
+            "required": false,
+            "type": "string",
+            "format": "date-time"
+          },
+          {
+            "name": "filter.orderPlannedStartDateTime",
+            "in": "query",
+            "description": "Filters for orders planned after the order planned start date time.",
+            "required": false,
+            "type": "string",
+            "format": "date-time"
+          },
+          {
+            "name": "filter.sfc",
+            "in": "query",
+            "description": "The sfc filter.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "filter.stepId",
+            "in": "query",
+            "description": "The step ID filter where an sfc is in queue, inwork, or completePending.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "operation",
+            "in": "query",
+            "description": "The operation we are interested in, ignored if user or work center is specified.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "plant",
+            "in": "query",
+            "description": "The plant.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "resource",
+            "in": "query",
+            "description": "The resource at a given operation, if operation specified. If not, will be treated as the scheduled resource.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "user",
+            "in": "query",
+            "description": "Uses the list of work centers assigned to the indicated user. The list is limited to the work centers assigned to the user in the Manage Users app.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "workCenter",
+            "in": "query",
+            "description": "An individual work center. This value is ignored if you specify a user.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "sfcStatuses",
+            "in": "query",
+            "description": "List of SFC statuses that are used to filter the result set.",
+            "required": false,
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+                 "enum": [
+                   "NEW",
+                   "IN_QUEUE",
+                   "ACTIVE",
+                   "HOLD"
+                 ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Have successfully retrieved the work list records count.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          "400": {
+            "description": "The http request is bad or invalid and can not be processed by the server.",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to call or view this resource."
+          },
+          "403": {
+            "description": "Accessing the resource you are trying to reach is forbidden."
+          },
+          "404": {
+            "description": "One of the related elements ( eg. operation, resource, workcenter) you are trying to reach is not found.",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          },
+          "500": {
+            "description": "There was an internal error somewhere in the call chain.",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          }
+        },
+        "deprecated": true
+      }
+    },
+    "/worklist/sfcs": {
+      "get": {
+        "tags": [
+          "Production Details"
+        ],
+        "summary": "Retrieves an SFC-centric work list including the routing steps.",
+        "description": "Returns the SFC-centric work list including the routing steps for the given plant and other optional filter criteria. This endpoint is now deprecated, please use the successor API <a href=https://api.sap.com/api/sapdme_sfc_v2/resource/getSfcWorkListV2UsingGET>Get SFC Worklist</a>",
+        "operationId": "getSfcWorkListUsingGET",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "allSfcSteps",
+            "in": "query",
+            "description": "By default set to false. A true value indicates that all steps within the SFCs should be retrieved. A true value is required if quantity decoupled process industry SFCs need to be retrieved.",
+            "required": false,
+            "type": "boolean",
+            "x-example": "false"
+          },
+          {
+            "name": "filter.material",
+            "in": "query",
+            "description": "The material name filter.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "filter.materialRevision",
+            "in": "query",
+            "description": "The material version filter.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "filter.operation",
+            "in": "query",
+            "description": "The operation name filter where an SFC is in queue, in work, or pending complete.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "filter.order",
+            "in": "query",
+            "description": "The Order filter.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "filter.orderPlannedEndDateTime",
+            "in": "query",
+            "description": "Filters for orders planned before the order planned end date time.",
+            "required": false,
+            "type": "string",
+            "format": "date-time"
+          },
+          {
+            "name": "filter.orderPlannedStartDateTime",
+            "in": "query",
+            "description": "Filters for orders planned after the order planned start date time.",
+            "required": false,
+            "type": "string",
+            "format": "date-time"
+          },
+          {
+            "name": "filter.sfc",
+            "in": "query",
+            "description": "The SFC filter.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "filter.stepId",
+            "in": "query",
+            "description": "The step ID filter where an SFC is in queue, in work, or pending complete.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "operation",
+            "in": "query",
+            "description": "The operation we are interested in, ignored if user or work center is specified.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "page.offset",
+            "in": "query",
+            "description": "The offset that determines the first item to be returned in the first page (skip).",
+            "required": false,
+            "type": "integer",
+            "format": "int32",
+            "x-example": 0
+          },
+          {
+            "name": "page.size",
+            "in": "query",
+            "description": "The number of items to return in each page (top).",
+            "required": false,
+            "type": "integer",
+            "format": "int32",
+            "x-example": 20
+          },
+          {
+            "name": "plant",
+            "in": "query",
+            "description": "The plant.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "resource",
+            "in": "query",
+            "description": "The resource at a given operation, if operation specified. If not, will be treated as the scheduled resource.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "user",
+            "in": "query",
+            "description": "Uses the list of work centers assigned to the indicated user. The list is limited to the work centers assigned to the user in the Manage Users app.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "workCenter",
+            "in": "query",
+            "description": "An individual work center. This value is ignored if you specify a user.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "sfcStatuses",
+            "in": "query",
+            "description": "List of SFC statuses that are used to filter the result set.",
+            "required": false,
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "enum": [
+                "NEW",
+                "IN_QUEUE",
+                "ACTIVE",
+                "HOLD"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Have successfully retrieved the work list records.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/SfcDetails"
+              }
+            }
+          },
+          "204": {
+            "description": "An empty list is returned. No records found that satisfy the given criteria.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/SfcDetails"
+              }
+            }
+          },
+          "400": {
+            "description": "The HTTP request is bad or invalid and can not be processed by the server.",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to call or view this resource."
+          },
+          "403": {
+            "description": "Accessing the resource you are trying to reach is forbidden."
+          },
+          "404": {
+            "description": "One of the related elements ( eg. operation, resource, workCenter) you are trying to reach is not found.",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          },
+          "500": {
+            "description": "There was an internal error somewhere in the call chain.",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          }
+        },
+        "deprecated": true
+      }
+    },
+    "/worklist/orders/$count": {
+      "get": {
+        "tags": [
+          "Production Details"
+        ],
+        "summary": "Retrieves an Order-centric work list count.",
+        "description": "Returns the number of orders in the Order-centric work list for the given plant and other optional filter criteria. This endpoint is now deprecated, please use the 'totalElements' field from the successor API <a href=https://api.sap.com/api/sapdme_sfc_v2/resource/getOrderWorkListV2UsingGET>Get Worklist Orders</a>",
+        "operationId": "getOrderWorkListCountUsingGET",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "allSfcSteps",
+            "in": "query",
+            "description": "By default set to false. A true value is required if quantity decoupled process industry orders need to be counted.",
+            "required": false,
+            "type": "boolean",
+            "x-example": "false"
+          },
+          {
+            "name": "filter.material",
+            "in": "query",
+            "description": "The material name filter.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "filter.materialRevision",
+            "in": "query",
+            "description": "The material revision filter.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "filter.operation",
+            "in": "query",
+            "description": "The operation name filter where an SFC is in a status of in queue, in work, or complete pending.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "filter.order",
+            "in": "query",
+            "description": "The order filter.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "filter.orderPlannedEndDateTime",
+            "in": "query",
+            "description": "Filters for orders planned before the order planned end date time.",
+            "required": false,
+            "type": "string",
+            "format": "date-time"
+          },
+          {
+            "name": "filter.orderPlannedStartDateTime",
+            "in": "query",
+            "description": "Filters for orders planned after the order planned start date time.",
+            "required": false,
+            "type": "string",
+            "format": "date-time"
+          },
+          {
+            "name": "filter.sfc",
+            "in": "query",
+            "description": "The SFC filter.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "filter.stepId",
+            "in": "query",
+            "description": "The step ID filter where an SFC is in a status of in queue, in work, or complete pending.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "operation",
+            "in": "query",
+            "description": "The operation, ignored if user or work center is specified.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "plant",
+            "in": "query",
+            "description": "The plant.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "resource",
+            "in": "query",
+            "description": "The resource at a given operation, if operation is specified. If not, the resource will be treated as the scheduled resource.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "user",
+            "in": "query",
+            "description": "The user.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "workCenter",
+            "in": "query",
+            "description": "The work center, ignored if user is specified.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "sfcStatuses",
+            "in": "query",
+            "description": "List of SFC statuses that are used to filter the result set.",
+            "required": false,
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "enum": [
+                "NEW",
+                "IN_QUEUE",
+                "ACTIVE",
+                "HOLD"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved the work list records count.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          "400": {
+            "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to call or view this resource."
+          },
+          "403": {
+            "description": "Accessing the resource you are trying to reach is forbidden."
+          },
+          "404": {
+            "description": "One of the related elements (for example, operation, resource, or work center) you are trying to reach is not found."
+          },
+          "500": {
+            "description": "There was an internal error somewhere in the call chain.",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          }
+        },
+        "deprecated": true
+      }
+    },
+    "/worklist/orders": {
+      "get": {
+        "tags": [
+          "Production Details"
+        ],
+        "summary": "Retrieves an Order-centric work list including SFCs.",
+        "description": "Returns the Order-centric work list along with a list of SFCs and the routing steps for the given plant and other optional filter criteria. This endpoint is now deprecated, please use the successor API <a href=https://api.sap.com/api/sapdme_sfc_v2/resource/getOrderWorkListV2UsingGET>Get Worklist Orders</a>",
+        "operationId": "getOrderWorkListUsingGET",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "allSfcSteps",
+            "in": "query",
+            "description": "By default set to false. A true value indicates that all steps within the SFCs of the order should be retrieved. A true value is required if quantity decoupled process industry orders need to be retrieved.",
+            "required": false,
+            "type": "boolean",
+            "x-example": "false"
+          },
+          {
+            "name": "filter.material",
+            "in": "query",
+            "description": "The material name filter.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "filter.materialRevision",
+            "in": "query",
+            "description": "The material revision filter.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "filter.operation",
+            "in": "query",
+            "description": "The operation name filter where an SFC is in a status of in queue, in work, or complete pending.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "filter.order",
+            "in": "query",
+            "description": "The order filter.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "filter.orderPlannedEndDateTime",
+            "in": "query",
+            "description": "Filters for orders planned before the order planned end date time.",
+            "required": false,
+            "type": "string",
+            "format": "date-time"
+          },
+          {
+            "name": "filter.orderPlannedStartDateTime",
+            "in": "query",
+            "description": "Filters for orders planned after the order planned start date time.",
+            "required": false,
+            "type": "string",
+            "format": "date-time"
+          },
+          {
+            "name": "filter.sfc",
+            "in": "query",
+            "description": "The SFC filter.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "filter.stepId",
+            "in": "query",
+            "description": "The step ID filter where an SFC is in a status of in queue, in work, or complete pending.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "operation",
+            "in": "query",
+            "description": "The operation, ignored if user or work center is specified.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "page.offset",
+            "in": "query",
+            "description": "The offset that determines the first item to be returned in the first page (skip).",
+            "required": false,
+            "type": "integer",
+            "format": "int32",
+            "x-example": 0
+          },
+          {
+            "name": "page.size",
+            "in": "query",
+            "description": "The number of items to return in each page (top).",
+            "required": false,
+            "type": "integer",
+            "format": "int32",
+            "x-example": 20
+          },
+          {
+            "name": "plant",
+            "in": "query",
+            "description": "The plant.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "resource",
+            "in": "query",
+            "description": "The resource at a given operation, if operation is specified. If not, the resource will be treated as the scheduled resource.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "user",
+            "in": "query",
+            "description": "The user.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "workCenter",
+            "in": "query",
+            "description": "The work center, ignored if user is specified.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "includeSfcDetails",
+            "in": "query",
+            "description": "By default set to true. A true value indicates sfc data within the order should be retrieved. A false value indicates sfc data within the order should be ignored in the response.",
+            "required": false,
+            "type": "boolean",
+            "default": true,
+            "x-example": "false"
+          },
+          {
+            "name": "sfcStatuses",
+            "in": "query",
+            "description": "List of SFC statuses that are used to filter the result set.",
+            "required": false,
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "enum": [
+                "NEW",
+                "IN_QUEUE",
+                "ACTIVE",
+                "HOLD"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved the work list records.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/WorkListResponse"
+              }
+            }
+          },
+          "204": {
+            "description": "An empty list is returned. No records has been found that satisfy the given criteria.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/WorkListResponse"
+              }
+            }
+          },
+          "400": {
+            "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to call or view this resource."
+          },
+          "403": {
+            "description": "Accessing the resource you are trying to reach is forbidden."
+          },
+          "404": {
+            "description": "One of the related elements (for example, operation, resource, or work center) you are trying to reach is not found.",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          },
+          "500": {
+            "description": "There was an internal error somewhere in the call chain.",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          }
+        },
+        "deprecated": true
+      }
+    },
+    "/alternateResource": {
+        "put": {
+            "tags": [
+                "Production Details"
+            ],
+            "summary": "Update Alternate Resource Mapping for an SFC/Charge and Operation Activity.",
+            "description": "Update Alternate Resource Mapping for an SFC and Operation Activity.Change to alternate resource mapping for an SFC and Phase.",
+            "operationId": "updateAlternateResourceUsingPUT",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "*/*"
+            ],
+            "parameters": [
+                {
+                    "name": "plant",
+                    "in": "query",
+                    "description": "The plant.",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "in": "body",
+                    "name": "request",
+                    "description": "Request object to update the alternate resource mapping for an SFC and Phase",
+                    "required": true,
+                    "schema": {
+                        "$ref": "#/definitions/SfcStepAlternatesRequest"
+                    }
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "SFC for which the update alternate resource mapping has to be updated successfully.",
+                    "schema": {
+                        "$ref": "#/definitions/SfcStepAlternatesResponse"
+                    }
+                },
+                "400": {
+                    "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+                    "schema": {
+                        "$ref": "#/definitions/error"
+                    }
+                },
+                "401": {
+                    "description": "You are not authorized to call this resource.",
+                    "schema": {
+                        "$ref": "#/definitions/error"
+                    }
+                },
+                "403": {
+                    "description": "Accessing the resource you are trying to reach is forbidden.",
+                    "schema": {
+                        "$ref": "#/definitions/error"
+                    }
+                },
+                "404": {
+                    "description": "One of the related elements is not found.",
+                    "schema": {
+                        "$ref": "#/definitions/error"
+                    }
+                },
+                "500": {
+                    "description": "There was an internal error somewhere in the call chain.",
+                    "schema": {
+                        "$ref": "#/definitions/error"
+                    }
+                }
+            }
+        }
+    },
+        "/stepActivity": {
+            "get": {
+                "tags": [
+                    "Production Details"
+                ],
+                "summary": "Get SFC step activity details.",
+                "description": "Returns step details for each routing step that the SFC has been started or completed.",
+                "operationId": "getSfcStepActivities",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "plant",
+                        "in": "query",
+                        "description": "The plant in which the SFC is processed.",
+                        "required": true,
+                        "type": "string",
+                        "maxLength": 6
+                    },
+                    {
+                        "name": "sfc",
+                        "in": "query",
+                        "description": "The shop floor control identifier.",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Request for SFC step details has been successfully processed.",
+                        "schema": {
+                            "$ref": "#/definitions/SfcStepActivityResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+                        "schema": {
+                            "$ref": "#/definitions/errorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "You are not authorized to call this resource.",
+                        "schema": {
+                            "$ref": "#/definitions/errorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Accessing the resource you are trying to reach is forbidden.",
+                        "schema": {
+                            "$ref": "#/definitions/errorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "One of the related elements is not found.",
+                        "schema": {
+                            "$ref": "#/definitions/errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "There was an internal error somewhere in the call chain.",
+                        "schema": {
+                            "$ref": "#/definitions/errorResponse"
+                        }
+                    }
+                },
+                "deprecated": false
+            }
+        },
+        "/sfcs/hold": {
+            "post": {
+                "tags": [
+                    "SFC Processing"
+                ],
+                "summary": "Place a hold on one or more SFCs.",
+                "description": " Initiate a hold request to temporarily pause the activity of an SFC in a given plant.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "*/*"
+                ],
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "request",
+                        "description": "The place hold on SFCs request object.",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/PlaceHoldRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Have successfully completed the sfc place hold request.",
+                        "schema": {
+                            "$ref": "#/definitions/PlaceHoldResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "The http request is bad or invalid and can not be processed by the server.",
+                        "schema": {
+                            "$ref": "#/definitions/errorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "You are not authorized to call this resource.",
+                        "schema": {
+                            "$ref": "#/definitions/errorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Accessing the resource you are trying to reach is forbidden.",
+                        "schema": {
+                            "$ref": "#/definitions/errorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "One of the related elements is not found.",
+                        "schema": {
+                            "$ref": "#/definitions/errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "There was an internal error somewhere in the call chain.",
+                        "schema": {
+                            "$ref": "#/definitions/errorResponse"
+                        }
+                    }
+                },
+                "deprecated": false
+            }
+        },
+        "/sfcs/release": {
+            "post": {
+                "tags": [
+                    "SFC Processing"
+                ],
+                "summary": "Release the hold from one or more SFCs .",
+                "description": " Initiate a release request to remove the hold status of an SFC in a given plant.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "*/*"
+                ],
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "request",
+                        "description": "The place hold on SFCs request object.",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/ReleaseHoldRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Have successfully completed the sfc place hold request.",
+                        "schema": {
+                            "$ref": "#/definitions/ReleaseHoldResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "The http request is bad or invalid and can not be processed by the server.",
+                        "schema": {
+                            "$ref": "#/definitions/errorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "You are not authorized to call this resource.",
+                        "schema": {
+                            "$ref": "#/definitions/errorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Accessing the resource you are trying to reach is forbidden.",
+                        "schema": {
+                            "$ref": "#/definitions/errorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "One of the related elements is not found.",
+                        "schema": {
+                            "$ref": "#/definitions/errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "There was an internal error somewhere in the call chain.",
+                        "schema": {
+                            "$ref": "#/definitions/errorResponse"
+                        }
+                    }
+                },
+                "deprecated": false
+            }
+        }
+  },
+    "definitions": {
+        "SfcBatchRequest": {
+            "type": "object",
+            "required": [
+                "plant",
+                "sfc",
+                "batchNumber"
+            ],
+            "properties": {
+                "plant": {
+                    "type": "string",
+                    "description": "The plant for the selected SFC"
+                },
+                "sfc": {
+                    "type": "string",
+                    "description": "The SFC to be updated."
+                },
+                "batchNumber": {
+                    "type": "string",
+                    "description": "The Batch Number/ID to update the SFC with."
+                }
+            },
+            "title": "SfcBatchRequest",
+            "description": "Request object for SFC default Batch Number/ID update."
+        },
+        "SfcBatchResponse": {
+            "type": "object",
+            "properties": {
+                "plant": {
+                    "type": "string",
+                    "description": "The plant for the SFC."
+                },
+                "sfc": {
+                    "type": "string",
+                    "description": "The updated SFC."
+                },
+                "batchNumber": {
+                    "type": "string",
+                    "description": "The Batch Number/ID SFC has been updated with."
+                }
+            },
+            "title": "SfcBatchResponse",
+            "description": "Response object for SFC default Batch Number/ID update."
+        },
+        "AutomationSfcSelectRequest": {
+            "type": "object",
+            "required": [
+                "plant",
+                "sfc"
+            ],
+            "properties": {
+                "operation": {
+                    "type": "string",
+                    "description": "The operation of a selected SFC."
+                },
+                "plant": {
+                    "type": "string",
+                    "description": "The plant for the selected SFC"
+                },
+                "resource": {
+                    "type": "string",
+                    "description": "The resource of a selected SFC."
+                },
+                "sfc": {
+                    "type": "string",
+                    "description": "The selected SFC."
+                },
+                "workCenter": {
+                    "type": "string",
+                    "description": "The workcenter of a selected SFC."
+                }
+            },
+            "title": "AutomationSfcSelectRequest",
+            "description": "Object represents a SFC selection with either a resource, operation or workcenter."
+        },
+        "SfcDetails": {
+            "type": "object",
+            "properties": {
+                "actualCompletionDateTime": {
+                    "type": "string",
+                    "description": "The SFC actual completion date."
+                },
+                "actualCompletionDateTime_Z": {
+                    "type": "string",
+                    "description": "The SFC actual completion date (in UTC)."
+                },
+                "orderScheduledCompleteDateTime": {
+                    "type": "string",
+                    "description": "The scheduled complete date and time of the shop order of this work list material."
+                },
+                "orderScheduledStartDateTime": {
+                    "type": "string",
+                    "description": "The scheduled start date and time of the shop order of this work list material."
+                },
+                "defaultBatchId": {
+                    "type": "string",
+                    "description": "The default SFC Batch ID."
+                },
+                "bom": {
+                    "description": "The bill of material used.",
+                    "$ref": "#/definitions/Bom"
+                },
+                "material": {
+                    "description": "The material used.",
+                    "$ref": "#/definitions/Material"
+                },
+                "order": {
+                    "type": "string",
+                    "description": "The order for the SFC."
+                },
+                "priority": {
+                    "type": "number",
+                    "description": "A number representing the priority of the SFC."
+                },
+                "quantity": {
+                    "type": "number",
+                    "description": "The quantity of the SFC."
+                },
+                "quantityCompletePending": {
+                    "type": "number",
+                    "description": "The total step aggregated quantity completed of this SFC but in a complete pending status."
+                },
+                "quantityInQueue": {
+                    "type": "number",
+                    "description": "The total step aggregated quantity in queue of this SFC."
+                },
+                "quantityInWork": {
+                    "type": "number",
+                    "description": "The total step aggregated quantity in work of this SFC."
+                },
+                "quantityRejected": {
+                    "type": "number",
+                    "description": "The total step aggregated quantity rejected from this SFC."
+                },
+                "routing": {
+                    "description": "The routing used.",
+                    "$ref": "#/definitions/Routing"
+                },
+                "sfc": {
+                    "type": "string",
+                    "description": "The name of the SFC."
+                },
+                "status": {
+                    "description": "The status of the SFC",
+                    "$ref": "#/definitions/SfcStatus"
+                },
+                "steps": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/SfcStep"
+                    }
+                },
+                "customValues": {
+                    "type": "array",
+                    "description": "The list of custom data for the SFC in attribute-value pairs.",
+                    "items": {
+                        "$ref": "#/definitions/CustomValue"
+                    }
+                }
+            },
+            "title": "SfcDetails",
+            "description": "The object representing an SFC under a work list response."
+        },
+        "StartSfcRequest": {
+            "type": "object",
+            "required": [
+                "plant",
+                "operation",
+                "resource"
+            ],
+            "properties": {
+                "plant": {
+                    "type": "string",
+                    "maxLength": 6,
+                    "description": "The plant in which the SFC is being started."
+                },
+                "operation": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 36,
+                    "description": "The operation activity where the SFC is started."
+                },
+                "quantity": {
+                    "type": "number",
+                    "description": "The SFC quantity to be started. If not provided, the full SFC quantity is started."
+                },
+                "resource": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 36,
+                    "description": "The resource where the SFC is started."
+                },
+                "sfcs": {
+                    "type": "array",
+                    "description": "The list of SFCs to be started. An SFC can be no longer than 128 characters.",
+                    "items": {
+                        "type": "string"
+                    },
+                    "maxItems": 500
+                },
+                "processLot": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128,
+                    "description": "The process lot name is used to find SFCs and start them. A process lot name cannot be longer than 128 characters."
+                }
+            },
+            "title": "StartSfcRequest",
+            "description": "The SFC start request."
+        },
+        "StartSfcResponse": {
+            "type": "object",
+            "properties": {
+                "sfcs": {
+                    "type": "array",
+                    "description": "The list of started SFCs.",
+                    "items": {
+                        "type": "string"
+                    },
+                    "maxItems": 500
+                }
+            },
+            "title": "StartSfcResponse",
+            "description": "The SFC start response."
+        },
+        "CompleteSfcRequest": {
+            "type": "object",
+            "required": [
+                "plant",
+                "operation",
+                "resource"
+            ],
+            "properties": {
+                "plant": {
+                    "type": "string",
+                    "maxLength": 6,
+                    "description": "The plant in which the SFC is being completed."
+                },
+                "operation": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 36,
+                    "description": "The operation activity where the SFC is completed."
+                },
+                "quantity": {
+                    "type": "number",
+                    "description": "The SFC quantity to be completed. If not provided, the full SFC quantity is completed."
+                },
+                "resource": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 36,
+                    "description": "The resource where the SFC is completed."
+                },
+                "sfcs": {
+                    "type": "array",
+                    "description": "The list of SFCs to be completed. An SFC can be no longer than 128 characters.",
+                    "items": {
+                        "type": "string"
+                    },
+                    "maxItems": 500
+                },
+                "processLot": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128,
+                    "description": "The process lot name is used to find SFCs and complete them. A process lot cannot be longer than 128 characters."
+                }
+            },
+            "title": "CompleteSfcRequest",
+            "description": "The SFC complete request."
+        },
+        "CompleteSfcResponse": {
+            "type": "object",
+            "properties": {
+                "success": {
+                    "type": "boolean",
+                    "description": "A boolean value that indicates if the Complete is successful."
+                },
+                "sfcs": {
+                    "type": "array",
+                    "description": "The list of completed SFCs.",
+                    "items": {
+                        "type": "string"
+                    },
+                    "maxItems": 500
+                },
+                "queuedOperations": {
+                    "type": "array",
+                    "description": "Operations where SFCs are queued at",
+                    "items": {
+                        "type": "string"
+                    },
+                    "maxItems": 500
+                },
+                "scrapped": {
+                    "type": "boolean",
+                    "description": "A boolean value that indicates if the SFC is scrapped"
+                },
+                "buyoffs": {
+                    "type": "array",
+                    "description": "List of open buyoffs",
+                    "items": {
+                        "type": "string"
+                    },
+                    "maxItems": 500
+                },
+                "doneStatuses": {
+                    "type": "array",
+                    "description": "List of SFCs and their done status.",
+                    "items": {
+                        "$ref": "#/definitions/SfcDoneStatus"
+                    },
+                    "maxItems": 500
+                }
+            },
+            "title": "CompleteSfcResponse",
+            "description": "The SFC Complete response."
+        },
+        "SfcDoneStatus": {
+            "type": "object",
+            "properties": {
+                "sfc": {
+                    "type": "string",
+                    "description": "The SFC for this status."
+                },
+                "done": {
+                    "type": "boolean",
+                    "description": "A boolean value that indicates if SFC is done or not."
+                }
+            },
+            "title": "SfcDoneStatus",
+            "description": "The done status for an SFC."
+        },
+        "ScrapSfcRequest": {
+            "type": "object",
+            "required": [
+                "plant",
+                "quantity",
+                "sfcs"
+            ],
+            "properties": {
+                "plant": {
+                    "type": "string",
+                    "maxLength": 6,
+                    "description": "The plant in which the SFC is being scrapped."
+                },
+                "operation": {
+                    "minLength": 1,
+                    "maxLength": 36,
+                    "type": "string",
+                    "description": "The operation activity where the SFC is scrapped."
+                },
+                "quantity": {
+                    "type": "number",
+                    "description": "The SFC quantity to be scrapped. Each SFC must have at least this quantity, otherwise an error will result. If the SFC is an assembly, then the scrapped quantity of assembled SFCs is the product of the assembled SFC quantity and the parent SFC quantity."
+                },
+                "resource": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 36,
+                    "description": "The resource where the SFC is scrapped."
+                },
+                "sfcs": {
+                    "type": "array",
+                    "description": "The list of SFCs to be scrapped. An SFC can be no longer than 128 characters.",
+                    "items": {
+                        "type": "string"
+                    },
+                    "maxItems": 500
+                },
+                "reasonCodeKey" : {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 38,
+                    "description": "The resource reason code key. A resource reason code may optionally be provided with the SFC scrap. The reason code will be logged to the Activity Log and used in reports, such as Overall Equipment Efficiency (OEE)."
+                }
+            },
+            "title": "ScrapSfcRequest",
+            "description": "The SFC scrap request."
+        },
+        "SfcDetailResponse": {
+            "type": "object",
+            "properties": {
+                "bom": {
+                    "$ref": "#/definitions/Bom"
+                },
+                "material": {
+                    "$ref": "#/definitions/Material"
+                },
+                "order": {
+                    "$ref": "#/definitions/Order"
+                },
+                "quantity": {
+                    "type": "number",
+                    "description": "The SFC quantity."
+                },
+                "defaultBatchId": {
+                    "type": "string",
+                    "description": "The default SFC Batch ID."
+                },
+                "routing": {
+                    "$ref": "#/definitions/Routing"
+                },
+                "sfc": {
+                    "type": "string",
+                    "description": "The SFC identifier."
+                },
+                "status": {
+                    "$ref": "#/definitions/SfcStatus"
+                },
+                "steps": {
+                    "type": "array",
+                    "description": "The list of SFC steps.",
+                    "items": {
+                        "$ref": "#/definitions/SfcStep"
+                    }
+                }
+            },
+            "title": "SfcDetailResponse",
+            "description": "Response containing SFC details, including order information."
+        },
+        "SfcSimpleDetailResponse": {
+            "type": "object",
+            "properties": {
+                "sfc": {
+                    "type": "string",
+                    "description": "The SFC identifier."
+                },
+                "material": {
+                    "$ref": "#/definitions/MaterialNoDesc"
+                },
+                "bom": {
+                    "$ref": "#/definitions/Bom"
+                },
+                "routing": {
+                    "$ref": "#/definitions/Routing"
+                },
+                "status": {
+                    "$ref": "#/definitions/SfcStatus"
+                },
+                "quantity": {
+                    "type": "number",
+                    "description": "The SFC quantity."
+                },
+                "quantityScrapped": {
+                    "type": "number",
+                    "description": "The quantity of item scrapped."
+                },
+                "order": {
+                    "type": "string",
+                    "description": "The order for the SFC."
+                },
+                "orderCategory": {
+                    "type": "string",
+                    "description": "A classification that defines the type of order.",
+                    "enum": [
+                        "PRODUCTION_ORDER",
+                        "PROCESS_ORDER",
+                        "PLANNED_ORDER",
+                        "SERVICE_ORDER"
+                    ]
+                },
+                "defaultBatchId": {
+                    "type": "string",
+                    "description": "The default SFC Batch ID."
+                },
+                "steps": {
+                    "type": "array",
+                    "description": "The list of SFC steps.",
+                    "items": {
+                        "$ref": "#/definitions/SfcStepList"
+                    }
+                }
+            },
+            "title": "SfcSimpleDetailResponse",
+            "description": "Response containing SFC details, including order information."
+        },
+        "DeleteSfcResponse": {
+            "type": "object",
+            "properties": {
+                "deletedSfcs": {
+                    "type": "array",
+                    "description": "The list of deleted/invalidated SFCs.",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            },
+            "title": "DeleteSfcResponse",
+            "description": "The Delete/Invalidated SFC response."
+        },
+        "Bom": {
+            "type": "object",
+            "properties": {
+                "bom": {
+                    "type": "string",
+                    "description": "The BOM description."
+                },
+                "type": {
+                    "type": "string",
+                    "description": "The BOM type."
+                },
+                "version": {
+                    "type": "string",
+                    "description": "The BOM version."
+                }
+            },
+            "title": "Bom"
+        },
+        "Material": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string",
+                    "description": "The material description."
+                },
+                "material": {
+                    "type": "string",
+                    "description": "The material name."
+                },
+                "version": {
+                    "type": "string",
+                    "description": "The material version."
+                }
+            },
+            "title": "Material",
+            "description": "The SFC material."
+        },
+        "MaterialNoDesc": {
+            "type": "object",
+            "properties": {
+                "material": {
+                    "type": "string",
+                    "description": "The material name."
+                },
+                "version": {
+                    "type": "string",
+                    "description": "The material version."
+                }
+            },
+            "title": "MaterialNoDescription",
+            "description": "The SFC material without description."
+        },
+        "Order": {
+            "type": "object",
+            "properties": {
+                "order": {
+                    "type": "string",
+                    "description": "The SFC order."
+                },
+                "orderPlannedCompleteDateTime": {
+                    "type": "string",
+                    "description": "The order planned completion date and time."
+                },
+                "orderPlannedStartDateTime": {
+                    "type": "string",
+                    "description": "The order planned start date and time."
+                },
+                "orderStatus": {
+                    "type": "string",
+                    "description": "The order status."
+                },
+                "orderType": {
+                    "type": "string",
+                    "description": "The order type."
+                },
+                "orderCategory": {
+                    "type": "string",
+                    "description": "The order category."
+                },
+                "batchNumber": {
+                    "type": "string",
+                    "description": "The batch number for this order."
+                }
+            },
+            "title": "Order",
+            "description": "The SFC order details."
+        },
+        "Routing": {
+            "type": "object",
+            "properties": {
+                "routing": {
+                    "type": "string",
+                    "description": "The routing name."
+                },
+                "type": {
+                    "type": "string",
+                    "description": "The routing type."
+                },
+                "version": {
+                    "type": "string",
+                    "description": "The routing version."
+                }
+            },
+            "title": "Routing"
+        },
+        "SfcStatus": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string",
+                    "description": "The status code."
+                },
+                "description": {
+                    "type": "string",
+                    "description": "The status description."
+                }
+            },
+            "title": "SfcStatus",
+            "description": "The SFC status."
+        },
+        "SfcStep": {
+            "type": "object",
+            "properties": {
+                "operation": {
+                    "description": "The operation at this step.",
+                    "$ref": "#/definitions/Operation"
+                },
+                "stepRouting": {
+                    "description": "The routing this step is on.",
+                    "$ref": "#/definitions/Routing"
+                },                
+                "plannedWorkCenter": {
+                    "type": "string",
+                    "description": "The name of the planned work center for this step."
+                },
+                "quantityCompletePending": {
+                    "type": "number",
+                    "description": "The quantity that has been completed but is awaiting buyoff."
+                },
+                "quantityDone": {
+                    "type": "number",
+                    "description": "The SFC quantity that is done at this step."
+                },
+                "quantityInQueue": {
+                    "type": "number",
+                    "description": "The SFC quantity that is in queue at this step."
+                },
+                "quantityInWork": {
+                    "type": "number",
+                    "description": "The SFC quantity that is in work at this step."
+                },
+                "quantityRejected": {
+                    "type": "number",
+                    "description": "The SFC quantity that is rejected at this step."
+                },
+                "quantityScrapped": {
+                    "type": "number",
+                    "description": "The SFC quantity that is scrapped at this step."
+                },
+                "stepDone": {
+                    "type": "boolean",
+                    "description": "Indicates if we are completely done with this step and all the SFC quantity has been processed/completed by it."
+                },
+                "resource": {
+                    "type": "string",
+                    "description": "The name of the resource being used while in work."
+                },
+                "stepId": {
+                    "type": "string",
+                    "description": "The step ID of this step."
+                },
+                "stepSequence": {
+                    "type": "number",
+                    "description": "The step sequence of this step."
+                },
+                "operationScheduledCompletionDate": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "The Resource Orchestration operation scheduled completion date and time in UTC.",
+                    "example": "2022-07-07T09:00:00Z"
+                },
+                "operationScheduledStartDate": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "The Resource Orchestration operation scheduled start date and time in UTC.",
+                    "example": "2022-07-07T09:00:00Z"
+                },
+                "description": {
+                    "type": "string",
+                    "description": "The SFC step description."
+                }
+            },
+            "title": "SfcStep"
+        },
+        "SfcStepList": {
+            "type": "object",
+            "properties": {
+                "stepId": {
+                    "type": "string",
+                    "description": "The step ID of this step."
+                },
+                "operation": {
+                    "description": "The operation at this step.",
+                    "$ref": "#/definitions/OperationDesc"
+                },
+                "resource": {
+                    "type": "string",
+                    "description": "The name of the resource being used while in work."
+                },
+                "quantityDone": {
+                    "type": "number",
+                    "description": "The SFC quantity that is done at this step."
+                },
+                "quantityScrapped": {
+                    "type": "number",
+                    "description": "The SFC quantity that is scrapped at this step."
+                },
+                "quantityInQueue": {
+                    "type": "number",
+                    "description": "The SFC quantity that is in queue at this step."
+                },
+                "quantityInWork": {
+                    "type": "number",
+                    "description": "The SFC quantity that is in work at this step."
+                },
+                "quantityCompletePending": {
+                    "type": "number",
+                    "description": "The quantity that has been completed but is awaiting buyoff."
+                },
+                "stepDone": {
+                    "type": "boolean",
+                    "description": "Indicates if we are completely done with this step and all the SFC quantity has been processed/completed by it."
+                },
+                "plannedWorkCenter": {
+                    "type": "string",
+                    "description": "The name of the planned work center for this step."
+                },
+                "erpSequence": {
+                    "type": "string",
+                    "description": "The ERP sequence of this step."
+                },
+                "reportingStep": {
+                    "type": "string",
+                    "description": "The reporting step."
+                },
+                "stepStartDate": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "The step start date and time in UTC.",
+                    "example": "2022-07-07T09:00:00Z"
+                },
+                "stepCompletedDate": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "The step completion date and time in UTC.",
+                    "example": "2022-07-07T09:00:00Z"
+                }
+            },
+            "title": "SfcStepData"
+        },
+        "Operation": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string",
+                    "description": "The operation activity description."
+                },
+                "operation": {
+                    "type": "string",
+                    "description": "The operation activity name."
+                },
+                "version": {
+                    "type": "string",
+                    "description": "The operation activity version."
+                }
+            },
+            "title": "Operation Activity"
+        },
+        "OperationDesc": {
+            "type": "object",
+            "properties": {
+                "operation": {
+                    "type": "string",
+                    "description": "The operation activity name."
+                },
+                "version": {
+                    "type": "string",
+                    "description": "The operation activity version."
+                }
+            },
+            "title": "OperationActivityDesc"
+        },
+        "errorResponse": {
+            "properties": {
+                "displayMessage": {
+                    "type": "string",
+                    "description": "Contains additional information, if any"
+                },
+                "errorMessageKey": {
+                    "type": "string",
+                    "description": "Internal error message"
+                },
+                "technicalMessage": {
+                    "type": "string",
+                    "description": "Contains technical reason for the error"
+                },
+                "errorCode": {
+                    "type": "number",
+                    "description": "Internal error code used for troubleshooting"
+                },
+                "timestamp": {
+                    "type": "number"
+                },
+                "status": {
+                    "type": "number",
+                    "description": "HTTP status code"
+                }
+            }
+        },
+        "WorkListResponse": {
+            "type": "object",
+            "properties": {
+                "batchNumber": {
+                    "type": "string",
+                    "description": "The batch number for this order."
+                },
+                "bom": {
+                    "description": "The bill of material used.",
+                    "$ref": "#/definitions/Bom"
+                },
+                "buildQuantity": {
+                    "type": "number",
+                    "description": "The order quantity to build."
+                },
+                "customValues": {
+                    "type": "array",
+                    "description": "The list of custom data for the order in attribute-value pairs.",
+                    "items": {
+                        "$ref": "#/definitions/CustomValue"
+                    }
+                },
+                "customer": {
+                    "type": "string",
+                    "description": "The customer associated with the order."
+                },
+                "customerOrder": {
+                    "type": "string",
+                    "description": "The customer order associated with this order."
+                },
+                "doneQuantity": {
+                    "type": "number",
+                    "description": "The order quantity that has been done."
+                },
+                "erpOrder": {
+                    "type": "string",
+                    "description": "The ERP order of this order."
+                },
+                "erpProductionVersion": {
+                    "type": "string",
+                    "description": "The ERP production version of this order."
+                },
+                "erpPutAwayStoreLoc": {
+                    "type": "string",
+                    "description": "The put away store location for this order."
+                },
+                "erpUnitOfMeasure": {
+                    "type": "string",
+                    "description": "The ERP unit of measure on this order."
+                },
+                "material": {
+                    "description": "The material used.",
+                    "$ref": "#/definitions/Material"
+                },
+                "order": {
+                    "type": "string",
+                    "description": "The name of the shop order relevant to this work list material."
+                },
+                "orderActualCompleteDateTime": {
+                    "type": "string",
+                    "description": "The actual complete date and time of the shop order of this work list material."
+                },
+                "orderActualStartDateTime": {
+                    "type": "string",
+                    "description": "The actual start date and time of the shop order of this work list material."
+                },
+                "orderPlannedCompleteDateTime": {
+                    "type": "string",
+                    "description": "The planned complete date and time of the shop order of this work list material."
+                },
+                "orderPlannedStartDateTime": {
+                    "type": "string",
+                    "description": "The planned start date and time of the shop order of this work list material."
+                },
+                "orderReleasedDateTime": {
+                    "type": "string",
+                    "description": "The released date and time of the shop order of this work list material."
+                },
+                "orderScheduledCompleteDateTime": {
+                    "type": "string",
+                    "description": "The scheduled complete date and time of the shop order of this work list material."
+                },
+                "orderScheduledStartDateTime": {
+                    "type": "string",
+                    "description": "The scheduled start date and time of the shop order of this work list material."
+                },
+                "orderActualCompleteDateTime_Z": {
+                    "type": "string",
+                    "description": "The actual complete date and time of the shop order of this work list material (in UTC)."
+                },
+                "orderActualStartDateTime_Z": {
+                    "type": "string",
+                    "description": "The actual start date and time of the shop order of this work list material (in UTC)."
+                },
+                "orderPlannedCompleteDateTime_Z": {
+                    "type": "string",
+                    "description": "The planned complete date and time of the shop order of this work list material (in UTC)."
+                },
+                "orderPlannedStartDateTime_Z": {
+                    "type": "string",
+                    "description": "The planned start date and time of the shop order of this work list material (in UTC)."
+                },
+                "orderReleasedDateTime_Z": {
+                    "type": "string",
+                    "description": "The released date and time of the shop order of this work list material (in UTC)."
+                },
+                "orderScheduledCompleteDateTime_Z": {
+                    "type": "string",
+                    "description": "The scheduled complete date and time of the shop order of this work list material (in UTC)."
+                },
+                "orderScheduledStartDateTime_Z": {
+                    "type": "string",
+                    "description": "The scheduled start date and time of the shop order of this work list material (in UTC)."
+                },
+                "orderSfcs": {
+                    "type": "array",
+                    "description": "The list of SFCs belonging to this shop order.",
+                    "items": {
+                        "$ref": "#/definitions/SfcDetails"
+                    }
+                },
+                "orderStatus": {
+                    "type": "string",
+                    "description": "The order status."
+                },
+                "orderedQuantity": {
+                    "type": "number",
+                    "description": "The order quantity that has been ordered."
+                },
+                "priority": {
+                    "type": "number",
+                    "description": "The order priority."
+                },
+                "quantityCompletePending": {
+                    "type": "number",
+                    "description": "The cumulative quantity of SFCs on this order that completed their operations but are in a complete pending status."
+                },
+                "quantityInQueue": {
+                    "type": "number",
+                    "description": "The cumulative quantity in queue on this order."
+                },
+                "quantityInWork": {
+                    "type": "number",
+                    "description": "The cumulative quantity in work on this order."
+                },
+                "quantityRejected": {
+                    "type": "number",
+                    "description": "The cumulative quantity rejected on this order."
+                },
+                "releasedQuantity": {
+                    "type": "number",
+                    "description": "The order quantity that has been released."
+                },
+                "scheduledResource": {
+                    "type": "string",
+                    "description": "The name of the resource scheduled for this order when released."
+                },
+                "scrappedQuantity": {
+                    "type": "number",
+                    "description": "The order quantity that has been scrapped."
+                },
+                "type": {
+                    "type": "string",
+                    "description": "The type of the shop order relevant to this work list material."
+                }
+            },
+            "title": "WorkListResponse",
+            "description": "The object representing the shop orders work list response."
+        },
+        "CustomValue": {
+            "type": "object",
+            "properties": {
+                "attribute": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                },
+                "sourceType": {
+                    "type": "string"
+                }
+            },
+            "title": "CustomValue"
+        },
+        "SerializeSfcRequest": {
+            "type": "object",
+            "required": [
+                "plant",
+                "sfc"
+            ],
+            "properties": {
+                "plant": {
+                    "type": "string",
+                    "description": "The plant containing the SFC."
+                },
+                "sfc": {
+                    "type": "string",
+                    "description": "The SFC for serialization."
+                },
+                "newSfcs": {
+                    "type": "array",
+                    "description": "List of new SFCs that must be created during serialization. If the parameter \"newSfcs\" is not empty, \"quantity\" parameter will be ignored. The number of new SFCs will be equal to the number of items in the \"newSfcs\" list.",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "quantity": {
+                    "type": "number",
+                    "description": "The number of SFCs to serialize. If the parameter \"newSfcs\" is empty and \"quantity\" parameter is not empty, the number of new SFCs is equal to the \"quantity\" parameter."
+                },
+                "copyWorkInstructionData": {
+                    "type": "boolean",
+                    "description": "Copy work instruction data from the original SFC."
+                },
+                "copyComponentTraceabilityData": {
+                    "type": "boolean",
+                    "description": "Copy component traceability data from the original SFC."
+                },
+                "copyNonConformanceData": {
+                    "type": "boolean",
+                    "description": "Copy nonconformance data from the original SFC."
+                },
+                "copyBuyoffData": {
+                    "type": "boolean",
+                    "description": "Copy buyoff data from the original SFC."
+                },
+                "copyDataCollectionData": {
+                    "type": "boolean",
+                    "description": "Copy data collection data from the original SFC."
+                },
+                "copyActivityLogData": {
+                    "type": "boolean",
+                    "description": "Copy activity log data from the original SFC."
+                },
+                "routingStepId": {
+                    "type": "string",
+                    "description": "The routing step where to serialize SFC."
+                }
+            }
+        },
+        "RelabelSfcRequest": {
+            "type": "object",
+            "required": [
+                "plant",
+                "sfc",
+                "newSfc"
+            ],
+            "properties": {
+                "plant": {
+                    "type": "string",
+                    "description": "The plant containing the SFC."
+                },
+                "sfc": {
+                    "type": "string",
+                    "description": "The SFC to be relabeled."
+                },
+                "newSfc": {
+                    "type": "string",
+                    "description": "The new SFC that must be created during relabeling."
+                },
+                "copyWorkInstructionData": {
+                    "type": "boolean",
+                    "description": "Copy work instruction data from the original SFC."
+                },
+                "copyComponentTraceabilityData": {
+                    "type": "boolean",
+                    "description": "Copy component traceability data from the original SFC."
+                },
+                "copyNonConformanceData": {
+                    "type": "boolean",
+                    "description": "Copy nonconformance data from the original SFC."
+                },
+                "copyBuyoffData": {
+                    "type": "boolean",
+                    "description": "Copy buyoff data from the original SFC."
+                },
+                "copyDataCollectionData": {
+                    "type": "boolean",
+                    "description": "Copy data collection data from the original SFC."
+                },
+                "copyActivityLogData": {
+                    "type": "boolean",
+                    "description": "Copy activity log data from the original SFC."
+                },
+                "routingStepId": {
+                    "type": "string",
+                    "description": "The routing step where to relabel SFC."
+                }
+            }
+        },
+        "SplitSfcRequest": {
+            "type": "object",
+            "required": [
+                "plant",
+                "sfc",
+                "newSfcs"
+            ],
+            "properties": {
+                "plant": {
+                    "type": "string",
+                    "description": "The plant containing the SFC."
+                },
+                "sfc": {
+                    "type": "string",
+                    "description": "The SFC for split."
+                },
+                "newSfcs": {
+                    "type": "array",
+                    "description": "The list of new SFCs and quantities that must be created during the SFC split.",
+                    "items": {
+                        "$ref": "#/definitions/SfcQuantity"
+                    }
+                },
+                "allowOverproduction": {
+                    "type": "boolean",
+                    "description": "Allows to create new SFCs with total quantity more than the original SFC quantity. The original SFC quantity will not be reduced."
+                },
+                "copyWorkInstructionData": {
+                    "type": "boolean",
+                    "description": "Copy work instruction data from the original SFC."
+                },
+                "copyComponentTraceabilityData": {
+                    "type": "boolean",
+                    "description": "Copy component traceability data from the original SFC."
+                },
+                "copyNonConformanceData": {
+                    "type": "boolean",
+                    "description": "Copy nonconformance data from the original SFC."
+                },
+                "copyBuyoffData": {
+                    "type": "boolean",
+                    "description": "Copy buyoff data from the original SFC."
+                },
+                "copyDataCollectionData": {
+                    "type": "boolean",
+                    "description": "Copy data collection data from the original SFC."
+                },
+                "copyActivityLogData": {
+                    "type": "boolean",
+                    "description": "Copy activity log data from the original SFC."
+                },
+                "routingStepId": {
+                    "type": "string",
+                    "description": "The routing step where to split SFC."
+                },
+                "splitQuantitySource": {
+                    "type": "string",
+                    "description": "To identify split quantity source from the parent SFC such as quantity in queue or quantity in work for a split SFC quantity.",
+                    "enum": [
+                        "IN_WORK",
+                        "IN_QUEUE"
+                    ]
+                }
+            }
+        },
+        "SfcQuantity": {
+            "type": "object",
+            "required": [
+                "quantity"
+            ],
+            "properties": {
+                "sfc": {
+                    "type": "string",
+                    "description": "The name of the new SFC."
+                },
+                "defaultBatchId": {
+                    "type": "string",
+                    "description": "The default batch ID of the new SFC."
+                },
+                "quantity": {
+                    "type": "number",
+                    "description": "The quantity of the new SFC. If parameter \"sfc\" is empty, the name for the new SFC will be generated."
+                }
+            }
+        },
+        "MergeSfcRequest": {
+            "type": "object",
+            "required": [
+                "plant",
+                "parentSfc",
+                "sourceSfcs"
+            ],
+            "properties": {
+                "plant": {
+                    "type": "string",
+                    "description": "The plant containing the SFC."
+                },
+                "parentSfc": {
+                    "type": "string",
+                    "description": "The parent SFC for merging"
+                },
+                "sourceSfcs": {
+                    "type": "array",
+                    "description": "The list of source SFCs for merging",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "mergeAcrossOperations": {
+                    "type": "boolean",
+                    "description": "Allows you to merge SFCs at different operation activities."
+                },
+                "copyWorkInstructionData": {
+                    "type": "boolean",
+                    "description": "Copy work instruction data to the parent SFC."
+                },
+                "copyComponentTraceabilityData": {
+                    "type": "boolean",
+                    "description": "Copy component traceability data to the parent SFC."
+                },
+                "copyNonConformanceData": {
+                    "type": "boolean",
+                    "description": "Copy nonconformance data to the parent SFC."
+                },
+                "copyBuyoffData": {
+                    "type": "boolean",
+                    "description": "Copy buyoff data to the parent SFC."
+                },
+                "copyDataCollectionData": {
+                    "type": "boolean",
+                    "description": "Copy data collections to the parent SFC."
+                },
+                "copyActivityLogData": {
+                    "type": "boolean",
+                    "description": "Copy activity log data to the parent SFC."
+                },
+                "routingStepId": {
+                    "type": "string",
+                    "description": "The routing step where to merged SFC."
+                }
+            }
+        },
+        "SetSfcQuantityRequests": {
+            "type": "object",
+            "required": [
+                "plant",
+                "sfcQuantityRequests"
+            ],
+            "properties": {
+                "plant": {
+                    "type": "string",
+                    "description": "The plant containing the SFC."
+                },
+                "sfcQuantityRequests": {
+                    "type": "array",
+                    "description": "The list of requests for setting the SFC quantity.",
+                    "items": {
+                        "$ref": "#/definitions/SetSfcQuantityRequest"
+                    }
+                }
+            }
+        },
+        "SetSfcQuantityRequest": {
+            "type": "object",
+            "required": [
+                "sfc",
+                "quantity"
+            ],
+            "description": "This object represents the set SFC quantity request.",
+            "properties": {
+                "sfc": {
+                    "type": "string",
+                    "description": "The SFC for the quantity setting."
+                },
+                "quantity": {
+                    "type": "number",
+                    "description": "The new SFC quantity."
+                }
+            }
+        },
+        "SerializeSfcResponse": {
+            "type": "object",
+            "properties": {
+                "newSfcs": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "SplitSfcResponse": {
+            "type": "object",
+            "properties": {
+                "newSfcs": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "MergeSfcResponse": {
+            "type": "object",
+            "properties": {
+                "parentSfcQuantity": {
+                    "type": "number",
+                    "description": "The total quantity of the parent SFC."
+                }
+            }
+        },
+        "SignoffSfcRequest": {
+            "type": "object",
+            "required": [
+                "plant"
+            ],
+            "properties": {
+                "plant": {
+                    "type": "string",
+                    "maxLength": 6,
+                    "description": "The plant where the SFC is currently active."
+                },
+                "sfcs": {
+                    "type": "array",
+                    "description": "The list of SFCs to Signoff. An SFC can be no longer than 128 characters.",
+                    "items": {
+                        "type": "string"
+                    },
+                    "maxItems": 500
+                },
+                "processLot": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128,
+                    "description": "The process lot name is used to find SFCs and sign them off. A process lot cannot be longer than 128 characters."
+                },
+                "operation": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 36,
+                    "description": "The operation activity where the SFC is currently Active."
+                },
+                "resource": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 36,
+                    "description": "The resource where the SFC is currently Active."
+                },
+                "dateTime": {
+                    "type": "string",
+                    "description": "The SFC Signoff Date time in UTC, ISO-8601 extended format example = \"2022-03-30T10:08:07.304Z\""
+                }
+            },
+            "title": "SignoffSfcRequest",
+            "description": "SFC Signoff Request object."
+        },
+        "SignoffSfcResponse": {
+            "type": "object",
+            "properties": {
+                "sfcs": {
+                    "type": "array",
+                    "description": "The list of SFCs to Signoff.",
+                    "items": {
+                        "type": "string"
+                    },
+                    "maxItems": 500
+                }
+            },
+            "title": "SignoffSfcResponse",
+            "description": "SFC Signoff Response object."
+        },
+        "ParameterValidationError": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string",
+                    "description": "Contains additional information if any."
+                },
+                "parameter": {
+                    "type": "string",
+                    "description": "Contains a parameter."
+                }
+            },
+            "title": "ParameterValidationError"
+        },
+        "ParametersValidationError": {
+            "type": "object",
+            "properties": {
+                "errors": {
+                    "type": "array",
+                    "description": "Contains parameter validation errors.",
+                    "items": {
+                        "$ref": "#/definitions/ParameterValidationError"
+                    }
+                }
+            },
+            "title": "ParametersValidationError",
+            "description": "Parameter validation error response."
+        },
+        "error": {
+            "type": "object",
+            "properties": {
+                "causeMessage": {
+                    "type": "string",
+                    "description": "Contains a technical reason for the error."
+                },
+                "code": {
+                    "type": "string",
+                    "description": "Internal error message"
+                },
+                "correlationId": {
+                    "type": "string",
+                    "description": "Contains a correlation ID for the error."
+                },
+                "message": {
+                    "type": "string",
+                    "description": "Contains additional information if any."
+                }
+            },
+            "title": "error",
+            "description": "Error response"
+        },
+        "InsufficientScopeException": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string",
+                    "xml": {
+                        "name": "error",
+                        "attribute": false,
+                        "wrapped": false
+                    },
+                    "description": "Error message code"
+                },
+                "errorDescription": {
+                    "type": "string",
+                    "xml": {
+                        "name": "error_description",
+                        "attribute": false,
+                        "wrapped": false
+                    },
+                    "description": "Error description"
+                },
+                "scope": {
+                    "type": "string",
+                    "xml": {
+                        "name": "scope",
+                        "attribute": false,
+                        "wrapped": false
+                    },
+                    "description": "The list of required scopes"
+                }
+            },
+            "title": "InsufficientScopeException",
+            "description": "Insufficient scope error response"
+        },
+        "InvalidTokenException": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string",
+                    "xml": {
+                        "name": "error",
+                        "attribute": false,
+                        "wrapped": false
+                    },
+                    "description": "Contains an error message code."
+                },
+                "errorDescription": {
+                    "type": "string",
+                    "xml": {
+                        "name": "error_description",
+                        "attribute": false,
+                        "wrapped": false
+                    },
+                    "description": "Contains an error description."
+                }
+            },
+            "title": "InvalidTokenException",
+            "description": "Invalid token error response"
+        },
+        "SfcStepAlternatesRequest": {
+            "type": "object",
+            "properties": {
+                "operationActivity": {
+                    "type": "string",
+                    "description": "Operation Activity for which the alternate resource mapping has to be updated",
+                    "pattern": "^(?! )[0-9A-Z_$!)(+~@^=\\-*. ]+(?<! )$"
+                },
+                "resource": {
+                    "type": "string",
+                    "description": "Resource which is to be added as an alternate resource",
+                    "pattern": "^(?! )[0-9A-Z_$!)(+~@^=\\-*. ]+(?<! )$"
+                },
+                "sfc": {
+                    "type": "string",
+                    "description": "Sfc for which the alternate resource mapping has to be updated",
+                    "pattern": "^(?! )[0-9A-Z_$!)(+~@^=\\-*. ]+(?<! )$"
+                },
+                "workCenter": {
+                    "type": "string",
+                    "description": "Work Center on which the order has been scheduled",
+                    "pattern": "^(?! )[0-9A-Z_$!)(+~@^=\\-*. ]+(?<! )$"
+                }
+            },
+            "title": "SfcStepAlternatesRequest",
+            "description": "Request object to update the alternate resource mapping for an SFC and Phase."
+        },
+        "SfcStepAlternatesResponse": {
+            "type": "object",
+            "properties": {
+                "operationActivity": {
+                    "type": "string",
+                    "description": "Operation Activity for which the alternate resource mapping has been updated",
+                    "pattern": "^(?! )[0-9A-Z_$!)(+~@^=\\-*. ]+(?<! )$"
+                },
+                "resource": {
+                    "type": "string",
+                    "description": "Updated alternate resource for the Sfc and Phase",
+                    "pattern": "^(?! )[0-9A-Z_$!)(+~@^=\\-*. ]+(?<! )$"
+                },
+                "sfc": {
+                    "type": "string",
+                    "description": "Sfc for which the alternate resource mapping has been updated",
+                    "pattern": "^(?! )[0-9A-Z_$!)(+~@^=\\-*. ]+(?<! )$"
+                }
+            },
+            "title": "SfcStepAlternatesResponse",
+            "description": "Response object for alternate resource mapping of an SFC and Phase."
+        },
+        "SfcStepActivityResponse": {
+            "type": "object",
+            "properties": {
+                "sfc": {
+                    "type": "string",
+                    "description": "The SFC used to retrieve step activity details."
+                },
+                "steps": {
+                    "type": "array",
+                    "description": "List of SFC step activity details.",
+                    "items": {
+                        "$ref": "#/definitions/SfcStepDetails"
+                    }
+                }
+            },
+            "title": "SfcStepActivityResponse",
+            "description": "The SFC activity steps response."
+        },
+        "SfcStepDetails": {
+            "type": "object",
+            "properties": {
+                "stepId": {
+                    "type": "string",
+                    "description": "The step on the routing where the activity took place."
+                },
+                "routing": {
+                    "$ref": "#/definitions/SfcStepRouting"
+                },
+                "operation": {
+                    "$ref": "#/definitions/BasicOperation"
+                },
+                "resource": {
+                    "type": "string",
+                    "description": "The resource in use."
+                },
+                "workCenter": {
+                    "type": "string",
+                    "description": "The work center where the activity took place."
+                },
+                "reportingStep": {
+                    "type": "string",
+                    "description": "The reporting step used for ERP messages."
+                },
+                "timesProcessed": {
+                    "type": "number",
+                    "description": "The number of times the SFC was processed at the step due to non-conformance."
+                },
+                "done": {
+                    "type": "boolean",
+                    "description": "If true, then the entire SFC quantity has completed this operation."
+                },
+                "previousStarted": {
+                    "type": "boolean",
+                    "description": "If true, then the SFC has been started at the step."
+                },
+                "quantityInQueue": {
+                    "type": "number",
+                    "description": "The SFC quantity in queue at the step."
+                },
+                "quantityInWork": {
+                    "type": "number",
+                    "description": "The SFC quantity in work at the step."
+                },
+                "quantityCompleted": {
+                    "type": "number",
+                    "description": "The SFC quantity completed at the step."
+                },
+                "quantityCompletePending": {
+                    "type": "number",
+                    "description": "The SFC quantity pending buyoff at the step."
+                },
+                "dateQueued": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "The UTC time that SFC quantity was queued at the step.",
+                    "example": "2022-04-23T09:53:31Z"
+                },
+                "firstStartTime": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "The first UTC time that SFC quantity was started at the step.",
+                    "example": "2022-04-23T09:53:31Z"
+                },
+                "lastStartTime": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "The last UTC time that SFC quantity was started at the step.",
+                    "example": "2022-04-23T09:53:31Z"
+                },
+                "firstCompleteTime": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "The first UTC time that SFC quantity was completed at the step.",
+                    "example": "2022-04-23T09:53:31Z"
+                },
+                "lastCompleteTime": {
+                    "type": "string",
+                    "description": "The last UTC time that SFC quantity was completed at the step.",
+                    "example": "2022-04-23T09:53:31Z"
+                }
+            },
+            "title": "SfcStepDetails"
+        },
+        "SfcStepRouting": {
+            "type": "object",
+            "properties": {
+                "routing": {
+                    "type": "string",
+                    "description": "The routing name."
+                },
+                "version": {
+                    "type": "string",
+                    "description": "The routing version."
+                }
+            },
+            "title": "SfcStepRouting"
+        },
+        "BasicOperation": {
+            "type": "object",
+            "properties": {
+                "operation": {
+                    "type": "string",
+                    "description": "The operation activity name."
+                },
+                "version": {
+                    "type": "string",
+                    "description": "The operation activity version."
+                }
+            },
+            "title": "Operation Activity"
+        },
+        "ActiveSfcResponse": {
+            "type": "object",
+            "properties": {
+                "sfc": {
+                    "type": "string",
+                    "description": "The SFC that is in work."
+                },
+                "operation": {
+                    "type": "string",
+                    "description": "The operation the SFC is at."
+                }
+            }
+        },
+        "PlaceHoldRequest": {
+            "type": "object",
+            "required": [
+                "plant",
+                "sfcs"
+            ],
+            "properties": {
+                "plant": {
+                    "type": "string",
+                    "maxLength": 6,
+                    "description": "The plant in which the SFC is placed on hold."
+                },
+                "sfcs": {
+                    "type": "array",
+                    "description": "The list of SFCs to be placed on hold. An SFC cannot be longer than 128 characters.",
+                    "items": {
+                        "type": "string"
+                    },
+                    "maxItems": 500
+                },
+                "comments": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 2048,
+                    "description": "A explanatory text given while placing the SFCs on hold. A comment cannot be more than 2048 characters."
+                },
+                "expectedReleaseDateTime": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "The expected released date time after which the hold on the SFCs will be released.",
+                    "example": "2023-05-20T05:29:47.000Z"
+                }
+            },
+            "title": "PlaceHoldRequest",
+            "description": "The SFCs hold request."
+        },
+        "PlaceHoldResponse": {
+            "type": "object",
+            "properties": {
+                "holdIds": {
+                    "type": "array",
+                    "description": "The list IDs generated for each SFCs that are on hold.",
+                    "items": {
+                        "type": "string"
+                    },
+                    "maxItems": 500
+                }
+            },
+            "title": "PlaceHoldResponse",
+            "description": "SFC hold response object."
+        },
+        "ReleaseHoldRequest": {
+            "type": "object",
+            "required": [
+                "plant",
+                "sfcs"
+            ],
+            "properties": {
+                "plant": {
+                    "type": "string",
+                    "maxLength": 6,
+                    "description": "The plant in which the SFC is released from hold."
+                },
+                "sfcs": {
+                    "type": "array",
+                    "description": "The list of SFCs to be released from hold. An SFC cannot be longer than 128 characters.",
+                    "items": {
+                        "type": "string"
+                    },
+                    "maxItems": 500
+                },
+                "releaseComments": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 2048,
+                    "description": "A explanatory text given while releasing the SFCs from hold. A comment cannot be more than 2048 characters."
+                }
+            },
+            "title": "ReleaseHoldRequest",
+            "description": "The SFCs release request."
+        },
+        "ReleaseHoldResponse": {
+            "type": "object",
+            "properties": {
+                "releasedSfcs": {
+                    "type": "array",
+                    "description": "The list of released SFCs from hold.",
+                    "items": {
+                        "type": "string"
+                    },
+                    "maxItems": 500
+                }
+            },
+            "title": "ReleaseHoldResponse",
+            "description": "SFC release response object."
+        }
+    }
+}

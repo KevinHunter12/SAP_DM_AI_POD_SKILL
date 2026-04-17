@@ -1,0 +1,1429 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "You can use this service to search, create, open, close, and re-open packing units. You can also add or remove content from packing units, update packing unit carriers, unload whole packing units, and unload some of the items for a given packing unit.",
+    "version": "v1",
+    "title": "Packing Unit",
+    "contact": {
+      "name": "SAP Digital Manufacturing Operations",
+      "email": "sap-dmoperation@sap.com"
+    }
+  },
+  "host": "hostname",
+  "basePath": "/",
+  "x-sap-shortText": "Manage activities for packing units",
+  "x-servers": [
+    {
+      "url": "https://api.{regionHost}/packingUnits/v1",
+      "description": "Base URL",
+      "templates": {
+        "regionHost": {
+          "description": "The data center where SAP Digital Manufacturing is provisioned for your organization",
+          "enum": [
+            "eu10.dmc.cloud.sap",
+            "eu20.dmc.cloud.sap",
+            "us10.dmc.cloud.sap",
+            "us20.dmc.cloud.sap",
+            "test.eu10.dmc.cloud.sap",
+            "test.eu20.dmc.cloud.sap",
+            "test.us10.dmc.cloud.sap",
+            "test.us20.dmc.cloud.sap"
+          ],
+          "default": "test.eu10.dmc.cloud.sap"
+        },
+        "tokenHost": {
+          "description": "The authentication server where SAP Digital Manufacturing is provisioned for your organization",
+          "enum": [
+            "eu10.hana.ondemand.com",
+            "eu20.hana.ondemand.com",
+            "us10.hana.ondemand.com",
+            "us20.hana.ondemand.com"
+          ],
+          "default": "eu10.hana.ondemand.com"
+        }
+      }
+    }
+  ],
+  "tags": [
+    {
+      "name": "Packing"
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "security": [
+    {
+      "OAuthSecurity": []
+    }
+  ],
+  "paths": {
+    "/packingUnits": {
+      "get": {
+        "tags": [
+          "Packing"
+        ],
+        "summary": "Finds a packing unit by plant and number.",
+        "description": "This endpoint can be called to obtain a single packing unit. As a search parameters it uses plant and packing unit number.",
+        "operationId": "findPackingUnitByPlantAndNumberUsingGET",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "number",
+            "in": "query",
+            "description": "Packing Unit Number",
+            "required": true,
+            "type": "string",
+            "allowEmptyValue": false
+          },
+          {
+            "name": "plant",
+            "in": "query",
+            "description": "Plant for which the request is executed",
+            "required": true,
+            "type": "string",
+            "allowEmptyValue": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Message successfully processed.",
+            "schema": {
+              "$ref": "#/definitions/PackingUnitCarrierApiModel"
+            }
+          },
+          "400": {
+            "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to call this resource.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Accessing the resource you are trying to reach is forbidden.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "One of the related elements is not found.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "An internal error occurred.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "deprecated": false
+      },
+      "post": {
+        "tags": [
+          "Packing"
+        ],
+        "summary": "Creates a packing unit.",
+        "description": "This endpoint can be called to create a new packing unit.",
+        "operationId": "createPackingUnitUsingPOST",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "packingUnit",
+            "description": "Packing Unit body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/PackingUnitCreateApiModel"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Message successfully processed.",
+            "schema": {
+              "$ref": "#/definitions/PackingUnitCreateApiModel"
+            }
+          },
+          "400": {
+            "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to call this resource.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Accessing the resource you are trying to reach is forbidden.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "One of the related elements is not found.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "An internal error occurred.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "deprecated": false
+      },
+      "put": {
+        "tags": [
+          "Packing"
+        ],
+        "summary": "Updates a packing unit.",
+        "description": "This endpoint can be called to edit an existing packing unit.",
+        "operationId": "updatePackingUnitUsingPUT",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "packingUnit",
+            "description": "Packing Unit body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/PackingUnitApiModel"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Message successfully processed.",
+            "schema": {
+              "$ref": "#/definitions/PackingUnitApiModel"
+            }
+          },
+          "400": {
+            "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to call this resource.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Accessing the resource you are trying to reach is forbidden.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "One of the related elements is not found.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "An internal error occurred.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/packingUnits/pack": {
+      "post": {
+        "tags": [
+          "Packing"
+        ],
+        "summary": "Closes an Open Packing Unit.",
+        "description": "This endpoint can be called to change the status of the Packing Unit to Closed. The required parameters for this endpoint are plant and packing unit number.",
+        "operationId": "packPackingUnitUsingPOST",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "packRequest",
+            "description": "Pack Request",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/PackPackingUnitRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Message successfully processed.",
+            "schema": {
+              "$ref": "#/definitions/PackingUnitApiModel"
+            }
+          },
+          "400": {
+            "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to call this resource.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Accessing the resource you are trying to reach is forbidden.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "One of the related elements is not found.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "An internal error occurred.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/packingUnits/unpack": {
+      "post": {
+        "tags": [
+          "Packing"
+        ],
+        "summary": "Re-opens a Closed Packing Unit.",
+        "description": "This endpoint can be called to change the status of the Packing Unit to Opened. The required parameters are Plant and Packing Unit Number.",
+        "operationId": "unpackPackingUnitUsingPOST",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "unpackRequest",
+            "description": "Unpack Request",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UnpackPackingUnitRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Message successfully processed.",
+            "schema": {
+              "$ref": "#/definitions/PackingUnitApiModel"
+            }
+          },
+          "400": {
+            "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to call this resource.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Accessing the resource you are trying to reach is forbidden.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "One of the related elements is not found.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "An internal error occurred.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/packingUnits/content": {
+      "post": {
+        "tags": [
+          "Packing"
+        ],
+        "summary": "Adds content to a Packing Unit.",
+        "description": "This endpoint can be called to add content to the Packing Unit.",
+        "operationId": "addContentUsingPOST",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "contentRequest",
+            "description": "Adds content to the packing unit. You must specify either the packing unit number or SFC.",
+            "required": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/PackingUnitContentRequestAdd"
+              }
+            }
+          },
+          {
+            "name": "packingUnit",
+            "in": "query",
+            "description": "The Packing Unit Number to which content items are added to",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "plant",
+            "in": "query",
+            "description": "The plant of the packing unit",
+            "required": true,
+            "type": "string",
+            "allowEmptyValue": false
+          },
+          {
+            "name": "allowedSfcStatuses",
+            "in": "query",
+            "description": "The list of statuses of SFCs (Shop Floor Controls) that can be packed. These statuses include NEW, IN_QUEUE, ACTIVE, DONE, HOLD.",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "NEW",
+                "IN_QUEUE",
+                "ACTIVE",
+                "DONE",
+                "HOLD"
+              ]
+            },
+            "collectionFormat": "multi",
+            "allowEmptyValue": false
+          },
+          {
+            "name": "allowMixedOperations",
+            "in": "query",
+            "description": "Allows SFCs at different operations to be packed into the same packing unit.",
+            "required": false,
+            "type": "boolean",
+            "allowEmptyValue": false
+          },
+          {
+            "name": "allowMixedOrders",
+            "in": "query",
+            "description": "Allows SFCs from different orders to be packed into the same packing unit.",
+            "required": false,
+            "type": "boolean",
+            "allowEmptyValue": false
+          },
+          {
+            "name": "allowAddConformantSfcToNonConformantPackingUnit",
+            "in": "query",
+            "description": "Allows you to pack conformant SFCs to a nonconformant packing unit.",
+            "required": false,
+            "type": "boolean",
+            "allowEmptyValue": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Message successfully processed.",
+            "schema": {
+              "$ref": "#/definitions/PackingUnitApiModel"
+            }
+          },
+          "400": {
+            "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to call this resource.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Accessing the resource you are trying to reach is forbidden.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "One of the related elements is not found.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "An internal error occurred.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "deprecated": false
+      },
+      "delete": {
+        "tags": [
+          "Packing"
+        ],
+        "summary": "Removes content from a Packing Unit.",
+        "description": "This endpoint can be called to remove content from the Packing Unit. The required parameters are SFC, Packing Unit Number, and Quantity.",
+        "operationId": "removeContentUsingDELETE",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "contentRequest",
+            "description": "Removes content from the packing unit. You must specify either the packing unit number or SFC.",
+            "required": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/PackingUnitContentRequestRemove"
+              }
+            }
+          },
+          {
+            "name": "packingUnit",
+            "in": "query",
+            "description": "The Packing Unit Number from which content items are removed from.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "plant",
+            "in": "query",
+            "description": "The plant of the packing unit",
+            "required": true,
+            "type": "string",
+            "allowEmptyValue": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Message successfully processed.",
+            "schema": {
+              "$ref": "#/definitions/PackingUnitApiModel"
+            }
+          },
+          "400": {
+            "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to call this resource.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Accessing the resource you are trying to reach is forbidden.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "One of the related elements is not found.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "An internal error occurred.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/changeCarrier": {
+      "post": {
+        "tags": [
+          "Packing"
+        ],
+        "summary": "Updates the carrier of a packing unit.",
+        "description": "Updates an existing packing unit with a new carrier. You can call this API endpoint when the carrier of the packing unit is broken or unusable. All the items in the packing unit will be moved to the new carrier you specify here. ",
+        "operationId": "updateCarrierUsingPOST",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "request",
+            "description": "Update carrier request body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UpdatePackingUnitCarrierRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Packing unit has been updated with the new carrier.",
+            "schema": {
+              "$ref": "#/definitions/PackingUnitCarrierApiModel"
+            }
+          },
+          "400": {
+            "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to call this resource.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Accessing the resource you are trying to reach is forbidden.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "One of the related elements is not found.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "An internal error occurred.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/unloadPackingUnit": {
+      "put": {
+        "tags": [
+          "Packing"
+        ],
+        "summary": "Unloads a packing unit.",
+        "description": "Unloads the whole packing unit, or unloads some of the items for a given packing unit.",
+        "operationId": "unloadPackingUnitUsingPUT",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "request",
+            "description": "Packing Unit body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UnloadPackingUnitRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Packing unit has been unloaded.",
+            "schema": {
+              "$ref": "#/definitions/PackingUnitApiModel"
+            }
+          },
+          "400": {
+            "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to call this resource.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Accessing the resource you are trying to reach is forbidden.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "One of the related elements is not found.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "An internal error occurred.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/carrier/packingUnit": {
+      "get": {
+        "tags": [
+          "Packing"
+        ],
+        "summary": "Gets packing units for a given plant and carrier number.",
+        "description": "Retrieves packing units that are loaded on a specific carrier for a given plant. You can also retrieve orders and shop floor controls (SFCs) associated with the packing units.",
+        "operationId": "carrierPackingUnitUsingGET",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "carrierNumber",
+            "in": "query",
+            "description": "The carrier number for which the request is executed",
+            "required": true,
+            "type": "string",
+            "allowEmptyValue": false
+          },
+          {
+            "name": "plant",
+            "in": "query",
+            "description": "The plant for which the request is executed",
+            "required": true,
+            "type": "string",
+            "allowEmptyValue": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Packing units successfully retrieved.",
+            "schema": {
+              "$ref": "#/definitions/CarrierPackingUnitApiModel"
+            }
+          },
+          "400": {
+            "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to call this resource.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Accessing the resource you are trying to reach is forbidden.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "One of the related elements is not found.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "An internal error occurred.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "deprecated": false
+      }
+    }
+  },
+  "securityDefinitions": {
+    "OAuthSecurity": {
+      "type": "oauth2",
+      "tokenUrl": "https://{subdomain}.authentication.{tokenHost}/oauth/token",
+      "flow": "application"
+    }
+  },
+  "definitions": {
+    "ErrorResponse": {
+      "type": "object",
+      "properties": {
+        "causeMessage": {
+          "type": "string",
+          "description": "Contains technical reason for the error."
+        },
+        "code": {
+          "type": "string",
+          "description": "Internal error message"
+        },
+        "correlationId": {
+          "type": "string",
+          "description": "Contains correlationId for the error."
+        },
+        "message": {
+          "type": "string",
+          "description": "Contains additional information, if any"
+        },
+        "status": {
+          "type": "integer",
+          "format": "int32",
+          "description": "HTTP status code"
+        }
+      },
+      "title": "ErrorResponse",
+      "description": "Error response. "
+    },
+    "PackingUnitContentApiModel": {
+      "type": "object",
+      "properties": {
+        "packingUnit": {
+          "type": "object",
+          "required": [
+            "number",
+            "plant"
+          ],
+          "properties": {
+            "number": {
+              "type": "string",
+              "description": "The unique number of the packing unit."
+            },
+            "plant": {
+              "type": "string",
+              "description": "The plant where the packing unit is used."
+            }
+          },
+          "description": "The packing unit which is the content of a packing unit."
+        },
+        "quantity": {
+          "type": "number",
+          "description": "The quantity of the packing unit content."
+        },
+        "sfc": {
+          "description": "The SFC which is the content of a packing unit.",
+          "$ref": "#/definitions/SFC"
+        },
+        "unitOfMeasure": {
+          "type": "string",
+          "description": "The unit of measure which qualifies the content's quantity"
+        }
+      },
+      "title": "PackingUnitContentApiModel",
+      "description": "Object represents the Packing Unit Content"
+    },
+    "PackingUnitApiModel": {
+      "type": "object",
+      "required": [
+        "material",
+        "modifiedDateTime",
+        "number",
+        "plant"
+      ],
+      "properties": {
+        "content": {
+          "type": "array",
+          "description": "The content of the packing unit. Can be SFC, Packing Unit",
+          "items": {
+            "$ref": "#/definitions/PackingUnitContentApiModel"
+          }
+        },
+        "material": {
+          "description": "The material of the packing unit. The material must be of the packaging or returnable packaging type, releasable, and of the current version.",
+          "$ref": "#/definitions/MaterialIdApiModel"
+        },
+        "modifiedDateTime": {
+          "type": "string",
+          "format": "date-time",
+          "example": "2021-09-08T13:50:45.751+00:00",
+          "description": "The time when the packing unit is modified."
+        },
+        "number": {
+          "type": "string",
+          "description": "The unique number of the packing unit."
+        },
+        "plant": {
+          "type": "string",
+          "description": "The plant where the packing unit is used."
+        },
+        "status": {
+          "type": "string",
+          "description": "The status of the packing unit. There are 3 possible statuses: OPEN, CLOSED and UNLOADED.",
+          "enum": [
+            "OPEN",
+            "CLOSED",
+            "UNLOADED"
+          ]
+        },
+        "allowedSfcStatuses": {
+          "type": "array",
+          "description": "The list of statuses of SFCs (Shop Floor Controls) that can be packed. These statuses include NEW, IN_QUEUE, ACTIVE, DONE, HOLD.",
+          "items": {
+            "type": "string",
+            "enum": [
+              "NEW",
+              "IN_QUEUE",
+              "ACTIVE",
+              "DONE",
+              "HOLD"
+            ]
+          }
+        },
+        "allowMixedOperations": {
+          "type": "boolean",
+          "description": "Allows SFCs at different operations to be packed into the same packing unit."
+        },
+        "allowMixedOrders": {
+          "type": "boolean",
+          "description": "Allows SFCs from different orders to be packed into the same packing unit."
+        },
+        "allowAddConformantSfcToNonConformantPackingUnit": {
+          "type": "boolean",
+          "description": "Allows you to pack conformant SFCs to a nonconformant packing unit."
+        }
+      },
+      "title": "PackingUnitApiModel",
+      "description": "Object represents the Packing Unit"
+    },
+    "PackingUnitCarrierApiModel": {
+      "type": "object",
+      "required": [
+        "material",
+        "number",
+        "plant"
+      ],
+      "properties": {
+        "content": {
+          "type": "array",
+          "description": "The content of the packing unit. Can be SFC, Packing Unit",
+          "items": {
+            "$ref": "#/definitions/PackingUnitContentApiModel"
+          }
+        },
+        "material": {
+          "description": "The material of the packing unit. The material must be of the packaging or returnable packaging type, releasable, and of the current version.",
+          "$ref": "#/definitions/MaterialIdApiModel"
+        },
+        "number": {
+          "type": "string",
+          "description": "The unique number of the packing unit."
+        },
+        "plant": {
+          "type": "string",
+          "description": "The plant where the packing unit is used."
+        },
+        "status": {
+          "type": "string",
+          "description": "The status of the packing unit. There are 3 possible statuses: OPEN, CLOSED and UNLOADED.",
+          "enum": [
+            "OPEN",
+            "CLOSED",
+            "UNLOADED"
+          ]
+        },
+        "carrier": {
+          "description": "The carrier of packing unit.",
+          "$ref": "#/definitions/CarrierIdApiModel"
+        }
+      },
+      "title": "PackingUnitCarrierApiModel",
+      "description": "Object represents the Packing Unit with Carrier information"
+    },
+    "PackingUnitCreateApiModel": {
+      "type": "object",
+      "required": [
+        "plant"
+      ],
+      "properties": {
+        "content": {
+          "type": "array",
+          "description": "The content of the packing unit. Can be SFC, Packing Unit",
+          "items": {
+            "$ref": "#/definitions/PackingUnitContentApiModel"
+          }
+        },
+        "material": {
+          "description": "The material of the packing unit. The material must be of the packaging or returnable packaging type, releasable, and of the current version. You can fill either material or carrier to create the packing unit. When the two properties are both filled, the relevant values must match.",
+          "$ref": "#/definitions/MaterialIdApiModel"
+        },
+        "number": {
+          "type": "string",
+          "description": "The unique number of the packing unit."
+        },
+        "plant": {
+          "type": "string",
+          "description": "The plant where the packing unit is used."
+        },
+        "status": {
+          "type": "string",
+          "description": "The status of the packing unit. Can be OPEN, CLOSED.",
+          "enum": [
+            "OPEN",
+            "CLOSED"
+          ]
+        },
+        "allowedSfcStatuses": {
+          "type": "array",
+          "description": "The list of statuses of SFCs (Shop Floor Controls) that can be packed. These statuses include NEW, IN_QUEUE, ACTIVE, DONE, HOLD.",
+          "items": {
+            "type": "string",
+            "enum": [
+              "NEW",
+              "IN_QUEUE",
+              "ACTIVE",
+              "DONE",
+              "HOLD"
+            ]
+          }
+        },
+        "allowMixedOperations": {
+          "type": "boolean",
+          "description": "Allows SFCs at different operations to be packed into the same packing unit."
+        },
+        "allowMixedOrders": {
+          "type": "boolean",
+          "description": "Allows SFCs from different orders to be packed into the same packing unit."
+        },
+        "allowAddConformantSfcToNonConformantPackingUnit": {
+          "type": "boolean",
+          "description": "Allows you to pack conformant SFCs to a nonconformant packing unit."
+        },
+        "carrier": {
+          "description": "The carrier of the packing unit. You can fill either the carrier or material to create a packing unit. When the two properties are both filled, the relevant values must match.",
+          "$ref": "#/definitions/CarrierIdApiModel"
+        }
+      },
+      "title": "PackingUnitCreateApiModel",
+      "description": "Object represents the Packing Unit to be created"
+    },
+    "SFC": {
+      "type": "object",
+      "properties": {
+        "plant": {
+          "type": "string",
+          "description": "The plant of the SFC."
+        },
+        "sfc": {
+          "type": "string",
+          "description": "The name of the SFC."
+        }
+      },
+      "title": "SFC"
+    },
+    "MaterialIdApiModel": {
+      "type": "object",
+      "properties": {
+        "material": {
+          "type": "string",
+          "description": "The name of the material."
+        },
+        "plant": {
+          "type": "string",
+          "description": "The plant of the material."
+        },
+        "version": {
+          "type": "string",
+          "description": "The version of the material."
+        }
+      },
+      "title": "MaterialIdApiModel"
+    },
+    "CarrierIdApiModel": {
+      "type": "object",
+      "required": [
+        "carrierNumber",
+        "packingType",
+        "sourceLocationType",
+        "sourceLocation"
+      ],
+      "properties": {
+        "carrierNumber": {
+          "type": "string",
+          "description": "The number of the carrier"
+        },
+        "packingType": {
+          "type": "string",
+          "description": "The type of the packing unit. There are 2 possible types: CONFORMANT and NONCONFORMANT.",
+          "enum": [
+            "CONFORMANT",
+            "NONCONFORMANT"
+          ]
+        },
+        "sourceLocationType": {
+          "type": "string",
+          "description": "The type of the source location for the packing unit. There are 3 possible source location types: RESOURCE, WORK_CENTER and STORAGE_LOCATION.",
+          "enum": [
+            "RESOURCE",
+            "WORK_CENTER",
+            "STORAGE_LOCATION"
+          ]
+        },
+        "sourceLocation": {
+          "type": "string",
+          "description": "The source location where the packing unit is transported from"
+        }
+      },
+      "title": "CarrierIdApiModel"
+    },
+    "UpdatePackingUnitCarrierRequest": {
+      "type": "object",
+      "required": [
+        "plant",
+        "oldCarrierNumber",
+        "newCarrierNumber"
+      ],
+      "properties": {
+        "plant": {
+          "type": "string",
+          "description": "The plant of the packing unit"
+        },
+        "oldCarrierNumber": {
+          "type": "string",
+          "description": "The original carrier number of the packing unit. This is the carrier number that needs to be replaced with a new one."
+        },
+        "newCarrierNumber": {
+          "type": "string",
+          "description": "The new carrier number that the packing unit is moved to"
+        }
+      },
+      "title": "UpdatePackingUnitCarrierRequest"
+    },
+    "UnloadPackingUnitRequest": {
+      "type": "object",
+      "required": [
+        "plant"
+      ],
+      "properties": {
+        "plant": {
+          "type": "string",
+          "description": "The plant of the packing unit"
+        },
+        "carrierNumber": {
+          "type": "string",
+          "description": "The carrier number from which the packing unit will be unloaded. You can fill either carrierNumber or packingUnitNumber to specify the packing unit that needs to be unloaded. If you fill both properties, the relevant values need to match."
+        },
+        "packingUnitNumber": {
+          "type": "string",
+          "description": "The ID of the packing unit that is unloaded. You can fill either carrierNumber or packingUnitNumber to specify the packing unit that needs to be unloaded. If you fill both properties, the relevant values need to match."
+        },
+        "content": {
+          "type": "array",
+          "description": "This field can be optionally filled to specify the exact items that are unloaded from the packing unit. If you want to unload the whole packing unit, you can leave this field empty.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "packingUnit": {
+                "type": "object",
+                "required": [
+                  "number",
+                  "plant"
+                ],
+                "properties": {
+                  "number": {
+                    "type": "string",
+                    "description": "The unique number of the packing unit."
+                  },
+                  "plant": {
+                    "type": "string",
+                    "description": "The plant where the packing unit is used."
+                  }
+                },
+                "description": "The packing unit which is the content of a packing unit."
+              },
+              "quantity": {
+                "type": "number",
+                "description": "If the packing unit content is SFC, specify here the quantity you want to unload from the SFC. When left empty, the whole SFC is unloaded."
+              },
+              "sfc": {
+                "description": "The SFC which is the content of a packing unit.",
+                "$ref": "#/definitions/SFC"
+              },
+              "unitOfMeasure": {
+                "type": "string",
+                "description": "The unit of measure which qualifies the content's quantity"
+              }
+            }
+          }
+        }
+      },
+      "title": "UnloadPackingUnitRequest"
+    },
+    "PackPackingUnitRequest": {
+      "type": "object",
+      "required": [
+        "plant",
+        "packingUnitNumber"
+      ],
+      "properties": {
+        "plant": {
+          "type": "string",
+          "description": "The plant of the packing unit"
+        },
+        "packingUnitNumber": {
+          "type": "string",
+          "description": "The unique number of the packing unit."
+        }
+      },
+      "title": "PackPackingUnitRequest"
+    },
+    "UnpackPackingUnitRequest": {
+      "type": "object",
+      "required": [
+        "plant",
+        "packingUnitNumber"
+      ],
+      "properties": {
+        "plant": {
+          "type": "string",
+          "description": "The plant of the packing unit"
+        },
+        "packingUnitNumber": {
+          "type": "string",
+          "description": "The unique number of the packing unit."
+        }
+      },
+      "title": "PackPackingUnitRequest"
+    },
+    "PackingUnitContentRequestAdd": {
+      "type": "object",
+      "properties": {
+        "sfc": {
+          "type": "string",
+          "description": "The SFC number added to the content."
+        },
+        "packingUnitNumber": {
+          "type": "string",
+          "description": "Another packing unit added to the content."
+        },
+        "quantity": {
+          "type": "number",
+          "description": "The content quantity to be added  to the packing unit. If not specified, then all available quantity is used. For nested packing units in content quantity is not used."
+        }
+      },
+      "title": "PackingUnitContentRequestAdd"
+    },
+    "PackingUnitContentRequestRemove": {
+      "type": "object",
+      "properties": {
+        "sfc": {
+          "type": "string",
+          "description": "The SFC number removed from the content."
+        },
+        "packingUnitNumber": {
+          "type": "string",
+          "description": "Another packing unit removed from the content."
+        },
+        "quantity": {
+          "type": "number",
+          "description": "The content quantity to be removed from the packing unit. If not specified, then all available quantity is used. For nested packing units in content quantity is not used."
+        }
+      },
+      "title": "PackingUnitContentRequestAdd"
+    },
+    "CarrierPackingUnitApiModel": {
+      "type": "object",
+      "required": [
+        "packingUnitNumber",
+        "carrierNumber",
+        "plant",
+        "status",
+        "packingType",
+        "currentLocationType",
+        "currentLocation",
+        "modifiedDateTime"
+      ],
+      "properties": {
+        "sfcsContent": {
+          "type": "array",
+          "description": "The list of orders and shop floor controls (SFCs)",
+          "items": {
+            "$ref": "#/definitions/SfcContentModel"
+          }
+        },
+        "packingUnitContent": {
+          "type": "array",
+          "description": "The content of the packing unit",
+          "items": {
+            "type": "string"
+          }
+        },
+        "packingUnitNumber": {
+          "type": "string",
+          "description": "The unique number of the packing unit"
+        },
+        "plant": {
+          "type": "string",
+          "description": "The plant for which the request is executed"
+        },
+        "carrierNumber": {
+          "type": "string",
+          "description": "The unique number of the carrier"
+        },
+        "packingType": {
+          "type": "string",
+          "description": "The type of the packing unit. There are 2 possible types: CONFORMANT and NONCONFORMANT.",
+          "enum": [
+            "CONFORMANT",
+            "NONCONFORMANT"
+          ]
+        },
+        "currentLocationType": {
+          "type": "string",
+          "description": "The type of the current location for the packing unit. There are 3 possible current location types: RESOURCE, WORK_CENTER and STORAGE_LOCATION.",
+          "enum": [
+            "RESOURCE",
+            "WORK_CENTER",
+            "STORAGE_LOCATION"
+          ]
+        },
+        "currentLocation": {
+          "type": "string",
+          "description": "The location where the packing unit is located currently."
+        },
+        "status": {
+          "type": "string",
+          "description": "The status of the packing unit. There are 3 possible statuses: OPEN, CLOSED and UNLOADED.",
+          "enum": [
+            "OPEN",
+            "CLOSED",
+            "UNLOADED"
+          ]
+        },
+        "modifiedDateTime": {
+          "type": "string",
+          "format": "date-time",
+          "example": "2023-01-06T02:24:58.872Z",
+          "description": "The time when the packing unit was last modified."
+        }
+      },
+      "title": "CarrierPackingUnitApiModel",
+      "description": "Object represents the packing unit with carrier information"
+    },
+    "SfcContentModel": {
+      "type": "object",
+      "properties": {
+        "shopOrder": {
+          "type": "string",
+          "description": "The order associated with the packing unit"
+        },
+        "sfcs": {
+          "type": "array",
+          "description": "The shop floor control (SFC) associated with the packing unit",
+          "items": {
+            "$ref": "#/definitions/SfcApiModel"
+          }
+        }
+      },
+      "title": "SfcContentModel"
+    },
+    "SfcApiModel": {
+      "type": "object",
+      "properties": {
+        "sfc": {
+          "type": "string",
+          "description": "The name of the shop floor control (SFC)."
+        },
+        "quantity": {
+          "type": "number",
+          "description": "The shop floor control (SFC) quantity that is loaded in the packing unit."
+        },
+        "unitOfMeasure": {
+          "type": "string",
+          "description": "The unit of measure which qualifies the quantity."
+        },
+        "status": {
+          "type": "string",
+          "description": "The status of the shop floor control (SFC). There are 11 possible statuses: NEW, IN_QUEUE, ACTIVE, HOLD, DONE, DONE_HOLD, SCRAPPED, INVALID, DELETED, RETURNED and GOLDEN_UNIT.",
+          "enum": [
+            "NEW",
+            "IN_QUEUE",
+            "ACTIVE",
+            "HOLD",
+            "DONE",
+            "DONE_HOLD",
+            "SCRAPPED",
+            "INVALID",
+            "DELETED",
+            "RETURNED",
+            "GOLDEN_UNIT"
+          ]
+        }
+      },
+      "title": "SfcApiModel"
+    }
+  },
+  "externalDocs": {
+    "description": "Prepare for API Integration",
+    "url": "https://help.sap.com/docs/sap-digital-manufacturing/operations-guide/prepare-for-api-integration"
+  },
+  "schemes": [
+    "https"
+  ]
+}

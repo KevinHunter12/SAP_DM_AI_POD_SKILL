@@ -1,0 +1,839 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "You can use this service to post yield and scrap quantity confirmations in SAP Digital Manufacturing. The confirmation information is synchronized to integrated ERP systems.",
+    "version": "v1",
+    "title": "Quantity Confirmation",
+    "contact": {
+      "name": "SAP Digital Manufacturing Operations",
+      "email": "sap-dmoperation@sap.com"
+    }
+     },
+    "externalDocs": {
+        "description": "Prepare for API Integration",
+        "url": "https://help.sap.com/docs/sap-digital-manufacturing/operations-guide/prepare-for-api-integration"
+  },
+  "host": "hostname",
+  "basePath": "/",
+  "tags": [
+    {
+      "name": "Post Quantity Confirmation",
+      "description": "Quantity Confirmation API Controller"
+    }
+  ],
+  "paths": {
+    "/quantityConfirmation/v1/confirm": {
+      "post": {
+        "tags": [
+          "Post Quantity Confirmation"
+        ],
+        "summary": "Post quantity confirmation for a given order.",
+        "description": "Post yield or scrap quantity confirmation for a given SFC of an order.",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "request",
+            "description": "Request object to perform yield and scrap quantity confirmation.",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/QuantityConfirmationPublicAPIRequest"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Confirm quantityConfirmation successfully.",
+            "schema": {
+              "$ref": "#/definitions/QuantityConfirmationPublicAPIResponse"
+            }
+          },
+          "400": {
+            "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to call this resource.",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          },
+          "403": {
+            "description": "Accessing the resource you are trying to reach is forbidden.",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          },
+          "404": {
+            "description": "One of the related elements is not found.",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          },
+          "500": {
+            "description": "An internal error occurred.",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/quantityConfirmation/v1/reportOperationActivityFinalConfirmation": {
+      "post": {
+        "tags": [
+          "Final Quantity Confirmation"
+        ],
+        "summary": "Post final quantity confirmation without updating the quantity for a given SFC of an order.",
+        "description": "Post final quantity confirmation without updating the quantity for a given SFC of an order. When the API call succeeds, the operation/phase status will be set to 'CNF' in the integrated ERP system.",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "request",
+            "description": "Request object to perform final quantity confirmation without updating the quantity.",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/FinalQuantityConfirmationPublicAPIRequest"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Final confirmation with zero quantity successfully.",
+            "schema": {
+              "$ref": "#/definitions/QuantityConfirmationPublicAPIResponse"
+            }
+          },
+          "400": {
+            "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to call this resource.",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          },
+          "403": {
+            "description": "Accessing the resource you are trying to reach is forbidden.",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          },
+          "404": {
+            "description": "One of the related elements is not found.",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          },
+          "500": {
+            "description": "An internal error occurred.",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/quantityConfirmation/v1/postings": {
+      "get": {
+        "tags": [
+          "Quantity Confirmation Postings"
+        ],
+        "summary": "Get quantity confirmation postings",
+        "description": "Combine quantity confirmation details and summary for a given plant, SFC, and operation activity.",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "plant",
+            "in": "query",
+            "description": "Plant for quantity confirmation postings retrieval",
+            "required": true,
+            "type": "string",
+            "maxLength": 6
+          },
+          {
+            "name": "sfc",
+            "in": "query",
+            "description": "SFC for quantity confirmation postings retrieval",
+            "required": true,
+            "type": "string",
+            "maxLength": 128
+          },
+          {
+            "name": "operationActivity",
+            "in": "query",
+            "description": "OperationActivity for quantity confirmation postings retrieval",
+            "required": true,
+            "type": "string",
+            "maxLength": 36
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Quantity confirmation postings request successfully completed.",
+            "schema": {
+              "$ref": "#/definitions/QuantityConfirmationPostingsResponse"
+            }
+          },
+          "400": {
+            "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to call this resource.",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          },
+          "403": {
+            "description": "Accessing the resource you are trying to reach is forbidden.",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          },
+          "404": {
+            "description": "One of the related elements is not found.",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          },
+          "500": {
+            "description": "An internal error occurred in the call chain.",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/quantityConfirmation/v1/postingHistory": {
+      "get": {
+        "tags": [
+          "Quantity Confirmation Posting History"
+        ],
+        "summary": "Get quantity confirmation posting history",
+        "description": "Get a list of quantity confirmation posting history entries for a given order, plant, and SFC",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "order",
+            "in": "query",
+            "description": "The order for which you want to retrieve the quantity confirmation posting history",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "plant",
+            "in": "query",
+            "description": "The plant for which you want to retrieve the quantity confirmation posting history",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "sfc",
+            "in": "query",
+            "description": "The SFC for which you want to retrieve the quantity confirmation posting history",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "collectionFormat": "multi"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "The current page index (starts from 0). Default index is 0.",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "description": "Specify the page size that determines the number of posting results that are displayed at one time on one page. Default is 50 and the maximum allowed is 100.",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "description": "Sorting criteria in the format: property,(asc|desc). The property we support are [SFC, OperationActivity, CreatedDateTime, PostingDateTime], Default is SFC. The default sort order is ascending.",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Have successfully retrieved the quantity confirmation posting history request.",
+            "schema": {
+              "$ref": "#/definitions/PageQuantityConfirmationPostingHistoryResponse"
+            }
+          },
+          "400": {
+            "description": "The http request is bad or invalid and can't be processed by the server.",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          },
+          "401": {
+            "description": "You're not authorized to call this resource.",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          },
+          "403": {
+            "description": "Accessing the resource you're trying to reach is forbidden.",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          },
+          "404": {
+            "description": "One of the related elements is not found.",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          },
+          "500": {
+            "description": "There was an internal error somewhere in the call chain.",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          }
+        },
+        "deprecated": false
+      }
+    }
+  },
+  "securityDefinitions": {
+    "OauthClientCredentials": {
+      "type": "oauth2",
+      "tokenUrl": "https://{subdomain}.authentication.{tokenHost}/oauth/token",
+      "flow": "application"
+    }
+  },
+  "security": [
+    {
+      "OauthClientCredentials": []
+    }
+  ],
+  "definitions": {
+    "QuantityConfirmationPublicAPIRequest": {
+      "type": "object",
+      "required": [
+        "plant",
+        "shopOrder",
+        "sfc",
+        "operationActivity",
+        "workCenter"
+      ],
+      "properties": {
+        "plant": {
+          "type": "string",
+          "description": "The plant where quantity confirmation is posted"
+        },
+        "shopOrder": {
+          "type": "string",
+          "description": "The order that the quantity confirmation is posted against. It can be a production order or a process order."
+        },
+        "sfc": {
+          "type": "string",
+          "description": "The SFC that the quantity confirmation is posted against"
+        },
+        "operationActivity": {
+          "type": "string",
+          "description": "The operation activity of the quantity confirmation"
+        },
+        "resource": {
+          "type": "string",
+          "description": "The resource for which the quantity confirmation is posted"
+        },
+        "workCenter": {
+          "type": "string",
+          "description": "The work center for which the quantity confirmation is posted"
+        },
+        "yieldQuantity": {
+          "type": "number",
+          "format": "double",
+          "description": "The quantity you want to yield for the SFC"
+        },
+        "yieldQuantityUnit": {
+          "type": "string",
+          "description": "The base unit of measure for the yield quantity"
+        },
+        "yieldQuantityIsoUnit": {
+          "type": "string",
+          "description": "The ISO unit of measure for the yield quantity"
+        },
+        "scrapQuantity": {
+          "type": "number",
+          "format": "double",
+          "description": "The quantity you want to scrap for the SFC"
+        },
+        "scrapQuantityUnit": {
+          "type": "string",
+          "description": "The base unit of measure for the scrap quantity"
+        },
+        "scrapQuantityIsoUnit": {
+          "type": "string",
+          "description": "The ISO unit of measure for the scrap quantity"
+        },
+        "reasonCodeKey": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 38,
+          "description": "The resource reason code key. A resource reason code may optionally be provided with the SFC scrap. The reason code will be used in reports and synchronized to the integrated ERP system."
+        },
+        "postedBy": {
+          "type": "string",
+          "description": "Specify the person who posted the quantity confirmation. It can be the user ID, user name or user email address, etc."
+        },
+        "batchNumber": {
+          "type": "string",
+          "description": "The batch number that is used in the quantity confirmation"
+        },
+        "storageLocation": {
+          "type": "string",
+          "description": "The storage location for the quantity confirmation"
+        },
+        "postingDateTime": {
+          "type": "string",
+          "format": "date-time",
+          "example": "2021-04-08T07:00:05.000Z",
+          "description": "The posting date time (in UTC) when the quantity confirmation is performed."
+        },
+        "finalConfirmation": {
+          "type": "boolean",
+          "description": "If set to true, it indicates that the current operation activity is confirmed, and no further quantity confirmation can be posted against it."
+        },
+        "checkSchedulingAndOeeRelevant": {
+          "type": "boolean",
+          "description": "If set to true, it checks if current resource is OEE and scheduling relevant. If resource is not OEE and scheduling relevant the confirmation will be rejected."
+        }
+      },
+      "title": "PostQuantityConfirmationRequest",
+      "description": "The object represents a request to post quantity confirmation."
+    },
+    "FinalQuantityConfirmationPublicAPIRequest": {
+      "type": "object",
+      "required": [
+        "plant",
+        "shopOrder",
+        "sfc",
+        "operationActivity"
+      ],
+      "properties": {
+        "plant": {
+          "type": "string",
+          "description": "The plant where final quantity confirmation is posted"
+        },
+        "shopOrder": {
+          "type": "string",
+          "description": "The order that the final quantity confirmation is posted against. It can be a production order or a process order."
+        },
+        "sfc": {
+          "type": "string",
+          "description": "The SFC that the final quantity confirmation is posted against"
+        },
+        "operationActivity": {
+          "type": "string",
+          "description": "The operation activity of the final quantity confirmation. Only when the operation activity has a 'Completed' status in SAP Digital Manufacturing, will the API service work, and set the operation/phase status to 'CNF' in the integrated ERP system."
+        }
+      },
+      "title": "PostFinalQuantityConfirmationRequest",
+      "description": "The object represents a request to post final quantity confirmation without updating the quantity."
+    },
+    "QuantityConfirmationPublicAPIResponse": {
+      "type": "object",
+      "properties": {
+        "transactionId": {
+          "type": "string",
+          "description": "Transaction ID of the quantity confirmation"
+        }
+      },
+      "title": "ResponseForQuantityConfirmation",
+      "description": "The object represents the response of quantity confirmation."
+    },
+    "QuantityConfirmationPostingsResponse": {
+      "type": "object",
+      "properties": {
+        "shopOrder":{
+          "type": "string",
+          "description": "Shop order for quantity confirmation postings retrieval"
+        },
+        "sfc": {
+          "type": "string",
+          "description": "SFC for quantity confirmation postings retrieval"
+        },
+        "operationActivity":{
+          "type": "string",
+          "description": "OperationActivity for quantity confirmation postings retrieval"
+        },
+        "material":{
+          "type": "string",
+          "description": "Material for quantity confirmation postings retrieval"
+        },
+        "materialVersion":{
+          "type": "string",
+          "description": "Material version for quantity confirmation postings retrieval"
+        },
+        "totalYieldQuantity": {
+          "description": "Total yield quantity postings retrieval",
+          "$ref": "#/definitions/quantity"
+        },
+        "totalScrapQuantity": {
+          "description": "Total scrap quantity postings retrieval",
+          "$ref": "#/definitions/quantity"
+        },
+        "details": {
+          "type": "array",
+          "description": "Details of quantity confirmations",
+          "items": {
+            "$ref": "#/definitions/detail"
+          }
+        }
+      },
+      "title": "ResponseForQuantityConfirmationPostings",
+      "description": "Quantity confirmation postings response"
+    },
+    "quantity": {
+      "type": "object",
+      "description": "Quantity and unit of measure",
+      "properties": {
+        "value": {
+          "type": "number",
+          "description": "Quantity"
+        },
+        "unitOfMeasure": {
+          "description": "Unit of measure",
+          "$ref": "#/definitions/unitOfMeasure"
+        }
+      }
+    },
+    "unitOfMeasure": {
+      "type": "object",
+      "description": "Unit of measure",
+      "properties": {
+        "longText": {
+          "description": "Long text",
+          "type": "string"
+        },
+        "shortText": {
+          "description": "Short text",
+          "type": "string"
+        },
+        "internalUom": {
+          "description": "Internal unit of measure",
+          "type": "string"
+        },
+        "uom": {
+          "description": "Commercial unit of measure",
+          "type": "string"
+        }
+      }
+    },
+    "detail": {
+      "type": "object",
+      "description": "Line item of quantity confirmation details object",
+      "properties": {
+        "yieldQuantity": {
+          "description": "Yield quantity",
+          "$ref": "#/definitions/quantity"
+        },
+        "scrapQuantity": {
+          "description": "Scrap quantity",
+          "$ref": "#/definitions/quantity"
+        },
+        "reasonCode": {
+          "description": "Reason code for scrap",
+          "type": "string"
+        },
+        "reasonCodes": {
+          "description": "Reason codes for scrap",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "description": {
+          "description": "Reason code description for scrap",
+          "type": "string"
+        },
+        "resource": {
+          "description": "Resource information of quantity confirmation",
+          "type": "string"
+        },
+        "userId": {
+          "description": "User ID of the quantity confirmation",
+          "type": "string"
+        },
+        "qtyConfirmationStatus": {
+          "description": "Status of quantity confirmation",
+          "type": "string"
+        },
+        "dateTime": {
+          "description": "Date and time when the quantity confirmation was performed",
+          "type": "string",
+          "format": "date-time",
+          "example": "2022-07-08T07:00:05.000Z"
+        },
+        "createdDateTime": {
+          "description": "Date and time when the quantity confirmation was created",
+          "type": "string",
+          "format": "date-time",
+          "example": "2022-07-08T07:00:05.000Z"
+        },
+        "customFieldData": {
+          "description": "Custom field data",
+          "type": "string"
+        }
+      }
+    },
+    "PageQuantityConfirmationPostingHistoryResponse": {
+      "type": "object",
+      "properties": {
+        "totalPages": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "totalElements": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "pageable": {
+          "$ref": "#/definitions/Pageable"
+        },
+        "numberOfElements": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "sort": {
+          "description": "Sort information of Response",
+          "$ref": "#/definitions/Sort"
+        },
+        "first": {
+          "type": "boolean"
+        },
+        "last": {
+          "type": "boolean"
+        },
+        "size": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "content": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/QuantityConfirmationPostingHistoryResponse"
+          }
+        },
+        "number": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "empty": {
+          "type": "boolean"
+        }
+      }
+    },
+    "Pageable": {
+      "type": "object",
+      "properties": {
+        "page": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "size": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "sort": {
+          "description": "Sort information of Request",
+          "$ref": "#/definitions/Sort"
+        }
+      },
+      "title": "Pageable"
+    },
+    "Sort": {
+      "type": "object",
+      "properties": {
+        "empty": {
+          "type": "boolean"
+        },
+        "sorted": {
+          "type": "boolean"
+        },
+        "unsorted": {
+          "type": "boolean"
+        }
+      },
+      "title": "Sort"
+    },
+    "QuantityConfirmationPostingHistoryResponse": {
+      "type": "object",
+      "properties": {
+        "sfc": {
+          "description": "SFC for quantity confirmation postings retrieval",
+          "type": "string"
+        },
+        "resource": {
+          "description": "Resource where the quantity confirmation was performed",
+          "type": "string"
+        },
+        "workCenter": {
+          "description": "Work center where the quantity confirmation was performed",
+          "type": "string"
+        },
+        "operationActivity": {
+          "description": "Operation activity where the quantity confirmation posting was performed",
+          "type": "string"
+        },
+        "yieldQuantity": {
+          "description": "Yield quantity",
+          "type": "number"
+        },
+        "yieldQuantityUnit": {
+          "description": "Yield quantity internal Unit",
+          "type": "string"
+        },
+        "yieldQuantityCommercialUnit": {
+          "description": "Yield quantity commercial Unit",
+          "type": "string"
+        },
+        "scrapQuantity": {
+          "description": "Scrap quantity",
+          "type": "number"
+        },
+        "scrapQuantityUnit": {
+          "description": "Scrap quantity internal Unit",
+          "type": "string"
+        },
+        "scrapQuantityCommercialUnit": {
+          "description": "Scrap quantity commercial Unit",
+          "type": "string"
+        },
+        "createdDateTime": {
+          "description": "System date time when the the quantity confirmation was performed in UTC. Format (ISO-8601): yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
+          "type": "string",
+          "format": "date-time"
+        },
+        "postingDateTime": {
+          "description": "Date time when the quantity confirmation was performed in UTC. Format (ISO-8601): yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
+          "type": "string",
+          "format": "date-time"
+        },
+        "userId": {
+          "description": "ID of the user who performed the quantity confirmation",
+          "type": "string"
+        },
+        "reasonCodeKey": {
+          "description": "Reason Code Key for scrap",
+          "type": "string"
+        },
+        "reasonCodes": {
+          "description": "Reason Code for scrap",
+          "type": "array",
+          "items": {
+            "description": "Reason Code for scrap",
+            "type": "string"
+          }
+        },
+        "reasonCodeDescription": {
+          "description": "Description of the reason code",
+          "type": "string"
+        },
+        "status": {
+          "description": "Status of quantity confirmation",
+          "type": "string"
+        }
+      },
+      "title": "QuantityConfirmationPostingHistoryResponse",
+      "description": "Response object for quantity confirmation postings"
+    },
+    "error": {
+      "type": "object",
+      "required": [
+        "code",
+        "message",
+        "corelationId"
+      ],
+      "properties": {
+        "code": {
+          "type": "string",
+          "description": "Internal error message"
+        },
+        "message": {
+          "type": "string",
+          "description": "Contains additional information, if any"
+        },
+        "correlationId": {
+          "type": "string",
+          "description": "Contains correlationId for the error."
+        },
+        "causeMessage": {
+          "type": "string",
+          "description": "Contains technical reason for the error."
+        }
+      }
+    }
+  },
+  "x-sap-shortText": "Perform quantity confirmations for an order",
+  "x-servers": [
+    {
+      "url": "https://api.{regionHost}",
+      "description": "Base URL",
+      "templates": {
+        "regionHost": {
+          "description": "The data center where SAP Digital Manufacturing is provisioned for your organization",
+          "enum": [
+            "eu10.dmc.cloud.sap",
+            "us10.dmc.cloud.sap",
+            "eu20.dmc.cloud.sap",
+            "us20.dmc.cloud.sap",
+            "test.eu10.dmc.cloud.sap",
+            "test.us10.dmc.cloud.sap",
+            "test.eu20.dmc.cloud.sap",
+            "test.us20.dmc.cloud.sap"
+          ],
+          "default": "test.eu10.dmc.cloud.sap"
+        },
+        "tokenHost": {
+          "description": "The authentication token server where SAP Digital Manufacturing is provisioned for your organization",
+          "enum": [
+            "eu10.hana.ondemand.com",
+            "us10.hana.ondemand.com",
+            "eu20.hana.ondemand.com",
+            "us20.hana.ondemand.com"
+          ],
+          "default": "eu10.hana.ondemand.com"
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,254 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "Quality inspection allows you to determine whether your company’s product consistently meets defined quality requirements. This service enables you to check whether all mandatory characteristics have been checked.",
+    "version": "v2",
+    "title": "Quality Inspection",
+    "contact": {
+      "name": "SAP Digital Manufacturing Operations",
+      "email": "sap-dmoperation@sap.com"
+    }
+     },
+    "externalDocs": {
+        "description": "Prepare for API Integration",
+        "url": "https://help.sap.com/docs/sap-digital-manufacturing/operations-guide/prepare-for-api-integration"
+  },
+  "host": "hostname",
+  "basePath": "/",
+  "tags": [
+    {
+      "name": "Quality Inspection Integration Management",
+      "description": "Inspection API Controller"
+    }
+  ],
+  "paths": {
+    "/mandatoryCharacteristics/checkResultsRecorded": {
+      "post": {
+        "tags": [
+          "Check The Mandatory Characteristics Inspected"
+        ],
+        "summary": "Check if the mandatory inspection characteristics are recorded for the given SFCs at the given steps.",
+        "description": "Before synchronizing the inspection results recorded in SAP Digital Manufacturing back to the integrated ERP system, check if all the mandatory inspection characteristics have been inspected.",
+        "operationId": "checkMandatoryCharacteristicsResultsRecordedV2",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "request",
+            "description": "Request to check the mandatory characteristics",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CheckResultsRecordedRequestV2"
+            }
+          },
+          {
+            "name": "Accept-Language",
+            "in": "header",
+            "description": "The Accept-Language request HTTP header indicates the natural language and locale that the client prefers. It's an ISO language-region code. Valid values: [en, en-US, de, hu, ko, fr, es, zh-CN, zh-TW, ja, ru, tr, pt, pl, sk, cz, it, th, bg, ro, sv].",
+            "required": false,
+            "type": "string",
+            "default": "en"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "The mandatory inspection characteristics check passed."
+          },
+          "200": {
+            "description": "There is at least one mandatory inspection characteristic that has not been inspected.",
+            "schema": {
+              "$ref": "#/definitions/CheckResultsRecordedFailureResponse"
+            }
+          },
+          "400": {
+            "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to call this resource.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Accessing the resource you are trying to reach is forbidden.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "One of the related elements is not found.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "An internal error occurred.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "deprecated": false
+      }
+    }
+  },
+  "securityDefinitions": {
+    "OauthClientCredentials": {
+      "type": "oauth2",
+      "tokenUrl":"https://{subdomain}.authentication.{tokenHost}/oauth/token",
+      "flow": "application"
+    }
+  },
+  "security": [
+    {
+      "OauthClientCredentials": []
+    }
+  ],
+  "definitions": {
+    "ErrorResponse": {
+      "type": "object",
+      "properties": {
+        "causeMessage": {
+          "type": "string",
+          "description": "Contains technical reason for the error."
+        },
+        "code": {
+          "type": "string",
+          "description": "Internal error message"
+        },
+        "correlationId": {
+          "type": "string",
+          "description": "Contains correlationId for the error."
+        },
+        "message": {
+          "type": "string",
+          "description": "Contains additional information, if any."
+        },
+        "status": {
+          "type": "integer",
+          "format": "int32",
+          "description": "HTTP status code"
+        }
+      },
+      "title": "ErrorResponse",
+      "description": "Error response."
+    },
+    "CheckResultsRecordedRequestV2": {
+      "type": "object",
+      "required": [
+        "plant",
+        "items"
+      ],
+      "properties": {
+        "plant": {
+          "type": "string",
+          "maxLength": 6,
+          "description": "The plant for which the inspection characteristics are to be checked.",
+          "pattern": "^(?! )[0-9A-Z_$!)(+~@^=\\-*. ]+(?<! )$"
+        },
+        "items": {
+          "type": "array",
+          "description": "The list of items to be checked",
+          "items": {
+            "$ref": "#/definitions/CheckResultsRecordedItem"
+          },
+          "maxItems": 20
+        }
+      },
+      "title": "CheckResultsRecordedRequestV2",
+      "description": "This object represents a request to check if the mandatory characteristics on the given SFCs and given steps have been inspected."
+    },
+    "CheckResultsRecordedItem": {
+      "type": "object",
+      "required": [
+        "sfc",
+        "stepId"
+      ],
+      "properties": {
+        "sfc": {
+          "type": "string",
+          "description": "The SFC number"
+        },
+        "inspectionLot": {
+          "type": "string",
+          "maxLength": 12,
+          "description": "The inspection lot number. Either 'inspectionLot' or 'order' is required. If you provide the 'inspectionLot' field, then 'order' isn't required. If both fields are provided, priority is given to the 'inspectionLot' field."
+        },
+        "order": {
+          "type": "string",
+          "maxLength": 36,
+          "description": "The order for which the inspection characteristics are to be checked"
+        },
+        "stepId": {
+          "type": "string",
+          "maxLength": 9,
+          "description": "The routing step ID for which inspection characteristics are to be checked"
+        },
+        "inspectionPoint": {
+          "type": "string",
+          "maxLength": 6,
+          "description": "The inspection point number"
+        }
+      },
+      "title": "CheckResultsRecordedItem",
+      "description": "This object represents a request to check the inspection characteristics for the given SFC at a given step."
+    },
+    "CheckResultsRecordedFailureResponse": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string",
+          "description": "The error code"
+        },
+        "message": {
+          "type": "string",
+          "description": "The error message"
+        },
+        "correlationId": {
+          "type": "string",
+          "description": "The correlationId for the error"
+        }
+      },
+      "title": "CheckResultsRecordedFailureResponse",
+      "description": "The object represents a response returned when the check fails due to one or more mandatory inspection characteristics not being properly inspected."
+    }
+  },
+  "x-sap-shortText": "Perform quality inspection related activities",
+  "x-servers": [
+    {
+      "url": "https://api.{regionHost}/qualityInspection/v2",
+      "description": "Base URL",
+      "templates": {
+        "regionHost": {
+          "description": "The data center where SAP Digital Manufacturing is provisioned for your organization",
+          "enum": [
+            "eu10.dmc.cloud.sap",
+            "us10.dmc.cloud.sap",
+            "eu20.dmc.cloud.sap",
+            "us20.dmc.cloud.sap",
+            "test.eu10.dmc.cloud.sap",
+            "test.us10.dmc.cloud.sap",
+            "test.eu20.dmc.cloud.sap",
+            "test.us20.dmc.cloud.sap"
+          ],
+          "default": "eu10.dmc.cloud.sap"
+        },
+        "tokenHost": {
+          "description": "The authentication token server where SAP Digital Manufacturing is provisioned for your organization",
+          "enum": [
+            "eu10.hana.ondemand.com",
+            "us10.hana.ondemand.com",
+            "eu20.hana.ondemand.com",
+            "us20.hana.ondemand.com"
+          ],
+          "default": "eu10.hana.ondemand.com"
+        }
+      }
+    }
+  ]
+}

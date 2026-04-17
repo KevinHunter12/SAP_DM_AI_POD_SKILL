@@ -1,0 +1,2398 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Tool",
+    "description": "A tool is a movable operating resource used in production and that can be used repeatedly. When integrated with SAP ERP systems, production resources/tools (PRTs) in ERP systems can be downloaded as tools in SAP Digital Manufacturing. \nYou can use this API service to perform a series of tool-relevant operations such as enabling automatic logging of tool usage for shop floor controls.",
+    "contact": {
+      "name": "SAP Digital Manufacturing Operations",
+      "email": "sap-dmoperation@sap.com"
+    },
+    "version": "v1"
+  },
+  "externalDocs": {
+    "description": "Prepare for API Integration",
+    "url": "https://help.sap.com/docs/sap-digital-manufacturing/operations-guide/prepare-for-api-integration"
+  },
+  "servers": [
+    {
+      "url": "https://api.{regionHost}/tool/v1",
+      "description": "Base URL",
+      "variables": {
+        "regionHost": {
+          "description": "The data center where SAP Digital Manufacturing is provisioned for your organization.",
+          "enum": [
+            "eu10.dmc.cloud.sap",
+            "us10.dmc.cloud.sap",
+            "eu20.dmc.cloud.sap",
+            "us20.dmc.cloud.sap",
+            "test.eu10.dmc.cloud.sap",
+            "test.us10.dmc.cloud.sap",
+            "test.eu20.dmc.cloud.sap",
+            "test.us20.dmc.cloud.sap"
+          ],
+          "default": "test.eu10.dmc.cloud.sap"
+        },
+        "tokenHost": {
+          "description": "The authentication token server where SAP Digital Manufacturing is provisioned for your organization.",
+          "enum": [
+            "eu10.hana.ondemand.com",
+            "us10.hana.ondemand.com",
+            "eu20.hana.ondemand.com",
+            "us20.hana.ondemand.com"
+          ],
+          "default": "eu10.hana.ondemand.com"
+        }
+      }
+    }
+  ],
+  "security": [
+    {
+      "OauthClientCredentials": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "Tool"
+    }
+  ],
+  "paths": {
+    "/toolUsageLogs": {
+      "post": {
+        "tags": [
+          "Tool"
+        ],
+        "summary": "Sets automatic logging of tool usage for SFCs",
+        "description": "Enables automatic logging of tool usage for SFCs that have already been started and are not yet done. Only tools specified with automatic logging method would be logged.",
+        "operationId": "saveToolUsageLogsUsingPOST_2",
+        "requestBody": {
+          "description": "request",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LogToolUsage"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "The tool has been automatically logged.",
+            "content": {}
+          },
+          "400": {
+            "description": "The HTTP request is invalid and can't be processed by the server.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseApiModel"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid or expired token.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseApiModel"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "You are not authorized to access the resource.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseApiModel"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Some required properties (e.g. sfc or operation) couldn't be retrieved.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseApiModel"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The resource has been modified by another user. Please retrieve the latest tool information and try again.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseApiModel"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "There was an internal error somewhere in the call chain.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseApiModel"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false,
+        "x-codegen-request-body-name": "request"
+      }
+    },
+    "/prtLoadValidation": {
+      "post": {
+        "tags": [
+          "Tool"
+        ],
+        "summary": "Get tool validation result for loaded tools",
+        "description": "Validate loaded tools by checking the alignment between loaded tools and PRT assignments. \nThere are 2 possible validation results: PRT_PASSED, FAILED.",
+        "operationId": "prtLoadValidationPOST",
+        "requestBody": {
+          "description": "request",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ValidatePrtLoadRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Find PrtLoad Validation Result was successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationResultResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The HTTP request is invalid and can't be processed by the server.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseApiModel"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid or expired token.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseApiModel"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "You are not authorized to access the resource.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseApiModel"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Some required properties (e.g. sfc or operation) couldn't be retrieved.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseApiModel"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "There was an internal error somewhere in the call chain.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseApiModel"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": true,
+        "x-codegen-request-body-name": "request"
+      }
+    },
+    "/loadedTools": {
+      "get": {
+        "tags": [
+          "Tool"
+        ],
+        "summary": "Gets loaded tools.",
+        "description": "Retrieves tool numbers of loaded tools for a given plant and location.",
+        "operationId": "loadedToolsGET",
+        "parameters": [
+          {
+            "name": "plant",
+            "in": "query",
+            "description": "The plant where the tools are loaded",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "location",
+            "in": "query",
+            "description": "The location of the loaded tools",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "locationType",
+            "in": "query",
+            "description": "The type of the location where the loaded tools are placed",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "RESOURCE"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Loaded tools are retrieved.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoadedToolListResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The HTTP request is invalid and can't be processed by the server.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseApiModel"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid or expired token.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseApiModel"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "You are not authorized to access the resource.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseApiModel"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "One of the required elements couldn't be retrieved.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseApiModel"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "There was an internal error somewhere in the call chain.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseApiModel"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/loadTool": {
+      "post": {
+        "tags": [
+          "Tool"
+        ],
+        "summary": "Loads a tool.",
+        "description": "Loads a tool for a given plant and location.",
+        "operationId": "loadToolPost",
+        "requestBody": {
+          "description": "request",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoadToolRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "The tool is loaded.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoadToolResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The HTTP request is invalid and can't be processed by the server.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseApiModel"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid or expired token.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseApiModel"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "You are not authorized to access the resource.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseApiModel"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "One of the required elements couldn't be retrieved.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseApiModel"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The resource has been modified by another user. Please retrieve the latest tool information and try again.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseApiModel"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "There was an internal error somewhere in the call chain.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseApiModel"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false,
+        "x-codegen-request-body-name": "request"
+      }
+    },
+    "/unloadTool": {
+      "post": {
+        "tags": [
+          "Tool"
+        ],
+        "summary": "Unloads a tool.",
+        "description": "Unloads a tool for a given plant and location.",
+        "operationId": "unloadToolPost",
+        "requestBody": {
+          "description": "request",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UnloadToolRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "The tool is unloaded.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnloadToolResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The HTTP request is invalid and can't be processed by the server.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseApiModel"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid or expired token.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseApiModel"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "You are not authorized to access the resource.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseApiModel"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "One of the required elements couldn't be retrieved.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseApiModel"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The resource has been modified by another user. Please retrieve the latest tool information and try again.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseApiModel"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "There was an internal error somewhere in the call chain.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseApiModel"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false,
+        "x-codegen-request-body-name": "request"
+      }
+    },
+    "/tools": {
+      "get": {
+        "tags": [
+          "Tool"
+        ],
+        "summary": "Retrieves tool information.",
+        "description": "Retrieves information of a tool for a given plant.",
+        "operationId": "getToolQuery_1",
+        "parameters": [
+          {
+            "name": "plant",
+            "in": "query",
+            "description": "The plant of the tool.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "toolNumber",
+            "in": "query",
+            "description": "The tool number of the tool.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "prtNumber",
+            "in": "query",
+            "description": "The production resources/tools (PRT) number of the tool.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "material",
+            "in": "query",
+            "description": "The material number of the tool.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "materialVersion",
+            "in": "query",
+            "description": "The material version of the tool.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "toolType",
+            "in": "query",
+            "description": "The type of the tool.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "EQUIPMENT_PRT",
+                "MATERIAL_PRT"
+              ]
+            }
+          },
+          {
+            "name": "loggingMethod",
+            "in": "query",
+            "description": "The logging method of the tool.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "MANUAL",
+                "AUTOMATIC",
+                "NON_TRACKED"
+              ]
+            }
+          },
+          {
+            "name": "origin",
+            "in": "query",
+            "description": "The origin of the tool.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ERP",
+                "LOCAL"
+              ]
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "description": "The status of the tool.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "DISABLED",
+                "ENABLED",
+                "ENGINEERING",
+                "PRODUCTIVE"
+              ]
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "The page number you want to query. Number 0 is the first page. Example: https://xxx?plant=XX&page=0&size=1",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "description": "The page size determines how many records are displayed in one page. Default page size is 20.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "description": "The retrieved records can be sorted using one or more of the following fields: 'toolNumber','prtNumber' ,'createdOn'. Example: 'https://xxx?xxxx&sort=toolNumber,desc&sort=createdOn,desc' ",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Information is retrieved for the specified tool.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ToolsQueryResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The HTTP request is invalid and can't be processed by the server.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseApiModel"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid or expired token."
+          },
+          "403": {
+            "description": "You are not authorized to access the resource."
+          },
+          "404": {
+            "description": "Some required properties (e.g. sfc or operation) couldn't be retrieved.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseApiModel"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "There was an internal error somewhere in the call chain.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseApiModel"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": true
+      },
+      "put": {
+        "tags": [
+          "Tool"
+        ],
+        "summary": "Updates a tool.",
+        "description": "Updates a tool for a given plant and tool number.",
+        "operationId": "updateToolUsingPUT",
+        "requestBody": {
+          "description": "request",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateToolRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "The tool is updated.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateToolResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The HTTP request is invalid and can't be processed by the server.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseApiModel"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid or expired token."
+          },
+          "403": {
+            "description": "You are not authorized to access the resource."
+          },
+          "404": {
+            "description": "One of the required elements couldn't be retrieved.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseApiModel"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The resource has been modified by another user. Please retrieve the latest tool information and try again.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseApiModel"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "There was an internal error somewhere in the call chain.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseApiModel"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false,
+        "x-codegen-request-body-name": "request"
+      },
+      "post": {
+        "tags": [
+          "Tool"
+        ],
+        "summary": "Creates a tool.",
+        "description": "Creates a tool for a given plant.",
+        "operationId": "createToolUsingPOST",
+        "requestBody": {
+          "description": "request",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateToolRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "The tool is created.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateToolResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The HTTP request is invalid and can't be processed by the server.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseApiModel"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid or expired token."
+          },
+          "403": {
+            "description": "You are not authorized to access the resource."
+          },
+          "404": {
+            "description": "Some required properties (e.g. sfc or operation) couldn't be retrieved.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseApiModel"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The resource already exists. Please retrieve the latest tool information and try again.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseApiModel"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "There was an internal error somewhere in the call chain.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseApiModel"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false,
+        "x-codegen-request-body-name": "request"
+      }
+    },
+    "/tools/status": {
+      "post": {
+        "tags": [
+          "Tool"
+        ],
+        "summary": "Updates tool status.",
+        "description": "Updates the tool status for a given plant and tools. You can't change the status of a productive tool that is loaded to a resource using this API service. For these tasks, refer to tool loading and tool unloading.",
+        "operationId": "updateToolsPort",
+        "requestBody": {
+          "description": "request",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateToolsStatusRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Status is updated for specified tools.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateToolsStatusResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The HTTP request is invalid and can't be processed by the server.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseApiModel"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid or expired token.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseApiModel"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "You are not authorized to access the resource.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseApiModel"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "One of the required elements couldn't be retrieved.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseApiModel"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "There was an internal error somewhere in the call chain.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseApiModel"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": true,
+        "x-codegen-request-body-name": "request"
+      }
+    },
+    "/tools/calibration": {
+      "post": {
+        "tags": [
+          "Tool"
+        ],
+        "summary": "Resets a tool.",
+        "description": "Resets the used count and used time to zero for a given plant and tool.",
+        "operationId": "resetTool",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResetToolRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "The usage of the tool has been successfully reset to zero.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResetToolUsageResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The HTTP request is invalid and can't be processed by the server."
+          },
+          "401": {
+            "description": "Invalid or expired token"
+          },
+          "403": {
+            "description": "You are not authorized to access the resource."
+          },
+          "404": {
+            "description": "One of the required elements couldn't be retrieved.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseApiModel"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The resource has been modified by another user. Please retrieve the latest tool information and try again.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseApiModel"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "There was an internal error somewhere in the call chain.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseApiModel"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tools/manualToolUsageLog": {
+      "post": {
+        "tags": [
+          "Tool"
+        ],
+        "summary": "Creates a tool usage logging record.",
+        "description": "Create a tool usage logging record for a given plant and shop floor control (SFC). You can only use this API service to log usage for tools that have a manual logging method.",
+        "operationId": "createToolUsageLog",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateToolUsageLogRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "The tool usage logging record has been created.",
+            "content": {}
+          },
+          "400": {
+            "description": "The HTTP request is invalid and can't be processed by the server."
+          },
+          "401": {
+            "description": "Invalid or expired token"
+          },
+          "403": {
+            "description": "You are not authorized to access the resource."
+          },
+          "404": {
+            "description": "One of the required elements couldn't be retrieved.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseApiModel"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The resource has been modified by another user. Please retrieve the latest tool information and try again.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseApiModel"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "There was an internal error somewhere in the call chain.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseApiModel"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tools/prtAssignment": {
+      "get": {
+        "tags": [
+          "Tool"
+        ],
+        "summary": "Retrieves production resources/tools (PRT) assignments for an order.",
+        "description": "Retrieves PRT assignments for a given plant and order. You can retrieve PRT assignments for the entire order, or for a specific operation activity. If there're multiple routings assigned to the order, the system retrieves only PRT assignments of the routing with the current version.",
+        "operationId": "findPrtAssignment",
+        "parameters": [
+          {
+            "name": "plant",
+            "in": "query",
+            "description": "The plant of the order.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "order",
+            "in": "query",
+            "description": "The order for which the PRT assignment is retrieved.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "stepId",
+            "in": "query",
+            "description": "The operation activity ID of the order's routing.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "PRT assignment information has been retrieved.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FindPrtAssignmentApiResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The HTTP request is invalid and can't be processed by the server."
+          },
+          "401": {
+            "description": "Invalid or expired token"
+          },
+          "403": {
+            "description": "You are not authorized to access the resource."
+          },
+          "404": {
+            "description": "One of the required elements couldn't be retrieved.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseApiModel"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "There was an internal error somewhere in the call chain.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseApiModel"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tools/{prt}/routings": {
+      "get": {
+        "tags": ["Tool"],
+        "summary": "Retrieves routings and routing steps.",
+        "description": "Retrieves routings and routing steps by production resources/tools (PRTs) for a given plant.",
+        "operationId": "findPrtRouting",
+        "deprecated": true,
+        "parameters": [
+          {
+            "name": "prt",
+            "in": "path",
+            "required": true,
+            "description": "The PRT number by which you want to retrieve routings.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "plant",
+            "description": "The plant of the PRT.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+
+          {
+            "in": "query",
+            "name": "startTime",
+            "description": "If specified, the system retrieves routings by PRT assignments that are created at or after the specified time.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "example": "2023-12-05T09:25:26.822Z"
+          },
+          {
+            "in": "query",
+            "name": "endTime",
+            "description": "If specified, the system retrieves routings by PRT assignments that are created up to the specified time.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "example": "2023-12-05T09:25:26.822Z"
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "description": "The page number you want to query. Number 0 is the first page.",
+            "required": false,
+            "schema": {
+              "minimum": 0,
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "description": "The page size determines how many routing steps are displayed in one page. Default page size is 20.",
+            "required": false,
+            "schema": {
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Routings have been successfully retrieved for the specified PRT.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetPrtRoutingResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The HTTP request is invalid and can't be processed by the server."
+          },
+          "401": {
+            "description": "Invalid or expired token"
+          },
+          "403": {
+            "description": "You are not authorized to access the resource."
+          },
+          "404": {
+            "description": "One of the required elements couldn't be retrieved."
+          },
+          "500": {
+            "description": "There was an internal error somewhere in the call chain.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseApiModel"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "LogToolUsage": {
+        "title": "LogToolUsage",
+        "required": [
+          "operation",
+          "plant",
+          "resource",
+          "sfcs"
+        ],
+        "type": "object",
+        "properties": {
+          "operation": {
+            "type": "string",
+            "description": "The operation against which the tool usage is logged."
+          },
+          "plant": {
+            "type": "string",
+            "description": "The plant for which the tool usage is logged."
+          },
+          "resource": {
+            "type": "string",
+            "description": "The resource to which the tool is assigned."
+          },
+          "sfcs": {
+            "type": "array",
+            "description": "The list of SFCs for which the tool usage is logged.",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "UpdateToolRequest": {
+        "title": "UpdateToolRequest",
+        "required": [
+          "plant",
+          "toolNumber"
+        ],
+        "type": "object",
+        "properties": {
+          "plant": {
+            "type": "string",
+            "description": "The plant of the tool."
+          },
+          "toolNumber": {
+            "type": "string",
+            "description": "The tool number of the tool."
+          },
+          "material": {
+            "$ref": "#/components/schemas/Material"
+          },
+          "status": {
+            "type": "string",
+            "description": "The status of the tool.",
+            "enum": [
+              "DISABLED",
+              "ENABLED",
+              "ENGINEERING",
+              "PRODUCTIVE"
+            ]
+          },
+          "description": {
+            "type": "string",
+            "description": "The description of the tool."
+          },
+          "serialNumber": {
+            "type": "string",
+            "description": "The serial number of the tool."
+          },
+          "loggingSetup": {
+            "$ref": "#/components/schemas/ToolLoggingSetup"
+          },
+          "customValues": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CustomData"
+            }
+          }
+        }
+      },
+      "UpdateToolResponse": {
+        "title": "UpdateToolResponse",
+        "type": "object",
+        "properties": {
+          "plant": {
+            "type": "string",
+            "description": "The plant of the tool."
+          },
+          "toolNumber": {
+            "type": "string",
+            "description": "The tool number of the tool."
+          },
+          "toolType": {
+            "type": "string",
+            "description": "The type of the tool.",
+            "enum": [
+              "EQUIPMENT_PRT",
+              "MATERIAL_PRT"
+            ]
+          },
+          "prtNumber": {
+            "type": "string",
+            "description": "The production resources/tools (PRT) number of the tool."
+          },
+          "material": {
+            "$ref": "#/components/schemas/Material"
+          },
+          "serialNumber": {
+            "type": "string",
+            "description": "The serial number of the tool."
+          },
+          "origin": {
+            "type": "string",
+            "description": "The origin of the tool.",
+            "enum": [
+              "LOCAL",
+              "ERP"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "description": "The status of the tool."
+          },
+          "description": {
+            "type": "string",
+            "description": "The description of the tool."
+          },
+          "loadedLocation": {
+            "type": "string",
+            "description": "The location where the tool is currently loaded."
+          },
+          "loggingSetup": {
+            "$ref": "#/components/schemas/ToolLoggingSetup"
+          },
+          "totalUsageCount": {
+            "type": "number",
+            "description": "The total number of times the tool was used."
+          },
+          "totalUsageTime": {
+            "type": "number",
+            "description": "The total duration of time the tool was used."
+          },
+          "customValues": {
+            "type": "array",
+            "description": "The custom values of the tool.",
+            "items": {
+              "$ref": "#/components/schemas/CustomData"
+            }
+          },
+          "vendor": {
+            "type": "string",
+            "description": "The vendor of the tool."
+          },
+          "vendorModel": {
+            "type": "string",
+            "description": "The vendor model of the tool."
+          },
+          "equipmentId": {
+            "type": "string",
+            "description": "The equipment ID of the equipment relevant to the tool. It’s applicable to Asset Central Model."
+          },
+          "assetId": {
+            "type": "string",
+            "description": "The asset ID of the equipment relevant to the tool. It’s applicable to Digital Manufacturing Asset Model."
+          },
+          "createdOn": {
+            "type": "string",
+            "description": "The time when the tool was created in UTC. Format (ISO-8601): yyyy-MM-dd'T'HH:mm:ss.SSS'Z'.",
+            "format": "date-time",
+            "example": "2023-12-05T09:25:26.822Z"
+          },
+          "modifiedOn": {
+            "type": "string",
+            "description": "The time when the tool was last modified in UTC. Format (ISO-8601): yyyy-MM-dd'T'HH:mm:ss.SSS'Z'.",
+            "format": "date-time",
+            "example": "2023-12-05T09:25:26.822Z"
+          }
+        }
+      },
+      "ValidatePrtLoadRequest": {
+        "title": "ValidateTool",
+        "required": [
+          "operation",
+          "plant",
+          "resource"
+        ],
+        "type": "object",
+        "properties": {
+          "plant": {
+            "type": "string",
+            "description": "The plant where the loaded tools are validated"
+          },
+          "sfcs": {
+            "type": "array",
+            "description": "The SFCs of the loaded tools",
+            "items": {
+              "type": "string"
+            }
+          },
+          "operation": {
+            "type": "string",
+            "description": "The operation of the loaded tools"
+          },
+          "resource": {
+            "type": "string",
+            "description": "The resource of the loaded tools"
+          }
+        }
+      },
+      "UpdateToolsStatusRequest": {
+        "title": "UpdateToolsStatus",
+        "required": [
+          "plant",
+          "status",
+          "toolNumbers"
+        ],
+        "type": "object",
+        "properties": {
+          "plant": {
+            "type": "string",
+            "description": "The plant of the tool."
+          },
+          "toolNumbers": {
+            "type": "array",
+            "description": "The tool numbers of the tools.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "status": {
+            "type": "string",
+            "description": "The target status of the tools.",
+            "enum": [
+              "DISABLED",
+              "ENABLED",
+              "ENGINEERING",
+              "PRODUCTIVE"
+            ]
+          }
+        }
+      },
+      "UpdateToolsStatusResponse": {
+        "title": "UpdateToolsStatusResult",
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "array",
+            "description": "These are the tools that are updated to target status.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "failure": {
+            "type": "array",
+            "description": "These are the tools that failed to be updated to target status.",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "ValidationResultResponse": {
+        "title": "ValidateToolResult",
+        "type": "object",
+        "properties": {
+          "validationResult": {
+            "type": "string",
+            "description": "The validation result of the loaded tools. 1. PRT_PASSED: Tool validation passed. All loaded tools align with planned PRT; 2. FAILED: Tool validation failed. There are loaded tools that do not align with planned PRT.",
+            "enum": [
+              "PRT_PASSED",
+              "FAILED"
+            ]
+          }
+        }
+      },
+      "LoadedToolListResponse": {
+        "title": "LoadingToolResult",
+        "type": "object",
+        "properties": {
+          "tools": {
+            "type": "array",
+            "description": "A list of tool numbers of the loaded tools",
+            "items": {
+              "$ref": "#/components/schemas/Tools"
+            }
+          }
+        }
+      },
+      "Tools": {
+        "type": "object",
+        "properties": {
+          "toolNumber": {
+            "type": "string",
+            "description": "The tool number of the loaded tool"
+          }
+        },
+        "description": "A list of tool numbers of the loaded tools"
+      },
+      "LoadToolRequest": {
+        "title": "LoadTool",
+        "required": [
+          "location",
+          "plant",
+          "toolNumber"
+        ],
+        "type": "object",
+        "properties": {
+          "plant": {
+            "type": "string",
+            "description": "The plant where the tool loading is performed"
+          },
+          "location": {
+            "type": "string",
+            "description": "The target location of the tool after it’s loaded"
+          },
+          "locationType": {
+            "type": "string",
+            "description": "The type of the location",
+            "enum": [
+              "RESOURCE"
+            ]
+          },
+          "toolNumber": {
+            "type": "string",
+            "description": "The tool number of the tool that’s to be loaded"
+          }
+        }
+      },
+      "UnloadToolRequest": {
+        "title": "UnloadTool",
+        "required": [
+          "location",
+          "plant",
+          "toolNumber"
+        ],
+        "type": "object",
+        "properties": {
+          "plant": {
+            "type": "string",
+            "description": "The plant where the tool unloading is performed"
+          },
+          "location": {
+            "type": "string",
+            "description": "The location from which the tool is unloaded"
+          },
+          "locationType": {
+            "type": "string",
+            "description": "The type of the location",
+            "enum": [
+              "RESOURCE"
+            ]
+          },
+          "toolNumber": {
+            "type": "string",
+            "description": "The tool number of the tool that’s to be unloaded"
+          }
+        }
+      },
+      "LoadToolResponse": {
+        "title": "LoadToolResult",
+        "type": "object",
+        "properties": {
+          "toolNumber": {
+            "type": "string",
+            "description": "Tool loading performed."
+          }
+        }
+      },
+      "UnloadToolResponse": {
+        "title": "UnloadToolResult",
+        "type": "object",
+        "properties": {
+          "toolNumber": {
+            "type": "string",
+            "description": "Tool unloading performed."
+          }
+        }
+      },
+      "ToolsQueryResponse": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "array",
+            "description": "The response of tool retrieval API.",
+            "items": {
+              "$ref": "#/components/schemas/ToolsQueryResponseBody"
+            }
+          },
+          "number": {
+            "type": "integer",
+            "description": "The page number.",
+            "format": "int32"
+          },
+          "numberOfElements": {
+            "type": "integer",
+            "description": "The number of records in the current page.",
+            "format": "int32"
+          },
+          "totalElements": {
+            "type": "integer",
+            "description": "The total number of records that are retrieved.",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "description": "The total number of pages that are returned.",
+            "format": "int32"
+          }
+        }
+      },
+      "ToolsQueryResponseBody": {
+        "title": "ToolsQueryResult",
+        "type": "object",
+        "properties": {
+          "plant": {
+            "type": "string",
+            "description": "The plant of the tool."
+          },
+          "toolNumber": {
+            "type": "string",
+            "description": "The tool number of the tool."
+          },
+          "prtNumber": {
+            "type": "string",
+            "description": "The production resources/tools (PRT) number of the tool."
+          },
+          "toolType": {
+            "type": "string",
+            "description": "The type of the tool."
+          },
+          "material": {
+            "$ref": "#/components/schemas/Material"
+          },
+          "serialNumber": {
+            "type": "string",
+            "description": "The serial number of the tool."
+          },
+          "origin": {
+            "type": "string",
+            "description": "The origin of the tool."
+          },
+          "status": {
+            "type": "string",
+            "description": "The status of the tool."
+          },
+          "description": {
+            "type": "string",
+            "description": "The description of the tool."
+          },
+          "loadedLocation": {
+            "type": "string",
+            "description": "The location where the tool is currently loaded."
+          },
+          "loggingSetup": {
+            "$ref": "#/components/schemas/ToolLoggingSetup"
+          },
+          "totalUsageCount": {
+            "type": "string",
+            "description": "The total number of times the tool was used."
+          },
+          "totalUsageTime": {
+            "type": "string",
+            "description": "The total duration of time the tool was used."
+          },
+          "customValues": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CustomData"
+            }
+          },
+          "vendor": {
+            "type": "string",
+            "description": "The vendor of the tool."
+          },
+          "vendorModel": {
+            "type": "string",
+            "description": "The vendor model of the tool."
+          },
+          "equipmentId": {
+            "type": "string",
+            "description": "The equipment ID of the equipment relevant to the tool. It’s applicable to Asset Central Model."
+          },
+          "assetId": {
+            "type": "string",
+            "description": "The asset ID of the equipment relevant to the tool. It’s applicable to Digital Manufacturing Asset Model."
+          },
+          "createdOn": {
+            "type": "string",
+            "description": "The time when the tool was created in UTC. Format (ISO-8601): yyyy-MM-dd'T'HH:mm:ss.SSS'Z'."
+          },
+          "modifiedOn": {
+            "type": "string",
+            "description": "The time when the tool was last modified in UTC. Format (ISO-8601): yyyy-MM-dd'T'HH:mm:ss.SSS'Z'."
+          }
+        }
+      },
+      "CreateToolRequest": {
+        "title": "CreateToolRequest",
+        "required": [
+          "plant",
+          "prtNumber",
+          "toolType"
+        ],
+        "type": "object",
+        "properties": {
+          "plant": {
+            "type": "string",
+            "description": "The plant for which the tool is created."
+          },
+          "toolType": {
+            "type": "string",
+            "description": "The type of the tool.",
+            "enum": [
+              "EQUIPMENT_PRT",
+              "MATERIAL_PRT"
+            ]
+          },
+          "prtNumber": {
+            "type": "string",
+            "description": "The production resources/tools (PRT) number of the tool."
+          },
+          "toolNumber": {
+            "type": "string",
+            "description": "The tool number of the tool."
+          },
+          "material": {
+            "$ref": "#/components/schemas/Material"
+          },
+          "description": {
+            "type": "string",
+            "description": "The description of the tool."
+          },
+          "customValues": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CustomData"
+            }
+          },
+          "vendor": {
+            "type": "string",
+            "description": "The vendor of the tool."
+          },
+          "vendorModel": {
+            "type": "string",
+            "description": "The vendor model of the tool."
+          },
+          "serialNumber": {
+            "type": "string",
+            "description": "The serial number of the tool."
+          },
+          "loggingSetup": {
+            "$ref": "#/components/schemas/ToolLoggingSetup"
+          }
+        }
+      },
+      "CreateToolResponse": {
+        "title": "CreateToolResponse",
+        "type": "object",
+        "properties": {
+          "plant": {
+            "type": "string",
+            "description": "The plant for which the tool is created."
+          },
+          "toolNumber": {
+            "type": "string",
+            "description": "The tool number of the tool."
+          },
+          "toolType": {
+            "type": "string",
+            "description": "The type of the tool.",
+            "enum": [
+              "EQUIPMENT_PRT",
+              "MATERIAL_PRT"
+            ]
+          },
+          "prtNumber": {
+            "type": "string",
+            "description": "The production resources/tools (PRT) number of the tool."
+          },
+          "material": {
+            "$ref": "#/components/schemas/Material"
+          },
+          "serialNumber": {
+            "type": "string",
+            "description": "The serial number of the tool."
+          },
+          "origin": {
+            "type": "string",
+            "description": "The origin of the tool.",
+            "enum": [
+              "LOCAL",
+              "ERP"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "description": "The status of the tool.",
+            "enum": [
+              "DISABLED",
+              "ENABLED",
+              "ENGINEERING",
+              "PRODUCTIVE"
+            ]
+          },
+          "description": {
+            "type": "string",
+            "description": "The description of the tool."
+          },
+          "loadedLocation": {
+            "type": "string",
+            "description": "The location where the tool is currently loaded."
+          },
+          "loggingSetup": {
+            "$ref": "#/components/schemas/ToolLoggingSetup"
+          },
+          "totalUsageCount": {
+            "type": "number",
+            "description": "The total number of times the tool was used."
+          },
+          "totalUsageTime": {
+            "type": "number",
+            "description": "The total duration of time the tool was used."
+          },
+          "customValues": {
+            "type": "array",
+            "description": "The custom values of the tool.",
+            "items": {
+              "$ref": "#/components/schemas/CustomData"
+            }
+          },
+          "vendor": {
+            "type": "string",
+            "description": "The vendor of the tool."
+          },
+          "vendorModel": {
+            "type": "string",
+            "description": "The vendor model of the tool."
+          },
+          "equipmentId": {
+            "type": "string",
+            "description": "The equipment ID of the equipment relevant to the tool. It’s applicable to Asset Central Model."
+          },
+          "assetId": {
+            "type": "string",
+            "description": "The asset ID of the equipment relevant to the tool. It’s applicable to Digital Manufacturing Asset Model."
+          },
+          "createdOn": {
+            "type": "string",
+            "description": "The time when the tool was created in UTC. Format (ISO-8601): yyyy-MM-dd'T'HH:mm:ss.SSS'Z'.",
+            "format": "date-time",
+            "example": "2023-12-05T09:25:26.822Z"
+          },
+          "modifiedOn": {
+            "type": "string",
+            "description": "The time when the tool was last modified in UTC. Format (ISO-8601): yyyy-MM-dd'T'HH:mm:ss.SSS'Z'.",
+            "format": "date-time",
+            "example": "2023-12-05T09:25:26.822Z"
+          }
+        }
+      },
+      "Material": {
+        "title": "Material",
+        "type": "object",
+        "properties": {
+          "material": {
+            "type": "string",
+            "description": "The name of the material."
+          },
+          "version": {
+            "type": "string",
+            "description": "The version of the material."
+          }
+        },
+        "description": "The material relevant to the tool."
+      },
+      "CustomData": {
+        "title": "CustomData",
+        "type": "object",
+        "properties": {
+          "attribute": {
+            "type": "string",
+            "description": "The attribute of the custom data."
+          },
+          "value": {
+            "type": "string",
+            "description": "The value of the attribute for the custom data."
+          }
+        },
+        "description": "The custom values of the tool."
+      },
+      "ToolLoggingSetup": {
+        "title": "ToolLoggingSetup",
+        "type": "object",
+        "properties": {
+          "loggingMethod": {
+            "type": "string",
+            "description": "The logging method of the tool. For MANUAL and AUTOMATIC methods, you need to define the respective properties under 'manual' or 'automatic'.",
+            "enum": [
+              "MANUAL",
+              "AUTOMATIC",
+              "NON_TRACKED"
+            ]
+          },
+          "manual": {
+            "type": "object",
+            "properties": {
+              "isByCounter": {
+                "type": "boolean",
+                "description": "Indicates that the tool usage is calculated by counts."
+              },
+              "isByTime": {
+                "type": "boolean",
+                "description": "Indicates that the tool usage is calculated by duration of time."
+              }
+            },
+            "description": "Indicates that the tool usage is logged manually. For this method, you need to further specify if the tool usage is calculated by counts, by time, or by both."
+          },
+          "automatic": {
+            "type": "object",
+            "properties": {
+              "counter": {
+                "type": "object",
+                "properties": {
+                  "isByCounter": {
+                    "type": "boolean",
+                    "description": "Indicates that the tool usage is calculated by counts. If set to 'True' and the automatic logging method is defined, then these two properties must be defined: 'autoMethodBaseCount', 'autoMethodCountBy'."
+                  },
+                  "autoMethodBaseCount": {
+                    "type": "number",
+                    "description": "The base count by which the used quantity of the tool is counted. Base count allows a maximum of 10 integer digits and 2 decimal digits."
+                  },
+                  "autoMethodCountBy": {
+                    "type": "string",
+                    "description": "Indicates how the used quantity of the tool is counted.",
+                    "enum": [
+                      "SFC",
+                      "SFC_QUANTITY"
+                    ]
+                  }
+                },
+                "description": "Contains the properties that define how the tool usage is calculated by counts."
+              },
+              "timer": {
+                "type": "object",
+                "properties": {
+                  "isByTime": {
+                    "type": "boolean",
+                    "description": "Indicates that the tool usage is calculated by duration of time. If set to 'True' and the automatic logging method is defined, then these two properties must be defined: 'autoMethodBaseTime', 'autoMethodCalculateBy'."
+                  },
+                  "autoMethodBaseTime": {
+                    "type": "number",
+                    "description": "TThe base time by which the used time of the tool is calculated. It's measured in seconds and it only accepts integers."
+                  },
+                  "autoMethodCalculateBy": {
+                    "type": "string",
+                    "description": "Indicates how the used time of the tool is calculated.",
+                    "enum": [
+                      "SFC",
+                      "SFC_QUANTITY"
+                    ]
+                  }
+                },
+                "description": "Contains the properties that define how the tool usage is calculated by time."
+              }
+            },
+            "description": "Indicates that the tool usage is logged automatically by the system. For this method, you need to further specify if the tool usage is calculated by counts, by time, or by both."
+          }
+        },
+        "description": "The logging setup of the tool."
+      },
+      "ResetToolRequest": {
+        "required": [
+          "plant",
+          "toolNumber"
+        ],
+        "type": "object",
+        "properties": {
+          "plant": {
+            "type": "string",
+            "description": "The plant of the tool."
+          },
+          "toolNumber": {
+            "type": "string",
+            "description": "The tool number of the tool."
+          }
+        }
+      },
+      "ResetToolUsageResponse": {
+        "type": "object",
+        "properties": {
+          "transactionId": {
+            "type": "string",
+            "description": "The ID of the tool calibration transaction."
+          },
+          "plant": {
+            "type": "string",
+            "description": "The plant of the tool."
+          },
+          "toolNumber": {
+            "type": "string",
+            "description": "The tool number of the tool."
+          },
+          "maintenanceType": {
+            "type": "string",
+            "description": "The type of the tool calibration.",
+            "enum": [
+              "MANUAL",
+              "ERP"
+            ]
+          },
+          "createdOn": {
+            "type": "string",
+            "description": "The UTC time when the tool calibration was performed. Format (ISO-8601): yyyy-MM-dd'T'HH:mm:ss.SSS'Z'.",
+            "format": "date-time",
+            "example": "2023-12-05T09:25:26.822Z"
+          }
+        }
+      },
+      "CreateToolUsageLogRequest": {
+        "title": "CreateToolUsageLogRequest",
+        "required": [
+          "operation",
+          "plant",
+          "resource",
+          "sfc",
+          "toolNumber"
+        ],
+        "type": "object",
+        "properties": {
+          "plant": {
+            "type": "string",
+            "description": "The plant of the tool."
+          },
+          "toolNumber": {
+            "type": "string",
+            "description": "The tool number of the tool."
+          },
+          "sfc": {
+            "type": "string",
+            "description": "The name of the shop floor control (SFC)."
+          },
+          "resource": {
+            "type": "string",
+            "description": "The name of the resource."
+          },
+          "operation": {
+            "type": "string",
+            "description": "The name of the operation."
+          },
+          "usageCount": {
+            "type": "number",
+            "description": "The number of counts the tool is used."
+          },
+          "startTime": {
+            "type": "string",
+            "description": "The start time of the tool usage logging.",
+            "format": "date-time",
+            "example": "2023-12-05T09:25:26.822Z"
+          },
+          "endTime": {
+            "type": "string",
+            "description": "The end time of the tool usage logging.",
+            "format": "date-time",
+            "example": "2023-12-05T09:25:26.822Z"
+          },
+          "usageTime": {
+            "type": "integer",
+            "description": "The used time of the tool. The tool's used time is calculated automatically when both 'startTime' and 'endTime' are filled. Otherwise, the time you enter here will be used. The used time is measured in seconds.",
+            "format": "int64"
+          }
+        }
+      },
+      "FindPrtAssignmentApiResponse": {
+        "title": "FindPrtAssignmentResponse",
+        "type": "object",
+        "properties": {
+          "plant": {
+            "type": "string",
+            "description": "The plant of the order."
+          },
+          "order": {
+            "type": "string",
+            "description": "The order for which the PRT assignment is retrieved."
+          },
+          "routing": {
+            "$ref": "#/components/schemas/PrtAssignmentRouting"
+          }
+        }
+      },
+      "PrtAssignmentRouting": {
+        "type": "object",
+        "properties": {
+          "routing": {
+            "type": "string",
+            "description": "The name of the routing."
+          },
+          "routingType": {
+            "type": "string",
+            "description": "The type of the routing.",
+            "enum": [
+              "PRODUCTION",
+              "NC",
+              "SPECIAL",
+              "DISPOSITION_FUNCTION",
+              "SFC_SPECIFIC",
+              "SHOPORDER_SPECIFIC",
+              "CONFIGURABLE",
+              "PRODUCTION_RECIPE",
+              "SHOPORDER_SPECIFIC_RECIPE"
+            ]
+          },
+          "routingVersion": {
+            "type": "string",
+            "description": "The version of the routing."
+          },
+          "steps": {
+            "type": "array",
+            "description": "The routing step list with PRT assignment of the routing.",
+            "items": {
+              "$ref": "#/components/schemas/StepDTO"
+            }
+          }
+        },
+        "description": "The routing with the current version."
+      },
+      "StepDTO": {
+        "type": "object",
+        "properties": {
+          "stepId": {
+            "type": "string",
+            "description": "The step ID of the routing step."
+          },
+          "operation": {
+            "type": "string",
+            "description": "The operation of the routing step."
+          },
+          "prtList": {
+            "type": "array",
+            "description": "The prt assignment list of the routing step.",
+            "items": {
+              "$ref": "#/components/schemas/PrtDTO"
+            }
+          }
+        }
+      },
+      "PrtDTO": {
+        "type": "object",
+        "properties": {
+          "prtNumber": {
+            "type": "string",
+            "description": "The PRT number of the PRT assignment."
+          },
+          "prtType": {
+            "type": "string",
+            "description": "The type of the PRT assignment.",
+            "enum": [
+              "EQUIPMENT_PRT",
+              "MATERIAL_PRT"
+            ]
+          },
+          "description": {
+            "type": "string",
+            "description": "The description of the PRT assignment."
+          },
+          "createdOn": {
+            "type": "string",
+            "description": "The UTC time when the PRT assignment was created. Format (ISO-8601): yyyy-MM-dd'T'HH:mm:ss.SSS'Z'.",
+            "format": "date-time"
+          }
+        },
+        "description": "The PRT assignment list of the routing step."
+      },
+      "GetPrtRoutingResponse": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PrtRoutingResponse"
+            }
+          },
+          "number": {
+            "type": "integer",
+            "format": "int32",
+            "description": "The current page number. The initial page number starts with '0'."
+          },
+          "numberOfElements": {
+            "type": "integer",
+            "format": "int32",
+            "description": "The number of routing steps on the current page."
+          },
+          "totalElements": {
+            "type": "integer",
+            "format": "int32",
+            "description": "The total number of routing steps that are returned."
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32",
+            "description": "The total number of pages that are returned."
+          }
+        }
+      },
+      "PrtRoutingResponse": {
+        "type": "object",
+        "properties": {
+          "prtType": {
+            "type": "string",
+            "description": "The type of the PRT assignment.",
+            "enum": [
+              "EQUIPMENT_PRT",
+              "MATERIAL_PRT"
+            ]
+          },
+          "routing": {
+            "$ref": "#/components/schemas/PrtRouting"
+          },
+          "routingStepId": {
+            "type": "string",
+            "description": "The step ID of the routing step."
+          },
+          "operation": {
+            "type": "string",
+            "description": "The operation of the the routing step."
+          },
+          "description": {
+            "type": "string",
+            "description": "The description of the PRT assignment."
+          },
+          "createdOn": {
+            "type": "string",
+            "description": "The UTC time when the PRT assignment was created. Format (ISO-8601): yyyy-MM-dd'T'HH:mm:ss.SSS'Z'.",
+            "format": "date-time"
+          }
+        }
+      },
+      "PrtRouting": {
+        "type": "object",
+        "properties": {
+          "routing": {
+            "type": "string",
+            "description": "The name of the routing."
+          },
+          "routingType": {
+            "type": "string",
+            "description": "The type of the routing.",
+            "enum": [
+              "PRODUCTION",
+              "NC",
+              "SPECIAL",
+              "DISPOSITION_FUNCTION",
+              "SFC_SPECIFIC",
+              "SHOPORDER_SPECIFIC",
+              "CONFIGURABLE",
+              "PRODUCTION_RECIPE",
+              "SHOPORDER_SPECIFIC_RECIPE"
+            ]
+          },
+          "routingVersion": {
+            "type": "string",
+            "description": "The version of the routing."
+          }
+        },
+        "description": "The routing of the order."
+      },
+      "ErrorResponseApiModel": {
+        "title": "ErrorResponseApiModel",
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "Contains a technical code for the error."
+          },
+          "correlationId": {
+            "type": "string",
+            "description": "Contains a correlation ID for the error."
+          },
+          "message": {
+            "type": "string",
+            "description": "Error message."
+          },
+          "details": {
+            "type": "array",
+            "description": "Error message details.",
+            "items": {
+              "$ref": "#/components/schemas/ErrorDetail"
+            }
+          }
+        },
+        "description": "Error response."
+      },
+      "ErrorDetail": {
+        "title": "ErrorDetail",
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "Contains a technical code for the error."
+          },
+          "message": {
+            "type": "string",
+            "description": "Error message."
+          }
+        },
+        "description": "Error detail."
+      }
+    },
+    "securitySchemes": {
+      "OauthClientCredentials": {
+        "type": "oauth2",
+        "flows": {
+          "clientCredentials": {
+            "tokenUrl": "https://{subdomain}.authentication.{tokenHost}/oauth/token",
+            "scopes": {}
+          }
+        }
+      }
+    }
+  },
+  "x-sap-shortText": "Perform production tool related operations such as tool usage logging, tool validation, tool loading and unloading",
+  "x-original-swagger-version": "2.0"
+}

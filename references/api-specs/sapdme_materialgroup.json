@@ -1,0 +1,427 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Material Group",
+    "description": "This API can be called to create, search, delete, and update material groups. It provides the functionality to search and view material groups, along with custom values.",
+    "contact": {
+      "name": "SAP Digital Manufacturing Operations",
+      "email": "sap-dmoperation@sap.com"
+    },
+    "version": "v1"
+  },
+  "host": "hostname",
+  "basePath": "/",
+  "tags": [
+    {
+      "name": "Material Group",
+      "description": "Allows you to interact with material groups."
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/materialGroups": {
+      "get": {
+        "tags": [
+          "Material Group"
+        ],
+        "summary": "Find material group.",
+        "description": "Finds a material group by plant and name.",
+        "operationId": "findMaterialGroupsByPlantAndNameUsingGET_1",
+        "parameters": [
+          {
+            "name": "plant",
+            "in": "query",
+            "description": "The plant for which the request is executed",
+            "required": true,
+            "type": "string",
+            "allowEmptyValue": false
+          },
+          {
+            "name": "materialGroup",
+            "in": "query",
+            "description": "Material group name",
+            "required": true,
+            "type": "string",
+            "allowEmptyValue": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The message was successfully processed.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/MaterialGroup"
+              }
+            }
+          },
+          "400": {
+            "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to call this resource.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Accessing the resource you are trying to reach is forbidden.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "One of the related elements was not found.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "An internal error occurred.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "deprecated": false
+      },
+      "post": {
+        "tags": [
+          "Material Group"
+        ],
+        "summary": "Create material group.",
+        "description": "Creates a list of material groups for the given plant.",
+        "operationId": "createMaterialGroupUsingPOST_1",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "materialGroups",
+            "description": "The list of material groups to create.",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/MaterialGroup"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "The message was successfully processed.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/MaterialGroup"
+              }
+            }
+          },
+          "400": {
+            "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to call this resource.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Accessing the resource you are trying to reach is forbidden.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "One of the related elements was not found.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "409": {
+            "description": "One of the material groups already exists.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "An internal error occurred.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "deprecated": false
+      },
+      "patch": {
+        "tags": [
+          "Material Group"
+        ],
+        "summary": "Update material group.",
+        "description": "Updates a list of material groups. Every material group that will be updated must have the material group and plant fields specified. Only the specified fields will be updated. Any unspecified fields will remain unchanged.",
+        "operationId": "updateMaterialGroupUsingPATCH_1",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "materialGroups",
+            "description": "List of material groups to update",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/MaterialGroup"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Message successfully processed.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/MaterialGroup"
+              }
+            }
+          },
+          "400": {
+            "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to call this resource.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Accessing the resource you are trying to reach is forbidden.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "One of the related elements was not found.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "An internal error occurred.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "deprecated": false
+      },
+      "delete": {
+        "tags": [
+          "Material Group"
+        ],
+        "summary": "Delete material group",
+        "description": "Deletes a material group by plant and name.",
+        "operationId": "deleteMaterialGroupUsingDELETE_1",
+        "parameters": [
+          {
+            "name": "plant",
+            "in": "query",
+            "description": "The plant for which the request is executed",
+            "required": true,
+            "type": "string",
+            "allowEmptyValue": false
+          },
+          {
+            "name": "materialGroup",
+            "in": "query",
+            "description": "Material group name",
+            "required": true,
+            "type": "string",
+            "allowEmptyValue": false
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Material group deleted successfully."
+          },
+          "400": {
+            "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to call this resource.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Accessing the resource you are trying to reach is forbidden.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "One of the related elements was not found.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "An internal error occurred.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "deprecated": false
+      }
+    }
+  },
+  "securityDefinitions": {
+    "OAuthSecurity": {
+      "type": "oauth2",
+      "tokenUrl": "https://{subdomain}.authentication.{tokenHost}/oauth/token",
+      "flow": "application"
+    }
+  },
+  "definitions": {
+    "MaterialGroup": {
+      "required": [
+        "materialGroup",
+        "plant"
+      ],
+      "type": "object",
+      "properties": {
+        "plant": {
+          "type": "string",
+          "description": "The plant of the material group."
+        },
+        "materialGroup": {
+          "type": "string",
+          "description": "The name of the material group."
+        },
+        "description": {
+          "type": "string",
+          "description": "The description of the material group."
+        },
+        "customValues": {
+          "type": "array",
+          "description": "Material group custom data.",
+          "items": {
+            "$ref": "#/definitions/CustomValue"
+          }
+        },
+        "createdDateTime": {
+          "type": "string",
+          "description": "The time when the material group was created.",
+          "format": "date-time",
+          "readOnly": true,
+          "example": "2018-06-22T04:24:000Z"
+        },
+        "modifiedDateTime": {
+          "type": "string",
+          "description": "The time when the material group was updated.",
+          "format": "date-time",
+          "readOnly": true,
+          "example": "2018-06-22T04:24:000Z"
+        }
+      }
+    },
+    "CustomValue": {
+      "type": "object",
+      "properties": {
+        "attribute": {
+          "type": "string",
+          "description": "The attribute name."
+        },
+        "value": {
+          "type": "string",
+          "description": "The value of the attribute."
+        }
+      },
+      "description": "Material group custom data."
+    },
+    "ErrorResponse": {
+      "type": "object",
+      "properties": {
+        "causeMessage": {
+          "type": "string",
+          "description": "Contains a technical reason for the error."
+        },
+        "code": {
+          "type": "string",
+          "description": "Internal error message"
+        },
+        "correlationId": {
+          "type": "string",
+          "description": "Contains a correlation ID for the error."
+        },
+        "message": {
+          "type": "string",
+          "description": "Contains additional information if any."
+        }
+      },
+      "title": "error",
+      "description": "Error response."
+    }
+  },
+  "externalDocs": {
+    "description": "Prepare for API Integration",
+    "url": "https://help.sap.com/docs/sap-digital-manufacturing/operations-guide/prepare-for-api-integration"
+  },
+  "schemes": [
+    "https"
+  ],
+  "security": [
+    {
+      "OAuthSecurity": []
+    }
+  ],
+  "x-sap-shortText": "Browse and modify material groups",
+  "x-servers": [
+    {
+      "url": "https://api.{regionHost}/materialGroup/v1",
+      "description": "Base URL",
+      "templates": {
+        "regionHost": {
+          "description": "The data center where SAP Digital Manufacturing is provisioned for your organization",
+          "enum": [
+            "eu10.dmc.cloud.sap",
+            "eu20.dmc.cloud.sap",
+            "us10.dmc.cloud.sap",
+            "us20.dmc.cloud.sap",
+            "test.eu10.dmc.cloud.sap",
+            "test.eu20.dmc.cloud.sap",
+            "test.us10.dmc.cloud.sap",
+            "test.us20.dmc.cloud.sap"
+          ],
+          "default": "test.eu10.dmc.cloud.sap"
+        },
+        "tokenHost": {
+          "description": "The authentication server where SAP Digital Manufacturing is provisioned for your organization",
+          "enum": [
+            "eu10.hana.ondemand.com",
+            "eu20.hana.ondemand.com",
+            "us10.hana.ondemand.com",
+            "us20.hana.ondemand.com"
+          ],
+          "default": "eu10.hana.ondemand.com"
+        }
+      }
+    }
+  ]
+}

@@ -1,9 +1,9 @@
 ---
 name: pod-plugin
-description: Create SAP Digital Manufacturing POD 1.0 and POD 2.0 plugins with proper architecture. **ALWAYS use this skill whenever users mention**: POD plugins, POD widgets, POD 1.0, POD 2.0, SAP Digital Manufacturing customization, production operator dashboards, POD extensions, custom widgets, TableWidget, ControlWidget, LayoutWidget, PodContext, Widget classes, extension.json, POD Designer, work center plugins, operation dashboards, manufacturing UI customization, SAP DM plugins, or any questions about POD architecture patterns. Expert in both legacy POD 1.0 (UI5 component-based) and modern POD 2.0 (ES6 class-based) plugin development. **Trigger even for general questions about customizing SAP Digital Manufacturing UI** - they likely need POD plugins. Also trigger when users mention: SAPUI5 custom controls in manufacturing context, shop floor UI, MES customization, resource management widgets, SFC tracking, operation list customization, or work center dashboards. **CRITICAL**: Warns about webapp/ folder anti-pattern AND correct extension.json placement inside namespace folder. **Automatically creates deployment zip file** when plugin is complete. **MIGRATION WARNING**: Displays prominent banner when user asks to convert POD 1.0 to POD 2.0, explaining that re-architecting is better than direct conversion. **ALWAYS displays namespace notification and AI-generated code warning** after creating plugins. **File structure aligned with official SAP POD 2.0 Developer's Guide** using widget/, action/, util/ folder pattern. **extension.json must be INSIDE namespace folder** for module path resolution. **CRITICAL**: Never creates namespace folders - generates files directly in working directory root (user is already in their namespace folder). **i18n IMPLEMENTATION**: Framework-driven pattern using static getI18nModel() with I18nResourceModel - widgets use inherited this.getI18nText() method (no manual ResourceBundle/ResourceModel loading!). **PRODUCTION PATTERNS**: Includes real SAP production code patterns (JSDoc, private fields, Object.freeze enums, design mode checks, ContentHandler patterns, subscription patterns, delegate patterns, error handling from actual SAP widgets). **COMPLETE PATTERNS**: Copy-paste ready widget templates including minimal widget, context-aware widget, API widget, full TableWidget, ControlWidget, LayoutWidget, and ContentHandler implementations. **PARENT PROPERTY SPREADING CLARITY**: Clear decision rules for when to spread parent properties (YES for TableWidget/LayoutWidget, NO for Widget/ControlWidget base classes).
-version: 13.0.0
+description: Create SAP Digital Manufacturing POD 1.0 and POD 2.0 plugins with proper architecture. **ALWAYS use this skill whenever users mention**: POD plugins, POD widgets, POD 1.0, POD 2.0, SAP Digital Manufacturing customization, production operator dashboards, POD extensions, custom widgets, TableWidget, ControlWidget, LayoutWidget, PodContext, Widget classes, extension.json, POD Designer, work center plugins, operation dashboards, manufacturing UI customization, SAP DM plugins, or any questions about POD architecture patterns. Expert in both legacy POD 1.0 (UI5 component-based) and modern POD 2.0 (ES6 class-based) plugin development. **Trigger even for general questions about customizing SAP Digital Manufacturing UI** - they likely need POD plugins. Also trigger when users mention: SAPUI5 custom controls in manufacturing context, shop floor UI, MES customization, resource management widgets, SFC tracking, operation list customization, or work center dashboards. **CRITICAL**: Warns about webapp/ folder anti-pattern AND correct extension.json placement inside namespace folder. **Automatically creates deployment zip file** when plugin is complete. **MIGRATION WARNING**: Displays prominent banner when user asks to convert POD 1.0 to POD 2.0, explaining that re-architecting is better than direct conversion. **ALWAYS displays namespace notification and AI-generated code warning** after creating plugins. **File structure aligned with official SAP POD 2.0 Developer's Guide** using widget/, action/, util/ folder pattern. **extension.json must be INSIDE namespace folder** for module path resolution. **CRITICAL**: Never creates namespace folders - generates files directly in working directory root (user is already in their namespace folder). **i18n IMPLEMENTATION**: Framework-driven pattern using static getI18nModel() with I18nResourceModel - widgets use inherited this.getI18nText() method (no manual ResourceBundle/ResourceModel loading!). **PRODUCTION PATTERNS**: Includes real SAP production code patterns (JSDoc, private fields, Object.freeze enums, design mode checks, ContentHandler patterns, subscription patterns, delegate patterns, error handling from actual SAP widgets). **COMPLETE PATTERNS**: Copy-paste ready widget templates including minimal widget, context-aware widget, API widget, full TableWidget, ControlWidget, LayoutWidget, and ContentHandler implementations. **PARENT PROPERTY SPREADING CLARITY**: Clear decision rules for when to spread parent properties (YES for TableWidget/LayoutWidget, NO for Widget/ControlWidget base classes). **IMPORT & MODELPATH VALIDATION**: Comprehensive validation checklist prevents common errors (PlacementType from sap/m, ModelPath constants plural, PodContext from context/).
+version: 14.0.0
 author: Claude
-tags: [sap, digital-manufacturing, pod, plugin, pod2, no-binding-in-widgetproperty, conditional-parent-spreading, getDefaultConfig-official-pattern, getI18nText-method, I18nResourceModel, framework-driven-i18n, stringpropertyeditor-no-default, callback-parameter-order, real-world-patterns, widget-architecture, createView-before-onInit, no-webapp-folder, pod-vs-sapui5, auto-deployment-zip, migration-warning, pod1-to-pod2, namespace-notification, ai-code-warning, official-sap-structure, widget-action-util-folders, extension-json-placement, module-path-resolution, no-namespace-folder-creation, generate-in-cwd-root, production-sap-patterns, jsdoc-patterns, private-fields-encapsulation, object-freeze-enums, design-mode-patterns, contenthandler-patterns, subscription-patterns, delegate-patterns, copy-paste-templates, spreading-decision-rules]
+tags: [sap, digital-manufacturing, pod, plugin, pod2, no-binding-in-widgetproperty, conditional-parent-spreading, getDefaultConfig-official-pattern, getI18nText-method, I18nResourceModel, framework-driven-i18n, stringpropertyeditor-no-default, callback-parameter-order, real-world-patterns, widget-architecture, createView-before-onInit, no-webapp-folder, pod-vs-sapui5, auto-deployment-zip, migration-warning, pod1-to-pod2, namespace-notification, ai-code-warning, official-sap-structure, widget-action-util-folders, extension-json-placement, module-path-resolution, no-namespace-folder-creation, generate-in-cwd-root, production-sap-patterns, jsdoc-patterns, private-fields-encapsulation, object-freeze-enums, design-mode-patterns, contenthandler-patterns, subscription-patterns, delegate-patterns, copy-paste-templates, spreading-decision-rules, import-validation, modelpath-validation, placementtype-import, context-not-model-import, plural-modelpath-constants, pre-generation-checklist]
 compatibility:
   environment: SAP Business Technology Platform (BTP) with SAP Digital Manufacturing
   requirements:
@@ -521,6 +521,28 @@ class MyTableWidget extends TableWidget {
 ## Quick Start (TL;DR)
 
 **New to POD plugins? Start here!**
+
+```
+╔════════════════════════════════════════════════════════════════════════════╗
+║ ⚠️  CRITICAL IMPORT CHECKS                                                 ║
+╠════════════════════════════════════════════════════════════════════════════╣
+║                                                                            ║
+║  Before generating widget code, verify these common errors:                ║
+║                                                                            ║
+║  ✅ PlacementType → import from "sap/m/PlacementType" (direct)            ║
+║     ❌ NOT from "sap/ui/core/library"                                     ║
+║                                                                            ║
+║  ✅ PodContext → import from "sap/dm/dme/pod2/context/PodContext"         ║
+║     ❌ NOT from "sap/dm/dme/pod2/model/PodContext"                        ║
+║                                                                            ║
+║  ✅ ModelPath.SelectedWorkListItems → Array (note plural!)                ║
+║     ❌ NOT ModelPath.SelectedWorkListItem (doesn't exist)                 ║
+║                                                                            ║
+║  Always verify ModelPath constants in references/pod2-api-reference.md    ║
+║  before use!                                                               ║
+║                                                                            ║
+╚════════════════════════════════════════════════════════════════════════════╝
+```
 
 ### For POD 2.0 (Recommended):
 
@@ -1215,6 +1237,148 @@ This skill includes comprehensive reference files:
 - **ApiClient**: Client for SAP DM public operations
 
 📖 **Complete Glossary**: See [references/glossary.md](references/glossary.md) for all terms and definitions.
+
+---
+
+## Pre-Generation Validation Checklist
+
+**CRITICAL**: Before generating ANY widget code, verify the following to prevent common import and ModelPath errors:
+
+### ✅ Import Validation
+
+**1. PlacementType Import:**
+```javascript
+// ✅ CORRECT
+import PlacementType from "sap/m/PlacementType";
+
+// ❌ WRONG - DON'T use sap/ui/core/library
+// import coreLibrary from "sap/ui/core/library";
+// const { PlacementType } = coreLibrary;
+```
+
+**2. PodContext & ModelPath Imports:**
+```javascript
+// ✅ CORRECT - Use context/ path
+import PodContext from "sap/dm/dme/pod2/context/PodContext";
+import ModelPath from "sap/dm/dme/pod2/context/ModelPath";
+
+// ❌ WRONG - Don't use model/ path
+// import PodContext from "sap/dm/dme/pod2/model/PodContext";
+// import ModelPath from "sap/dm/dme/pod2/model/ModelPath";
+```
+
+**3. Other Common Enum Imports:**
+```javascript
+// All sap.m enums from their direct modules
+import ButtonType from "sap/m/ButtonType";
+import ListMode from "sap/m/ListMode";
+import MessageType from "sap/m/MessageType";
+import ValueState from "sap/ui/core/ValueState";  // Exception: ValueState IS in core
+```
+
+### ✅ ModelPath Constants Validation
+
+**CRITICAL**: Work list paths are PLURAL and return arrays!
+
+```javascript
+// ✅ CORRECT - Use exact names from API reference
+ModelPath.SelectedWorkListItems   // Array (note plural!)
+ModelPath.WorkListItems           // Array
+ModelPath.FilterResources         // Array
+ModelPath.CurrentResource         // Single object
+
+// ❌ WRONG - These don't exist
+// ModelPath.SelectedWorkListItem  // Doesn't exist!
+// ModelPath.SelectedSfc            // Doesn't exist!
+```
+
+**Before using ANY ModelPath constant:**
+1. Check [references/pod2-api-reference.md](references/pod2-api-reference.md#modelpath-constants) for exact name
+2. Verify if path returns array or single object
+3. Use `Array.isArray()` for defensive coding
+
+### ✅ i18n Setup Validation
+
+**Framework-driven pattern (correct as of v13.0.0):**
+
+```javascript
+// ✅ CORRECT - Framework-driven i18n
+import I18nResourceModel from "sap/dm/dme/pod2/model/I18nResourceModel";
+
+class MyWidget extends Widget {
+    // 1. Static private i18n model
+    static #oI18nModel = new I18nResourceModel({
+        bundleName: "custom.company.project.i18n.i18n"  // Dots!
+    });
+    
+    // 2. Static getter (framework calls this)
+    static getI18nModel() {
+        return this.#oI18nModel;
+    }
+    
+    // 3. Use inherited method
+    _someMethod() {
+        const sText = this.getI18nText("myWidget.greeting");
+    }
+}
+
+// ❌ WRONG - No manual ResourceBundle/ResourceModel loading!
+```
+
+### ✅ Lifecycle Validation
+
+**Subscription pattern:**
+```javascript
+// ✅ Subscribe in onInit() with correct ModelPath
+async onInit() {
+    await super.onInit();
+    
+    if (PodContext.isRunMode()) {
+        PodContext.subscribe(
+            ModelPath.SelectedWorkListItems,  // Exact constant name
+            this._onSelectionChanged,
+            this
+        );
+    }
+}
+
+// ✅ Unsubscribe in onExit() with same path
+onExit() {
+    super.onExit();
+    
+    if (PodContext.isRunMode()) {
+        PodContext.unsubscribe(
+            ModelPath.SelectedWorkListItems,
+            this._onSelectionChanged,
+            this
+        );
+    }
+}
+
+// ✅ Handle arrays defensively
+_onSelectionChanged(aItems, sPath) {
+    const items = Array.isArray(aItems) ? aItems : [];
+    // ... process items
+}
+```
+
+### Quick Checklist
+
+Before generating widget code, confirm:
+
+- [ ] PlacementType from `"sap/m/PlacementType"` (not sap/ui/core/library)
+- [ ] PodContext from `"sap/dm/dme/pod2/context/PodContext"` (not model/)
+- [ ] ModelPath from `"sap/dm/dme/pod2/context/ModelPath"` (not model/)
+- [ ] ModelPath constants are exact (SelectedWorkListItems not Item)
+- [ ] Work list paths understood to return arrays
+- [ ] i18n uses static getI18nModel() + I18nResourceModel pattern
+- [ ] Callbacks use (value, path) parameter order
+- [ ] Defensive type checking with Array.isArray()
+
+**See Also:**
+- [Common Mistakes #12-#13](references/common-mistakes.md#mistake-12-wrong-placementtype-import) - Import and ModelPath errors
+- [Common Imports Reference](references/pod2-api-reference.md#common-imports-reference) - Correct import paths
+- [ModelPath Constants](references/pod2-api-reference.md#modelpath-constants) - Exact constant names
 
 ---
 

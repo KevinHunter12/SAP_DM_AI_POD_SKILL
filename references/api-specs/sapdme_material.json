@@ -1,0 +1,1819 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "This API can be called to create, search and update materials. It provides a functionality to search and view materials, along with a routing, bill of material, storage location, lot size, unit of measure, and custom values.",
+    "version": "v1",
+    "title": "Material",
+    "contact": {
+      "name": "SAP Digital Manufacturing Operations",
+      "email": "sap-dmoperation@sap.com"
+    }
+  },
+  "host": "hostname",
+  "basePath": "/",
+  "tags": [
+    {
+      "name": "Material",
+      "description": "Allows you to interact with materials."
+    },
+    {
+      "name": "File Attachment"
+    }
+  ],
+  "consumes": [
+    "application/json",
+    "multipart/form-data"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/v1/materials": {
+      "get": {
+        "tags": [
+          "Material"
+        ],
+        "summary": "Find material.",
+        "description": "Finds a material by plant, name, and version.",
+        "operationId": "findMaterialByPlantAndNameUsingGET_1",
+        "parameters": [
+          {
+            "name": "material",
+            "in": "query",
+            "description": "Material name",
+            "required": true,
+            "type": "string",
+            "allowEmptyValue": false
+          },
+          {
+            "name": "plant",
+            "in": "query",
+            "description": "Plant for which the request is executed",
+            "required": true,
+            "type": "string",
+            "allowEmptyValue": false
+          },
+          {
+            "name": "version",
+            "in": "query",
+            "description": "Version of the material. If not present, current version material will be returned.",
+            "required": false,
+            "type": "string",
+            "allowEmptyValue": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The message was successfully processed.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/MaterialResponse"
+              }
+            }
+          },
+          "400": {
+            "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to call this resource.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Accessing the resource you are trying to reach is forbidden.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "One of the related elements was not found.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "An internal error occurred.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "deprecated": false
+      },
+      "post": {
+        "tags": [
+          "Material"
+        ],
+        "summary": "Create material.",
+        "description": "Creates a list of materials for given plants.",
+        "operationId": "createUsingPOST_4",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "materialApiModelList",
+            "description": "List of materials to create.",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/MaterialRequest"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "The message was successfully processed.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/MaterialResponse"
+              }
+            }
+          },
+          "400": {
+            "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to call this resource.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Accessing the resource you are trying to reach is forbidden.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "One of the related elements was not found.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "409": {
+            "description": "One of the materials already exists.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "An internal error occurred.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "deprecated": false
+      },
+      "delete": {
+        "tags": [
+          "Material"
+        ],
+        "summary": "Delete material.",
+        "description": "Deletes a material by plant, name, and version. If the version is not defined, then it deletes the current material version.",
+        "operationId": "deleteUsingDELETE_4",
+        "parameters": [
+          {
+            "name": "material",
+            "in": "query",
+            "description": "Material name",
+            "required": true,
+            "type": "string",
+            "allowEmptyValue": false
+          },
+          {
+            "name": "plant",
+            "in": "query",
+            "description": "Plant for which the request is executed",
+            "required": true,
+            "type": "string",
+            "allowEmptyValue": false
+          },
+          {
+            "name": "version",
+            "in": "query",
+            "description": "Material version",
+            "required": false,
+            "type": "string",
+            "allowEmptyValue": false
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "The message was successfully processed."
+          },
+          "400": {
+            "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to call this resource.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Accessing the resource you are trying to reach is forbidden.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "One of the related elements was not found.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "An internal error occurred.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "deprecated": false
+      },
+      "patch": {
+        "tags": [
+          "Material"
+        ],
+        "summary": "Update material.",
+        "description": "Every material that will be updated must have the material, plant, and version fields specified. Only the specified fields will be updated. Any unspecified fields will remain unchanged.",
+        "operationId": "updateUsingPATCH_4",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "materialApiModelList",
+            "description": "List of materials to update",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/MaterialRequest"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Message successfully processed.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/MaterialResponse"
+              }
+            }
+          },
+          "400": {
+            "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to call this resource.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Accessing the resource you are trying to reach is forbidden.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "One of the related elements was not found.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "An internal error occurred.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/v1/materials/fileAttachments": {
+      "get": {
+        "tags": [
+          "Material"
+        ],
+        "summary": "Finds material file attachments.",
+        "description": "Finds material file attachments by plant, name, and version.",
+        "operationId": "findMaterialFileAttachmentByPlantAndNameUsingGET_1",
+        "parameters": [
+          {
+            "name": "plant",
+            "in": "query",
+            "description": "Plant for which the request is executed",
+            "required": true,
+            "type": "string",
+            "allowEmptyValue": false
+          },
+          {
+            "name": "material",
+            "in": "query",
+            "description": "Material name",
+            "required": true,
+            "type": "string",
+            "allowEmptyValue": false
+          },
+          {
+            "name": "version",
+            "in": "query",
+            "description": "Version of the material.",
+            "required": true,
+            "type": "string",
+            "allowEmptyValue": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The message was successfully processed.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/MaterialFileAttachmentResponse"
+              }
+            }
+          },
+          "400": {
+            "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to call this resource.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "403": {
+            "description": "Accessing the resource you are trying to reach is forbidden.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "One of the related elements was not found.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "An internal error occurred.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/v2/materials": {
+      "get": {
+        "tags": [
+          "Material"
+        ],
+        "summary": "Finds materials by plant; or by plant and material; or by plant, material, and version.",
+        "description": "Searches materials by plant; or by plant and material; or by plant, material, and version.",
+        "operationId": "findMaterialsByPlantUsingGET_2",
+        "parameters": [
+          {
+            "name": "plant",
+            "in": "query",
+            "description": "A plant for which the request is executed",
+            "required": true,
+            "type": "string",
+            "allowEmptyValue": false
+          },
+          {
+            "name": "material",
+            "in": "query",
+            "description": "A material name",
+            "required": false,
+            "type": "string",
+            "allowEmptyValue": false
+          },
+          {
+            "name": "version",
+            "in": "query",
+            "description": "A version of the material. If not present, all versions of the given material are returned.",
+            "required": false,
+            "type": "string",
+            "allowEmptyValue": false
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "description": "Size",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The message was successfully processed.",
+            "schema": {
+              "$ref": "#/definitions/Page_MaterialResponse"
+            }
+          },
+          "400": {
+            "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to call this resource.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Accessing the resource you are trying to reach is forbidden.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "One of the related elements was not found.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "An internal error occurred.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/v1/materials/headerDetails": {
+      "get": {
+        "tags": [
+          "Material"
+        ],
+        "summary": "Finds material header details by plant, name, and version.",
+        "description": "Searches for material header details by plant, name, and version.",
+        "operationId": "findMaterialHeaderDetailsUsingGET_1",
+        "parameters": [
+          {
+            "name": "material",
+            "in": "query",
+            "description": "The material name",
+            "required": true,
+            "type": "string",
+            "allowEmptyValue": false
+          },
+          {
+            "name": "plant",
+            "in": "query",
+            "description": "The plant for which the request is executed",
+            "required": true,
+            "type": "string",
+            "allowEmptyValue": false
+          },
+          {
+            "name": "version",
+            "in": "query",
+            "description": "The version of the material. If not present, the header details for the current version of the material are returned.",
+            "required": false,
+            "type": "string",
+            "allowEmptyValue": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The message was successfully processed.",
+            "schema": {
+              "$ref": "#/definitions/MaterialHeaderDetailsResponse"
+            }
+          },
+          "400": {
+            "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to call this resource.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "403": {
+            "description": "Accessing the resource you are trying to reach is forbidden.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "One of the related elements was not found.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "An internal error occurred.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/v1/file/upload": {
+      "post": {
+        "tags": [
+          "File Attachment"
+        ],
+        "summary": "Upload a file.",
+        "description": "This API allows users to upload a file. The external URL of the uploaded file can be used during the creation of material attachments.",
+        "operationId": "uploadFileUsingPOST_1",
+        "parameters": [
+          {
+            "in": "formData",
+            "name": "file",
+            "description": "The file to be uploaded.",
+            "required": true,
+            "type": "file"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Message successfully processed.",
+            "schema": {
+              "$ref": "#/definitions/FileMetadata"
+            }
+          },
+          "400": {
+            "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to call this resource.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "403": {
+            "description": "Accessing the resource you are trying to reach is forbidden.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "One of the related elements is not found.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "An internal error occurred.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/v1/file/download": {
+      "get": {
+        "tags": [
+          "File Attachment"
+        ],
+        "summary": "Download a file.",
+        "description": "This API allows users to download file content by using the provided external URL.",
+        "operationId": "downloadFileGET_1",
+        "parameters": [
+          {
+            "name": "externalFileUrl",
+            "in": "query",
+            "description": "The external URL of the file you would like to download.",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Message successfully processed.",
+            "schema": {
+              "type": "string",
+              "format": "binary"
+            },
+            "headers": {
+              "Content-Disposition": {
+                "type": "string",
+                "description": "A header for specifying the file name, for example 'attachment; filename=file.jpg'."
+              },
+              "Content-Type": {
+                "type": "string",
+                "description": "Indicates the original media type of the resource."
+              }
+            }
+          },
+          "400": {
+            "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to call this resource.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "403": {
+            "description": "Accessing the resource you are trying to reach is forbidden.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "One of the related elements is not found.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "An internal error occured.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/v1/file/preview": {
+      "get": {
+        "tags": [
+          "File Attachment"
+        ],
+        "summary": "View contents of a file.",
+        "description": "This API allows users to preview file content by using the provided external URL.",
+        "operationId": "previewFileGET_1",
+        "parameters": [
+          {
+            "name": "externalFileUrl",
+            "in": "query",
+            "description": "The external URL of the file that is to be downloaded.",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Message successfully processed.",
+            "schema": {
+              "type": "string",
+              "format": "binary"
+            },
+            "headers": {
+              "Content-Disposition": {
+                "type": "string",
+                "description": "A header for specifying the file name, for example 'inline; filename=file.jpg'."
+              },
+              "Content-Type": {
+                "type": "string",
+                "description": "Indicates the original media type of the resource."
+              }
+            }
+          },
+          "400": {
+            "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to call this resource.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "403": {
+            "description": "Accessing the resource you are trying to reach is forbidden.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "One of the related elements is not found.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "An internal error occured.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    }
+  },
+  "securityDefinitions": {
+    "OAuthSecurity": {
+      "type": "oauth2",
+      "tokenUrl": "https://{subdomain}.authentication.{tokenHost}/oauth/token",
+      "flow": "application"
+    }
+  },
+  "definitions": {
+    "FileMetadata": {
+      "type": "object",
+      "properties": {
+        "mimeType": {
+          "type": "string",
+          "description": "The file media type.",
+          "example": "text/xml"
+        },
+        "externalFileUrl": {
+          "type": "string",
+          "description": "The URL of the file."
+        }
+      },
+      "title": "FileMetadata"
+    },
+    "MaterialFileAttachmentResponse": {
+      "type": "object",
+      "properties": {
+        "fileName": {
+          "type": "string",
+          "description": "The name of the file."
+        },
+        "fileId": {
+          "type": "string",
+          "description": "The file path of the file."
+        },
+        "thumbnail": {
+          "type": "boolean",
+          "description": "Defines if the file is a default one. If true, then this file attachment is a default one.",
+          "default": false
+        },
+        "createdDateTime": {
+          "type": "string",
+          "format": "date-time",
+          "example": "2018-06-22T04:24:00.000Z",
+          "description": "The time when the file was created."
+        }
+      },
+      "title": "File Attachment"
+    },
+    "AlternateUnitOfMeasure": {
+      "type": "object",
+      "properties": {
+        "denominator": {
+          "type": "integer",
+          "format": "int32",
+          "description": "The denominator parameter value used during calculation."
+        },
+        "numerator": {
+          "type": "integer",
+          "format": "int32",
+          "description": "The numerator parameter value used during calculation."
+        },
+        "uom": {
+          "type": "string",
+          "description": "The value of the unit of measure."
+        },
+        "parallelUom": {
+          "type": "boolean",
+          "description": "If true, then the parallel unit of measure is enabled for this material.",
+          "default": false
+        }
+      },
+      "title": "AlternateUnitOfMeasure"
+    },
+    "BOM": {
+      "type": "object",
+      "properties": {
+        "bom": {
+          "type": "string",
+          "description": "The name of the BOM."
+        },
+        "bomType": {
+          "type": "string",
+          "description": "The type of the BOM.",
+          "enum": [
+            "USERBOM",
+            "SHOPORDERBOM",
+            "SFCBOM",
+            "CONFIGURABLEBOM"
+          ]
+        },
+        "plant": {
+          "type": "string",
+          "description": "The plant for which the BOM is defined."
+        },
+        "version": {
+          "type": "string",
+          "description": "The version of the BOM."
+        }
+      },
+      "title": "BOM"
+    },
+    "CustomValue": {
+      "type": "object",
+      "properties": {
+        "attribute": {
+          "type": "string",
+          "description": "The attribute name."
+        },
+        "value": {
+          "type": "string",
+          "description": "The value of the attribute."
+        }
+      },
+      "title": "CustomValue"
+    },
+    "DataField": {
+      "type": "object",
+      "properties": {
+        "dataFieldOptions": {
+          "type": "array",
+          "description": "The options of the data field.",
+          "items": {
+            "$ref": "#/definitions/DataFieldOption"
+          }
+        },
+        "description": {
+          "type": "string",
+          "description": "The description of the data field."
+        },
+        "fieldLabel": {
+          "type": "string",
+          "description": "The label of the data field."
+        },
+        "fieldName": {
+          "type": "string",
+          "description": "The name of the data field."
+        },
+        "status": {
+          "type": "string",
+          "description": "The status of the data field."
+        },
+        "type": {
+          "type": "string",
+          "description": "The type of the data field.",
+          "enum": [
+            "TEXT",
+            "TEXT_AREA",
+            "DATE",
+            "NUMBER",
+            "CHECKBOX",
+            "LIST",
+            "FORMULA"
+          ]
+        },
+        "browsable": {
+          "type": "boolean",
+          "description": "Defines whether this data field is browsable.",
+          "default": false
+        }
+      },
+      "title": "DataField"
+    },
+    "DataFieldOption": {
+      "type": "object",
+      "properties": {
+        "fieldValue": {
+          "type": "string",
+          "description": "The value of the data field."
+        },
+        "isDefault": {
+          "type": "boolean",
+          "description": "If true, then this value is a default one."
+        },
+        "optionLabel": {
+          "type": "string",
+          "description": "The option label."
+        }
+      },
+      "title": "DataFieldOption"
+    },
+    "DataType": {
+      "type": "object",
+      "properties": {
+        "category": {
+          "type": "string",
+          "description": "The category of the data type.",
+          "enum": [
+            "ASSEMBLY",
+            "NC",
+            "PACKING_CONTAINER",
+            "PACKING_SFC",
+            "RMA_SFC",
+            "RMA_SHOP_ORDER",
+            "SFC"
+          ]
+        },
+        "dataFieldList": {
+          "type": "array",
+          "description": "The list of data type fields.",
+          "items": {
+            "$ref": "#/definitions/DataTypeField"
+          }
+        },
+        "dataType": {
+          "type": "string",
+          "description": "The name of the data type."
+        },
+        "description": {
+          "type": "string",
+          "description": "The description of the data type."
+        }
+      },
+      "title": "DataType"
+    },
+    "DataTypeField": {
+      "type": "object",
+      "properties": {
+        "dataField": {
+          "description": "The data field of the data type.",
+          "$ref": "#/definitions/DataField"
+        },
+        "required": {
+          "type": "boolean",
+          "description": "If true, then this field is required."
+        },
+        "sequence": {
+          "type": "integer",
+          "format": "int64",
+          "description": "The sequence number of this data type field."
+        }
+      },
+      "title": "DataTypeField"
+    },
+    "ErrorResponse": {
+      "type": "object",
+      "properties": {
+        "displayMessage": {
+          "type": "string",
+          "description": "Contains additional information, if any"
+        },
+        "errorMessageKey": {
+          "type": "string",
+          "description": "Internal error message"
+        },
+        "status": {
+          "type": "integer",
+          "format": "int32",
+          "description": "HTTP status code"
+        },
+        "technicalMessage": {
+          "type": "string",
+          "description": "Contains technical reason for the error."
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "example": "2018-06-22T04:24:00Z",
+          "description": "The time when the error message is created."
+        }
+      },
+      "title": "ErrorResponse",
+      "description": "Error response."
+    },
+    "Error": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string",
+          "description": "Contains additional information if any."
+        },
+        "code": {
+          "type": "string",
+          "description": "Contains a technical code for the error."
+        },
+        "causeMessage": {
+          "type": "string",
+          "description": "Contains a technical reason for the error."
+        },
+        "correlationId": {
+          "type": "string",
+          "description": "Contains a correlation ID for the error."
+        }
+      },
+      "description": "Error response"
+    },
+    "LocalizedDescriptionApiModel": {
+      "type": "object",
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "locale": {
+          "type": "string"
+        }
+      },
+      "title": "LocalizedDescriptionApiModel"
+    },
+    "Material": {
+      "type": "object",
+      "properties": {
+        "material": {
+          "type": "string",
+          "description": "The name of the material."
+        },
+        "plant": {
+          "type": "string",
+          "description": "The plant of the material."
+        },
+        "version": {
+          "type": "string",
+          "description": "The version of the material."
+        }
+      },
+      "title": "Material"
+    },
+    "MaterialRequest": {
+      "type": "object",
+      "properties": {
+        "alternateUnitsOfMeasure": {
+          "type": "array",
+          "description": "Alternate Unit of Measures of the material.",
+          "items": {
+            "$ref": "#/definitions/AlternateUnitOfMeasure"
+          }
+        },
+        "assemblyDataType": {
+          "description": "The assembly data type of the material.",
+          "$ref": "#/definitions/DataType"
+        },
+        "bom": {
+          "description": "The BOM attached to the material.",
+          "$ref": "#/definitions/BOM"
+        },
+        "customValues": {
+          "type": "array",
+          "description": "Custom values of the material.",
+          "items": {
+            "$ref": "#/definitions/CustomValue"
+          }
+        },
+        "description": {
+          "type": "string",
+          "description": "The localized description of the material."
+        },
+        "descriptions": {
+          "type": "array",
+          "description": "Localized descriptions",
+          "items": {
+            "$ref": "#/definitions/LocalizedDescriptionApiModel"
+          }
+        },
+        "isAutocompleteAndConfirmed": {
+          "type": "boolean",
+          "description": "If enabled, the autocomplete of operation activity is done."
+        },
+        "isCurrentVersion": {
+          "type": "boolean",
+          "description": "If true, the version of the material is current."
+        },
+        "lotSize": {
+          "type": "number",
+          "description": "The lot size of the material."
+        },
+        "targetLotSize": {
+          "type": "number",
+          "description": "The target lot size of the material."
+        },
+        "panel": {
+          "type": "boolean",
+          "description": "If true, then this material is considered a panelized material. This means it will have panel locations defined.",
+          "default": false
+        },
+        "material": {
+          "type": "string",
+          "description": "The name of the material."
+        },
+        "materialGroups": {
+          "type": "array",
+          "description": "Assigned Material Groups.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "materialType": {
+          "type": "string",
+          "description": "The type of the material.",
+          "enum": [
+            "CONFIGURABLE",
+            "FINISHED",
+            "GENERAL",
+            "NONSTOCK",
+            "NONVALUATED",
+            "OPERATING_SUPPLIES",
+            "PACKAGING",
+            "RETURNABLE_PACKAGING",
+            "SEMIFINISHED_PRODUCT",
+            "SERVICE",
+            "SERVICES",
+            "SOFTWARE_NONVALUATED",
+            "SPARE_PARTS",
+            "TRADING_GOODS",
+            "RAW",
+            "CUSTOM",
+            "PIPELINE",
+            "PRT"
+          ]
+        },
+        "maxShelfLife": {
+          "type": "number",
+          "description": "This is the amount of time the material can be stored before it must be used."
+        },
+        "maxShelfLifeUnits": {
+          "type": "string",
+          "description": "The unit of measure used for the maxShelfLife property.",
+          "enum": [
+            "DAYS",
+            "HOURS",
+            "MONTHS",
+            "WEEKS",
+            "YEARS"
+          ]
+        },
+        "mrpController": {
+          "type": "string",
+          "description": "Person or a team responsible for ensuring the availability of materials."
+        },
+        "origin": {
+          "type": "string",
+          "description": "System where the material was created.",
+          "enum": [
+            "ERP",
+            "ME"
+          ]
+        },
+        "bomExplosionDependent": {
+          "type": "string",
+          "description": "An indicator determining whether the following requirements are allowed for the dependent requirements of the material.",
+          "enum": [
+            "INDIVIDUAL_COLLECTIVE",
+            "COLLECTIVE",
+            "INDIVIDUAL"
+          ]
+        },
+        "quantityRestriction": {
+          "type": "string",
+          "description": "The quantity restriction setting of the material.",
+          "enum": [
+            "ONLY_1_0",
+            "WHOLE_NUMBER",
+            "ANY_NUMBER"
+          ]
+        },
+        "serialNumberProfile": {
+          "type": "string",
+          "description": "Data represented by a four-character abbreviation. This data determines the conditions and business activities needed for the assignment of serial numbers to single product units."
+        },
+        "orderProcessingMode": {
+          "type": "string",
+          "description": "Special order processing logic.",
+          "enum": [
+            "DEFAULT",
+            "BOM_MERGE_SPLIT",
+            "BOM_MERGE",
+            "ROUTING_MERGE"
+          ]
+        },
+        "plant": {
+          "type": "string",
+          "description": "The plant the material belongs to."
+        },
+        "procurementType": {
+          "type": "string",
+          "description": "The procurement type of the material.",
+          "enum": [
+            "MANUFACTURED",
+            "PURCHASED",
+            "MANUFACTURED_PURCHASED"
+          ]
+        },
+        "productionStorageLocation": {
+          "type": "string",
+          "description": "Production storage location."
+        },
+        "putawayStorageLocation": {
+          "type": "string",
+          "description": "Putaway storage location."
+        },
+        "removalComponentDataType": {
+          "description": "The removal data type of the material.",
+          "$ref": "#/definitions/DataType"
+        },
+        "routing": {
+          "description": "The routing attached to the material.",
+          "$ref": "#/definitions/Routing"
+        },
+        "status": {
+          "type": "string",
+          "description": "The status of the material.",
+          "enum": [
+            "NEW",
+            "RELEASABLE",
+            "FROZEN",
+            "OBSOLETE",
+            "HOLD",
+            "HOLD_YIELD_RATE",
+            "HOLD_CONSEC_NC",
+            "HOLD_SPC_VIOL",
+            "HOLD_SPC_WARN"
+          ]
+        },
+        "unitOfMeasure": {
+          "type": "string",
+          "description": "The unit of measure of the material."
+        },
+        "version": {
+          "type": "string",
+          "description": "The version of the material."
+        },
+        "locations": {
+          "type": "array",
+          "description": "Assigned material locations.",
+          "items": {
+            "$ref": "#/definitions/MaterialLocationApiModel"
+          }
+        },
+        "createdDateTime": {
+          "type": "string",
+          "format": "date-time",
+          "example": "2018-06-22T04:24:000Z",
+          "description": "The time when the material was created."
+        },
+        "modifiedDateTime": {
+          "type": "string",
+          "format": "date-time",
+          "example": "2018-06-22T04:24:000Z",
+          "description": "The time when the material has most recently changed."
+        }
+      },
+      "title": "MaterialRequest"
+    },
+    "MaterialResponse": {
+      "type": "object",
+      "properties": {
+        "alternateUnitsOfMeasure": {
+          "type": "array",
+          "description": "Alternate Unit of Measures of the material.",
+          "items": {
+            "$ref": "#/definitions/AlternateUnitOfMeasure"
+          }
+        },
+        "assemblyDataType": {
+          "description": "The assembly data type of the material.",
+          "$ref": "#/definitions/DataType"
+        },
+        "bom": {
+          "description": "The BOM attached to the material.",
+          "$ref": "#/definitions/BOM"
+        },
+        "customValues": {
+          "type": "array",
+          "description": "Custom values of the material.",
+          "items": {
+            "$ref": "#/definitions/CustomValue"
+          }
+        },
+        "description": {
+          "type": "string",
+          "description": "The localized description of the material."
+        },
+        "descriptions": {
+          "type": "array",
+          "description": "Localized descriptions",
+          "items": {
+            "$ref": "#/definitions/LocalizedDescriptionApiModel"
+          }
+        },
+        "isAutocompleteAndConfirmed": {
+          "type": "boolean",
+          "description": "If enabled, the autocomplete of operation activity is done."
+        },
+        "isCurrentVersion": {
+          "type": "boolean",
+          "description": "If true, the version of the material is current."
+        },
+        "lotSize": {
+          "type": "number",
+          "description": "The lot size of the material."
+        },
+        "targetLotSize": {
+          "type": "number",
+          "description": "The target lot size of the material."
+        },
+        "panel": {
+          "type": "boolean",
+          "description": "If true, then this material is considered a panelized material. This means it will have panel locations defined.",
+          "default": false
+        },
+        "material": {
+          "type": "string",
+          "description": "The name of the material."
+        },
+        "materialGroups": {
+          "type": "array",
+          "description": "Assigned Material Groups.",
+          "items": {
+            "$ref": "#/definitions/MaterialGroupMemberApiModel"
+          }
+        },
+        "locations": {
+          "type": "array",
+          "description": "Assigned material locations.",
+          "items": {
+            "$ref": "#/definitions/MaterialLocationApiModel"
+          }
+        },
+        "materialType": {
+          "type": "string",
+          "description": "The type of the material.",
+          "enum": [
+            "CONFIGURABLE",
+            "FINISHED",
+            "GENERAL",
+            "NONSTOCK",
+            "NONVALUATED",
+            "OPERATING_SUPPLIES",
+            "PACKAGING",
+            "RETURNABLE_PACKAGING",
+            "SEMIFINISHED_PRODUCT",
+            "SERVICE",
+            "SERVICES",
+            "SOFTWARE_NONVALUATED",
+            "SPARE_PARTS",
+            "TRADING_GOODS",
+            "RAW",
+            "CUSTOM",
+            "PIPELINE",
+            "PRT"
+          ]
+        },
+        "maxShelfLife": {
+          "type": "number",
+          "description": "This is the amount of time the material can be stored before it must be used."
+        },
+        "maxShelfLifeUnits": {
+          "type": "string",
+          "description": "The unit of measure used for the maxShelfLife property.",
+          "enum": [
+            "DAYS",
+            "HOURS",
+            "MONTHS",
+            "WEEKS",
+            "YEARS"
+          ]
+        },
+        "mrpController": {
+          "type": "string",
+          "description": "Person or a team responsible for ensuring the availability of materials."
+        },
+        "origin": {
+          "type": "string",
+          "description": "System from where the material was created.",
+          "enum": [
+            "ERP",
+            "ME"
+          ]
+        },
+        "bomExplosionDependent": {
+          "type": "string",
+          "description": "An indicator determining whether the following requirements are allowed for the dependent requirements of the material.",
+          "enum": [
+            "INDIVIDUAL_COLLECTIVE",
+            "COLLECTIVE",
+            "INDIVIDUAL"
+          ]
+        },
+        "quantityRestriction": {
+          "type": "string",
+          "description": "The quantity restriction setting of the material.",
+          "enum": [
+            "ONLY_1_0",
+            "WHOLE_NUMBER",
+            "ANY_NUMBER"
+          ]
+        },
+        "serialNumberProfile": {
+          "type": "string",
+          "description": "Data represented by a four-character abbreviation. This data determines the conditions and business activities needed for the assignment of serial numbers to single product units."
+        },
+        "plant": {
+          "type": "string",
+          "description": "The plant the material belongs to."
+        },
+        "procurementType": {
+          "type": "string",
+          "description": "The procurement type of the material.",
+          "enum": [
+            "MANUFACTURED",
+            "PURCHASED",
+            "MANUFACTURED_PURCHASED"
+          ]
+        },
+        "productionStorageLocation": {
+          "type": "string",
+          "description": "Production storage location."
+        },
+        "putawayStorageLocation": {
+          "type": "string",
+          "description": "Putaway storage location."
+        },
+        "removalComponentDataType": {
+          "description": "The removal data type of the material.",
+          "$ref": "#/definitions/DataType"
+        },
+        "routing": {
+          "description": "The routing attached to the material.",
+          "$ref": "#/definitions/Routing"
+        },
+        "status": {
+          "type": "string",
+          "description": "The status of the material.",
+          "enum": [
+            "NEW",
+            "RELEASABLE",
+            "FROZEN",
+            "OBSOLETE",
+            "HOLD",
+            "HOLD_YIELD_RATE",
+            "HOLD_CONSEC_NC",
+            "HOLD_SPC_VIOL",
+            "HOLD_SPC_WARN"
+          ]
+        },
+        "unitOfMeasure": {
+          "type": "string",
+          "description": "The unit of measure of the material."
+        },
+        "version": {
+          "type": "string",
+          "description": "The version of the material."
+        },
+        "createdDateTime": {
+          "type": "string",
+          "format": "date-time",
+          "example": "2018-06-22T04:24:000Z",
+          "description": "The time when the material was created."
+        },
+        "modifiedDateTime": {
+          "type": "string",
+          "format": "date-time",
+          "example": "2018-06-22T04:24:000Z",
+          "description": "The time when the material has most recently changed."
+        }
+      },
+      "title": "MaterialResponse"
+    },
+    "MaterialGroup": {
+      "type": "object",
+      "properties": {
+        "description": {
+          "type": "string",
+          "description": "The description of the material group."
+        },
+        "materialGroup": {
+          "type": "string",
+          "description": "The name of the material group."
+        }
+      },
+      "title": "MaterialGroup"
+    },
+    "MaterialGroupMemberApiModel": {
+      "type": "object",
+      "properties": {
+        "material": {
+          "description": "The material of this material group member.",
+          "$ref": "#/definitions/Material"
+        },
+        "materialGroup": {
+          "description": "The material group.",
+          "$ref": "#/definitions/MaterialGroup"
+        }
+      },
+      "title": "MaterialGroupMemberApiModel"
+    },
+    "MaterialLocationApiModel": {
+      "type": "object",
+      "properties": {
+      "location": {
+          "type": "string",
+          "description": "The material location."
+        },
+       "description": {
+          "type": "string",
+          "description": "The material location description."
+        },
+       "locationData": {
+          "type": "string",
+          "description": "The material location data."
+        }
+      },
+      "title": "MaterialLocationApiModel"
+    },
+    "Routing": {
+      "type": "object",
+      "properties": {
+        "plant": {
+          "type": "string",
+          "description": "The plant this routing is assigned to."
+        },
+        "routing": {
+          "type": "string",
+          "description": "Name of the routing or recipe."
+        },
+        "routingType": {
+          "type": "string",
+          "description": "Indicates the type of routing or recipe.",
+          "enum": [
+            "PRODUCTION",
+            "NC",
+            "SPECIAL",
+            "DISPOSITION_FUNCTION",
+            "SFC_SPECIFIC",
+            "SHOPORDER_SPECIFIC",
+            "CONFIGURABLE",
+            "PRODUCTION_RECIPE",
+            "SHOPORDER_SPECIFIC_RECIPE"
+          ]
+        },
+        "version": {
+          "type": "string",
+          "description": "The routing version."
+        }
+      },
+      "title": "Routing"
+    },
+    "Pageable": {
+      "type": "object",
+      "properties": {
+        "offset": {
+          "type": "integer",
+          "format": "int64",
+          "description": "Returns the materials according to the pageNumber and pageSize you set"
+        },
+        "pageNumber": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Indicates the page from which the materials are retrieved."
+        },
+        "pageSize": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Specifies the number of records on one page."
+        },
+        "paged": {
+          "type": "boolean",
+          "description": "If set to 'true', retrieves the materials based on the properties you set in Pageable. If set to 'false', all materials are retrieved."
+        },
+        "sort": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Sort"
+          },
+          "description": "Defines how the materials records are sorted"
+        },
+        "unpaged": {
+          "type": "boolean",
+          "description": "Indicates if the materials are retrieved based on the properties you set in Pageable, or they are all retrieved. The value of this field is automatically filled."
+        }
+      }
+    },
+    "Sort": {
+      "type": "object",
+      "properties": {
+        "empty": {
+          "type": "boolean",
+          "description": "If the value is 'true', it indicates that no material is retrieved. If the value is 'false', it indicates that there are materials retrieved."
+        },
+        "sorted": {
+          "type": "boolean",
+          "description": "If the value is 'true', it indicates that the materials retrieved are sorted accordingly. If the value is 'false', it indicates that no materials are retrieved."
+        },
+        "unsorted": {
+          "type": "boolean",
+          "description": "If the value is 'false', it indicates that the materials retrieved are sorted accordingly. If the value is 'true', it indicates that no materials are retrieved."
+        }
+      }
+    },
+    "Page_MaterialResponse": {
+      "type": "object",
+      "properties": {
+        "content": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/MaterialResponse"
+          }
+        },
+        "empty": {
+          "type": "boolean",
+          "description": "Returns true if the result is empty"
+        },
+        "first": {
+          "type": "boolean",
+          "description": "If the value is 'true', it indicates that the current page is the first page."
+        },
+        "last": {
+          "type": "boolean",
+          "description": "If the value is 'true', it indicates that the current page is the last page."
+        },
+        "number": {
+          "type": "integer",
+          "format": "int32",
+          "description": "The page number"
+        },
+        "numberOfElements": {
+          "type": "integer",
+          "format": "int32",
+          "description": "The number of materials on the current page"
+        },
+        "pageable": {
+          "$ref": "#/definitions/Pageable"
+        },
+        "size": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "sort": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Sort"
+          },
+          "description": "Defines how the materials records are sorted"
+        },
+        "totalElements": {
+          "type": "integer",
+          "format": "int64",
+          "description": "The total number of materials that are retrieved"
+        },
+        "totalPages": {
+          "type": "integer",
+          "format": "int32",
+          "description": "The total number of pages returned"
+        }
+      }
+    },
+    "MaterialHeaderDetailsResponse": {
+      "type": "object",
+      "properties": {
+        "plant": {
+          "type": "string",
+          "description": "The plant the material belongs to."
+        },
+        "material": {
+          "type": "string",
+          "description": "The name of the material."
+        },
+        "description": {
+          "type": "string",
+          "description": "The localized description of the material."
+        },
+        "version": {
+          "type": "string",
+          "description": "The version of the material."
+        },
+        "currentVersion": {
+          "type": "boolean",
+          "description": "If true, this version of the material is the current one."
+        },
+        "status": {
+          "type": "string",
+          "description": "The status of the material.",
+          "enum": [
+            "NEW",
+            "RELEASABLE",
+            "FROZEN",
+            "OBSOLETE",
+            "HOLD",
+            "HOLD_YIELD_RATE",
+            "HOLD_CONSEC_NC",
+            "HOLD_SPC_VIOL",
+            "HOLD_SPC_WARN"
+          ]
+        },
+        "unitOfMeasure": {
+          "type": "string",
+          "description": "The internal unit of measure of the material."
+        },
+        "lotSize": {
+          "type": "number",
+          "description": "The lot size of the material."
+        },
+        "maxShelfLife": {
+          "type": "number",
+          "description": "This is the amount of time the material can be stored before it must be used."
+        },
+        "maxShelfLifeUnits": {
+          "type": "string",
+          "description": "The unit of measure used for the maximum shelf life property.",
+          "enum": [
+            "DAYS",
+            "HOURS",
+            "MONTHS",
+            "WEEKS",
+            "YEARS"
+          ]
+        },
+        "serialNumberProfile": {
+          "type": "string",
+          "description": "Data represented by a four-character abbreviation. This data determines the conditions and business activities needed for the assignment of serial numbers to single product units."
+        },
+        "createdDateTime": {
+          "type": "string",
+          "format": "date-time",
+          "example": "2024-06-22T04:24:00.000Z",
+          "description": "The time when the material was created."
+        },
+        "modifiedDateTime": {
+          "type": "string",
+          "format": "date-time",
+          "example": "2024-06-22T05:24:00.000Z",
+          "description": "The time when the material has most recently changed."
+        }
+      },
+      "title": "MaterialHeaderDetailsResponse"
+    }
+  },
+  "externalDocs": {
+    "description": "Prepare for API Integration",
+    "url": "https://help.sap.com/docs/sap-digital-manufacturing/operations-guide/prepare-for-api-integration"
+  },
+  "schemes": [
+    "https"
+  ],
+  "security": [
+    {
+      "OAuthSecurity": []
+    }
+  ],
+  "x-sap-shortText": "Browse and modify materials",
+  "x-servers": [
+    {
+      "url": "https://api.{regionHost}/material",
+      "description": "Base URL",
+      "templates": {
+        "regionHost": {
+          "description": "The data center where SAP Digital Manufacturing is provisioned for your organization",
+          "enum": [
+            "eu10.dmc.cloud.sap",
+            "eu20.dmc.cloud.sap",
+            "us10.dmc.cloud.sap",
+            "us20.dmc.cloud.sap",
+            "test.eu10.dmc.cloud.sap",
+            "test.eu20.dmc.cloud.sap",
+            "test.us10.dmc.cloud.sap",
+            "test.us20.dmc.cloud.sap"
+          ],
+          "default": "test.eu10.dmc.cloud.sap"
+        },
+        "tokenHost": {
+          "description": "The authentication server where SAP Digital Manufacturing is provisioned for your organization",
+          "enum": [
+            "eu10.hana.ondemand.com",
+            "eu20.hana.ondemand.com",
+            "us10.hana.ondemand.com",
+            "us20.hana.ondemand.com"
+          ],
+          "default": "eu10.hana.ondemand.com"
+        }
+      }
+    }
+  ]
+}

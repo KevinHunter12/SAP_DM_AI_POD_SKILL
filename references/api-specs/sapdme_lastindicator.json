@@ -1,0 +1,248 @@
+{
+    "openapi": "3.0.3",
+    "info": {
+        "title": "Last Indicator Value",
+        "description": "This API allows you to post the indicator's value that you've selected from the shop floor, via Production Connector for SAP Digital Manufacturing, to Cloud in real time. These values are displayed in the Line Monitor POD's Asset tab.",
+        "version": "v1",
+        "contact": {
+            "name": "SAP Digital Manufacturing Operations",
+            "email": "sap-dmoperation@sap.com"
+        }
+    },
+    "tags": [
+        {
+            "name": "Last Indicator Value",
+            "description": "Allows you to post the value for an Indicator"
+        }
+    ],
+    "paths": {
+        "/value": {
+            "post": {
+                "tags": [
+                    "Last Indicator Value"
+                ],
+                "summary": "Saves the indicator's last value.",
+                "description": "Send and save the indicator's last value from shop floor via Production Connector for SAP Digital Manufacturing.",
+                "requestBody": {
+                    "description": "Request to save the indicator's last value",
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/LastIndicatorValuePublicAPIRequest"
+                            }
+                        }
+                      },
+                      "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                              "schema": {
+                                "$ref": "#/components/schemas/LastIndicatorValuePublicAPIResponse"
+                              }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "The HTTP request is bad or invalid, and therefore can't be processed by the sever.",
+                        "content": {
+                            "application/json": {
+                              "schema": {
+                                "$ref": "#/components/schemas/ErrorResponse"
+                              }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "You're not authorized to call this resource.",
+                        "content": {
+                            "application/json": {
+                              "schema": {
+                                "$ref": "#/components/schemas/ErrorResponse"
+                              }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Accessing the resource you're trying to reach is forbidden.",
+                        "content": {
+                            "application/json": {
+                              "schema": {
+                                "$ref": "#/components/schemas/ErrorResponse"
+                              }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "One of the related elements is not found.",
+                        "content": {
+                            "application/json": {
+                              "schema": {
+                                "$ref": "#/components/schemas/ErrorResponse"
+                              }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "An internal error occurred.",
+                        "content": {
+                            "application/json": {
+                              "schema": {
+                                "$ref": "#/components/schemas/ErrorResponse"
+                              }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "OauthClientCredentials": []
+                    }
+                ],
+                "deprecated": false
+            }
+        }
+    },
+    "components":{
+        "schemas":{
+            "LastIndicatorValuePublicAPIRequest": {
+                "type": "object",
+                "required": [
+                    "plant",
+                    "workCenter",
+                    "assetId",
+                    "indicator",
+                    "value"
+                ],
+                "properties": {
+                    "plant": {
+                        "type": "string",
+                        "description": "The plant containing the resource.",
+                        "minLength": 1,
+                        "maxLength": 6
+                    },
+                    "workCenter": {
+                        "type": "string",
+                        "description": "Work center for which the indicator is connected to."
+                    },
+                    "assetId": {
+                        "description": "Asset's ID.",
+                        "type": "string"
+                    },
+                    "structurePath": {
+                        "description": "Structure path to uniquely identify a structure/indicator.",
+                        "type": "string"
+                    },
+                    "indicator": {
+                        "description": "Name of the indicator.",
+                        "type": "string"
+                    },
+                    "value": {
+                        "description": "Indicator value.",
+                        "type": "string"
+                    },
+                    "unitOfMeasure": {
+                        "description": "Unit of measure of the indicator.",
+                        "type": "string"
+                    },
+                    "dateTime": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "The timestamp of when the indicator value was created."
+                    }
+                },
+                "title": "LastIndicatorValueRequest",
+                "description": "Request to save the last value for an indicator."
+            },
+            "LastIndicatorValuePublicAPIResponse": {
+                "type": "object",
+                "title": "LastIndicatorValueResponse",
+                "description": "Last Indicator value response .",
+                "properties": {
+                   "message": {
+                       "description": "Indicator values server processing response.",
+                          "type": "string"
+                    }
+                }
+            },
+            "ErrorResponse": {
+                "type": "object",
+                "properties": {
+                    "causeMessage": {
+                        "type": "string",
+                        "description": "Contains the technical reason for the error."
+                    },
+                    "code": {
+                        "type": "string",
+                        "description": "Internal error message"
+                    },
+                    "correlationId": {
+                        "type": "string",
+                        "description": "Contains the correlation ID for the error."
+                    },
+                    "message": {
+                        "type": "string",
+                        "description": "Contains any additional information."
+                    }
+                },
+                "title": "ErrorResponse",
+                "description": "Error response"
+            }
+        },
+        "securitySchemes": {
+            "OauthClientCredentials": {
+              "type": "oauth2",
+              "flows": {
+                "clientCredentials": {
+                  "tokenUrl": "https://{subdomain}.authentication.{tokenHost}/oauth/token",
+                  "scopes": {}
+                }
+              }
+            }
+        }
+    },
+    "externalDocs": {
+        "description": "Prepare for API Integration",
+        "url": "https://help.sap.com/docs/sap-digital-manufacturing/operations-guide/prepare-for-api-integration"
+    },
+    "security": [
+        {
+            "OauthClientCredentials": []
+        }
+    ],
+    "x-sap-shortText": "Last value for an Indicator",
+    "servers": [
+        {
+            "url": "https://api.{regionHost}/api/v1/indicator/",
+            "description": "Base URL",
+            "variables": {
+                "regionHost": {
+                    "description": "The data center where SAP Digital Manufacturing is provisioned for your organization",
+                    "enum": [
+                        "eu10.dmc.cloud.sap",
+                        "eu20.dmc.cloud.sap",
+                        "us10.dmc.cloud.sap",
+                        "us20.dmc.cloud.sap",
+                        "test.eu10.dmc.cloud.sap",
+                        "test.eu20.dmc.cloud.sap",
+                        "test.us10.dmc.cloud.sap",
+                        "test.us20.dmc.cloud.sap"
+                    ],
+                    "default": "test.eu10.dmc.cloud.sap"
+                },
+                "tokenHost": {
+                    "description": "The authentication server where SAP Digital Manufacturing is provisioned for your organization",
+                    "enum": [
+                        "eu10.hana.ondemand.com",
+                        "eu20.hana.ondemand.com",
+                        "us10.hana.ondemand.com",
+                        "us20.hana.ondemand.com"
+                    ],
+                    "default": "eu10.hana.ondemand.com"
+                }
+            }
+        }
+    ]
+}

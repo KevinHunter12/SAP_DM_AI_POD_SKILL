@@ -1,0 +1,361 @@
+{
+    "openapi": "3.0.1",
+    "info": {
+        "title": "Asset Model",
+        "description": "Use the service to retrieve the metadata of an asset by providing its unique ID. With this service, you can access information about an asset, such as its name, description, and other relevant details.",
+        "contact": {
+            "name": "SAP Digital Manufacturing Operations",
+            "email": "sap-dmoperation@sap.com"
+        },
+        "version": "v1"
+    },
+    "externalDocs": {
+        "description": "Prepare for API Integration",
+        "url": "https://help.sap.com/docs/sap-digital-manufacturing/operations-guide/prepare-for-api-integration"
+    },
+    "servers": [
+        {
+            "url": "https://api.{regionHost}/assetmodel/v1",
+            "description": "Base URL",
+            "variables": {
+                "regionHost": {
+                    "description": "The data center where SAP Digital Manufacturing is provisioned for your organization.",
+                    "enum": [
+                        "eu10.dmc.cloud.sap",
+                        "us10.dmc.cloud.sap",
+                        "eu20.dmc.cloud.sap",
+                        "us20.dmc.cloud.sap",
+                        "test.eu10.dmc.cloud.sap",
+                        "test.us10.dmc.cloud.sap",
+                        "test.eu20.dmc.cloud.sap",
+                        "test.us20.dmc.cloud.sap"
+                    ],
+                    "default": "test.eu10.dmc.cloud.sap"
+                },
+                "tokenHost": {
+                    "description": "The authentication token server where SAP Digital Manufacturing is provisioned for your organization.",
+                    "enum": [
+                        "eu10.hana.ondemand.com",
+                        "us10.hana.ondemand.com",
+                        "eu20.hana.ondemand.com",
+                        "us20.hana.ondemand.com"
+                    ],
+                    "default": "eu10.hana.ondemand.com"
+                }
+            }
+        }
+    ],
+    "security": [
+        {
+            "OauthClientCredentials": []
+        }
+    ],
+    "tags": [
+    ],
+    "paths": {
+        "/assets/{assetId}/metadata": {
+            "get": {
+                "tags": [
+                    "Assets"
+                ],
+                "summary": "Retrieves metadata of an asset",
+                "description": "Retrieves metadata of an asset with specific identifier. Metadata comprises of entities such as asset type, structure, indicator, attribute, and codelist.",
+                "operationId": "getAssetsByIdMetadata",
+                "parameters": [
+                    {
+                        "name": "assetId",
+                        "in": "path",
+                        "description": "Unique name of the asset",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "401": {
+                        "description": "You are not authorized to call this resource.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "200": {
+                        "description": "Ok",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AssetMetadata"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Accessing the resource you are trying to reach is forbidden.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "One of the related elements is not found.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "An internal error occurred.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "The HTTP request is bad or invalid, and therefore can't be processed by the sever.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "AssetMetadata": {
+                "type": "object",
+                "properties": {
+                    "assetTypeId": {
+                        "description": "Unique identifier of the asset type.",
+                        "type": "string"
+                    },
+                    "assetTypeName": {
+                        "description": "Name of the asset type.",
+                        "type": "string"
+                    },
+                    "parentAssetType": {
+                        "description": "Name of the parent asset type.",
+                        "type": "string"
+                    },
+                    "description": {
+                        "description": "Description of the asset type.",
+                        "type": "string"
+                    },
+                    "longDescription": {
+                        "description": "Long description of the asset type.",
+                        "type": "string"
+                    },
+                    "structures": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Structure"
+                        }
+                    }
+                }
+            },
+            "AttributeConditions": {
+                "type": "object",
+                "properties": {
+                    "dimension": {
+                        "description": "Measurement category of the attribute.",
+                        "type": "string"
+                    },
+                    "UoM": {
+                        "description": "Measuremnet unit of the attribute.",
+                        "type": "string"
+                    }
+                }
+            },
+            "IndicatorConditions": {
+                "type": "object",
+                "properties": {
+                    "dimension": {
+                        "description": "Measurement category of the indicator.",
+                        "type": "string"
+                    },
+                    "UoM": {
+                        "description": "Measuremnet unit of the indicator.",
+                        "type": "string"
+                    }
+                }
+            },
+            "Structure": {
+                "required": [
+                    "id"
+                ],
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "description": "Unique identifier of the structure.",
+                        "type": "string"
+                    },
+                    "name": {
+                        "description": "Name of the structure.",
+                        "type": "string"
+                    },
+                    "referenceName": {
+                        "description": "Reference name of the structure.",
+                        "type": "string"
+                    },
+                    "referencePath": {
+                        "description": "Reference path of the structure.",
+                        "type": "string"
+                    },
+                    "generatedId": {
+                        "description": "System generated ID representing the unique association of asset type to a structure or the unique association of a structure to its parent structure.",
+                        "type": "string"
+                    },
+                    "parentStructure": {
+                        "description": "Parent of the structure.",
+                        "type": "string"
+                    },
+                    "description": {
+                        "description": "Description of the structure.",
+                        "type": "string"
+                    },
+                    "longDescription": {
+                        "description": "Long description of the structure.",
+                        "type": "string"
+                    },
+                    "descriptions": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/StructureDescription"
+                        }
+                    },
+                    "properties": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/StructureProperty"
+                        }
+                    },
+                    "nestedStructures": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Structure"
+                        }
+                    }
+                }
+            },
+            "StructureDescription": {
+                "type": "object",
+                "properties": {
+                    "languageCode": {
+                        "description": "ISO code of the language of the structure description.",
+                        "type": "string"
+                    },
+                    "description": {
+                        "description": "Description of the structure.",
+                        "type": "string"
+                    },
+                    "longDescription": {
+                        "description": "Long description of the structure.",
+                        "type": "string"
+                    }
+                }
+            },
+            "StructureProperty": {
+                "required": [
+                    "propertyId"
+                ],
+                "type": "object",
+                "properties": {
+                    "propertyId": {
+                        "description": "Unique identifier of the indicator or attribute of the structure.",
+                        "type": "string"
+                    },
+                    "referenceName": {
+                        "description": "Reference name of the indicator or attribute of the structure.",
+                        "type": "string"
+                    },
+                    "type": {
+                        "description": "Data type of the indicator or attribute of the structure.",
+                        "type": "string"
+                    },
+                    "name": {
+                        "description": "Name of the indicator or attribute of the structure.",
+                        "type": "string"
+                    },
+                    "description": {
+                        "description": "Description of the indicator or attribute of the structure.",
+                        "type": "string"
+                    },
+                    "longDescription": {
+                        "description": "Long description of the indicator or attribute of the structure.",
+                        "type": "string"
+                    },
+                    "dataType": {
+                        "description": "Date type of the indicator or attribute of the structure.",
+                        "type": "string"
+                    },
+                    "length": {
+                        "description": "Length of the value stored in the indicator or attribute of the structure.",
+                        "type": "string"
+                    },
+                    "codeListId": {
+                        "description": "Unique identifier of the codelist.",
+                        "type": "string"
+                    },
+                    "indicatorConditions": {
+                        "$ref": "#/components/schemas/IndicatorConditions"
+                    },
+                    "attributeConditions": {
+                        "$ref": "#/components/schemas/AttributeConditions"
+                    }
+                }
+            },
+            "ErrorResponse": {
+                "type": "object",
+                "properties": {
+                    "causeMessage": {
+                        "type": "string",
+                        "description": "Contains the technical reason for the error."
+                    },
+                    "code": {
+                        "type": "string",
+                        "description": "Internal error message"
+                    },
+                    "correlationId": {
+                        "type": "string",
+                        "description": "Contains the correlation ID for the error."
+                    },
+                    "message": {
+                        "type": "string",
+                        "description": "Contains any additional information."
+                    }
+                },
+                "title": "ErrorResponse",
+                "description": "Error response"
+            }
+        },
+        "securitySchemes": {
+            "OauthClientCredentials": {
+                "type": "oauth2",
+                "flows": {
+                    "clientCredentials": {
+                        "tokenUrl": "https://{subdomain}.authentication.{tokenHost}/oauth/token",
+                        "scopes": {}
+                    }
+                }
+            }
+        }
+    },
+    "x-sap-shortText": "Retrieves metadata of an asset."
+}

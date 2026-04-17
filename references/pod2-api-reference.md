@@ -8,20 +8,123 @@ This document provides a comprehensive API reference for SAP Digital Manufacturi
 
 ## TABLE OF CONTENTS
 
-1. [Widget Base Class](#widget-base-class)
-2. [Widget Subclasses](#widget-subclasses)
-3. [PodContext](#podcontext)
-4. [ModelPath Constants](#modelpath-constants)
-5. [Action Base Class](#action-base-class)
-6. [Core Action Classes](#core-action-classes)
-7. [Property Editors](#property-editors)
-8. [REST Client](#rest-client)
-9. [OData Clients](#odata-clients)
-10. [Public API Clients](#public-api-clients)
-11. [Logger](#logger)
-12. [DateTimeUtils](#datetimeutils)
-13. [Widget Registry](#widget-registry)
-14. [Action Registry](#action-registry)
+1. [Common Imports Reference](#common-imports-reference)
+2. [Widget Base Class](#widget-base-class)
+3. [Widget Subclasses](#widget-subclasses)
+4. [PodContext](#podcontext)
+5. [ModelPath Constants](#modelpath-constants)
+6. [Action Base Class](#action-base-class)
+7. [Core Action Classes](#core-action-classes)
+8. [Property Editors](#property-editors)
+9. [REST Client](#rest-client)
+10. [OData Clients](#odata-clients)
+11. [Public API Clients](#public-api-clients)
+12. [Logger](#logger)
+13. [DateTimeUtils](#datetimeutils)
+14. [Widget Registry](#widget-registry)
+15. [Action Registry](#action-registry)
+
+---
+
+## COMMON IMPORTS REFERENCE
+
+### Control & Enum Imports
+
+**CRITICAL**: Many common SAPUI5 enums are frequently imported from wrong modules. Use these correct paths:
+
+```javascript
+// ✅ PlacementType (for Popover, Dialog positioning)
+import PlacementType from "sap/m/PlacementType";
+// NOT from "sap/ui/core/library"!
+// Values: PlacementType.Auto, PlacementType.Bottom, PlacementType.Top,
+//         PlacementType.Left, PlacementType.Right, etc.
+
+// ✅ Button Types
+import ButtonType from "sap/m/ButtonType";
+// Values: ButtonType.Default, ButtonType.Accept, ButtonType.Reject,
+//         ButtonType.Emphasized, ButtonType.Transparent, etc.
+
+// ✅ List Modes (selection)
+import ListMode from "sap/m/ListMode";
+// Values: ListMode.None, ListMode.SingleSelect, ListMode.MultiSelect,
+//         ListMode.Delete, ListMode.SingleSelectLeft, etc.
+
+// ✅ Message Types
+import MessageType from "sap/m/MessageType";
+// Values: MessageType.Success, MessageType.Error, MessageType.Warning,
+//         MessageType.Information, MessageType.None
+
+// ✅ Value States (input validation)
+import ValueState from "sap/ui/core/ValueState";
+// This one IS in sap/ui/core (exception to the rule)
+// Values: ValueState.None, ValueState.Error, ValueState.Warning,
+//         ValueState.Success, ValueState.Information
+```
+
+### POD 2.0 Core Imports
+
+**CRITICAL**: Use `context/` NOT `model/` for PodContext and ModelPath!
+
+```javascript
+// ✅ CORRECT - Use context/ path
+import PodContext from "sap/dm/dme/pod2/context/PodContext";
+import ModelPath from "sap/dm/dme/pod2/context/ModelPath";
+
+// ❌ WRONG - Don't use model/ path (old/incorrect)
+// import PodContext from "sap/dm/dme/pod2/model/PodContext";
+// import ModelPath from "sap/dm/dme/pod2/model/ModelPath";
+
+// ✅ Widget Base Classes
+import Widget from "sap/dm/dme/pod2/widget/Widget";
+import ControlWidget from "sap/dm/dme/pod2/widget/ControlWidget";
+import LayoutWidget from "sap/dm/dme/pod2/widget/LayoutWidget";
+import TableWidget from "sap/dm/dme/pod2/widget/core/TableWidget";
+
+// ✅ i18n (Framework-driven pattern)
+import I18nResourceModel from "sap/dm/dme/pod2/model/I18nResourceModel";
+```
+
+### Property Editors & Metadata
+
+```javascript
+// ✅ Widget Property Definition
+import WidgetProperty from "sap/dm/dme/pod2/widget/metadata/WidgetProperty";
+// NOTE: in widget/metadata/ NOT property/!
+
+// ✅ Property Editors (in propertyeditor/ NOT property/editor/)
+import StringPropertyEditor from "sap/dm/dme/pod2/propertyeditor/StringPropertyEditor";
+import IntegerPropertyEditor from "sap/dm/dme/pod2/propertyeditor/IntegerPropertyEditor";
+import BooleanPropertyEditor from "sap/dm/dme/pod2/propertyeditor/BooleanPropertyEditor";
+import SelectPropertyEditor from "sap/dm/dme/pod2/propertyeditor/SelectPropertyEditor";
+import ColorPropertyEditor from "sap/dm/dme/pod2/propertyeditor/ColorPropertyEditor";
+import IconPropertyEditor from "sap/dm/dme/pod2/propertyeditor/IconPropertyEditor";
+```
+
+### Correct ModelPath Constants
+
+**CRITICAL**: Work list paths are PLURAL and return arrays!
+
+```javascript
+// ✅ Work List (arrays - note plural!)
+ModelPath.SelectedWorkListItems   // Array of selected items (NOT "Item" singular!)
+ModelPath.WorkListItems           // Array of all items
+ModelPath.WorkListCount           // Number
+ModelPath.WorkListLoading         // Boolean
+
+// ✅ Resources (arrays)
+ModelPath.FilterResources         // Array of selected resources
+ModelPath.CurrentResource         // Single resource object
+
+// ✅ Operations
+ModelPath.CurrentOperation        // Single operation object
+ModelPath.SelectedOperationActivities // Array (plural!)
+
+// ❌ WRONG - These DON'T EXIST
+// ModelPath.SelectedWorkListItem  // ❌ Doesn't exist!
+// ModelPath.SelectedSfc            // ❌ Doesn't exist!
+```
+
+**Always verify exact constant names in** [ModelPath Constants](#modelpath-constants) **section before use!**
 
 ---
 

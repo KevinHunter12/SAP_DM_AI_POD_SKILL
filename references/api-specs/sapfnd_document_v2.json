@@ -1,0 +1,949 @@
+{
+    "openapi": "3.0.1",
+    "info": {
+        "title": "Document",
+        "description": "An API that allows you to retrieve, create, update, remove document print templates, and download template files attached to document print templates.",
+        "version": "v2",
+        "contact": {
+            "name": "SAP Digital Manufacturing Operations",
+            "email": "sap-dmoperation@sap.com"
+        }
+    },
+    "externalDocs": {
+        "description": "Prepare for API Integration",
+        "url": "https://help.sap.com/docs/sap-digital-manufacturing/operations-guide/prepare-for-api-integration"
+    },
+    "servers": [
+        {
+            "url": "https://api.{regionHost}/document/v2",
+            "description": "Base URL",
+            "variables": {
+                "regionHost": {
+                    "description": "The data center where SAP Digital Manufacturing is provisioned for your organization.",
+                    "enum": [
+                        "eu10.dmc.cloud.sap",
+                        "us10.dmc.cloud.sap",
+                        "eu20.dmc.cloud.sap",
+                        "us20.dmc.cloud.sap",
+                        "test.eu10.dmc.cloud.sap",
+                        "test.us10.dmc.cloud.sap",
+                        "test.eu20.dmc.cloud.sap",
+                        "test.us20.dmc.cloud.sap"
+                    ],
+                    "default": "test.eu10.dmc.cloud.sap"
+                },
+                "tokenHost": {
+                    "description": "The authentication token server where SAP Digital Manufacturing is provisioned for your organization.",
+                    "enum": [
+                        "eu10.hana.ondemand.com",
+                        "us10.hana.ondemand.com",
+                        "eu20.hana.ondemand.com",
+                        "us20.hana.ondemand.com"
+                    ],
+                    "default": "eu10.hana.ondemand.com"
+                }
+            }
+        }
+    ],
+    "security": [
+        {
+            "OauthClientCredentials": []
+        }
+    ],
+    "tags": [
+        {
+            "name": "Document",
+            "description": "Manages document print templates."
+        }
+    ],
+    "x-sap-shortText": "Manage documents",
+    "paths": {
+        "/documents": {
+            "get": {
+                "tags": [
+                    "Document"
+                ],
+                "summary": "Retrieves a page of document print templates.",
+                "description": "Retrieves a page of document print templates or a specific document print template defined in the request. If the sort parameter is not defined, the results are ordered by the modified date and time in the ascending order. The maximum returned quantity is 100.",
+                "operationId": "getDocumentsUsingGET_1",
+                "parameters": [
+                    {
+                        "name": "document",
+                        "in": "query",
+                        "description": "A document print template name for which a request is executed.",
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 128
+                        }
+                    },
+                    {
+                        "name": "version",
+                        "in": "query",
+                        "description": "A document print template version for which a request is executed.",
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 20
+                        }
+                    },
+                    {
+                        "name": "size",
+                        "in": "query",
+                        "description": "The quantity of document print templates records to be returned. If it is not specified, the default value is 100. The maximum allowed value is 100.",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32",
+                            "minimum": 1,
+                            "maximum": 100
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "The number of a page to be returned. The page number starts from 0. If it is not defined, the first page is returned.",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32",
+                            "minimum": 0
+                        }
+                    },
+                    {
+                        "name": "sort",
+                        "in": "query",
+                        "description": "This parameter is used for sorting. To define the sorting order, use comma-separated values, like 'document,desc'. The default sorting order is ascending. The following sorting parameters are supported: modifiedOn, createdOn, document, documentType, description, status, version, currentVersion, dataAcquisitionPlugin, formatterPlugin.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "modifiedOn,desc"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The page of document print templates was returned.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DocumentPageResponse"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "You are not authorized to call this resource.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Accessing the resource you are trying to reach is forbidden.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "An internal error occurred.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "deprecated": false,
+                "security": [
+                    {
+                        "OauthClientCredentials": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Document"
+                ],
+                "summary": "Creates a document print template.",
+                "description": "Creates a document print template by the given request.",
+                "operationId": "createDocumentUsingPOST_1",
+                "requestBody": {
+                    "description": "The request to create a document print template.",
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CreateDocumentRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "The document print template was created."
+                    },
+                    "400": {
+                        "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "You are not authorized to call this resource.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Accessing the resource you are trying to reach is forbidden.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Document type was not found.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "The document print template already exists.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "An internal error occurred.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "deprecated": false,
+                "security": [
+                    {
+                        "OauthClientCredentials": []
+                    }
+                ]
+            },
+            "patch": {
+                "tags": [
+                    "Document"
+                ],
+                "summary": "Updates a document print template.",
+                "description": "Updates a document print template by the given request.",
+                "operationId": "updateDocumentUsingPATCH_1",
+                "requestBody": {
+                    "description": "The request to update a document print template.",
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateDocumentRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "204": {
+                        "description": "The document print template was updated."
+                    },
+                    "400": {
+                        "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "You are not authorized to call this resource.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Accessing the resource you are trying to reach is forbidden.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "If a document print template or a document type does not exist.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "An internal error occurred.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "deprecated": false,
+                "security": [
+                    {
+                        "OauthClientCredentials": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Document"
+                ],
+                "summary": "Deletes a document print template",
+                "description": "Deletes a document print template by the given document name and version.",
+                "operationId": "deleteDocumentUsingDELETE_1",
+                "parameters": [
+                    {
+                        "name": "document",
+                        "required": true,
+                        "in": "query",
+                        "description": "A document print template name for which a request is executed.",
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 128
+                        }
+                    },
+                    {
+                        "name": "version",
+                        "required": true,
+                        "in": "query",
+                        "description": "A document print template version for which a request is executed.",
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 20
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "The document print template was deleted."
+                    },
+                    "400": {
+                        "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "You are not authorized to call this resource.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Accessing the resource you are trying to reach is forbidden.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "If a document print template does not exist.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "An internal error occurred.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "deprecated": false,
+                "security": [
+                    {
+                        "OauthClientCredentials": []
+                    }
+                ]
+            }
+        },
+        "/download": {
+            "get": {
+                "tags": [
+                    "Document"
+                ],
+                "summary": "Downloads a document print template file.",
+                "description": "Downloads the attached template file from the document print template using the document name and version.",
+                "operationId": "downloadDocumentUsingGET_1",
+                "parameters": [
+                    {
+                        "name": "document",
+                        "in": "query",
+                        "description": "A document print template name for which a request is executed.",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 128
+                        }
+                    },
+                    {
+                        "name": "version",
+                        "in": "query",
+                        "description": "A document print template version for which a request is executed.",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 20
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The file attached to the document print template was returned.",
+                        "content": {
+                            "application/octet-stream": {
+                                "schema": {
+                                    "type": "string",
+                                    "format": "binary"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "You are not authorized to call this resource.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Accessing the resource you are trying to reach is forbidden.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "The document print template or attached file is not found.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "An internal error occurred.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "deprecated": false,
+                "security": [
+                    {
+                        "OauthClientCredentials": []
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "DocumentPageResponse": {
+                "description": "The page of document print templates.",
+                "type": "object",
+                "properties": {
+                    "content": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/DocumentResponse"
+                        }
+                    },
+                    "number": {
+                        "type": "number",
+                        "format": "int32",
+                        "description": "The current page number."
+                    },
+                    "size": {
+                        "type": "number",
+                        "format": "int32",
+                        "description": "The size of the page."
+                    },
+                    "totalElements": {
+                        "type": "number",
+                        "format": "int64",
+                        "description": "The total number of elements."
+                    },
+                    "totalPages": {
+                        "type": "number",
+                        "format": "int32",
+                        "description": "The total number of pages."
+                    },
+                    "empty": {
+                        "type": "boolean",
+                        "description": "Indicates if the page is empty."
+                    }
+                }
+            },
+            "DocumentResponse": {
+                "description": "The document print template response.",
+                "type": "object",
+                "properties": {
+                    "document": {
+                        "type": "string",
+                        "description": "The name of the document print template."
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "The description of the document print template."
+                    },
+                    "version": {
+                        "type": "string",
+                        "description": "The version of the document print template."
+                    },
+                    "currentVersion": {
+                        "type": "boolean",
+                        "description": "Indicates if the version is current."
+                    },
+                    "status": {
+                        "type": "string",
+                        "description": "The status of the document print template.",
+                        "enum": [
+                            "ENABLED",
+                            "DISABLED"
+                        ]
+                    },
+                    "documentType": {
+                        "$ref": "#/components/schemas/DocumentType"
+                    },
+                    "dataAcquisitionPlugin": {
+                        "$ref": "#/components/schemas/DataAcquisitionPlugin"
+                    },
+                    "formatterPlugin": {
+                        "$ref": "#/components/schemas/FormatterPlugin"
+                    },
+                    "createdOn": {
+                        "type": "string",
+                        "description": "The date and time when a document print template was created. This is in the UTC timezone.",
+                        "format": "date-time",
+                        "example": "2025-02-14T14:00:06.000Z"
+                    },
+                    "modifiedOn": {
+                        "type": "string",
+                        "description": "The date and time when a document print template was updated. This is in the UTC timezone.",
+                        "format": "date-time",
+                        "example": "2025-02-14T14:00:06.000Z"
+                    }
+                }
+            },
+            "DocumentType": {
+                "description": "The type of the document print template.",
+                "type": "object",
+                "properties": {
+                    "type": {
+                        "type": "string",
+                        "description": "The type of the document print template.",
+                        "enum": [
+                            "DOCUMENT",
+                            "LABEL",
+                            "ORDER",
+                            "TRAVELER"
+                        ]
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "The description of the document print template type."
+                    }
+                }
+            },
+            "DocumentTypeCreate": {
+                "description": "The create type object of the document print template.",
+                "type": "object",
+                "properties": {
+                    "type": {
+                        "type": "string",
+                        "description": "The type of the document print template.",
+                        "enum": [
+                            "DOCUMENT",
+                            "LABEL",
+                            "ORDER",
+                            "TRAVELER"
+                        ]
+                    }
+                }
+            },
+            "DataAcquisitionPlugin": {
+                "type": "object",
+                "description": "The data acquisition plugin.",
+                "required": [
+                    "plugin"
+                ],
+                "properties": {
+                    "plugin": {
+                        "type": "string",
+                        "description": "The name of the data acquisition plugin. PGR_DATA_ACQUISITION is a deprecated product genealogy plugin. CUSTOM_DATA_ACQUISITION is a custom plugin that allows you to print data provided in the print request. It can be used in edge and cloud. MDO_PRODUCTION_DATA_ACQUISITION is a product history plugin that allows you to print data from the SFC report. MDO_PGR_DATA_ACQUISITION is a product genealogy plugin that allows you to print data from the product genealogy report. PRODUCTION_DATA_ACQUISITION is a production plugin that allows you to print production data such as SFC, order, and so on.",
+                        "enum": [
+                            "CUSTOM_DATA_ACQUISITION",
+                            "PGR_DATA_ACQUISITION",
+                            "MDO_PRODUCTION_DATA_ACQUISITION",
+                            "MDO_PGR_DATA_ACQUISITION",
+                            "PRODUCTION_DATA_ACQUISITION"
+                        ]
+                    },
+                    "options": {
+                        "$ref": "#/components/schemas/ProductionDataAcquisitionOptions"
+                    }
+                }
+            },
+            "FormatterPlugin": {
+                "type": "object",
+                "description": "The formatter plugin.",
+                "required": [
+                    "plugin"
+                ],
+                "properties": {
+                    "plugin": {
+                        "type": "string",
+                        "description": "The name of the formatter plugin. PDF_FORMATTER uses the Apache FOP library for producing a PDF file. ADS_PDF_FORMATTER (Adobe Forms PDF) uses the SAP Forms service by Adobe for producing a PDF file. ADS_ZPL_FORMATTER (Adobe Forms ZPL) uses the SAP Forms service by Adobe for producing a ZPL file. PAS_FORMATTER is Loftware PAS. ZPL_FORMATTER is ZPL formatter. XSL_FORMATTER is XSL Transformation.",
+                        "enum": [
+                            "PDF_FORMATTER",
+                            "ADS_PDF_FORMATTER",
+                            "ADS_ZPL_FORMATTER",
+                            "PAS_FORMATTER",
+                            "ZPL_FORMATTER",
+                            "XSL_FORMATTER"
+                        ]
+                    },
+                    "options": {
+                        "$ref": "#/components/schemas/FormatterOptions"
+                    }
+                }
+            },
+            "FormatterPluginCreate": {
+                "type": "object",
+                "description": "The formatter plugin.",
+                "required": [
+                    "plugin"
+                ],
+                "properties": {
+                    "plugin": {
+                        "type": "string",
+                        "description": "The name of the formatter plugin. PDF_FORMATTER uses the Apache FOP library for producing a PDF file. ADS_PDF_FORMATTER (Adobe Forms PDF) uses the SAP Forms service by Adobe for producing a PDF file. ADS_ZPL_FORMATTER (Adobe Forms ZPL) uses the SAP Forms service by Adobe for producing a ZPL file. PAS_FORMATTER is Loftware PAS. ZPL_FORMATTER is ZPL formatter. XSL_FORMATTER is XSL Transformation.",
+                        "enum": [
+                            "PDF_FORMATTER",
+                            "ADS_PDF_FORMATTER",
+                            "ADS_ZPL_FORMATTER",
+                            "PAS_FORMATTER",
+                            "ZPL_FORMATTER",
+                            "XSL_FORMATTER"
+                        ]
+                    },
+                    "options": {
+                        "$ref": "#/components/schemas/FormatterOptionsCreate"
+                    }
+                }
+            },
+            "FormatterOptionsCreate": {
+                "type": "object",
+                "description": "The object that is used for creating formatter plugin options.",
+                "properties": {
+                    "fileName": {
+                        "type": "string",
+                        "description": "The name of the attached print template file. This property is required for ADS_PDF_FORMATTER, ADS_ZPL_FORMATTER, XSL_FORMATTER, PDF_FORMATTER, ZPL_FORMATTER."
+                    },
+                    "templateFileName": {
+                        "type": "string",
+                        "description": "The full or short PAS template file name. This property is required for PAS_FORMATTER."
+                    },
+                    "fileContent": {
+                        "type": "string",
+                        "description": "The template file is represented as a Base64-encoded string. It is used for the following template formatters: ADS_PDF_FORMATTER, ADS_ZPL_FORMATTER, XSL_FORMATTER, PDF_FORMATTER, ZPL_FORMATTER."
+                    }
+                }
+            },
+            "ProductionDataAcquisitionOptions": {
+                "type": "object",
+                "description": "The data acquisition plugin options.",
+                "properties": {
+                    "includeSfcData": {
+                        "type": "boolean",
+                        "description": "Indicates if the SFC data must be included."
+                    },
+                    "includeOrderData": {
+                        "type": "boolean",
+                        "description": "Indicates if the order data must be included."
+                    },
+                    "includeMaterialData": {
+                        "type": "boolean",
+                        "description": "Indicates if the material data must be included."
+                    },
+                    "includeRoutingData": {
+                        "type": "boolean",
+                        "description": "Indicates if the routing data must be included. This option is for the discrete industry."
+                    },
+                    "includeRecipeData": {
+                        "type": "boolean",
+                        "description": "Indicates if the recipe data must be included. This option is for the process industry."
+                    },
+                    "includeBomData": {
+                        "type": "boolean",
+                        "description": "Indicates if the bill of material data must be included."
+                    }
+                }
+            },
+            "FormatterOptions": {
+                "type": "object",
+                "description": "The formatter plugin options.",
+                "properties": {
+                    "fileName": {
+                        "type": "string",
+                        "description": "The name of the attached print template file. This property is available for ADS_PDF_FORMATTER, ADS_ZPL_FORMATTER, XSL_FORMATTER, PDF_FORMATTER, ZPL_FORMATTER."
+                    },
+                    "templateFileName": {
+                        "type": "string",
+                        "description": "The full or short PAS template file name. This property is available for PAS_FORMATTER."
+                    }
+                }
+            },
+            "CreateDocumentRequest": {
+                "description": "The request object that is used for creating document print template.",
+                "type": "object",
+                "required": [
+                    "document",
+                    "version",
+                    "dataAcquisitionPlugin",
+                    "formatterPlugin"
+                ],
+                "properties": {
+                    "document": {
+                        "description": "The name of the document print template.",
+                        "type": "string",
+                        "maxLength": 128,
+                        "minLength": 1
+                    },
+                    "version": {
+                        "description": "The version of the document print template.",
+                        "type": "string",
+                        "maxLength": 20,
+                        "minLength": 1
+                    },
+                    "description": {
+                        "description": "The description of the document print template.",
+                        "type": "string"
+                    },
+                    "currentVersion": {
+                        "type": "boolean",
+                        "description": "Indicates if the version is current."
+                    },
+                    "status": {
+                        "type": "string",
+                        "description": "The status of the document print template.",
+                        "enum": [
+                            "ENABLED",
+                            "DISABLED"
+                        ]
+                    },
+                    "documentType": {
+                        "$ref": "#/components/schemas/DocumentTypeCreate"
+                    },
+                    "dataAcquisitionPlugin": {
+                        "$ref": "#/components/schemas/DataAcquisitionPlugin"
+                    },
+                    "formatterPlugin": {
+                        "$ref": "#/components/schemas/FormatterPluginCreate"
+                    }
+                }
+            },
+            "UpdateDocumentRequest": {
+                "description": "The request object that is used for updating document print template.",
+                "type": "object",
+                "required": [
+                    "document",
+                    "version"
+                ],
+                "properties": {
+                    "document": {
+                        "description": "The name of the document print template.",
+                        "type": "string",
+                        "maxLength": 128,
+                        "minLength": 1
+                    },
+                    "version": {
+                        "description": "The version of the document print template.",
+                        "type": "string",
+                        "maxLength": 20,
+                        "minLength": 1
+                    },
+                    "description": {
+                        "description": "The description of the document print template.",
+                        "type": "string"
+                    },
+                    "currentVersion": {
+                        "type": "boolean",
+                        "description": "Indicates if the version is current."
+                    },
+                    "status": {
+                        "type": "string",
+                        "description": "The status of the document print template.",
+                        "enum": [
+                            "ENABLED",
+                            "DISABLED"
+                        ]
+                    },
+                    "documentType": {
+                        "$ref": "#/components/schemas/DocumentTypeCreate"
+                    },
+                    "dataAcquisitionPlugin": {
+                        "$ref": "#/components/schemas/DataAcquisitionPlugin"
+                    },
+                    "formatterPlugin": {
+                        "$ref": "#/components/schemas/FormatterPluginCreate"
+                    }
+                }
+            },
+            "ErrorResponse": {
+                "description": "The error response.",
+                "type": "object",
+                "properties": {
+                    "error": {
+                        "type": "object",
+                        "properties": {
+                            "message": {
+                                "type": "string",
+                                "description": "The error message."
+                            },
+                            "code": {
+                                "type": "string",
+                                "description": "The HTTP status code."
+                            },
+                            "correlationId": {
+                                "type": "string",
+                                "description": "Contains the correlation ID for the error."
+                            },
+                            "details": {
+                                "type": "array",
+                                "description": "Details of the exception.",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "code": {
+                                            "type": "string",
+                                            "description": "The internal error code."
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "description": "The message that describes the error."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "securitySchemes": {
+            "OauthClientCredentials": {
+                "type": "oauth2",
+                "flows": {
+                    "clientCredentials": {
+                        "tokenUrl": "https://{subdomain}.authentication.{regionHost}/oauth/token",
+                        "scopes": {}
+                    }
+                }
+            }
+        }
+    }
+}

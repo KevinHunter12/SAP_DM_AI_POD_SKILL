@@ -1,0 +1,1000 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "title": "Assembly",
+        "description": "Provides functionality for component assembly. For example, view the BOM components planned for assembly, assemble a component, view the assembled components with the assembled data or remove a component assembly.",
+        "version": "v1",
+        "contact": {
+            "name": "SAP Digital Manufacturing Operations",
+            "email": "sap-dmoperation@sap.com"
+        }
+    },
+    "externalDocs": {
+        "description": "Prepare for API Integration",
+        "url": "https://help.sap.com/docs/sap-digital-manufacturing/operations-guide/prepare-for-api-integration"
+    },
+    "host": "hostname",
+    "basePath": "/",
+    "x-sap-shortText": "View components for assembly, assemble and remove components",
+    "x-servers": [
+        {
+            "url": "https://api.{regionHost}/assembly/v1",
+            "description": "Base URL",
+            "templates": {
+                "regionHost": {
+                    "description": "The data center where SAP Digital Manufacturing is provisioned for your organization",
+                    "enum": [
+                        "eu10.dmc.cloud.sap",
+                        "eu20.dmc.cloud.sap",
+                        "us10.dmc.cloud.sap",
+                        "us20.dmc.cloud.sap",
+                        "test.eu10.dmc.cloud.sap",
+                        "test.eu20.dmc.cloud.sap",
+                        "test.us10.dmc.cloud.sap",
+                        "test.us20.dmc.cloud.sap"
+                    ],
+                    "default": "test.eu10.dmc.cloud.sap"
+                },
+                "tokenHost": {
+                    "description": "The authentication server where SAP Digital Manufacturing is provisioned for your organization",
+                    "enum": [
+                        "eu10.hana.ondemand.com",
+                        "eu20.hana.ondemand.com",
+                        "us10.hana.ondemand.com",
+                        "us20.hana.ondemand.com"
+                    ],
+                    "default": "eu10.hana.ondemand.com"
+                }
+            }
+        }
+    ],
+    "schemes": [
+        "https"
+    ],
+    "securityDefinitions": {
+        "OauthSecurity": {
+            "type": "oauth2",
+            "tokenUrl": "https://{subdomain}.authentication.{tokenHost}/oauth/token",
+            "flow": "application"
+        }
+    },
+    "security": [
+        {
+            "OauthSecurity": []
+        }
+    ],
+    "produces": [
+        "application/json"
+    ],
+    "consumes": [
+        "application/json"
+    ],
+    "tags": [
+        {
+            "name": "Assembly",
+            "description": "Perform component assembly."
+        },
+        {
+            "name": "Service Order Component Consumption",
+            "description": "Upload component consumption information for a service order."
+        }
+    ],
+    "paths": {
+        "/plannedComponents": {
+            "get": {
+                "tags": [
+                    "Assembly"
+                ],
+                "summary": "Retrieves the planned component list.",
+                "description": "Retrieves list of all the planned BOM components which can be assembled for the given SFC and operation activity.",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "plant",
+                        "description": "Plant for retrieving list of components to be assembled.",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "query",
+                        "name": "sfc",
+                        "description": "SFC for retrieving list of components to be assembled.",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "query",
+                        "name": "operationActivity",
+                        "description": "Operation activities in comma-separated way for retrieving list of components to be assembled.",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "in": "query",
+                        "name": "assemblyDataTypes",
+                        "description": "Name of the assembly data types in comma-separated way for retrieving list of components to be assembled.",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "in": "query",
+                        "name": "requireCustomData",
+                        "description": "The flag to indicate if, the custom data needs to be included in the response.",
+                        "required": false,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/ComponentListResponse"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized.",
+                        "schema": {
+                            "$ref": "#/definitions/errorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Access denied.",
+                        "schema": {
+                            "$ref": "#/definitions/errorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Assembly not found.",
+                        "schema": {
+                            "$ref": "#/definitions/errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal error.",
+                        "schema": {
+                            "$ref": "#/definitions/errorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/autoAssemble": {
+            "post": {
+                "tags": [
+                    "Assembly"
+                ],
+                "summary": "Auto assembles components.",
+                "description": "Auto assembles components on the given operation and resource.",
+                "operationId": "autoAssembleComponentsUsingPOST_1",
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "request",
+                        "description": "request",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/AutoAssembleRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Auto assembly components were assembled."
+                    },
+                    "400": {
+                        "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+                        "schema": {
+                            "$ref": "#/definitions/errorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "You are not authorized to call this resource.",
+                        "schema": {
+                            "$ref": "#/definitions/errorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Accessing the resource you are trying to reach is forbidden.",
+                        "schema": {
+                            "$ref": "#/definitions/errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "An internal error occurred.",
+                        "schema": {
+                            "$ref": "#/definitions/errorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/components/quantity/check": {
+            "post": {
+                "tags": [
+                    "Assembly"
+                ],
+                "summary": "Checks the resource bin component quantity.",
+                "description": "Checks the resource bin component quantity is enough to make time based auto assembly.",
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "request",
+                        "description": "request",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/CheckResourceBinComponentQuantityRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Check the resource bin component quantity is executed successfully."
+                    },
+                    "400": {
+                        "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+                        "schema": {
+                            "$ref": "#/definitions/errorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "You are not authorized to call this resource.",
+                        "schema": {
+                            "$ref": "#/definitions/errorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Accessing the resource you are trying to reach is forbidden.",
+                        "schema": {
+                            "$ref": "#/definitions/errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Not enough components to finish the assembly on given Resource.",
+                        "schema": {
+                            "$ref": "#/definitions/errorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/assembledComponents": {
+            "post": {
+                "tags": [
+                    "Assembly"
+                ],
+                "summary": "Adds a component.",
+                "description": "Assembles planned BOM component.",
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "AddComponentRequest",
+                        "description": "Request to add a component.",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/AddComponentRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Component assembled successfully."
+                    },
+                    "400": {
+                        "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+                        "schema": {
+                            "$ref": "#/definitions/errorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized.",
+                        "schema": {
+                            "$ref": "#/definitions/errorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Access denied.",
+                        "schema": {
+                            "$ref": "#/definitions/errorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Assembly not found.",
+                        "schema": {
+                            "$ref": "#/definitions/errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal error.",
+                        "schema": {
+                            "$ref": "#/definitions/errorResponse"
+                        }
+                    }
+                }
+            },
+            "get": {
+                "tags": [
+                    "Assembly"
+                ],
+                "summary": "Retrieves the components already assembled.",
+                "description": "Returns the components already assembled with data collected during assembly.",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "plant",
+                        "description": "Plant for retrieving list of assembled components.",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "query",
+                        "name": "sfc",
+                        "description": "SFC for retrieving list of assembled components.",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "query",
+                        "name": "operationActivity",
+                        "description": "Operation activity for retrieving list of assembled components.",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "query",
+                        "name": "assemblyDataTypes",
+                        "description": "Name of the assembly data types in comma-separated way for retrieving list of components to be assembled.",
+                        "required": false,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/AssembledComponents"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized.",
+                        "schema": {
+                            "$ref": "#/definitions/errorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Access denied.",
+                        "schema": {
+                            "$ref": "#/definitions/errorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Assembly not found.",
+                        "schema": {
+                            "$ref": "#/definitions/errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal error.",
+                        "schema": {
+                            "$ref": "#/definitions/errorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Assembly"
+                ],
+                "summary": "Removes a component.",
+                "description": "Removes assembled BOM component.",
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "RemoveComponentRequest",
+                        "description": "Request to remove a added component.",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/RemoveComponentRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Component removed successfully."
+                    },
+                    "401": {
+                        "description": "Unauthorized.",
+                        "schema": {
+                            "$ref": "#/definitions/errorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Access denied.",
+                        "schema": {
+                            "$ref": "#/definitions/errorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Assembly not found.",
+                        "schema": {
+                            "$ref": "#/definitions/errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal error.",
+                        "schema": {
+                            "$ref": "#/definitions/errorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/checkComponents": {
+            "post": {
+                "tags": [
+                    "Assembly"
+                ],
+                "summary": "Checks assembled components.",
+                "description": "Checks if components are assembled according to predefined rules for the SFCs.",
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "inRequest",
+                        "description": "inRequest",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/CheckComponentRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "All components are assembled according to predefined rules for the SFCs."
+                    },
+                    "400": {
+                        "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+                        "schema": {
+                            "$ref": "#/definitions/errorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "You are not authorized to access this resource.",
+                        "schema": {
+                            "$ref": "#/definitions/errorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Accessing the resource you are trying to reach is forbidden.",
+                        "schema": {
+                            "$ref": "#/definitions/errorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "One of the related elements is not found.",
+                        "schema": {
+                            "$ref": "#/definitions/errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "An internal error occurred.",
+                        "schema": {
+                            "$ref": "#/definitions/errorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/serviceOrder/asBuilt/upload": {
+            "post": {
+                "tags": [
+                    "Service Order Component Consumption"
+                ],
+                "summary": "Saves as-built information via file upload.",
+                "description": "Saves the as-built information from the uploaded file in a service order SFC.",
+                "operationId": "ServiceOrderFileUploadUsingPOST",
+                "consumes":["multipart/form-data"],
+                "parameters": [
+                    {
+                        "name": "sfc",
+                        "in": "query",
+                        "description": "The SFC for which the as-built information is saved.",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "plant",
+                        "in": "query",
+                        "description": "The plant for which the as-built information is saved.",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "fileName",
+                        "in": "formData",
+                        "required": true,
+                        "type": "file",
+                        "description": "Upload a CSV file (maximum size: 10MB). Only files with a ‘.csv’ extension are allowed. Please ensure the file follows the specified structure as shown in the example here. Note that only quantities in the base unit of measure are accepted.\n|Component|ComponentVersion|StepId|Operation|OperationVersion|Resource|InstallationPoint|Quantity|Comment|CreatedBy|CreatedOn|\n|-|-|-|-|-|-|-|-|-|-|-|\n|RM09_AZSYSHC|ERP001|20|1027260-000000-0020|ERP001|MIXING|REAR01|1|sample comment|testUser|2024-07-05T15:09:31.607Z|\n|RM09_AZSYSHC|ERP002|30|1027260-000000-0030|ERP001|MIXING|REAR01|2|sample comment|testUser|2024-07-05T15:09:31.607Z|\n\n"
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Service order SFC details have been saved successfully."
+                    },
+                    "400": {
+                        "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+                        "schema": {
+                            "$ref": "#/definitions/errorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "You are not authorized to call this resource.",
+                        "schema": {
+                            "$ref": "#/definitions/errorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Accessing the resource you are trying to reach is forbidden.",
+                        "schema": {
+                            "$ref": "#/definitions/errorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "One of the related elements is not found.",
+                        "schema": {
+                            "$ref": "#/definitions/errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "There was an internal error somewhere in the call chain.",
+                        "schema": {
+                            "$ref": "#/definitions/errorResponse"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "ComponentListResponse": {
+            "description": "Response component",
+            "properties": {
+                "component": {
+                    "description": "Component",
+                    "type": "string"
+                },
+                "componentVersion": {
+                    "description": "Version of the component",
+                    "type": "string"
+                },
+                "componentDescription": {
+                    "description": "Description of the component",
+                    "type": "string"
+                },
+                "operationActivity": {
+                    "description": "Operation activity",
+                    "type": "string"
+                },
+                "plant": {
+                    "description": "The plant for which this operation activity is defined",
+                    "type": "string"
+                },
+                "requiredQuantity": {
+                    "description": "Required quantity to assemble for the BOM component",
+                    "type": "number"
+                },
+                "assembledQuantity": {
+                    "description": "Assembled quantity for the BOM component",
+                    "type": "number"
+                },
+                "remainingQuantity": {
+                    "description": "Remaining quantity to assemble for the BOM component",
+                    "type": "number"
+                },
+                "assembleQuantityAsRequired": {
+                    "description": "Indicates whether the BOM component can be assembled with custom quantity",
+                    "type": "boolean"
+                },
+                "stepId": {
+                    "description": "Step ID",
+                    "type": "string"
+                },
+                "componentSequence": {
+                    "description": "Sequence of the BOM component",
+                    "type": "number"
+                },
+                "assemblyDataType": {
+                    "description": "Assembly data type",
+                    "type": "string"
+                },
+                "bomComponentCustomData": {
+                    "description": "Set of bom component custom data.",
+                    "items": {
+                        "$ref": "#/definitions/CustomData"
+                    },
+                    "type": "array"
+                },
+                "installationPoint": {
+                    "description": "Installation Point Value of the Component",
+                    "type": "string"
+                }
+            }
+        },
+        "CustomData": {
+            "description": "Bom component custom data.",
+            "properties": {
+                "attribute": {
+                    "description": "Attribute name.",
+                    "type": "string"
+                },
+                "value": {
+                    "description": "Attribute value.",
+                    "type": "string"
+                }
+            }
+        },
+        "AutoAssembleRequest": {
+            "type": "object",
+            "required": [
+                "sfcs",
+                "operationActivity",
+                "resource",
+                "plant"
+            ],
+            "properties": {
+                "operationActivity": {
+                    "type": "string",
+                    "description": "The operation activity to work on"
+                },
+                "operationActivityVersion": {
+                    "type": "string",
+                    "description": "The version of the operation activity to work on."
+                },
+                "plant": {
+                    "type": "string",
+                    "description": "The plant where the auto assembly is performed."
+                },
+                "quantity": {
+                    "type": "number",
+                    "description": "The SFC quantity to assemble."
+                },
+                "resource": {
+                    "type": "string",
+                    "description": "The resource to work on."
+                },
+                "sfcs": {
+                    "type": "array",
+                    "description": "The list of SFC names that must be processed.",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "hasTimeBased": {
+                    "type": "boolean",
+                    "description": "The flag indicates whether there are any components that should follow the time based auto assembly. By default, the value is true."
+                },
+                "hasNonTimeBased": {
+                    "type": "boolean",
+                    "description": "The flag indicates whether there are any components that should follow the non-time based auto assembly. By default, the value is true."
+                }
+            },
+            "title": "AutoAssembleRequest",
+            "description": "The request object to assemble auto assembly components"
+        },
+        "CheckResourceBinComponentQuantityRequest": {
+            "type": "object",
+            "required": [
+                "operation",
+                "operationVersion",
+                "plant",
+                "resource",
+                "sfcs"
+            ],
+            "properties": {
+                "operation": {
+                    "type": "string",
+                    "description": "The Operation for checking the components"
+                },
+                "operationVersion": {
+                    "type": "string",
+                    "description": "Version of the Operation."
+                },
+                "plant": {
+                    "type": "string",
+                    "description": "The plant containing an SFC."
+                },
+                "resource": {
+                    "type": "string",
+                    "description": "The Resource with Bin which is needed to be checked"
+                },
+                "sfcs": {
+                    "type": "array",
+                    "description": "The list of SFCs for checking the component quantity",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            },
+            "title": "CheckResourceBinComponentQuantityRequest",
+            "description": "The request for checking the component quantity in the Resource Bin is enough to make time based auto assembly."
+        },
+        "AssembledComponents": {
+            "description": "A request to list the assembled components",
+            "properties": {
+                "assemblyId": {
+                    "description": "Assembly ID of the component.",
+                    "type": "number"
+                },
+                "plant": {
+                    "description": "The plant for which this operation activity is defined.",
+                    "type": "string"
+                },
+                "operationActivity": {
+                    "description": "Operation activity.",
+                    "type": "string"
+                },
+                "component": {
+                    "description": "Component.",
+                    "type": "string"
+                },
+                "componentVersion": {
+                    "description": "Version of the component.",
+                    "type": "string"
+                },
+                "description": {
+                    "description": "Description of the component.",
+                    "type": "string"
+                },
+                "installationPoint": {
+                    "description": "Installation Point value of the Component",
+                    "type": "string"
+                },
+                "assembledQuantity": {
+                    "description": "Assembled quantity for the BOM component.",
+                    "type": "number"
+                },
+                "unitOfMeasure": {
+                    "description": "Unit of Measure.",
+                    "type": "string"
+                },
+                "assembledDate": {
+                    "description": "Assembled date.",
+                    "type": "string"
+                },
+                "assemblyDataType": {
+                    "description": "Assembly data type of the component.",
+                    "type": "string"
+                },
+                "assemblyDataFields": {
+                    "description": "List of Assembly data fields for the component.",
+                    "items": {
+                        "$ref": "#/definitions/AssemblyDataField"
+                    },
+                    "type": "array"
+                },
+                "inventoryId":{
+                    "description": "Inventory ID of the Component",
+                    "type": "string"
+                },
+                "handlingUnit":{
+                    "description": "Handling Unit for the Component",
+                    "type": "string"
+                },
+                "batchNumber":{
+                    "description": "Batch Number of the Component",
+                    "type": "string"
+                },
+                "storageLocation":{
+                    "description": "Storage Location of the Component",
+                    "type": "string"
+                },
+                "serialNumber": {
+                    "description": "Serial Number of the Component",
+                    "type": "string"
+                }
+            }
+        },
+        "AssemblyDataField": {
+            "description": "Assembly data fields for the component.",
+            "properties": {
+                "fieldName": {
+                    "description": "Assembly field name.",
+                    "type": "string"
+                },
+                "fieldValue": {
+                    "description": "Assembly field value.",
+                    "type": "string"
+                }
+            }
+        },
+        "AddComponentRequest": {
+            "description": "A request to add a component.",
+            "required": [
+                "plant",
+                "operationActivity",
+                "sfc",
+                "component",
+                "componentVersion",
+                "quantity",
+                "resource"
+            ],
+            "properties": {
+                "plant": {
+                    "description": "Plant for assembly of component.",
+                    "type": "string"
+                },
+                "operationActivity": {
+                    "description": "Operation activity for assembly of component.",
+                    "type": "string"
+                },
+                "sfc": {
+                    "description": "SFC for assembly of component.",
+                    "type": "string"
+                },
+                "component": {
+                    "description": "Component name for assembly of component.",
+                    "type": "string"
+                },
+                "componentVersion": {
+                    "description": "Component version for assembly of component.",
+                    "type": "string"
+                },
+                "quantity": {
+                    "description": "Quantity for assembly of component.",
+                    "type": "number"
+                },
+                "resource": {
+                    "description": "Resource name for assembly of component.",
+                    "type": "string"
+                },
+                "sequence": {
+                    "description": "Sequence for assembly of component.",
+                    "type": "number"
+                },
+                "dataFields": {
+                    "description": "List of Assembly Data fields for assembly of component.",
+                    "items": {
+                        "$ref": "#/definitions/AssemblyDataField"
+                    },
+                    "type": "array"
+                },
+                "installationPoint": {
+                    "description": "Installation Point Value of the Component.",
+                    "type": "string"
+                },
+                "isBomComponentAssembly": {
+                    "description": "Is the component assembled a BOM component. By default, the value is true.",
+                    "type": "boolean",
+                    "default": true
+                }
+            }
+        },
+        "RemoveComponentRequest": {
+            "description": "A request to delete a component.",
+            "required": [
+                "plant",
+                "operationActivity",
+                "sfc",
+                "component",
+                "componentVersion",
+                "resource"
+            ],
+            "properties": {
+                "plant": {
+                    "description": "Plant for assembly of component.",
+                    "type": "string"
+                },
+                "operationActivity": {
+                    "description": "Operation activity for assembly of component.",
+                    "type": "string"
+                },
+                "sfc": {
+                    "description": "SFC for assembly of component.",
+                    "type": "string"
+                },
+                "component": {
+                    "description": "Component name for assembly of component.",
+                    "type": "string"
+                },
+                "componentVersion": {
+                    "description": "Component version for assembly of component.",
+                    "type": "string"
+                },
+                "resource": {
+                    "description": "Resource name for assembly of component.",
+                    "type": "string"
+                },
+                "sequence": {
+                    "description": "Sequence for assembly of component.",
+                    "type": "number"
+                }
+            }
+        },
+        "CheckComponentRequest": {
+            "type": "object",
+            "required": [
+                "sfcs",
+                "operation",
+                "plant"
+            ],
+            "properties": {
+                "sfcs": {
+                    "type": "array",
+                    "description": "The list of SFCs to be checked for assembled components.",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "operation": {
+                    "type": "string",
+                    "description": "Operation to be checked for assembled components."
+                },
+                "resource": {
+                    "type": "string",
+                    "description": "Resource to be checked for assembled components."
+                },
+                "missing": {
+                    "type": "boolean",
+                    "description": "If true, checks if quantity of assembled components is less than the quantity specified in the BOM."
+                },
+                "excess": {
+                    "type": "boolean",
+                    "description": "If true, checks if quantity of assembled components is in excess of the quantity specified in the BOM."
+                },
+                "nonBom": {
+                    "type": "boolean",
+                    "description": "If true, checks if assembled components contain any component not specified in the BOM."
+                },
+                "checkAutoAssyComponents": {
+                    "type": "boolean",
+                    "description": "If true, checks if SFCs have any un-assembled components."
+                },
+                "checkOperations": {
+                    "type": "string",
+                    "description": "List of the operations in comma separated form, that need to be used for check."
+                },
+                "checkCurrentOperationOnly": {
+                    "type": "boolean",
+                    "description": "If true, only the current operation will be included into check."
+                },
+                "plant": {
+                    "type": "string",
+                    "description": "The plant for assembled components to be checked."
+                }
+            },
+            "title": "CheckComponentRequest",
+            "description": "The request to check for assembled components configuration."
+        },
+        "errorResponse": {
+            "properties": {
+                "displayMessage": {
+                    "type": "string",
+                    "description": "Contains additional information, if any"
+                },
+                "errorMessageKey": {
+                    "type": "string",
+                    "description": "Internal error message"
+                },
+                "technicalMessage": {
+                    "type": "string",
+                    "description": "Contains technical reason for the error"
+                },
+                "errorCode": {
+                    "type": "number",
+                    "description": "Internal error code used for troubleshooting"
+                },
+                "timestamp": {
+                    "type": "number"
+                },
+                "status": {
+                    "type": "number",
+                    "description": "HTTP status code"
+                }
+            }
+        }
+    }
+}

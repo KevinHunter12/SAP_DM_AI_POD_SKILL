@@ -1,0 +1,1070 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "A nonconformance code is a distinct set of characters that represent a failure, defect, or repair code indicating that the shop floor control doesn’t meet the approved quality definition. Use this service to search, create, update, and delete nonconformance codes, and custom field definitions for it.",
+        "version": "v1",
+        "title": "Nonconformance Code",
+        "contact": {
+            "name": "SAP Digital Manufacturing Operations",
+            "email": "sap-dmoperation@sap.com"
+        }
+    },
+    "host": "hostname",
+    "basePath": "/",
+    "tags": [
+             {
+                 "name": "Nonconformance Code",
+                 "description": "Allows you to manage nonconformance codes."
+             }
+             ],
+    "consumes": [
+                 "application/json"
+                 ],
+    "produces": [
+                 "application/json"
+                 ],
+    "paths": {
+        "/nonconformancecodes": {
+            "get": {
+                "tags": [
+                         "Nonconformance Code"
+                         ],
+                "summary": "Read nonconformance code",
+                "description": "Reads a nonconformance code for a given plant and returns the details for the same",
+                "operationId": "readNonConformanceCodesUsingGET",
+                "produces": [
+                             "application/json"
+                             ],
+                "parameters": [
+                               {
+                                   "name": "code",
+                                   "in": "query",
+                                   "description": "The nonconformance code value.",
+                                   "required": false,
+                                   "type": "string",
+                                   "pattern": "^(?! )[0-9A-Z_$!)(+~@^=\\-*. ]+(?<! )$"
+                               },
+                               {
+                                   "name": "plant",
+                                   "in": "query",
+                                   "description": "The plant where a nonconformance code is defined.",
+                                   "required": true,
+                                   "type": "string",
+                                   "pattern": "^(?! )[0-9A-Z_$!)(+~@^=\\-*. ]+(?<! )$"
+                               }
+                               ],
+                "responses": {
+                    "200": {
+                        "description": "The nonconformance code was found.",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/NonConformanceCodeV2"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+                        "schema": {
+                            "$ref": "#/definitions/error"
+                        }
+                    },
+                    "401": {
+                        "description": "You are not authorized to call this resource.",
+                        "schema": {
+                            "$ref": "#/definitions/error"
+                        }
+                    },
+                    "403": {
+                        "description": "Accessing the resource you are trying to reach is forbidden.",
+                        "schema": {
+                            "$ref": "#/definitions/error"
+                        }
+                    },
+                    "500": {
+                        "description": "An internal error occured.",
+                        "schema": {
+                            "$ref": "#/definitions/error"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                         "Nonconformance Code"
+                         ],
+                "summary": "Create nonconformance code.",
+                "description": "Creates a nonconformance code for a given plant",
+                "operationId": "createUsingPOST",
+                "consumes": [
+                             "application/json"
+                             ],
+                "produces": [
+                             "application/json"
+                             ],
+                "parameters": [
+                               {
+                                   "in": "body",
+                                   "name": "The Nonconformance code to create",
+                                   "description": "nonConformanceCode",
+                                   "required": true,
+                                   "schema": {
+                                       "$ref": "#/definitions/NonConformanceCodeV2"
+                                   }
+                               }
+                               ],
+                "responses": {
+                    "201": {
+                        "description": "The nonconformance code was created."
+                    },
+                    "400": {
+                        "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+                        "schema": {
+                            "$ref": "#/definitions/error"
+                        }
+                    },
+                    "401": {
+                        "description": "You are not authorized to call this resource.",
+                        "schema": {
+                            "$ref": "#/definitions/error"
+                        }
+                    },
+                    "403": {
+                        "description": "Accessing the resource you are trying to reach is forbidden.",
+                        "schema": {
+                            "$ref": "#/definitions/error"
+                        }
+                    },
+                    "409": {
+                        "description": "The nonconformance code already exists.",
+                        "schema": {
+                            "$ref": "#/definitions/error"
+                        }
+                    },
+                    "500": {
+                        "description": "An internal error occured.",
+                        "schema": {
+                            "$ref": "#/definitions/error"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                         "Nonconformance Code"
+                         ],
+                "summary": "Delete nonconformance code.",
+                "description": "Deletes a nonconformance code for a given plant",
+                "operationId": "deleteUsingDELETE",
+                "produces": [
+                             "application/json"
+                             ],
+                "parameters": [
+                               {
+                                   "in": "body",
+                                   "name": "request",
+                                   "description": "request",
+                                   "required": true,
+                                   "schema": {
+                                       "$ref": "#/definitions/NonConformanceCodeDeleteRequest"
+                                   }
+                               }
+                               ],
+                "responses": {
+                    "204": {
+                        "description": "The nonconformance code was removed."
+                    },
+                    "400": {
+                        "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+                        "schema": {
+                            "$ref": "#/definitions/error"
+                        }
+                    },
+                    "401": {
+                        "description": "You are not authorized to call this resource.",
+                        "schema": {
+                            "$ref": "#/definitions/error"
+                        }
+                    },
+                    "403": {
+                        "description": "Accessing the resource you are trying to reach is forbidden.",
+                        "schema": {
+                            "$ref": "#/definitions/error"
+                        }
+                    },
+                    "404": {
+                        "description": "The nonconformance code was not found.",
+                        "schema": {
+                            "$ref": "#/definitions/error"
+                        }
+                    },
+                    "500": {
+                        "description": "An internal error occured.",
+                        "schema": {
+                            "$ref": "#/definitions/error"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "tags": [
+                         "Nonconformance Code"
+                         ],
+                "summary": "Update nonconformance code.",
+                "description": "Updates a nonconformance code for a given plant",
+                "operationId": "updateUsingPATCH",
+                "consumes": [
+                             "application/json"
+                             ],
+                "produces": [
+                             "application/json"
+                             ],
+                "parameters": [
+                               {
+                                   "in": "body",
+                                   "name": "nonConformanceCode",
+                                   "description": "The nonconformance code to update.",
+                                   "required": true,
+                                   "schema": {
+                                       "$ref": "#/definitions/NonConformanceCodeV2"
+                                   }
+                               }
+                               ],
+                "responses": {
+                    "200": {
+                        "description": "The nonconformance code was updated.",
+                        "schema": {
+                            "$ref": "#/definitions/NonConformanceCodeV2"
+                        }
+                    },
+                    "400": {
+                        "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+                        "schema": {
+                            "$ref": "#/definitions/error"
+                        }
+                    },
+                    "401": {
+                        "description": "You are not authorized to call this resource.",
+                        "schema": {
+                            "$ref": "#/definitions/error"
+                        }
+                    },
+                    "403": {
+                        "description": "Accessing the resource you are trying to reach is forbidden.",
+                        "schema": {
+                            "$ref": "#/definitions/error"
+                        }
+                    },
+                    "404": {
+                        "description": "The nonconformance code was not found.",
+                        "schema": {
+                            "$ref": "#/definitions/error"
+                        }
+                    },
+                    "500": {
+                        "description": "An internal error occured.",
+                        "schema": {
+                            "$ref": "#/definitions/error"
+                        }
+                    }
+                }
+            }
+        },
+        "/customFieldDefinitions": {
+            "get": {
+                "tags": [
+                    "Custom Field Definition"
+                ],
+                "summary": "Retrieves a list of custom data definitions for nonconformance codes.",
+                "description": "Returns all maintained custom field definitions, for a given plant.",
+                "operationId": "getCustomFieldDefinition",
+                "parameters": [
+                    {
+                        "name": "plant",
+                        "in": "query",
+                        "description": "The plant where a custom field definitions are defined.",
+                        "required": true,
+                        "type": "string",
+                        "maxLength": 6,
+                        "minLength": 1
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The list of custom data definitions was returned.",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/CustomFieldDefinition"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+                        "schema": {
+                            "$ref": "#/definitions/error"
+                        }
+                    },
+                    "401": {
+                        "description": "You are not authorized to call this resource.",
+                        "schema": {
+                            "$ref": "#/definitions/error"
+                        }
+                    },
+                    "403": {
+                        "description": "Accessing the resource you are trying to reach is forbidden.",
+                        "schema": {
+                            "$ref": "#/definitions/error"
+                        }
+                    },
+                    "500": {
+                        "description": "An internal error occurred.",
+                        "schema": {
+                            "$ref": "#/definitions/error"
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "OAuthSecurity": []
+                    }
+                ],
+                "deprecated": false
+            },
+            "post": {
+                "tags": [
+                    "Custom Field Definition"
+                ],
+                "summary": "Creates a custom data definition for the nonconformance code.",
+                "operationId": "createCustomFieldDefinition",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "request",
+                        "description": "request",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/CustomFieldDefinitionCreateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "The custom data definition was created.",
+                        "schema": {
+                            "$ref": "#/definitions/CustomFieldDefinition"
+                        }
+                    },
+                    "400": {
+                        "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+                        "schema": {
+                            "$ref": "#/definitions/error"
+                        }
+                    },
+                    "401": {
+                        "description": "You are not authorized to call this resource.",
+                        "schema": {
+                            "$ref": "#/definitions/error"
+                        }
+                    },
+                    "403": {
+                        "description": "Accessing the resource you are trying to reach is forbidden.",
+                        "schema": {
+                            "$ref": "#/definitions/error"
+                        }
+                    },
+                    "404": {
+                        "description": "The plant was not found.",
+                        "schema": {
+                            "$ref": "#/definitions/error"
+                        }
+                    },
+                    "409": {
+                        "description": "The custom data definition already exists.",
+                        "schema": {
+                            "$ref": "#/definitions/error"
+                        }
+                    },
+                    "500": {
+                        "description": "An internal error occurred.",
+                        "schema": {
+                            "$ref": "#/definitions/error"
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "OAuthSecurity": []
+                    }
+                ],
+                "deprecated": false
+            },
+            "patch": {
+                "tags": [
+                    "Custom Field Definition"
+                ],
+                "summary": "Updates a custom data definition for the nonconformance code.",
+                "description": "Updates field label or sequence in the custom field definition for the nonconformance code.",
+                "operationId": "updateCustomFieldDefinition",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "request",
+                        "description": "request",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/CustomFieldDefinitionUpdateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The custom data definition was updated.",
+                        "schema": {
+                            "$ref": "#/definitions/CustomFieldDefinition"
+                        }
+                    },
+                    "400": {
+                        "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+                        "schema": {
+                            "$ref": "#/definitions/error"
+                        }
+                    },
+                    "401": {
+                        "description": "You are not authorized to call this resource.",
+                        "schema": {
+                            "$ref": "#/definitions/error"
+                        }
+                    },
+                    "403": {
+                        "description": "Accessing the resource you are trying to reach is forbidden.",
+                        "schema": {
+                            "$ref": "#/definitions/error"
+                        }
+                    },
+                    "404": {
+                        "description": "The custom data definition or plant was not found.",
+                        "schema": {
+                            "$ref": "#/definitions/error"
+                        }
+                    },
+                    "412": {
+                        "description": "The custom data definition has already been updated by another user.",
+                        "schema": {
+                            "$ref": "#/definitions/error"
+                        }
+                    },
+                    "500": {
+                        "description": "An internal error occurred.",
+                        "schema": {
+                            "$ref": "#/definitions/error"
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "OAuthSecurity": []
+                    }
+                ],
+                "deprecated": false
+            },
+            "delete": {
+                "tags": [
+                    "Custom Field Definition"
+                ],
+                "summary": "Deletes a custom data definition for the nonconformance code.",
+                "operationId": "deleteCustomFieldDefinition",
+                "consumes": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "request",
+                        "description": "request",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/CustomFieldDefinitionDeleteRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "The custom data definition was deleted."
+                    },
+                    "400": {
+                        "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+                        "schema": {
+                            "$ref": "#/definitions/error"
+                        }
+                    },
+                    "401": {
+                        "description": "You are not authorized to call this resource.",
+                        "schema": {
+                            "$ref": "#/definitions/error"
+                        }
+                    },
+                    "403": {
+                        "description": "Accessing the resource you are trying to reach is forbidden.",
+                        "schema": {
+                            "$ref": "#/definitions/error"
+                        }
+                    },
+                    "404": {
+                        "description": "The custom data definition or plant was not found.",
+                        "schema": {
+                            "$ref": "#/definitions/error"
+                        }
+                    },
+                    "412": {
+                        "description": "Cannot delete custom data definition because it is used in other objects.",
+                        "schema": {
+                            "$ref": "#/definitions/error"
+                        }
+                    },
+                    "500": {
+                        "description": "An internal error occurred.",
+                        "schema": {
+                            "$ref": "#/definitions/error"
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "OAuthSecurity": []
+                    }
+                ],
+                "deprecated": false
+            }
+        }
+    },
+    "securityDefinitions": {
+        "OAuthSecurity": {
+            "type": "oauth2",
+            "tokenUrl": "https://{subdomain}.authentication.{tokenHost}/oauth/token",
+            "flow": "application"
+        }
+    },
+    "definitions": {
+        "NonConformanceCodeDeleteRequest": {
+            "type": "object",
+            "required": [
+                         "code",
+                         "plant"
+                         ],
+            "properties": {
+                "code": {
+                    "type": "string",
+                    "description": "The nonconformance code value to delete.",
+                    "pattern": "^(?! )[0-9A-Z_$!)(+~@^=\\-*. ]+(?<! )$"
+                },
+                "plant": {
+                    "type": "string",
+                    "description": "The plant where a nonconformance code is defined.",
+                    "pattern": "^(?! )[0-9A-Z_$!)(+~@^=\\-*. ]+(?<! )$"
+                }
+            },
+            "title": "NonConformanceCodeDeleteRequest",
+            "description": "Nonconformance code delete request."
+        },
+        "NonConformanceCodeV2Request": {
+            "type": "object",
+            "required": [
+                         "code",
+                         "plant"
+                         ],
+            "properties": {
+                "category": {
+                    "type": "string",
+                    "description": "The nonconformance code category.",
+                    "enum": [
+                             "DEFECT",
+                             "FAILURE",
+                             "REPAIR"
+                             ]
+                },
+                "code": {
+                    "type": "string",
+                    "description": "The nonconformance code value.",
+                    "pattern": "^(?! )[0-9A-Z_$!)(+~@^=\\-*. ]+(?<! )$"
+                },
+                "createdDateTime": {
+                    "type": "string",
+                    "description": "The date and time when the nonconformance code was created."
+                },
+                "customData": {
+                    "type": "array",
+                    "description": "The nonconformance code custom values.",
+                    "items": {
+                        "$ref": "#/definitions/CustomValue"
+                    }
+                },
+                "description": {
+                    "type": "string",
+                    "description": "The nonconformance code description."
+                },
+                "groups": {
+                    "type": "array",
+                    "description": "The nonconformance groups to be assigned.",
+                    "items": {
+                        "$ref": "#/definitions/NonConformanceGroupId"
+                    }
+                },
+                "modifiedDateTime": {
+                    "type": "string",
+                    "description": "The date and time when the nonconformance code was updated."
+                },
+                "plant": {
+                    "type": "string",
+                    "description": "The plant where a nonconformance code is defined.",
+                    "pattern": "^(?! )[0-9A-Z_$!)(+~@^=\\-*. ]+(?<! )$"
+                },
+                "status": {
+                    "type": "string",
+                    "description": "The nonconformance code status.",
+                    "enum": [
+                             "DISABLED",
+                             "ENABLED"
+                             ]
+                },
+                "dataType": {
+                    "type": "string",
+                    "description": "The nonconformance code data type."
+                },
+                "canBePrimary":{
+                    "type": "boolean",
+                    "description": "The nonconformance code can be primary."
+                },
+                "autoCloseIncident": {
+                    "type": "boolean",
+                    "description": "The nonconformance code auto close incident."
+                },
+                "dispositionRoutings": {
+                    "type": "array",
+                    "description": "The nonconformance code disposition routings.",
+                    "items": {
+                        "$ref": "#/definitions/DispositionRoutingRequest"
+                    }
+                },
+                "secondaryCodes": {
+                    "type": "array",
+                    "description": "The nonconformance code secondary codes.",
+                    "items": {
+                        "$ref": "#/definitions/NonConformanceSecondaryCodeRequest"
+                    }
+
+                }
+            },
+            "title": "NonConformanceCodeV2Request",
+            "description": "Nonconformance code."
+        },
+        "NonConformanceCodeV2": {
+            "type": "object",
+            "required": [
+                "code",
+                "plant"
+            ],
+            "properties": {
+                "category": {
+                    "type": "string",
+                    "description": "The nonconformance code category.",
+                    "enum": [
+                        "DEFECT",
+                        "FAILURE",
+                        "REPAIR"
+                    ]
+                },
+                "code": {
+                    "type": "string",
+                    "description": "The nonconformance code value.",
+                    "pattern": "^(?! )[0-9A-Z_$!)(+~@^=\\-*. ]+(?<! )$"
+                },
+                "createdDateTime": {
+                    "type": "string",
+                    "description": "The date and time when the nonconformance code was created."
+                },
+                "customData": {
+                    "type": "array",
+                    "description": "The nonconformance code custom values.",
+                    "items": {
+                        "$ref": "#/definitions/CustomValue"
+                    }
+                },
+                "description": {
+                    "type": "string",
+                    "description": "The nonconformance code description."
+                },
+                "groups": {
+                    "type": "array",
+                    "description": "The nonconformance groups to be assigned.",
+                    "items": {
+                        "$ref": "#/definitions/NonConformanceGroupId"
+                    }
+                },
+                "modifiedDateTime": {
+                    "type": "string",
+                    "description": "The date and time when the nonconformance code was updated."
+                },
+                "plant": {
+                    "type": "string",
+                    "description": "The plant where a nonconformance code is defined.",
+                    "pattern": "^(?! )[0-9A-Z_$!)(+~@^=\\-*. ]+(?<! )$"
+                },
+                "status": {
+                    "type": "string",
+                    "description": "The nonconformance code status.",
+                    "enum": [
+                        "DISABLED",
+                        "ENABLED"
+                    ]
+                },
+                "dataType": {
+                    "type": "string",
+                    "description": "The nonconformance code data type."
+                },
+                "canBePrimary":{
+                    "type": "boolean",
+                    "description": "The nonconformance code can be primary."
+                },
+                "autoCloseIncident": {
+                    "type": "boolean",
+                    "description": "The nonconformance code auto close incident."
+                },
+                "severity": {
+                    "type": "string",
+                    "description": "Indicates the the severity of the nonconformance code. It is used by sampling to increment the reject number.",
+                    "enum": [
+                        "NONE",
+                        "LOW",
+                        "MEDIUM",
+                        "HIGH"
+                    ]
+                },
+                "dispositionRoutings": {
+                    "type": "array",
+                    "description": "The nonconformance code disposition routings.",
+                    "items": {
+                        "$ref": "#/definitions/DispositionRouting"
+                    }
+                },
+                "secondaryCodes": {
+                    "type": "array",
+                    "description": "The nonconformance code secondary codes.",
+                    "items": {
+                        "$ref": "#/definitions/NonConformanceSecondaryCode"
+                    }
+
+                }
+            },
+            "title": "NonConformanceCodeV2",
+            "description": "Nonconformance code."
+        },
+        "CustomValue": {
+            "type": "object",
+            "properties": {
+                "attribute": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                }
+            },
+            "title": "CustomValue"
+        },
+        "NonConformanceGroupId": {
+            "type": "object",
+            "properties": {
+                "group": {
+                    "type": "string",
+                    "description": "The nonconformance group value.",
+                    "pattern": "^(?! )[0-9A-Z_$!)(+~@^=\\-*. ]+(?<! )$"
+                },
+                "plant": {
+                    "type": "string",
+                    "description": "The plant where a nonconformance code is defined.",
+                    "pattern": "^(?! )[0-9A-Z_$!)(+~@^=\\-*. ]+(?<! )$"
+                }
+            },
+            "title": "NonConformanceGroupId",
+            "description": "Nonconformance group unique data."
+        },
+        "CustomFieldDefinition": {
+            "title": "CustomFieldDefinition",
+            "type": "object",
+            "properties": {
+                "plant": {
+                    "description": "The plant where a custom field definition is defined.",
+                    "type": "string"
+                },
+                "fieldName": {
+                    "description": "The custom field definition name.",
+                    "type": "string"
+                },
+                "fieldLabel": {
+                    "description": "The custom field definition label.",
+                    "type": "string"
+                },
+                "sequence": {
+                    "description": "The custom field definition sequence.",
+                    "type": "number"
+                },
+                "createdDateTime": {
+                    "description": "The date and time when the custom field definition was created.",
+                    "type": "string",
+                    "format": "date-time",
+                    "example": "2024-06-17T14:19:37.016+00:00"
+                },
+                "modifiedDateTime": {
+                    "description": "The date and time when the custom field definition was updated.",
+                    "type": "string",
+                    "format": "date-time",
+                    "example": "2024-06-17T14:19:37.016+00:00"
+                }
+            }
+        },
+        "CustomFieldDefinitionCreateRequest": {
+            "title": "CustomFieldDefinitionCreateRequest",
+            "description": "The custom field definition create request.",
+            "type": "object",
+            "required": [
+                "plant",
+                "fieldName"
+            ],
+            "properties": {
+                "plant": {
+                    "description": "The plant where a custom field definition is defined.",
+                    "type": "string"
+                },
+                "fieldName": {
+                    "description": "The custom field definition name. Ensure that the name meets the following requirements: it must start with a character that is not a space and can contain only digits, uppercase letters, and specified special characters (including spaces within the string).",
+                    "type": "string"
+                },
+                "fieldLabel": {
+                    "description": "The custom field definition label.",
+                    "type": "string"
+                },
+                "sequence": {
+                    "description": "The custom field definition sequence.",
+                    "type": "number"
+                }
+            }
+        },
+        "CustomFieldDefinitionUpdateRequest": {
+            "title": "CustomFieldDefinitionUpdateRequest",
+            "description": "The custom field definition update request.",
+            "type": "object",
+            "required": [
+                "plant",
+                "fieldName",
+                "modifiedDateTime"
+            ],
+            "properties": {
+                "plant": {
+                    "description": "The plant where a custom field definition is defined.",
+                    "type": "string"
+                },
+                "fieldName": {
+                    "description": "The custom field definition name.",
+                    "type": "string"
+                },
+                "fieldLabel": {
+                    "description": "The custom field definition label.",
+                    "type": "string"
+                },
+                "sequence": {
+                    "description": "The custom field definition sequence.",
+                    "type": "number"
+                },
+                "modifiedDateTime": {
+                    "description": "The date and time when the custom field definition was updated.",
+                    "type": "string",
+                    "format": "date-time",
+                    "example": "2024-06-17T14:19:37.016+00:00"
+                }
+            }
+        },
+        "CustomFieldDefinitionDeleteRequest": {
+            "title": "CustomFieldDefinitionDeleteRequest",
+            "description": "The custom field definition delete request.",
+            "type": "object",
+            "required": [
+                "plant",
+                "fieldName"
+            ],
+            "properties": {
+                "plant": {
+                    "description": "The plant where a custom field definition is defined.",
+                    "type": "string"
+                },
+                "fieldName": {
+                    "description": "The custom field definition name.",
+                    "type": "string"
+                }
+            }
+        },
+        "DispositionRoutingRequest": {
+            "title": "DispositionRoutingRequest",
+            "description": "The disposition routing.",
+            "type": "object",
+            "required": [
+                "routing",
+                "type",
+                "version"
+            ],
+            "properties": {
+                "routing": {
+                    "description": "The disposition routing value.",
+                    "type": "string"
+                },
+                "type": {
+                    "description": "The disposition routing type.",
+                    "type": "string"
+                },
+                "version": {
+                    "description": "The disposition routing version.",
+                    "type": "string"
+                }
+            }
+        },
+        "DispositionRouting": {
+            "title": "DispositionRouting",
+            "description": "The disposition routing.",
+            "type": "object",
+            "properties": {
+                "plant": {
+                    "description": "The plant where a disposition routing is defined.",
+                    "type": "string"
+                },
+                "routing": {
+                    "description": "The disposition routing value.",
+                    "type": "string"
+                },
+                "type": {
+                    "description": "The disposition routing type.",
+                    "type": "string"
+                },
+                "version": {
+                    "description": "The disposition routing version.",
+                    "type": "string"
+                }
+            }
+        },
+        "NonConformanceSecondaryCodeRequest": {
+            "title": "NonConformanceSecondaryCodeRequest",
+            "description": "The nonconformance secondary code.",
+            "type": "object",
+            "required": [
+                "code"
+            ],
+            "properties": {
+                "code": {
+                    "description": "The nonconformance secondary code value.",
+                    "type": "string"
+                },
+                "required": {
+                    "description": "The nonconformance secondary code is required.",
+                    "type": "boolean"
+                }
+            }
+        },
+        "NonConformanceSecondaryCode": {
+            "title": "NonConformanceSecondaryCode",
+            "description": "The nonconformance secondary code.",
+            "type": "object",
+            "properties": {
+                "plant": {
+                    "description": "The plant where a nonconformance secondary code is defined.",
+                    "type": "string"
+                },
+                "code": {
+                    "description": "The nonconformance secondary code value.",
+                    "type": "string"
+                },
+                "required": {
+                    "description": "The nonconformance secondary code is required.",
+                    "type": "boolean"
+                }
+            }
+        },
+        "error": {
+            "type": "object",
+            "properties": {
+                "causeMessage": {
+                    "type": "string",
+                    "description": "Contains technical reason for the error."
+                },
+                "code": {
+                    "type": "string",
+                    "description": "Internal error message"
+                },
+                "correlationId": {
+                    "type": "string",
+                    "description": "Contains correlationId for the error."
+                },
+                "message": {
+                    "type": "string",
+                    "description": "Contains additional information, if any"
+                }
+            },
+            "title": "error",
+            "description": "Error response."
+        }
+    },
+    "externalDocs": {
+        "description": "Prepare for API Integration",
+        "url": "https://help.sap.com/docs/sap-digital-manufacturing/operations-guide/prepare-for-api-integration"
+    },
+    "schemes": [
+                "https"
+                ],
+    "security": [
+                 {
+                     "OAuthSecurity": []
+                 }
+                 ],
+    "x-sap-shortText": "Manage nonconformance codes",
+    "x-servers": [
+                  {
+                      "url": "https://api.{regionHost}/nonconformancecode/v1",
+                      "description": "Base URL",
+                      "templates": {
+                          "regionHost": {
+                              "description": "The data center where SAP Digital Manufacturing is provisioned for your organization",
+                              "enum": [
+                                       "eu10.dmc.cloud.sap",
+                                       "eu20.dmc.cloud.sap",
+                                       "us10.dmc.cloud.sap",
+                                       "us20.dmc.cloud.sap",
+                                       "test.eu10.dmc.cloud.sap",
+                                       "test.eu20.dmc.cloud.sap",
+                                       "test.us10.dmc.cloud.sap",
+                                       "test.us20.dmc.cloud.sap"
+                                       ],
+                              "default": "test.eu10.dmc.cloud.sap"
+                          },
+                          "tokenHost": {
+                              "description": "The authentication server where SAP Digital Manufacturing is provisioned for your organization",
+                              "enum": [
+                                       "eu10.hana.ondemand.com",
+                                       "eu20.hana.ondemand.com",
+                                       "us10.hana.ondemand.com",
+                                       "us20.hana.ondemand.com"
+                                       ],
+                              "default": "eu10.hana.ondemand.com"
+                          }
+                      }
+                  }
+                  ]
+}

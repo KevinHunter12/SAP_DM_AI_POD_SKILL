@@ -1,0 +1,3278 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "This service enables you to perform inventory related actions that include but are not limited to retrieving stock information and return stock from SAP Digital Manufacturing to integrated ERP systems.",
+        "version": "v2",
+        "title": "Inventory",
+        "contact": {
+            "name": "SAP Digital Manufacturing Operations",
+            "email": "sap-dmoperation@sap.com"
+        }
+    },
+    "externalDocs": {
+        "description": "Prepare for API Integration",
+        "url": "https://help.sap.com/docs/sap-digital-manufacturing/operations-guide/prepare-for-api-integration"
+    },
+    "host": "hostname",
+    "basePath": "/",
+    "tags": [
+        {
+            "name": "Stocks"
+        },
+        {
+          "name": "Goods Receipts"
+        },
+        {
+          "name": "Goods Issues"
+        }
+    ],
+    "security": [
+        {
+            "OAuthSecurity": []
+        }
+    ],
+    "consumes": [
+        "application/json"
+    ],
+    "produces": [
+        "application/json"
+    ],
+    "paths": {
+        "/inventories/query": {
+            "post": {
+                "tags": [
+                    "Stocks"
+                ],
+                "summary": "Retrieves stock information for a given plant.",
+                "description": "Retrieves stocks created in SAP Digital Manufacturing for a given plant. You can retrieve stocks of different statuses and types, as well as stocks with or without on-hand quantities.",
+                "operationId": "queryInventoriesUsingPost_V2",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "request",
+                        "description": "request",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/QueryInventoryRequestV2"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Stocks have been retrieved.",
+                        "schema": {
+                            "$ref": "#/definitions/QueryInventoryResponseV2"
+                        }
+                    },
+                    "400": {
+                        "description": "The HTTP request is invalid and it cannot be processed by the server correctly.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponseV3"
+                        }
+                    },
+                    "401": {
+                        "description": "You are not authorized to call this resource.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponseV3"
+                        }
+                    },
+                    "403": {
+                        "description": "Accessing the resource you are trying to reach is forbidden.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponseV3"
+                        }
+                    },
+                    "404": {
+                        "description": "Resource not found.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponseV3"
+                        }
+                    },
+                    "500": {
+                        "description": "An internal error occurred.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponseV3"
+                        }
+                    }
+                }
+            }
+        },
+        "/inventories/bulkCreate": {
+            "post": {
+                "tags": [
+                    "Stocks"
+                ],
+                "summary": "Creates multiple stocks for a given plant.",
+                "description": "Creates multiple stocks with either 'DMC', 'ERP' or 'EWM' origin for specific materials at a given plant. To create stock with 'ERP' or 'EWM' origins, you must first enable Third-Party Inventory Management in the Manage Business Settings app.",
+                "operationId": "createInventoryPOST_V2",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "request",
+                        "description": "request",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/CreateBulkInventoriesRequestV2"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Stocks are created.",
+                        "schema": {
+                            "$ref": "#/definitions/CreateBulkInventoriesResponseV2"
+                        }
+                    },
+                    "400": {
+                        "description": "The HTTP request is invalid and it cannot be processed by the server correctly.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponseV3"
+                        }
+                    },
+                    "401": {
+                        "description": "You are not authorized to call this resource.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponseV3"
+                        }
+                    },
+                    "403": {
+                        "description": "Accessing the resource you are trying to reach is forbidden.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponseV3"
+                        }
+                    },
+                    "404": {
+                        "description": "Resource not found.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponseV3"
+                        }
+                    },
+                    "409": {
+                        "description": "The resource has been modified by another user. Please retry later.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponseV3"
+                        }
+                    },
+                    "500": {
+                        "description": "An internal error occurred.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponseV3"
+                        }
+                    }
+                }
+            }
+        },
+        "/inventories/{inventoryId}": {
+            "patch": {
+                "tags": [
+                    "Stocks"
+                ],
+                "summary": "Updates a single stock for a given plant.",
+                "description": "Updates an existing stock for a given plant. You can update a stock with DMC, ERP or EWM origin. For DMC stocks, you can increase the stock on-hand quantity, or change the stock information such as stock status and data fields. For ERP stocks or EWM stocks, you can only change its data fields. For the stocks imported from third-party systems(Stocks originally created via POST /api/v2/inventories/bulkCreate), you can also change the stock details if the settings Third-Party Inventory Management and Allow Updating Third-Party Inventories are enabled in the Manage Business Settings app.",
+                "operationId": "UpdateInventoriesUsingPATCH_V2",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "inventoryId",
+                        "in": "path",
+                        "description": "The inventory ID of the stock that needs to be updated",
+                        "required": true,
+                        "type": "string",
+                        "maxLength": 128,
+                        "minLength": 0
+                    },
+                    {
+                        "name": "plant",
+                        "in": "query",
+                        "description": "The plant of the stock",
+                        "required": true,
+                        "type": "string",
+                        "maxLength": 6,
+                        "minLength": 0
+                    },
+                    {
+                        "in": "body",
+                        "name": "request",
+                        "description": "request",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/UpdateInventoryRequestV2"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The stock has been updated.",
+                        "schema": {
+                            "$ref": "#/definitions/UpdateInventoryResponseV2"
+                        }
+                    },
+                    "400": {
+                        "description": "The HTTP request is invalid and it cannot be processed by the server correctly.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponseV3"
+                        }
+                    },
+                    "401": {
+                        "description": "You are not authorized to call this resource.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponseV3"
+                        }
+                    },
+                    "403": {
+                        "description": "Accessing the resource you are trying to reach is forbidden.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponseV3"
+                        }
+                    },
+                    "404": {
+                        "description": "Resource not found.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponseV3"
+                        }
+                    },
+                    "409": {
+                        "description": "The resource has been modified by another user. Please retrieve the latest inventory information and try again.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponseV3"
+                        }
+                    },
+                    "500": {
+                        "description": "An internal error occurred.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponseV3"
+                        }
+                    }
+                }
+            }
+        },
+        "/inventories/transfer": {
+            "post": {
+                "tags": [
+                    "Stocks"
+                ],
+                "summary": "Transfers the full or the partial quantity of a DMC stock to a different storage location.",
+                "description": "Transfers the full or partial quantity of a stock to a different storage location. It's only supported for stocks with DMC origin or ERP stocks imported from third-party systems. <br>If you transfer the full quantity, the system creates an inventory ID for the new stock and removes the original stock. However, if you only transfer a partial quantity, the system creates an inventory ID for the new stock while the original stock still exists, just with a decreased quantity. ",
+                "operationId": "transferInventoryUsingPOST_V2",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "request",
+                        "description": "request",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/TransferInventoryRequestV2"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Stock transfer has been performed.",
+                        "schema": {
+                            "$ref": "#/definitions/TransferInventoryResponseV2"
+                        }
+                    },
+                    "400": {
+                        "description": "The HTTP request is invalid and it cannot be processed by the server correctly.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponseV3"
+                        }
+                    },
+                    "401": {
+                        "description": "You are not authorized to call this resource.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponseV3"
+                        }
+                    },
+                    "403": {
+                        "description": "Accessing the resource you are trying to reach is forbidden.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponseV3"
+                        }
+                    },
+                    "404": {
+                        "description": "Resource not found.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponseV3"
+                        }
+                    },
+                    "409": {
+                        "description": "The resource has been modified by another user. Please retrieve the latest inventory information and try again.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponseV3"
+                        }
+                    },
+                    "500": {
+                        "description": "An internal error occurred.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponseV3"
+                        }
+                    }
+                }
+            }
+        },
+        "/inventories/ewmSynchronization": {
+            "post": {
+                "tags": [
+                    "Stocks"
+                ],
+                "summary": "Synchronizes Extended Warehouse Management (EWM) stock information.",
+                "description": "Synchronizes stock information from the integrated EWM system to SAP Digital Manufacturing for a given plant, warehouse and production supply area.",
+                "operationId": "ewmStockSyncUsingPOST_V2",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "async",
+                        "in": "query",
+                        "description": "Indicates if the EWM stock synchronization process occurs synchronously or asynchronously. To ensure good API performance, we recommend using the asynchronous process if you retrieve more than 60 stocks items in one call. Stock items are differentiated based on the following properties: plant, warehouse, production supply area (PSA), PSA bin, handling unit, material, order, reservation item number, reservation order number, batch number, serial number and stock type.",
+                        "required": false,
+                        "type": "boolean",
+                        "default": false
+                    },
+                    {
+                        "in": "body",
+                        "name": "request",
+                        "description": "request",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/EwmStockSyncRequestV2"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "EWM stocks have been synchronized successfully.",
+                        "schema": {
+                            "$ref": "#/definitions/EwmStockSyncResponseV2"
+                        }
+                    },
+                    "202": {
+                        "description": "The request to synchronize EWM stocks has been performed. Call /inventory/transactions/{id} in version 1 to the retrieve the status of the request.",
+                        "schema": {
+                            "$ref": "#/definitions/EwmStockAsyncResponseV2"
+                        }
+                    },
+                    "400": {
+                        "description": "The HTTP request is invalid and it cannot be processed by the server correctly.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponseV3"
+                        }
+                    },
+                    "401": {
+                        "description": "You are not authorized to call this resource.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponseV3"
+                        }
+                    },
+                    "403": {
+                        "description": "Accessing the resource you are trying to reach is forbidden.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponseV3"
+                        }
+                    },
+                    "404": {
+                        "description": "Resource not found.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponseV3"
+                        }
+                    },
+                    "409": {
+                        "description": "The resource has been modified by another user. Please retrieve the latest inventory information and try again.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponseV3"
+                        }
+                    },
+                    "500": {
+                        "description": "An internal error occurred.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponseV3"
+                        }
+                    }
+                }
+            }
+        },
+        "/inventories/{inventoryId}/return": {
+            "post": {
+                "tags": [
+                    "Stocks"
+                ],
+                "summary": "Returns an ERP origin stock to the central storage location.",
+                "description": "Returns partial or full quantities of ERP origin stocks to the central storage location for a given plant and inventory ID. Stocks eligible for return don't include those imported from third-party systems. You can return only unrestricted stocks.",
+                "operationId": "ReturnInventoryUsingPOST_V2",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "inventoryId",
+                        "in": "path",
+                        "description": "The inventory ID of the stock that needs to be returned.",
+                        "required": true,
+                        "type": "string",
+                        "maxLength": 128,
+                        "minLength": 0
+                    },
+                    {
+                        "name": "plant",
+                        "in": "query",
+                        "description": "The plant of the stock.",
+                        "required": true,
+                        "type": "string",
+                        "maxLength": 6,
+                        "minLength": 0
+                    },
+                    {
+                        "in": "body",
+                        "name": "request",
+                        "description": "request",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/ReturnInventoryRequestV2"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The stock has been returned with the specified quantity.",
+                        "schema": {
+                            "$ref": "#/definitions/ReturnInventoryResponseV2"
+                        }
+                    },
+                    "400": {
+                        "description": "The HTTP request is invalid and it cannot be processed by the server correctly.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponseV3"
+                        }
+                    },
+                    "401": {
+                        "description": "You are not authorized to call this resource.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponseV3"
+                        }
+                    },
+                    "403": {
+                        "description": "Accessing the resource you are trying to reach is forbidden.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponseV3"
+                        }
+                    },
+                    "404": {
+                        "description": "Resource not found.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponseV3"
+                        }
+                    },
+                    "409": {
+                        "description": "The resource has been modified by another user. Please retrieve the latest inventory information and try again.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponseV3"
+                        }
+                    },
+                    "500": {
+                        "description": "An internal error occurred.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponseV3"
+                        }
+                    }
+                }
+            }
+        },
+        "/inventories/{inventoryId}/scrap": {
+            "post": {
+                "tags": [
+                    "Stocks"
+                ],
+                "summary": "Scraps an ERP origin stock.",
+                "description": "Scraps partial or full quantities of ERP origin stocks for a given plant and inventory ID. Stocks eligible for scrap don't include those imported from third-party systems. You can scrap only unrestricted stocks.",
+                "operationId": "ScrapInventoryUsingPOST_V2",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "inventoryId",
+                        "in": "path",
+                        "description": "The inventory ID of the stock that needs to be scrapped.",
+                        "required": true,
+                        "type": "string",
+                        "maxLength": 128,
+                        "minLength": 0
+                    },
+                    {
+                        "name": "plant",
+                        "in": "query",
+                        "description": "The plant of the stock.",
+                        "required": true,
+                        "type": "string",
+                        "maxLength": 6,
+                        "minLength": 0
+                    },
+                    {
+                        "name": "request",
+                        "in": "body",
+                        "description": "request",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/ScrapInventoryRequestV2"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The stock has been scrapped with the specified quantity.",
+                        "schema": {
+                            "$ref": "#/definitions/ScrapInventoryResponseV2"
+                        }
+                    },
+                    "400": {
+                        "description": "The HTTP request is invalid and it cannot be processed by the server correctly.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponseV3"
+                        }
+                    },
+                    "401": {
+                        "description": "You are not authorized to call this resource.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponseV3"
+                        }
+                    },
+                    "403": {
+                        "description": "Accessing the resource you are trying to reach is forbidden.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponseV3"
+                        }
+                    },
+                    "404": {
+                        "description": "Resource not found.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponseV3"
+                        }
+                    },
+                    "409": {
+                        "description": "The resource has been modified by another user. Please retrieve the latest inventory information and try again.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponseV3"
+                        }
+                    },
+                    "500": {
+                        "description": "An internal error occurred.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponseV3"
+                        }
+                    }
+                }
+            }
+        },
+        "/inventory/ewmGoodsReceipts": {
+            "post": {
+                "tags": [
+                    "Goods Receipts"
+                ],
+                "summary": "Posts goods receipts for products that have enabled Extended Warehouse Management.",
+                "description": "Posts goods receipts for products in plants where Extended Warehouse Management is enabled in SAP Digital Manufacturing Cloud. The goods receipts are created in both SAP Digital Manufacturing Cloud and the integrated EWM system. The API supports posting a single request with multiple line items, where each line item can include multiple serial numbers. A maximum of 50-line items per request is allowed, with an overall limit of 500 serial numbers per request. Do not use this endpoint in combination with the Work Center POD, Operation Activity POD, or the SFC Complete API. Completing an SFC at the final operation automatically triggers inventory generation, which can result in inconsistencies in the delivered quantity.",
+                "operationId": "postEwmGoodsReceiptsUsingPOST_V2",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "request",
+                        "description": "request",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/PostEwmGoodsReceiptRequestV2"
+                        }
+                    }
+                ],
+                "responses": {
+                    "202": {
+                        "description": "Goods receipt request has been successfully accepted.",
+                        "schema": {
+                            "$ref": "#/definitions/PostEwmGoodsReceiptResponseV2"
+                        }
+                    },
+                    "400": {
+                        "description": "The HTTP request is invalid which cannot be processed by the server.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponseV3"
+                        }
+                    },
+                    "401": {
+                        "description": "You are not authorized to call this resource.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponseV3"
+                        }
+                    },
+                    "403": {
+                        "description": "Accessing the resource you are trying to reach is forbidden.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponseV3"
+                        }
+                    },
+                    "404": {
+                        "description": "The resource you are accessing is not found.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponseV3"
+                        }
+                    },
+                    "409": {
+                        "description": "The resource has been modified by another user. Please retry later.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponseV3"
+                        }
+                    },
+                    "500": {
+                        "description": "An internal error occurred.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponseV3"
+                        }
+                    }
+                }
+            }
+        },
+        "/inventory/goodsReceipts": {
+            "get": {
+                "tags": [
+                    "Goods Receipts"
+                ],
+                "summary": "Retrieves posted goods receipts.",
+                "description": "Retrieves posted goods receipts from the Order POD app, Post-Production Reporting POD app, and the Goods Receipt public API. Please note that the request parameters are case-sensitive.",
+                "operationId": "getPostedGoodsReceiptsUsingGET_V2",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                  {
+                      "name": "plant",
+                      "in": "query",
+                      "description": "The plant where the goods receipts is posted",
+                      "required": true,
+                      "type": "string",
+                      "maxLength": 6,
+                      "minLength": 0
+                  },
+                  {
+                      "name": "order",
+                      "in": "query",
+                      "description": "The order number of the goods receipt. You must fill either the order or the SFC to get goods receipts.",
+                      "required": false,
+                      "type": "string",
+                      "maxLength": 12,
+                      "minLength": 0
+                  },
+                  {
+                      "name": "sfc",
+                      "in": "query",
+                      "description": "The Shop Floor Control (SFC) number for the goods receipt. You must provide either the Order or the SFC to retrieve goods receipts. If both are provided, the SFC must correspond to the specified order.",
+                      "required": false,
+                      "type": "string",
+                      "maxLength": 128,
+                      "minLength": 0
+                  },
+                  {
+                      "name": "material",
+                      "in": "query",
+                      "description": "The material name of the goods receipt",
+                      "required": false,
+                      "type": "string",
+                      "maxLength": 40,
+                      "minLength": 0
+                  },
+                  {
+                    "name": "showRelevantGoodsReceiptItems",
+                    "in": "query",
+                    "description": "Whether to include all other items within the same transaction, even if they do not match the specified material or SFC filters.",
+                    "required": false,
+                    "type": "boolean",
+                    "default": false
+                  },
+                  {
+                      "name": "page",
+                      "in": "query",
+                      "description": "The page number you want to query. Number 0 is the first page.",
+                      "required": false,
+                      "type": "integer",
+                      "format": "int32"
+                  },
+                  {
+                      "name": "size",
+                      "in": "query",
+                      "description": "The page size determines how many goods receipt postings are returned per page. An internal validation limits the maximum value to 100. If not specified, the default value is 20.",
+                      "required": false,
+                      "type": "integer",
+                      "format": "int32",
+                      "default": 20,
+                      "maximum": 100,
+                      "minimum": 1
+                  },
+                  {
+                      "name": "sort",
+                      "description": "The retrieved goods receipts can be sorted using one or more of the following fields: 'postedBy', 'postingDateTime' and 'createdDateTime'. Example: 'https://xxx/v2/inventory/goodsReceipts?xxxx&sort=postingDateTime,desc&sort=createdDateTime,asc'. The default sorting order is descending, and the default sort fields are 'postingDateTime' and 'createdDateTime'.",
+                      "in": "query",
+                      "required": false,
+                      "type": "string"
+                  }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Goods receipts have been retrieved.",
+                        "schema": {
+                            "$ref": "#/definitions/Page_PostedGoodsReceiptV2"
+                        }
+                    },
+                    "400": {
+                        "description": "The HTTP request is invalid or malformed and cannot be processed by the server.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponseV3"
+                        }
+                    },
+                    "401": {
+                        "description": "You are not authorized to call this resource.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponseV3"
+                        }
+                    },
+                    "403": {
+                        "description": "Accessing the resource you are trying to reach is forbidden.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponseV3"
+                        }
+                    },
+                    "404": {
+                        "description": "One of the related elements is not found.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponseV3"
+                        }
+                    },
+                    "500": {
+                        "description": "An internal error occurred.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponseV3"
+                        }
+                    }
+                }
+            }
+        },
+        "/inventory/goodsIssues": {
+          "get": {
+            "produces": [
+              "application/json"
+            ],
+            "parameters": [
+              {
+                "description": "The plant where the goods issue is performed.",
+                "in": "query",
+                "name": "plant",
+                "required": true,
+                "type": "string"
+              },
+              {
+                "description": "The material name of the component used in the goods issue.",
+                "in": "query",
+                "maxLength": 40,
+                "minLength": 0,
+                "name": "material",
+                "required": true,
+                "type": "string"
+              },
+              {
+                "description": "The material version of the component used in the goods issue.",
+                "in": "query",
+                "maxLength": 20,
+                "minLength": 0,
+                "name": "materialVersion",
+                "required": true,
+                "type": "string"
+              },
+              {
+                "description": "The batch number of the component used in the goods issue.",
+                "in": "query",
+                "maxLength": 10,
+                "minLength": 0,
+                "name": "batchNumber",
+                "required": false,
+                "type": "string"
+              },
+              {
+                "description": "The handling unit number of the innermost package. This property only applies to EWM goods issues.",
+                "in": "query",
+                "maxLength": 20,
+                "minLength": 0,
+                "name": "handlingUnit",
+                "required": false,
+                "type": "string"
+              },
+              {
+                "description": "The inventory ID of the component used in the goods issue.",
+                "in": "query",
+                "maxLength": 128,
+                "minLength": 0,
+                "name": "inventoryId",
+                "required": false,
+                "type": "string"
+              },
+              {
+                "description": "The order against which the goods issue is performed.",
+                "in": "query",
+                "maxLength": 12,
+                "minLength": 0,
+                "name": "order",
+                "required": false,
+                "type": "string"
+              },
+              {
+                "description": "The user who posted the goods issue.",
+                "in": "query",
+                "name": "postedBy",
+                "required": false,
+                "type": "string"
+              },
+              {
+                "description": "The production supply area of the component used in the goods issue. This property only applies to EWM goods issues.",
+                "in": "query",
+                "maxLength": 10,
+                "minLength": 0,
+                "name": "productionSupplyArea",
+                "required": false,
+                "type": "string"
+              },
+              {
+                "description": "The serial number of the component used in the goods issue.",
+                "in": "query",
+                "maxLength": 18,
+                "minLength": 0,
+                "name": "serialNumber",
+                "required": false,
+                "type": "string"
+              },
+              {
+                "description": "The shop floor control (SFC) number against which the goods issue is performed. If you've specified an order number, the SFC must belong to that order.",
+                "in": "query",
+                "maxLength": 128,
+                "minLength": 0,
+                "name": "sfc",
+                "required": false,
+                "type": "string"
+              },
+              {
+                "description": "The storage bin of the component used in the goods issue. This property only applies to EWM goods issues.",
+                "in": "query",
+                "maxLength": 20,
+                "minLength": 0,
+                "name": "storageBin",
+                "required": false,
+                "type": "string"
+              },
+              {
+                "description": "The storage location of the component used in the goods issue.",
+                "in": "query",
+                "maxLength": 4,
+                "minLength": 0,
+                "name": "storageLocation",
+                "required": false,
+                "type": "string"
+              },
+              {
+                "description": "The work center for which the goods issue is performed.",
+                "in": "query",
+                "name": "workCenter",
+                "required": false,
+                "type": "string"
+              },
+              {
+                "description": "If specified, all goods issues posted at or after this UTC time will be retrieved. Format (ISO-8601): yyyy-MM-dd'T'HH:mm:ss.SSS'Z'.",
+                "in": "query",
+                "name": "startDateTime",
+                "required": false,
+                "type": "string",
+                "x-example": "2022-06-18T00:00:00.000Z"
+              },
+              {
+                "description": "If specified, all goods issues posted up to this UTC time will be retrieved. Format (ISO-8601): yyyy-MM-dd'T'HH:mm:ss.SSS'Z'.",
+                "in": "query",
+                "name": "endDateTime",
+                "required": false,
+                "type": "string",
+                "x-example": "2022-06-18T00:00:00.000Z"
+              },
+              {
+                "default": 0,
+                "description": "The page number you want to query. Number 0 is the first page.",
+                "in": "query",
+                "minimum": 0,
+                "name": "page",
+                "required": false,
+                "type": "integer"
+              },
+              {
+                "default": 20,
+                "description": "The size determines how many goods issue postings are displayed in one page. An internal validation limits the maximum value to 100. If not specified, the default value is 20.",
+                "in": "query",
+                "minimum": 1,
+                "maximum": 100,
+                "name": "size",
+                "required": false,
+                "type": "integer"
+              },
+              {
+                "collectionFormat": "multi",
+                "description": "The retrieved goods issues can be sorted by using one or more of the following properties: 'order', 'sfc', 'workCenter', 'inventoryId', 'productionSupplyArea', 'storageBin', 'storageLocation', 'batchNumber', 'handlingUnit', 'serialNumber'. By default, the goods issues are sorted by inventory ID in ascending order. For example, https://<baseURL>/inventory/v2/inventory/goodsIssues?plant=<plant name>&material=<material name>&materialVersion=<material version>&sort=batchNumber,desc.",
+                "in": "query",
+                "name": "sort",
+                "required": false,
+                "type": "string"
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "The stock related information of posted goods issues has been successfully retrieved.",
+                "schema": {
+                  "$ref": "#/definitions/PageGetInventoryPostingsForGoodIssueResponseV2"
+                }
+              },
+              "400": {
+                "description": "The HTTP request is invalid which cannot be processed by the server.",
+                "schema": {
+                  "$ref": "#/definitions/ErrorResponseV3"
+                }
+              },
+              "401": {
+                "description": "You are not authenticated.",
+                "schema": {
+                  "$ref": "#/definitions/ErrorResponseV3"
+                }
+              },
+              "403": {
+                "description": "You are not authorized to access this resource.",
+                "schema": {
+                  "$ref": "#/definitions/ErrorResponseV3"
+                }
+              },
+              "404": {
+                "description": "The resources are not found.",
+                "schema": {
+                  "$ref": "#/definitions/ErrorResponseV3"
+                }
+              },
+              "500": {
+                "description": "An internal error occurred.",
+                "schema": {
+                  "$ref": "#/definitions/ErrorResponseV3"
+                }
+              }
+            },
+            "tags": [
+              "Goods Issues"
+            ],
+            "description": "Retrieves stock related information of posted goods issues for a given plant and material. You can retrieve goods issues posted to integrated ERP systems and local ones.",
+            "operationId": "getInventoryPostingsForGoodIssue",
+            "summary": "Retrieves posted goods issues."
+          }
+        }
+    },
+    "securityDefinitions": {
+        "OAuthSecurity": {
+            "type": "oauth2",
+            "tokenUrl":"https://{subdomain}.authentication.{tokenHost}/oauth/token",
+            "flow": "application"
+        }
+    },
+    "definitions": {
+        "InventoryDataFieldDtoV2": {
+            "type": "object",
+            "properties": {
+                "dataAttribute": {
+                    "type": "string",
+                    "description": "The field value of the stock data type.",
+                    "minLength": 0,
+                    "maxLength": 1000
+                },
+                "dataField": {
+                    "type": "string",
+                    "description": "The field name of the stock data type.",
+                    "minLength": 0,
+                    "maxLength": 60
+                },
+                "sequence": {
+                    "type": "number",
+                    "description": "The technical sequence of the stock data fields. You can refer to it to display the data fields in UI."
+                }
+            },
+            "title": "InventoryDataFieldDto"
+        },
+        "QueryInventoryRequestV2": {
+            "type": "object",
+            "required": [
+                "plant"
+            ],
+            "properties": {
+                "plant": {
+                    "type": "string",
+                    "description": "The plant of the stock.",
+                    "maxLength": 6,
+                    "minLength": 0
+                },
+                "batchNumber": {
+                    "type": "string",
+                    "description": "The batch number of the stock.",
+                    "maxLength": 412,
+                    "minLength": 0
+                },
+                "handlingUnit": {
+                    "type": "string",
+                    "description": "The handling unit number of the innermost package.",
+                    "maxLength": 20,
+                    "minLength": 0
+                },
+                "inventoryIds": {
+                    "type": "array",
+                    "description": "The inventory IDs of the stocks. You can query a maximum of 50 inventory IDs at one time.",
+                    "maxItems": 50,
+                    "items": {
+                        "type": "string",
+                        "maxLength": 128
+                    }
+                },
+                "material": {
+                    "type": "string",
+                    "description": "The material of the stock.",
+                    "maxLength": 40,
+                    "minLength": 0
+                },
+                "materialVersion": {
+                    "type": "string",
+                    "description": "The material version of the stock.",
+                    "maxLength": 20,
+                    "minLength": 0
+                },
+                "productionSupplyArea": {
+                    "type": "string",
+                    "description": "The production supply area of the stock.",
+                    "maxLength": 10,
+                    "minLength": 0
+                },
+                "reservedOperation": {
+                    "type": "string",
+                    "description": "The operation for which the stock is reserved.",
+                    "maxLength": 412,
+                    "minLength": 0
+                },
+                "reservedOrder": {
+                    "type": "string",
+                    "description": "The order for which the stock is reserved.",
+                    "maxLength": 36,
+                    "minLength": 0
+                },
+                "serialNumber": {
+                    "type": "string",
+                    "description": "The serial number of the stock.",
+                    "maxLength": 18,
+                    "minLength": 0
+                },
+                "status": {
+                    "type": "string",
+                    "description": "The status of the stock.",
+                    "enum": [
+                        "UNRESTRICTED",
+                        "RESTRICTED",
+                        "QUALITY_INSPECTION",
+                        "BLOCKED"
+                    ]
+                },
+                "storageLocation": {
+                    "type": "string",
+                    "description": "The storage location of the inventory.",
+                    "maxLength": 4,
+                    "minLength": 0
+                },
+                "storageBin": {
+                    "type": "string",
+                    "description": "The storage bin where the stock is stored at the production supply area.",
+                    "maxLength": 20,
+                    "minLength": 0
+                },
+                "quantityOnHandFilter": {
+                    "type": "object",
+                    "required": [
+                        "conditions"
+                    ],
+                    "properties": {
+                        "conditions": {
+                            "type": "array",
+                            "description": "The query conditions of the stock quantity on hand. You can specify a maximum of 3 conditions at one time.",
+                            "maxItems": 3,
+                            "items": {
+                                "$ref": "#/definitions/QuantityOnHandItemV2"
+                            }
+                        },
+                        "conjunction": {
+                            "type": "string",
+                            "default": "OR",
+                            "description": "Specify whether to conjunct or disjunct the given quantity on hand conditions. There are two possible conjunction types: 'AND' and 'OR'. The default type is 'OR'.",
+                            "enum": [
+                                "AND",
+                                "OR"
+                            ]
+                        }
+                    },
+                    "title": "QuantityOnHandFilter"
+                },
+                "dataFieldsFilter": {
+                    "type": "object",
+                    "required": [
+                        "conditions"
+                    ],
+                    "properties": {
+                        "conditions": {
+                            "type": "array",
+                            "description": "The query conditions of the stock data type.",
+                            "maxItems": 3,
+                            "items": {
+                                "$ref": "#/definitions/DataFieldsFilterItemV2"
+                            }
+                        },
+                        "conjunction": {
+                            "type": "string",
+                            "default": "AND",
+                            "description": "Specify whether conjunction or disjunction is applied to given data fields items. There are two possible conjunction types: 'AND' and 'OR'. The default type is 'AND'.",
+                            "enum": [
+                                "AND",
+                                "OR"
+                            ]
+                        }
+                    },
+                    "title": "dataFieldsFilter"
+                },
+                "salesOrder": {
+                    "type": "string",
+                    "description": "The sales order for which the stock is allocated or delivered.",
+                    "maxLength": 10,
+                    "minLength": 0
+                },
+                "salesOrderItem": {
+                    "type": "string",
+                    "description": "The sales order item for which the stock is allocated or delivered.",
+                    "maxLength": 6,
+                    "minLength": 0
+                },
+                "page": {
+                    "type": "integer",
+                    "default": 0,
+                    "description": "The page number you want to query. Number 0 is the first page.",
+                    "format": "int32"
+                },
+                "size": {
+                    "type": "integer",
+                    "default": 20,
+                    "description": "The page size determines how many stocks are displayed in one page. Default page size is 20.",
+                    "format": "int32",
+                    "minimum": 1,
+                    "maximum": 100
+                },
+                "sort": {
+                    "type": "array",
+                    "description": "The retrieved stocks can be sorted by using one or more of the following fields: 'inventoryId', 'storageLocation', 'productionSupplyArea', 'storageBin', 'handlingUnit', 'batchNumber' and 'serialNumber'.",
+                    "items": {
+                        "$ref": "#/definitions/InventorySortV2"
+                    }
+                }
+            },
+            "title": "QueryInventoryRequest"
+        },
+        "QuantityOnHandItemV2": {
+            "type": "object",
+            "properties": {
+                "value": {
+                    "type": "number",
+                    "description": "The quantity value to compare against."
+                },
+                "operator": {
+                    "type": "string",
+                    "description": "The comparison operator for quantity filtering. The supported operators are '=', '!=', '<', '<=', '>', '>='.",
+                    "enum": [
+                        "=",
+                        "!=",
+                        "<",
+                        "<=",
+                        ">",
+                        ">="
+                    ]
+                }
+            },
+            "required": [
+                "operator",
+                "value"
+            ],
+            "title": "QuantityOnHandItem"
+        },
+        "DataFieldsFilterItemV2": {
+            "type": "object",
+            "required": [
+                "dataField",
+                "dataAttributes"
+            ],
+            "properties": {
+                "dataAttributes": {
+                    "type": "array",
+                    "description": "The field values of the stock data type. You can specify a maximum of 2 values for each data field.",
+                    "maxItems": 2,
+                    "items": {
+                        "$ref": "#/definitions/DataAttributeEntityV2"
+                    }
+                },
+                "dataField": {
+                    "type": "string",
+                    "description": "The field name of the stock data type. You can specify a maximum of 3 data fields at one time.",
+                    "minLength": 0,
+                    "maxLength": 60
+                }
+            },
+            "title": "DataFieldsFilterItem"
+        },
+        "DataAttributeEntityV2": {
+            "type": "object",
+            "required": [
+                "dataAttribute"
+            ],
+            "properties": {
+                "dataAttribute": {
+                    "type": "string",
+                    "description": "The field value of the stock data type.",
+                    "minLength": 0,
+                    "maxLength": 1000
+                }
+            },
+            "title": "DataAttributeEntity"
+        },
+        "InventorySortV2": {
+            "type": "object",
+            "required": [
+                "fieldName"
+            ],
+            "properties": {
+                "fieldName": {
+                    "type": "string",
+                    "description": "Specify the field name that's used to sort the retrieved stock items."
+                },
+                "order": {
+                    "type": "string",
+                    "default": "ASC",
+                    "description": "Specify the sort direction that's used to sort the retrieved stock items. There are 2 direction types: 'ASC' (ascending) and 'DESC' (descending). The default type is 'ASC'. ",
+                    "enum": [
+                        "ASC",
+                        "DESC"
+                    ]
+                }
+            },
+            "title": "InventorySort"
+        },
+        "QueryInventoryResponseV2": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "type": "array",
+                    "description": "The stock detail items.",
+                    "items": {
+                        "$ref": "#/definitions/QueryInventoryResponseItemV2"
+                    }
+                },
+                "number": {
+                    "type": "integer",
+                    "format": "int32",
+                    "description": "The current page number. The initial page number starts from '0'."
+                },
+                "numberOfElements": {
+                    "type": "integer",
+                    "format": "int64",
+                    "description": "Indicates how many stocks are returned on the current page."
+                },
+                "totalElements": {
+                    "type": "integer",
+                    "format": "int64",
+                    "description": "Indicates how many stocks are returned in total."
+                },
+                "totalPages": {
+                    "type": "integer",
+                    "format": "int32",
+                    "description": "Indicates how many pages are returned."
+                }
+            },
+            "title": "QueryInventoryResponse"
+        },
+        "QueryInventoryResponseItemV2": {
+            "type": "object",
+            "properties": {
+                "dataFields": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/QueryInventoryDataFieldV2"
+                    }
+                },
+                "batchNumber": {
+                    "type": "string",
+                    "description": "The batch number of the stock"
+                },
+                "createdDateTime": {
+                    "type": "string",
+                    "format": "date-time",
+                    "example": "2022-08-31T23:53:35.123Z",
+                    "description": "The creation date and time of the stock in UTC. Format (ISO-8601): yyyy-MM-dd'T'HH:mm:ss.SSS'Z'."
+                },
+                "comments": {
+                    "type": "string",
+                    "description": "The comments added to the stock."
+                },
+                "handlingUnit": {
+                    "type": "string",
+                    "description": "The handling unit number of the innermost package."
+                },
+                "inventoryId": {
+                    "type": "string",
+                    "description": "The inventory ID of the stock in SAP Digital Manufacturing."
+                },
+                "material": {
+                    "type": "string",
+                    "description": "The material of the stock."
+                },
+                "materialVersion": {
+                    "type": "string",
+                    "description": "The material version of the stock."
+                },
+                "modifiedDateTime": {
+                    "type": "string",
+                    "format": "date-time",
+                    "example": "2022-08-31T23:53:35.123Z",
+                    "description": "The modification date and time of the stock in UTC. Format (ISO-8601): yyyy-MM-dd'T'HH:mm:ss.SSS'Z'."
+                },
+                "origin": {
+                    "type": "string",
+                    "description": "The origin of the stock. It indicates where the stock originally comes from. There are 3 possible origins: 'DMC', 'ERP' and 'EWM'.",
+                    "enum": [
+                        "DMC",
+                        "ERP",
+                        "EWM"
+                    ]
+                },
+                "productionSupplyArea": {
+                    "type": "string",
+                    "description": "The production supply area where the stock is stored."
+                },
+                "quantityOnHand": {
+                    "description": "The available quantity of the stock",
+                    "$ref": "#/definitions/ResponseOnHandQuantityV2"
+                },
+                "parallelQuantity": {
+                    "description": "The available quantity of the stock in the material's parallel unit of measure.",
+                    "$ref": "#/definitions/ResponseParallelQuantityV2"
+                },
+                "reservedOperation": {
+                    "type": "string",
+                    "description": "The operation for which the stock is reserved."
+                },
+                "reservedOrder": {
+                    "type": "string",
+                    "description": "The order for which the stock is reserved."
+                },
+                "serialNumber": {
+                    "type": "string",
+                    "description": "The serial number of the stock."
+                },
+                "status": {
+                    "type": "string",
+                    "description": "The status of the stock.",
+                    "enum": [
+                        "UNRESTRICTED",
+                        "RESTRICTED",
+                        "QUALITY_INSPECTION",
+                        "BLOCKED"
+                    ]
+                },
+                "storageBin": {
+                    "type": "string",
+                    "description": "The storage bin where the stock is stored at the production supply area."
+                },
+                "storageLocation": {
+                    "type": "string",
+                    "description": "The storage location where the stock is stored."
+                },
+                "salesOrder": {
+                    "type": "string",
+                    "description": "The sales order for which the stock is allocated or delivered."
+                },
+                "salesOrderItem": {
+                    "type": "string",
+                    "description": "The sales order item for which the stock is allocated or delivered."
+                },
+                "thirdPartyImported": {
+                    "type": "boolean",
+                    "description": "Indicates if the stock is imported from a third-party system that serves as the single source of inventories to transfer to SAP Digital Manufacturing."
+                },
+                "warehouse": {
+                    "type": "string",
+                    "description": "The warehouse from which the stock is staged in the integrated EWM system."
+                },
+                "reservationNumber": {
+                    "type": "string",
+                    "description": "The reservation number of the component in the respective bill of materials (BOM)."
+                },
+                "reservationItemNumber": {
+                    "type": "string",
+                    "description": "The reservation item number of the component in the respective bill of materials (BOM)."
+                }
+            },
+            "title": "QueryInventoryResponseItem"
+        },
+        "QueryInventoryDataFieldV2": {
+            "type": "object",
+            "properties": {
+                "dataAttribute": {
+                    "type": "string",
+                    "description": "The field value of the stock data type.",
+                    "minLength": 0,
+                    "maxLength": 1000
+                },
+                "dataField": {
+                    "type": "string",
+                    "description": "The field name of the stock data type.",
+                    "minLength": 0,
+                    "maxLength": 60
+                },
+                "sequence": {
+                    "type": "number",
+                    "description": "The technical sequence of the stock data fields. You can refer to it to display the data fields in UI."
+                },
+                "obsolete": {
+                    "type": "boolean",
+                    "description": "Indicates whether the retrieved stock data type is still up-to-date and consistent with the data type information of the relevant material. 'True' indicates that the data is consistent while 'False' means the opposite. The property only appears when the 'dataFieldsFilter' is specified in the request payload. "
+                }
+            },
+            "title": "InventoryDataField"
+        },
+        "GetInventoryResponseItemParallelQuantityV2": {
+            "type": "object",
+            "properties": {
+                "internalUnitOfMeasure": {
+                    "type": "string",
+                    "description": "The SAP internal unit of measure.",
+                    "minLength": 0,
+                    "maxLength": 3
+                },
+                "value": {
+                    "type": "number",
+                    "description": "The quantity of the stock in parallel unit of measure."
+                }
+            },
+            "title": "Stock Parallel Quantity"
+        },
+        "ErrorResponseV3": {
+            "type": "object",
+            "properties": {
+                "causeMessage": {
+                    "type": "string",
+                    "description": "The technical reason for the error."
+                },
+                "code": {
+                    "type": "string",
+                    "description": "The internal error message."
+                },
+                "correlationId": {
+                    "type": "string",
+                    "description": "The correlation ID of the error."
+                },
+                "message": {
+                    "type": "string",
+                    "description": "Any additional information of the error."
+                },
+                "status": {
+                    "type": "integer",
+                    "format": "int32",
+                    "description": "HTTP status code."
+                }
+            },
+            "title": "ErrorResponseV3",
+            "description": "Error response."
+        },
+        "CreateBulkInventoriesRequestV2": {
+            "type": "object",
+            "required": [
+                "lineItems",
+                "origin",
+                "plant"
+            ],
+            "properties": {
+                "plant": {
+                    "type": "string",
+                    "description": "The plant where the stock resides.",
+                    "minLength": 0,
+                    "maxLength": 6
+                },
+                "origin": {
+                    "type": "string",
+                    "description": "The origin of the stock. Stocks of different origins are consumed differently in the system. There are 3 possible origins: 'DMC', 'ERP' and 'EWM'. To create a stock with 'ERP' or 'EWM' origin, you must first enable Third-Party Inventory Management in the Manage Business Settings app.",
+                    "enum": [
+                        "DMC",
+                        "ERP",
+                        "EWM"
+                    ]
+                },
+                "thirdPartyImported": {
+                    "type": "boolean",
+                    "description": "Indicates if the stock is imported from a third-party system that serves as the single source of inventories to transfer to SAP Digital Manufacturing. The default is 'True' if the stock origin is set to ERP. For stocks of other origins, the default is 'False'."
+                },
+                "lineItems": {
+                    "type": "array",
+                    "maxItems": 50,
+                    "description": "The items of the stocks. You can add a maximum of 50 items at one time.",
+                    "items": {
+                        "$ref": "#/definitions/PostCreateBulkInventoriesItemV2"
+                    }
+                }
+            },
+            "title": "CreateBulkInventoriesRequest"
+        },
+        "PostCreateBulkInventoriesItemV2": {
+            "type": "object",
+            "required": [
+                "material",
+                "materialVersion",
+                "quantity",
+                "status",
+                "storageLocation"
+            ],
+            "properties": {
+                "dataFields": {
+                    "type": "array",
+                    "maxItems": 100,
+                    "description": "The data fields of one stock. You can add a maximum of 100 data fields at one time.",
+                    "items": {
+                        "$ref": "#/definitions/InventoryDataFieldV2"
+                    }
+                },
+                "batchNumber": {
+                    "type": "string",
+                    "description": "The batch number of the stock.",
+                    "minLength": 0,
+                    "maxLength": 10
+                },
+                "comments": {
+                    "type": "string",
+                    "description": "The comments you want to add to the stock.",
+                    "minLength": 0,
+                    "maxLength": 1000
+                },
+                "handlingUnit": {
+                    "type": "string",
+                    "description": "The handling unit number of the innermost package. This property only applies to stocks with DMC or EWM origin, and it is mandatory when stock origin is EWM.",
+                    "minLength": 0,
+                    "maxLength": 20
+                },
+                "inventoryId": {
+                    "type": "string",
+                    "description": "The inventory ID of the stock.",
+                    "minLength": 0,
+                    "maxLength": 128,
+                    "pattern": "^(?! )[0-9A-Z_$!)(+~@^=\\-*. ]+(?<! )$"
+                },
+                "material": {
+                    "type": "string",
+                    "description": "The material of the stock. Note the material origin of the material you specify here. To create stocks with ERP or EWM origins, you can only use ERP materials. To create stocks with DMC origin, use DMC materials.",
+                    "minLength": 0,
+                    "maxLength": 40
+                },
+                "materialVersion": {
+                    "type": "string",
+                    "description": "The material version of the stock.",
+                    "minLength": 0,
+                    "maxLength": 20
+                },
+                "productionSupplyArea": {
+                    "type": "string",
+                    "description": "The production supply area of the stock. You can specify only one production supply area that exists in SAP Digital Manufacturing. This property only applies to stocks with DMC or EWM origin, and it is mandatory when the stock origin is EWM.",
+                    "minLength": 0,
+                    "maxLength": 10
+                },
+                "quantity": {
+                    "description": "Indicates the total quantity of items in the stock.",
+                    "$ref": "#/definitions/RequestQuantityV2"
+                },
+                "reservedOperation": {
+                    "type": "string",
+                    "description": "The operation for which the stock is reserved. This property only applies to stocks with DMC or ERP origin.",
+                    "minLength": 0,
+                    "maxLength": 412
+                },
+                "reservedOrder": {
+                    "type": "string",
+                    "description": "The order number for which the stock is reserved. This property only applies to stocks with DMC or ERP origin.",
+                    "minLength": 0,
+                    "maxLength": 36
+                },
+                "serialNumber": {
+                    "type": "string",
+                    "description": "The serial number of the stock. You can only specify serial number when the quantity of the stock is 1.",
+                    "minLength": 0,
+                    "maxLength": 18
+                },
+                "status": {
+                    "type": "string",
+                    "description": "The status of the stock.",
+                    "enum": [
+                        "UNRESTRICTED",
+                        "RESTRICTED",
+                        "QUALITY_INSPECTION",
+                        "BLOCKED"
+                    ]
+                },
+                "storageBin": {
+                    "type": "string",
+                    "description": "The storage bin where the stock is stored at the production supply area. This property only applies to stocks with DMC or EWM origin, and it is mandatory when the stock origin is EWM.",
+                    "minLength": 0,
+                    "maxLength": 18
+                },
+                "storageLocation": {
+                    "type": "string",
+                    "description": "The storage location of the stock",
+                    "minLength": 0,
+                    "maxLength": 4
+                },
+                "warehouse": {
+                    "type": "string",
+                    "description": "The warehouse from which the stock is staged in the integrated EWM system. This property only applies to stock with EWM origin, and it is mandatory.",
+                    "minLength": 0,
+                    "maxLength": 3
+                }
+            },
+            "title": "PostCreateBulkInventoriesItem"
+        },
+        "InventoryDataFieldV2": {
+            "type": "object",
+            "properties": {
+                "dataAttribute": {
+                    "type": "string",
+                    "description": "The field value of the stock data type.",
+                    "minLength": 0,
+                    "maxLength": 1000
+                },
+                "dataField": {
+                    "type": "string",
+                    "description": "The field name of the stock data type.",
+                    "minLength": 0,
+                    "maxLength": 60
+                }
+            },
+            "title": "InventoryDataField"
+        },
+        "CreateBulkInventoriesResponseV2": {
+            "type": "object",
+            "properties": {
+                "lineItems": {
+                    "type": "array",
+                    "description": "create bulk inventories results.",
+                    "items": {
+                        "$ref": "#/definitions/CreateBulkInventoriesResponseItemV2"
+                    }
+                },
+                "origin": {
+                    "type": "string",
+                    "description": "The origin of the stock. Stocks of different origins are consumed differently in the system. There are 3 possible origins: 'DMC', 'ERP' and 'EWM'.",
+                    "enum": [
+                        "DMC",
+                        "ERP",
+                        "EWM"
+                    ]
+                },
+                "thirdPartyImported": {
+                    "type": "boolean",
+                    "description": "Indicates if the stock is imported from a third-party system that serves as the single source of inventories to transfer to SAP Digital Manufacturing."
+                },
+                "plant": {
+                    "type": "string",
+                    "description": "The plant for which the stock creation is performed."
+                }
+            },
+            "title": "CreateBulkInventoriesResponse"
+        },
+        "CreateBulkInventoriesResponseItemV2": {
+            "type": "object",
+            "properties": {
+                "dataFields": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/InventoryDataFieldDtoV2"
+                    }
+                },
+                "batchNumber": {
+                    "type": "string",
+                    "description": "The batch number of the stock."
+                },
+                "comments": {
+                    "type": "string",
+                    "description": "The comments added to the stock.",
+                    "minLength": 0,
+                    "maxLength": 1000
+                },
+                "createdDateTime": {
+                    "type": "string",
+                    "format": "date-time",
+                    "example": "2022-08-31T23:53:35.123Z",
+                    "description": "The creation date and time of the stock in UTC. Format (ISO-8601): yyyy-MM-dd'T'HH:mm:ss.SSS'Z'."
+                },
+                "handlingUnit": {
+                    "type": "string",
+                    "description": "The handling unit number of the innermost package."
+                },
+                "inventoryId": {
+                    "type": "string",
+                    "description": "The inventory ID of the stock in SAP Digital Manufacturing."
+                },
+                "material": {
+                    "type": "string",
+                    "description": "The material of the stock."
+                },
+                "materialVersion": {
+                    "type": "string",
+                    "description": "The material version of the stock."
+                },
+                "modifiedDateTime": {
+                    "type": "string",
+                    "format": "date-time",
+                    "example": "2022-08-31T23:53:35.123Z",
+                    "description": "The modification date and time of the stock in UTC. Format (ISO-8601): yyyy-MM-dd'T'HH:mm:ss.SSS'Z'."
+                },
+                "productionSupplyArea": {
+                    "type": "string",
+                    "description": "The production supply area where the stock is stored."
+                },
+                "quantityOnHand": {
+                    "description": "The available quantity of the stock.",
+                    "$ref": "#/definitions/ResponseOnHandQuantityV2"
+                },
+                "reservedOperation": {
+                    "type": "string",
+                    "description": "The operation for which the stock is reserved."
+                },
+                "reservedOrder": {
+                    "type": "string",
+                    "description": "The order number for which the stock is reserved."
+                },
+                "serialNumber": {
+                    "type": "string",
+                    "description": "The serial number of the stock."
+                },
+                "status": {
+                    "type": "string",
+                    "description": "The status of the stock.",
+                    "enum": [
+                        "UNRESTRICTED",
+                        "RESTRICTED",
+                        "QUALITY_INSPECTION",
+                        "BLOCKED"
+                    ]
+                },
+                "storageBin": {
+                    "type": "string",
+                    "description": "The storage bin where the stock is stored at the production supply area."
+                },
+                "storageLocation": {
+                    "type": "string",
+                    "description": "The storage location of the stock."
+                },
+                "warehouse": {
+                    "type": "string",
+                    "description": "The warehouse from which the stock is staged in the integrated EWM system."
+                }
+            },
+            "title": "CreateBulkInventoriesResponseItem"
+        },
+        "UpdateInventoryRequestV2" : {
+            "type": "object",
+            "required": [
+                "lastModifiedDateTime"
+            ],
+            "properties": {
+                "quantityToReceive": {
+                    "description": "The quantity to be received.",
+                    "$ref": "#/definitions/RequestQuantityV2"
+                },
+                "reservedOperation": {
+                    "type": "string",
+                    "description": "The operation for which the stock is reserved.",
+                    "minLength": 0,
+                    "maxLength": 390
+                },
+                "reservedOrder": {
+                    "type": "string",
+                    "description": "The order for which the stock is reserved.",
+                    "minLength": 0,
+                    "maxLength": 36
+                },
+                "status": {
+                    "type": "string",
+                    "description": "The status of the stock.",
+                    "enum": [
+                        "UNRESTRICTED",
+                        "RESTRICTED",
+                        "QUALITY_INSPECTION",
+                        "BLOCKED"
+                    ]
+                },
+                "serialNumber": {
+                    "type": "string",
+                    "description": "The serial number of the stock.",
+                    "minLength": 0,
+                    "maxLength": 18
+                },
+                "comments": {
+                    "type": "string",
+                    "description": "The comments of the stock.",
+                    "minLength": 0,
+                    "maxLength": 4000
+                },
+                "dataFields": {
+                    "type": "array",
+                    "maxItems": 100,
+                    "description": "The data field of the stock. Only the data field value can be updated with this API. Adding or changing data field name is not supported. You can also remove a particular data field value, by passing the field name without filling the field value.",
+                    "items": {
+                        "$ref": "#/definitions/InventoryDataFieldV2"
+                    }
+                },
+                "lastModifiedDateTime": {
+                    "type": "string",
+                    "format": "date-time",
+                    "example": "2021-07-29T03:53:33.123Z",
+                    "description": "The date and time when the stock was most recently changed in UTC. Format (ISO-8601): yyyy-MM-dd'T'HH:mm:ss.SSS'Z'. Filling this field can help avoid unexpected data modification when concurrent operations are executed attempting to change the same data entry. To retrieve 'lastModifiedDateTime', you can use the corresponding GET API and extract the value of 'lastModifiedDateTime' from the response body."
+                }
+            },
+            "title": "UpdateInventoryRequest"
+        },
+        "UpdateInventoryResponseV2": {
+            "type": "object",
+            "properties": {
+                "dataFields": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/InventoryDataFieldDtoV2"
+                    }
+                },
+                "batchNumber": {
+                    "type": "string",
+                    "description": "The batch number of the updated stock."
+                },
+                "comments": {
+                    "type": "string",
+                    "description": "The comments added to the updated stock.",
+                    "minLength": 0,
+                    "maxLength": 1000
+                },
+                "createdDateTime": {
+                    "type": "string",
+                    "format": "date-time",
+                    "example": "2022-08-31T23:53:35.123Z",
+                    "description": "The creation date and time of the original stock in UTC. Format (ISO-8601): yyyy-MM-dd'T'HH:mm:ss.SSS'Z'."
+                },
+                "handlingUnit": {
+                    "type": "string",
+                    "description": "The handling unit number of the innermost package."
+                },
+                "inventoryId": {
+                    "type": "string",
+                    "description": "The inventory ID of the updated stock in SAP Digital Manufacturing."
+                },
+                "material": {
+                    "type": "string",
+                    "description": "The material of the updated stock."
+                },
+                "materialVersion": {
+                    "type": "string",
+                    "description": "The material version of the updated stock."
+                },
+                "modifiedDateTime": {
+                    "type": "string",
+                    "format": "date-time",
+                    "example": "2022-08-31T23:53:35.123Z",
+                    "description": "The date and time when the updated stock was most recently changed in UTC. Format (ISO-8601): yyyy-MM-dd'T'HH:mm:ss.SSS'Z'."
+                },
+                "origin": {
+                    "type": "string",
+                    "description": "The origin of the updated stock. For this API call, the returned origin should always be 'DMC'.",
+                    "enum": [
+                        "DMC"
+                    ]
+                },
+                "parallelQuantity": {
+                    "description": "The available quantity of the stock in the material's parallel unit of measure.",
+                    "$ref": "#/definitions/GetInventoryResponseItemParallelQuantityV2"
+                },
+                "productionSupplyArea": {
+                    "type": "string",
+                    "description": "The production supply area where the updated stock is stored."
+                },
+                "quantityOnHand": {
+                    "description": "The available quantity of the updated stock.",
+                    "$ref": "#/definitions/ResponseOnHandQuantityV2"
+                },
+                "reservedOperation": {
+                    "type": "string",
+                    "description": "The operation for which the updated stock is reserved."
+                },
+                "reservedOrder": {
+                    "type": "string",
+                    "description": "The order number for which the updated stock is reserved."
+                },
+                "serialNumber": {
+                    "type": "string",
+                    "description": "The serial number of the updated stock. It's only supported when the on-hand quantity of the updated stock is '1' in base unit of measure."
+                },
+                "status": {
+                    "type": "string",
+                    "description": "The status of the stock.",
+                    "enum": [
+                        "UNRESTRICTED",
+                        "RESTRICTED",
+                        "QUALITY_INSPECTION",
+                        "BLOCKED"
+                    ]
+                },
+                "storageBin": {
+                    "type": "string",
+                    "description": "The storage bin where the updated stock is stored at the production supply area."
+                },
+                "storageLocation": {
+                    "type": "string",
+                    "description": "The storage location of the updated stock."
+                },
+                "warehouse": {
+                    "type": "string",
+                    "description": "The warehouse from which the updated stock is staged in the integrated EWM system."
+                },
+                "thirdPartyImported": {
+                    "type": "boolean",
+                    "description": "Indicates if the stock is imported from a third-party system that serves as the single source of inventories to transfer to SAP Digital Manufacturing."
+                }
+            },
+            "title": "UpdateInventoryResponse"
+        },
+        "TransferInventoryRequestV2": {
+            "type": "object",
+            "required": [
+                "lastModifiedDateTime",
+                "inventoryId",
+                "plant",
+                "quantity",
+                "storageLocation"
+            ],
+            "properties": {
+                "dataFields": {
+                    "type": "array",
+                    "maxItems": 100,
+                    "description": "The data fields of one stock. You can add a maximum of 100 data fields at one time.",
+                    "items": {
+                        "$ref": "#/definitions/InventoryDataFieldV2"
+                    }
+                },
+                "comments": {
+                    "type": "string",
+                    "description": "The comments you want to add to the new stock.",
+                    "minLength": 0,
+                    "maxLength": 1000
+                },
+                "inventoryId": {
+                    "type": "string",
+                    "description": "The inventory ID of the original stock to which stock transfer is performed.",
+                    "minLength": 0,
+                    "maxLength": 128,
+                    "pattern": "^(?! )[0-9A-Z_$!)(+~@^=\\-*. ]+(?<! )$"
+                },
+                "lastModifiedDateTime": {
+                    "type": "string",
+                    "description": "The date and time when the stock was most recently changed in UTC. Format (ISO-8601): yyyy-MM-dd'T'HH:mm:ss.SSS'Z'. Filling this field can help avoid unexpected data modification when concurrent operations are executed attempting to change the same data entry. To retrieve 'lastModifiedDateTime', you can use the corresponding GET API and extract the value of 'lastModifiedDateTime' from the response body.",
+                    "format": "date-time",
+                    "example": "2021-07-29T03:53:33.123Z"
+                },
+                "plant": {
+                    "type": "string",
+                    "description": "The plant of the stock.",
+                    "minLength": 0,
+                    "maxLength": 6
+                },
+                "quantity": {
+                    "description": "The quantity of the stock that's transferred. The quantity is the on-hand quantity of the new stock.",
+                    "$ref": "#/definitions/RequestQuantityV2"
+                },
+                "reservedOperation": {
+                    "type": "string",
+                    "description": "The operation for which the new stock is reserved.",
+                    "minLength": 0,
+                    "maxLength": 412
+                },
+                "reservedOrder": {
+                    "type": "string",
+                    "description": "The order for which the new stock is reserved.",
+                    "minLength": 0,
+                    "maxLength": 36
+                },
+                "status": {
+                    "type": "string",
+                    "description": "The status of the stock.",
+                    "enum": [
+                        "UNRESTRICTED",
+                        "RESTRICTED",
+                        "QUALITY_INSPECTION",
+                        "BLOCKED"
+                    ]
+                },
+                "storageLocation": {
+                    "type": "string",
+                    "description": "The destination storage location to which the stock is transferred. It is the storage location of the new stock.",
+                    "minLength": 0,
+                    "maxLength": 4
+                }
+            },
+            "title": "TransferInventoryRequest"
+        },
+        "TransferInventoryResponseV2": {
+            "type": "object",
+            "properties": {
+                "dataFields": {
+                    "type": "array",
+                    "description": "The data field of the new stock.",
+                    "items": {
+                        "$ref": "#/definitions/InventoryDataFieldV2"
+                    }
+                },
+                "batchNumber": {
+                    "type": "string",
+                    "description": "The batch number of the new stock."
+                },
+                "comments": {
+                    "type": "string",
+                    "description": "The comments of the new stock."
+                },
+                "createdDateTime": {
+                    "type": "string",
+                    "description": "The creation date and time of the new stock in UTC. Format (ISO-8601): yyyy-MM-dd'T'HH:mm:ss.SSS'Z'.",
+                    "format": "date-time",
+                    "example": "2021-07-29T03:53:33.123Z"
+                },
+                "handlingUnit": {
+                    "type": "string",
+                    "description": "The handling unit number of the innermost package."
+                },
+                "inventoryId": {
+                    "type": "string",
+                    "description": "The inventory ID of the new stock."
+                },
+                "material": {
+                    "type": "string",
+                    "description": "The material of the new stock."
+                },
+                "materialVersion": {
+                    "type": "string",
+                    "description": "The material version of the new stock."
+                },
+                "modifiedDateTime": {
+                    "type": "string",
+                    "description": "The date and time when the stock was most recently changed in UTC. Format (ISO-8601): yyyy-MM-dd'T'HH:mm:ss.SSS'Z'.",
+                    "format": "date-time",
+                    "example": "2021-07-29T03:53:33.123Z"
+                },
+                "origin": {
+                    "type": "string",
+                    "description": "The origin of the new stock. It should always be DMC."
+                },
+                "productionSupplyArea": {
+                    "type": "string",
+                    "description": "The production supply area of the new stock."
+                },
+                "quantityOnHand": {
+                    "description": "The on-hand quantity of the new stock.",
+                    "$ref": "#/definitions/ResponseOnHandQuantityV2"
+                },
+                "reservedOperation": {
+                    "type": "string",
+                    "description": "The operation for which the new stock is reserved."
+                },
+                "reservedOrder": {
+                    "type": "string",
+                    "description": "The order for which the new stock is reserved."
+                },
+                "serialNumber": {
+                    "type": "string",
+                    "description": "The serial number of the new stock."
+                },
+                "status": {
+                    "type": "string",
+                    "description": "The status of the stock.",
+                    "enum": [
+                        "UNRESTRICTED",
+                        "RESTRICTED",
+                        "QUALITY_INSPECTION",
+                        "BLOCKED"
+                    ]
+                },
+                "storageBin": {
+                    "type": "string",
+                    "description": "The storage bin of the new stock."
+                },
+                "storageLocation": {
+                    "type": "string",
+                    "description": "The storage location of the new stock."
+                },
+                "thirdPartyImported": {
+                    "type": "boolean",
+                    "description": "Indicates if the stock is imported from a third-party system that serves as the single source of inventories to transfer to SAP Digital Manufacturing."
+                }
+            },
+            "title": "TransferInventoryResponse"
+        },
+        "RequestQuantityV2": {
+            "type": "object",
+            "required": [
+                "unitOfMeasure",
+                "value"
+            ],
+            "properties": {
+                "unitOfMeasure": {
+                    "description": "The unit of measure of the stock.",
+                    "$ref": "#/definitions/UnitOfMeasureV2"
+                },
+                "value": {
+                    "type": "number",
+                    "description": "The on-hand quantity of the stock."
+                }
+            },
+            "title": "Stock Quantity"
+        },
+        "UnitOfMeasureV2": {
+            "type": "object",
+            "properties": {
+                "commercialUnitOfMeasure": {
+                    "type": "string",
+                    "description": "The SAP commercial unit of measure that's visible on the user interface.",
+                    "minLength": 0,
+                    "maxLength": 3
+                },
+                "internalUnitOfMeasure": {
+                    "type": "string",
+                    "description": "The SAP internal unit of measure.",
+                    "minLength": 0,
+                    "maxLength": 3
+                },
+                "isoUnitOfMeasure": {
+                    "type": "string",
+                    "description": "The ISO unit of measure.",
+                    "minLength": 0,
+                    "maxLength": 3
+                }
+            },
+            "title": "UnitOfMeasure"
+        },
+        "ResponseParallelQuantityV2": {
+            "type": "object",
+            "properties": {
+                "internalUnitOfMeasure": {
+                    "type": "string",
+                    "description": "The SAP internal unit of measure.",
+                    "minLength": 0,
+                    "maxLength": 3
+                },
+                "value": {
+                    "type": "number",
+                    "description": "The quantity of the stock in parallel unit of measure."
+                }
+            },
+            "title": "Stock Parallel Quantity"
+        },
+        "ResponseOnHandQuantityV2": {
+            "type": "object",
+            "required": [
+                "unitOfMeasure",
+                "value"
+            ],
+            "properties": {
+                "internalUnitOfMeasure": {
+                    "type": "string",
+                    "description": "The SAP internal unit of measure.",
+                    "minLength": 0,
+                    "maxLength": 3
+                },
+                "value": {
+                    "type": "number",
+                    "description": "The on-hand quantity of the stock."
+                }
+            },
+            "title": "Stock Quantity"
+        },
+        "EwmStockSyncRequestV2": {
+            "required": [
+                "plant",
+                "productionSupplyArea",
+                "warehouse"
+            ],
+            "type": "object",
+            "properties": {
+                "plant": {
+                    "maxLength": 6,
+                    "minLength": 0,
+                    "type": "string",
+                    "description": "The plant where EWM stock synchronization is performed."
+                },
+                "warehouse": {
+                    "maxLength": 3,
+                    "minLength": 0,
+                    "type": "string",
+                    "description": "The warehouse of the stocks."
+                },
+                "productionSupplyArea": {
+                    "maxLength": 10,
+                    "minLength": 0,
+                    "type": "string",
+                    "description": "The production supply area of the stocks."
+                },
+                "material": {
+                    "maxLength": 40,
+                    "minLength": 0,
+                    "type": "string",
+                    "description": "The material of the stocks. If specified, the system only synchronizes the stocks of this material."
+                },
+                "order": {
+                    "maxLength": 12,
+                    "minLength": 0,
+                    "type": "string",
+                    "description": "If specified, the system only synchronizes the stocks of this order's components."
+                },
+                "handlingUnit": {
+                    "maxLength": 20,
+                    "minLength": 0,
+                    "type": "string",
+                    "description": "The handling unit of the stocks. If specified, the system only synchronizes the stocks with this handling unit."
+                }
+            }
+        },
+        "ResponseQuantityV2": {
+            "type": "object",
+            "required": [
+                "unitOfMeasure",
+                "value"
+            ],
+            "properties": {
+                "internalUnitOfMeasure": {
+                    "type": "string",
+                    "description": "The SAP internal unit of measure.",
+                    "minLength": 0,
+                    "maxLength": 3
+                },
+                "value": {
+                    "type": "number",
+                    "description": "The current available quantity of the stock."
+                }
+            },
+            "title": "ResponseQuantityV2"
+        },
+        "GRResponseQuantityV2": {
+            "type": "object",
+            "required": [
+                "unitOfMeasure",
+                "value"
+            ],
+            "properties": {
+                "internalUnitOfMeasure": {
+                    "type": "string",
+                    "description": "The SAP internal unit of measure.",
+                    "minLength": 0,
+                    "maxLength": 3
+                },
+                "value": {
+                    "type": "number",
+                    "description": "Indicates how many products are posted in the goods receipt."
+                }
+            },
+            "title": "GRResponseQuantityV2"
+        },
+        "EwmStockSyncResponseV2": {
+            "type": "object",
+            "properties": {
+                "plant": {
+                    "type": "string",
+                    "description": "The plant where EWM stock synchronization is performed."
+                },
+                "warehouse": {
+                    "type": "string",
+                    "description": "The warehouse of the stocks."
+                },
+                "productionSupplyArea": {
+                    "type": "string",
+                    "description": "The production supply area of the stocks."
+                },
+                "material": {
+                    "type": "string",
+                    "description": "The material of the stocks."
+                },
+                "order": {
+                    "type": "string",
+                    "description": "The order for which the stocks are synchronized."
+                },
+                "handlingUnit": {
+                    "type": "string",
+                    "description": "The handling unit of the stocks."
+                },
+                "createdInventories": {
+                    "type": "array",
+                    "description": "The inventories that are created because of the stock synchronization.",
+                    "items": {
+                        "$ref": "#/definitions/InventoryResponseV2"
+                    }
+                },
+                "updatedInventories": {
+                    "type": "array",
+                    "description": "The inventories that are updated because of the stock synchronization.",
+                    "items": {
+                        "$ref": "#/definitions/InventoryResponseV2"
+                    }
+                },
+                "removedInventories": {
+                    "type": "array",
+                    "description": "The inventories that are removed because of the stock synchronization.",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "InventoryResponseV2": {
+            "type": "object",
+            "properties": {
+                "inventoryId": {
+                    "type": "string",
+                    "description": "The inventory ID of the stock in SAP Digital Manufacturing."
+                },
+                "status": {
+                    "type": "string",
+                    "enum": [
+                        "UNRESTRICTED",
+                        "RESTRICTED",
+                        "BLOCKED",
+                        "QUALITY_INSPECTION"
+                    ],
+                    "description": "The status of the stock. There are 4 possible statuses: 'UNRESTRICTED', 'RESTRICTED', 'BLOCKED' and 'QUALITY_INSPECTION'."
+                },
+                "quantityOnHand": {
+                    "$ref": "#/definitions/ResponseQuantityV2"
+                },
+                "batchNumber": {
+                    "type": "string",
+                    "description": "The batch number of the stock."
+                },
+                "serialNumber": {
+                    "type": "string",
+                    "description": "The serial number of the stock."
+                }
+            }
+        },
+        "EwmStockAsyncResponseV2": {
+            "type": "object",
+            "properties": {
+                "transactionId": {
+                    "type": "string",
+                    "description": "The ID of the EWM stock synchronization transaction."
+                }
+            }
+        },
+        "ReturnInventoryRequestV2": {
+            "type": "object",
+            "required": [
+                "quantity",
+                "destinationStorageLocation"
+            ],
+            "properties": {
+                "quantity": {
+                    "description": "The quantity to return. This quantity is deducted from the original on-hand quantity of the stock. Make sure to fill at least one of the unit of measures. If you fill in multiple units of measure, the system applies them in the following order: internalUnitOfMeasure, isoUnitOfMeasure, commercialUnitOfMeasure.",
+                    "$ref": "#/definitions/RequestQuantityV2"
+                },
+                "destinationStorageLocation": {
+                    "type": "string",
+                    "description": "The central storage location to which the stock is returned.",
+                    "minLength": 0,
+                    "maxLength": 4
+                },
+                "comments": {
+                    "type": "string",
+                    "description": "The comments you want to add to the stock return.",
+                    "minLength": 0,
+                    "maxLength": 4000
+                }
+            }
+        },
+        "ScrapInventoryRequestV2": {
+            "type": "object",
+            "required": [
+                "quantity"
+            ],
+            "properties": {
+                "quantity": {
+                    "description": "The quantity to scrap. This quantity is deducted from the original on-hand quantity of the stock. Make sure to fill at least one of the unit of measures. If you fill in multiple units of measure, the system applies them in the following order: internalUnitOfMeasure, isoUnitOfMeasure, commercialUnitOfMeasure.",
+                    "$ref": "#/definitions/RequestQuantityV2"
+                },
+                "comments": {
+                    "type": "string",
+                    "description": "The comments you want to add to the stock scrap.",
+                    "minLength": 0,
+                    "maxLength": 4000
+                }
+            }
+        },
+        "ReturnInventoryResponseV2": {
+            "type": "object",
+            "properties": {
+                "dataFields": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/InventoryDataFieldDtoV2"
+                    }
+                },
+                "batchNumber": {
+                    "type": "string",
+                    "description": "The batch number of the stock."
+                },
+                "createdDateTime": {
+                    "type": "string",
+                    "format": "date-time",
+                    "example": "2022-08-31T23:53:35.123Z",
+                    "description": "The date and time when the stock was created (UTC). Format (ISO-8601): yyyy-MM-dd'T'HH:mm:ss.SSS'Z'."
+                },
+                "handlingUnit": {
+                    "type": "string",
+                    "description": "The handling unit number of the innermost package."
+                },
+                "inventoryId": {
+                    "type": "string",
+                    "description": "The inventory ID of the stock in SAP Digital Manufacturing."
+                },
+                "material": {
+                    "type": "string",
+                    "description": "The material of the stock."
+                },
+                "materialVersion": {
+                    "type": "string",
+                    "description": "The material version of the stock."
+                },
+                "modifiedDateTime": {
+                    "type": "string",
+                    "format": "date-time",
+                    "example": "2022-08-31T23:53:35.123Z",
+                    "description": "The date and time when the stock was last modified (UTC). Format (ISO-8601): yyyy-MM-dd'T'HH:mm:ss.SSS'Z'."
+                },
+                "origin": {
+                    "type": "string",
+                    "description": "The origin of the stock. It indicates where the stock originally comes from. There are 3 possible origins: 'DMC', 'ERP' and 'EWM'.",
+                    "enum": [
+                        "DMC",
+                        "ERP",
+                        "EWM"
+                    ]
+                },
+                "productionSupplyArea": {
+                    "type": "string",
+                    "description": "The production supply area where the stock is stored."
+                },
+                "quantityOnHand": {
+                    "description": "The available quantity of the stock.",
+                    "$ref": "#/definitions/ResponseOnHandQuantityV2"
+                },
+                "reservedOperation": {
+                    "type": "string",
+                    "description": "The operation for which the stock is reserved."
+                },
+                "reservedOrder": {
+                    "type": "string",
+                    "description": "The order for which the stock is reserved."
+                },
+                "serialNumber": {
+                    "type": "string",
+                    "description": "The serial number of the stock."
+                },
+                "status": {
+                    "type": "string",
+                    "description": "The status of the stock.",
+                    "enum": [
+                        "UNRESTRICTED",
+                        "RESTRICTED",
+                        "QUALITY_INSPECTION",
+                        "BLOCKED"
+                    ]
+                },
+                "storageBin": {
+                    "type": "string",
+                    "description": "The storage bin where the stock is stored at the production supply area."
+                },
+                "storageLocation": {
+                    "type": "string",
+                    "description": "The storage location where the stock is stored."
+                },
+                "salesOrder": {
+                    "type": "string",
+                    "description": "The sales order for which the stock is allocated or delivered."
+                },
+                "salesOrderItem": {
+                    "type": "string",
+                    "description": "The sales order item for which the stock is allocated or delivered."
+                },
+                "thirdPartyImported": {
+                    "type": "boolean",
+                    "description": "Indicates if the stock is imported from a third-party system that serves as the single source of inventories to transfer to SAP Digital Manufacturing."
+                },
+                "warehouse": {
+                    "type": "string",
+                    "description": "The warehouse from which the stock is staged in the integrated EWM system."
+                },
+                "comments": {
+                    "type": "string",
+                    "description": "The comments you add to the stock."
+                }
+            },
+            "title": "ReturnInventoryResponse"
+        },
+        "ScrapInventoryResponseV2": {
+            "type": "object",
+            "properties": {
+                "dataFields": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/InventoryDataFieldDtoV2"
+                    }
+                },
+                "batchNumber": {
+                    "type": "string",
+                    "description": "The batch number of the stock."
+                },
+                "createdDateTime": {
+                    "type": "string",
+                    "format": "date-time",
+                    "example": "2022-08-31T23:53:35.123Z",
+                    "description": "The date and time when the stock was created (UTC). Format (ISO-8601): yyyy-MM-dd'T'HH:mm:ss.SSS'Z'."
+                },
+                "handlingUnit": {
+                    "type": "string",
+                    "description": "The handling unit number of the innermost package."
+                },
+                "inventoryId": {
+                    "type": "string",
+                    "description": "The inventory ID of the stock in SAP Digital Manufacturing."
+                },
+                "material": {
+                    "type": "string",
+                    "description": "The material of the stock."
+                },
+                "materialVersion": {
+                    "type": "string",
+                    "description": "The material version of the stock."
+                },
+                "modifiedDateTime": {
+                    "type": "string",
+                    "format": "date-time",
+                    "example": "2022-08-31T23:53:35.123Z",
+                    "description": "The date and time when the stock was last modified (UTC). Format (ISO-8601): yyyy-MM-dd'T'HH:mm:ss.SSS'Z'."
+                },
+                "origin": {
+                    "type": "string",
+                    "description": "The origin of the stock. It indicates where the stock originally comes from. There are 3 possible origins: 'DMC', 'ERP' and 'EWM'.",
+                    "enum": [
+                        "DMC",
+                        "ERP",
+                        "EWM"
+                    ]
+                },
+                "productionSupplyArea": {
+                    "type": "string",
+                    "description": "The production supply area where the stock is stored."
+                },
+                "quantityOnHand": {
+                    "description": "The available quantity of the stock.",
+                    "$ref": "#/definitions/ResponseOnHandQuantityV2"
+                },
+                "reservedOperation": {
+                    "type": "string",
+                    "description": "The operation for which the stock is reserved."
+                },
+                "reservedOrder": {
+                    "type": "string",
+                    "description": "The order for which the stock is reserved."
+                },
+                "serialNumber": {
+                    "type": "string",
+                    "description": "The serial number of the stock."
+                },
+                "status": {
+                    "type": "string",
+                    "description": "The status of the stock.",
+                    "enum": [
+                        "UNRESTRICTED",
+                        "RESTRICTED",
+                        "QUALITY_INSPECTION",
+                        "BLOCKED"
+                    ]
+                },
+                "storageBin": {
+                    "type": "string",
+                    "description": "The storage bin where the stock is stored at the production supply area."
+                },
+                "storageLocation": {
+                    "type": "string",
+                    "description": "The storage location where the stock is stored."
+                },
+                "salesOrder": {
+                    "type": "string",
+                    "description": "The sales order for which the stock is allocated or delivered."
+                },
+                "salesOrderItem": {
+                    "type": "string",
+                    "description": "The sales order item for which the stock is allocated or delivered."
+                },
+                "thirdPartyImported": {
+                    "type": "boolean",
+                    "description": "Indicates if the stock is imported from a third-party system that serves as the single source of inventories to transfer to SAP Digital Manufacturing."
+                },
+                "warehouse": {
+                    "type": "string",
+                    "description": "The warehouse from which the stock is staged in the integrated EWM system."
+                },
+                "comments": {
+                    "type": "string",
+                    "description": "The comments you add to the stock."
+                }
+            },
+            "title": "ScrapInventoryResponse"
+        },
+        "GRQuantityV2": {
+          "type": "object",
+          "required": [
+            "unitOfMeasure",
+            "value"
+          ],
+          "properties": {
+            "unitOfMeasure": {
+              "description": "The unit of measure",
+              "$ref": "#/definitions/UnitOfMeasureV2"
+            },
+            "value": {
+              "type": "number",
+              "description": "Indicates how many products are posted in the goods receipt."
+            }
+          },
+          "title": "GRQuantityV2"
+        },
+        "PostEwmGoodsReceiptRequestV2": {
+            "type": "object",
+            "required": [
+                "lineItems",
+                "order",
+                "plant"
+            ],
+            "properties": {
+                "plant": {
+                    "type": "string",
+                    "description": "The plant where the goods receipt is performed.",
+                    "minLength": 0,
+                    "maxLength": 6
+                },
+                "warehouse": {
+                    "type": "string",
+                    "description": "The warehouse number where the goods receipt is performed.",
+                    "minLength": 0,
+                    "maxLength": 3
+                },
+                "order": {
+                    "type": "string",
+                    "description": "The order number for which the goods receipt is performed.",
+                    "minLength": 0,
+                    "maxLength": 12
+                },
+                "postedBy": {
+                    "type": "string",
+                    "description": "Specifies the user who posted the goods receipt. The person must be a registered user, and the value should be provided as the user ID.",
+                    "maxLength": 412
+                },
+                "requireQuantityToleranceCheck": {
+                    "type": "boolean",
+                    "description": "Specifies whether to enable the tolerance check for goods receipt posting. Set to true to enable the check, or false to disable it. The default value is false. Note that, if tolerance check is enabled on the ERP side and this value is set to false, goods receipts can be posted successfully in SAP Digital Manufacturing, but postings that exceed the tolerance may fail in the integrated ERP system."
+                },
+                "postingDateTime": {
+                    "type": "string",
+                    "format": "date-time",
+                    "example": "2022-09-23T00:00:00.000Z",
+                    "description": "The posting date time of the product in UTC. Format (ISO-8601): yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
+                },
+                "lineItems": {
+                    "type": "array",
+                    "description": "The request details of the goods receipt posting.",
+                    "minItems": 0,
+                    "maxItems": 50,
+                    "items": {
+                        "$ref": "#/definitions/EwmGoodsReceiptsRequestItemV2"
+                    }
+                },
+                "headerAdditionalParameters": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/HeaderAdditionalParametersV2"
+                    },
+                    "minItems": 0,
+                    "maxItems": 100,
+                    "description": "The additional parameter of the product."
+                }
+            },
+            "title": "PostEwmGoodsReceiptRequestV2"
+        },
+        "PostEwmGoodsReceiptResponseV2": {
+            "type": "object",
+            "properties": {
+                "lineItems": {
+                    "type": "array",
+                    "description": "The response details of the goods receipt posting.",
+                    "items": {
+                        "$ref": "#/definitions/EwmGoodsReceiptsResponseItemV2"
+                    }
+                },
+                "order": {
+                    "type": "string",
+                    "description": "The order number for which the goods receipt is performed."
+                },
+                "plant": {
+                    "type": "string",
+                    "description": "The plant where the goods receipt is posted."
+                },
+                "postedBy": {
+                    "type": "string",
+                    "description": "The user who posted the goods receipt."
+                },
+                "transactionId": {
+                    "type": "string",
+                    "description": "Unique identifier of the goods receipt transaction."
+                },
+                "warehouse": {
+                    "type": "string",
+                    "description": "The warehouse number where the goods receipt is performed."
+                }
+            },
+            "title": "PostEwmGoodsReceiptResponseV2"
+        },
+        "EwmGoodsReceiptsRequestItemV2": {
+            "type": "object",
+            "required": [
+              "material",
+              "quantity",
+              "sfc",
+              "packingMaterial"
+            ],
+            "properties": {
+                "sfc": {
+                    "type": "string",
+                    "description": "The SFC number of the product.",
+                    "minLength": 0,
+                    "maxLength": 128
+                },
+                "material": {
+                    "type": "string",
+                    "description": "The material name of the product.",
+                    "minLength": 0,
+                    "maxLength": 40
+                },
+                "packingMaterial": {
+                    "type": "string",
+                    "description": "The name of the packaging material associated with the product.",
+                    "minLength": 0,
+                    "maxLength": 40
+                },
+                "quantity": {
+                    "description": "The number of products you want to post in the goods receipt. You can provide a value in only one of the three units of measure. If more than one is provided, the system reads them in the following order of priority: internalUnitOfMeasure, isoUnitOfMeasure, and commercialUnitOfMeasure. The quantity must be equal to the number of serial numbers provided for the current line item.",
+                    "$ref": "#/definitions/GRQuantityV2"
+                },
+                "materialVersion": {
+                    "type": "string",
+                    "description": "The material version of the product.",
+                    "minLength": 0,
+                    "maxLength": 20
+                },
+                "handlingUnit": {
+                    "type": "string",
+                    "description": "The handling unit number of the product.",
+                    "minLength": 0,
+                    "maxLength": 20
+                },
+                "batchNumber": {
+                    "type": "string",
+                    "description": "The batch number assigned to the product.",
+                    "minLength": 0,
+                    "maxLength": 10
+                },
+                "serialNumbers": {
+                    "type": "array",
+                    "description": "A list of serial numbers for the products. Instead of limit serial numbers per line item, there's overall limit of 500 serial numbers per request.",
+                    "maxItems": 500,
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "bomComponentSequence": {
+                    "type": "integer",
+                    "format": "int64",
+                    "description": "The sequence of the BOM component. For finished goods receipts, this field must be null. For co-products and by-products, it is optional and should only be provided when explicitly specifying a BOM component for the receipt."
+                },
+                "productionDate": {
+                    "type": "string",
+                    "format": "date",
+                    "example": "2025-09-23",
+                    "description": "The production date of the product in your local and cannot be a future date. Format (ISO-8601): YYYY-MM-DD."
+                },
+                "additionalParameters": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/HeaderAdditionalParametersV2"
+                    },
+                    "description": "The additional custom parameters you want to add to the goods receipt posting.",
+                    "minItems": 0,
+                    "maxItems": 100
+                },
+                "storageLocation": {
+                    "type": "string",
+                    "description": "An EWM-Managed Storage Location where stock is physically stored and whose 'EWM-Managed Storage Location' indicator is activated in the Manage Storage Locations app.",
+                    "minLength": 0,
+                    "maxLength": 4
+                },
+                "comments": {
+                    "type": "string",
+                    "description": "The comments you want to add to the goods receipt posting.",
+                    "minLength": 0,
+                    "maxLength": 4000
+                }
+            },
+            "title": "EwmGoodsReceiptsRequestItemV2"
+        },
+        "HeaderAdditionalParametersV2": {
+            "type": "object",
+            "properties": {
+                "parameterName": {
+                    "type": "string",
+                    "description": "The additional custom parameter name."
+                },
+                "parameterValue": {
+                    "type": "string",
+                    "description": "The additional custom parameter value."
+                }
+            }
+        },
+        "EwmGoodsReceiptsResponseItemV2": {
+            "type": "object",
+            "properties": {
+                "batchNumber": {
+                    "type": "string",
+                    "description": "The batch number of the product."
+                },
+                "inventoryIds": {
+                    "type": "array",
+                    "description": "The inventory IDs that were created/updated for the goods receipt item.",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "serialNumbers": {
+                    "type": "array",
+                    "description": "A list of serial numbers of the products.",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "material": {
+                    "type": "string",
+                    "description": "The name of the material associated with the product."
+                },
+                "materialVersion": {
+                    "type": "string",
+                    "description": "The material version of product."
+                },
+                "packingMaterial": {
+                    "type": "string",
+                    "description": "The name of the packing material associated with the product."
+                },
+                "handlingUnit": {
+                    "type": "string",
+                    "description": "The handling unit number of product."
+                },
+                "totalQuantityInBaseUnit": {
+                    "description": "The total quantity of the product calculated in base unit of measure.",
+                    "$ref": "#/definitions/ResponseQuantityV2"
+                },
+                "storageLocation": {
+                    "type": "string",
+                    "description": "The name of the product’s storage location."
+                }
+            },
+            "title": "EwmGoodsReceiptResponseItemV2"
+        },
+        "Page_PostedGoodsReceiptV2": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "type": "array",
+                    "description": "The list of goods receipts",
+                    "items": {
+                      "$ref": "#/definitions/PostedGoodsReceiptV2"
+                    }
+                },
+                "number": {
+                    "description": "The current page number.",
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "numberOfElements": {
+                    "description": "The number of goods receipt postings on the current page.",
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "totalElements": {
+                    "description": "The total number of goods receipt postings that are returned.",
+                    "type": "integer",
+                    "format": "int64"
+                },
+                "totalPages": {
+                    "description": "The total number of pages that are returned.",
+                    "type": "integer",
+                    "format": "int32"
+                }
+            },
+            "title": "Page_PostedGoodsReceiptV2"
+        },
+        "PostedGoodsReceiptV2": {
+            "type": "object",
+            "properties": {
+                "plant": {
+                    "type": "string",
+                    "description": "The plant where the goods receipt is posted."
+                },
+                "transactionId": {
+                    "type": "string",
+                    "description": "The ID of the goods receipt transaction."
+                },
+                "postedBy": {
+                    "type": "string",
+                    "description": "The user who posted goods receipts."
+                },
+                "order": {
+                    "type": "string",
+                    "description": "The order number of the goods receipt."
+                },
+                "postingDateTime": {
+                    "type": "string",
+                    "format": "date-time",
+                    "example": "2022-08-31T23:53:34.123Z",
+                    "description": "The posting date time of the goods receipt in UTC . Format (ISO-8601): yyyy-MM-dd'T'HH:mm:ss.SSS'Z'."
+                },
+                "createdDateTime": {
+                    "type": "string",
+                    "format": "date-time",
+                    "example": "2022-06-22T04:24:24.000Z",
+                    "description": "The creation date time of goods receipt in UTC. Format (ISO-8601): yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
+                },
+                "status": {
+                    "type": "string",
+                    "description": "The status of the goods receipt. There are the following possible statuses: \n1) CANCELLATION_FAILED_TO_POST_TO_TARGET_SYS: Cancellation has been triggered for the goods receipt, yet the cancellation to the integrated ERP system failed; \n2) CANCELLATION_POSTED_IN_DMC: Cancellation has been triggered for the goods receipt, and it has been successfully posted in SAP Digital Manufacturing; \n3) CANCELLATION_POSTED_TO_TARGET_SYS: Cancellation has been triggered for the goods receipt, and it has been successfully posted in both SAP Digital Manufacturing and the integrated ERP system; \n4) FAILED_TO_POST_TO_TARGET_SYS: Goods receipt posting to the integrated ERP system failed; \n5) POSTED_IN_DMC: Goods receipt has been successfully posted in SAP Digital Manufacturing; \n6) POSTED_TO_TARGET_SYS: Goods receipt has been successfully posted in both SAP Digital Manufacturing and the integrated ERP system.",
+                    "enum": [
+                      "CANCELLATION_FAILED_TO_POST_TO_TARGET_SYS",
+                      "CANCELLATION_POSTED_IN_DMC",
+                      "CANCELLATION_POSTED_TO_TARGET_SYS",
+                      "FAILED_TO_POST_TO_TARGET_SYS",
+                      "POSTED_IN_DMC",
+                      "POSTED_TO_TARGET_SYS"
+                    ]
+                },
+                "cancelReason": {
+                    "type": "string",
+                    "description": "Reason for canceling the goods receipt posting."
+                },
+                "items": {
+                    "type": "array",
+                    "description": "The list of goods receipts items.",
+                    "items": {
+                      "$ref": "#/definitions/PostedGoodsReceiptItemsV2"
+                    }
+                }
+            },
+            "title": "PostedGoodsReceiptV2"
+        },
+      "PostedGoodsReceiptItemsV2": {
+          "type": "object",
+          "properties": {
+              "sfc": {
+                  "type": "string",
+                  "description": "The shop floor control number of product."
+              },
+              "serialNumbers": {
+                  "type": "array",
+                  "description": "A list of serial numbers for the products.",
+                  "items": {
+                    "type": "string"
+                  }
+              },
+              "material": {
+                  "type": "string",
+                  "description": "The material name of product."
+              },
+              "materialVersion": {
+                  "type": "string",
+                  "description": "The material version of product."
+              },
+              "quantityInProductionUnit": {
+                  "description": "The number of products calculated in production unit of measure.",
+                  "$ref": "#/definitions/GRResponseQuantityV2"
+              },
+              "quantityInBaseUnit": {
+                  "description": "The number of products calculated in base unit of measure.",
+                  "$ref": "#/definitions/GRResponseQuantityV2"
+              },
+              "quantityInParallelUnit": {
+                  "description": "The number of products calculated in the material's parallel unit of measure.",
+                  "$ref": "#/definitions/GRResponseQuantityV2"
+              },
+              "storageLocation": {
+                  "type": "string",
+                  "description": "The storage location of product."
+              },
+              "handlingUnit": {
+                  "type": "string",
+                  "description": "The handling unit number of product. It applies only to goods receipts that are posted to Extended Warehouse Management."
+              },
+              "batchNumber": {
+                  "type": "string",
+                  "description": "The batch number of the product."
+              },
+              "salesOrder": {
+                  "type": "string",
+                  "description": "The sales order for which the goods receipt is posted."
+              },
+              "salesOrderItem": {
+                "type": "string",
+                "description": "The sales order item for which the goods receipt is posted."
+              },
+              "comments": {
+                  "type": "string",
+                  "description": "The comments of the goods receipt postings."
+              }
+          },
+          "title": "PostedGoodsReceiptItemsV2"
+        },
+        "GetInventoryPostingsForGoodIssueResponseV2": {
+          "properties": {
+            "batchNumber": {
+              "description": "The batch number of the component used in the goods issue.",
+              "type": "string"
+            },
+            "cancellationTriggered": {
+              "description": "Indicates if cancellation has ever been triggered for the goods issue.",
+              "type": "boolean"
+            },
+            "comments": {
+              "description": "Comments of the goods issue. If the goods issue is canceled, then the comments of the goods issue cancellation are retrieved.",
+              "type": "string"
+            },
+            "createdDateTime": {
+              "description": "The UTC time when the goods issue was created. Format (ISO-8601): yyyy-MM-dd'T'HH:mm:ss.SSS'Z'.",
+              "format": "date-time",
+              "type": "string"
+            },
+            "handlingUnit": {
+              "description": "The handling unit number of the innermost package. This property only applies to EWM goods issues.",
+              "type": "string"
+            },
+            "inventoryId": {
+              "description": "The inventory ID of the component used in the goods issue.",
+              "type": "string"
+            },
+            "material": {
+              "description": "The material name of the component used in the goods issue.",
+              "type": "string"
+            },
+            "materialVersion": {
+              "description": "The material version of the component used in the goods issue.",
+              "type": "string"
+            },
+            "order": {
+              "description": "The order against which the goods issue is performed.",
+              "type": "string"
+            },
+            "plant": {
+              "description": "The plant where the goods issue is performed.",
+              "type": "string"
+            },
+            "postedBy": {
+              "description": "The user who posted the goods issue.",
+              "type": "string"
+            },
+            "postingDateTime": {
+              "description": "The UTC time when the goods issue was posted. Format (ISO-8601): yyyy-MM-dd'T'HH:mm:ss.SSS'Z'.",
+              "format": "date-time",
+              "type": "string"
+            },
+            "postingStatus": {
+              "description": "The status of the goods issue posting.",
+              "enum": [
+                "POSTED_IN_DMC",
+                "POSTED_TO_TARGET_SYS",
+                "FAILED_TO_POST_TO_TARGET_SYS",
+                "CANCELLATION_POSTED_IN_DMC",
+                "CANCELLATION_POSTED_TO_TARGET_SYS",
+                "CANCELLATION_FAILED_TO_POST_TO_TARGET_SYS"
+              ],
+              "type": "string"
+            },
+            "postingTargetSystem": {
+              "description": "The target system to which the goods issue is posted. It can be one of the following: 1) 'IM': The integrated SAP S/4HANA or SAP S/4HANA Cloud system. 2) 'EWM': The integrated EWM system. 3) 'NONE': Indicates there's no integrated external system. The goods issue is a local one.",
+              "enum": [
+                "IM",
+                "EWM",
+                "NONE"
+              ],
+              "type": "string"
+            },
+            "postingType": {
+              "description": "The type of the goods issue posting.",
+              "enum": [
+                "GI"
+              ],
+              "type": "string"
+            },
+            "productionSupplyArea": {
+              "description": "The production supply area of the component used in the goods issue. This property only applies to EWM goods issues.",
+              "type": "string"
+            },
+            "quantityInBaseUnit": {
+              "$ref": "#/definitions/ResponseQuantityV2"
+            },
+            "serialNumber": {
+              "description": "The serial number of the component used in the goods issue.",
+              "type": "string"
+            },
+            "sfc": {
+              "description": "The SFC number against which the goods issue is performed.",
+              "type": "string"
+            },
+            "stepId": {
+              "description": "The step ID of the routing step against which the goods issue is performed.",
+              "type": "string"
+            },
+            "storageBin": {
+              "description": "The storage bin of the component used in the goods issue. This property only applies to EWM goods issues.",
+              "type": "string"
+            },
+            "storageLocation": {
+              "description": "The storage location of the component used in the goods issue.",
+              "type": "string"
+            },
+            "transactionId": {
+              "description": "The transaction ID of the posted goods issue.",
+              "type": "string"
+            },
+            "workCenter": {
+              "description": "The work center for which the goods issue is performed.",
+              "type": "string"
+            }
+          },
+          "type": "object"
+        },
+        "PageGetInventoryPostingsForGoodIssueResponseV2": {
+          "type": "object",
+          "properties": {
+            "content": {
+              "type": "array",
+              "description": "The list of retrieved goods issues.",
+              "items": {
+                "$ref": "#/definitions/GetInventoryPostingsForGoodIssueResponseV2"
+              }
+            },
+            "number": {
+              "description": "The current page number. The initial page number starts from '0'.",
+              "type": "integer",
+              "format": "int32"
+            },
+            "numberOfElements": {
+              "description": "The number of goods issue postings on the current page.",
+              "type": "integer",
+              "format": "int32"
+            },
+            "totalElements": {
+              "description": "The total number of goods issue postings that are returned.",
+              "type": "integer",
+              "format": "int64"
+            },
+            "totalPages": {
+              "description": "The total number of pages that are returned.",
+              "type": "integer",
+              "format": "int32"
+            }
+        },
+        "title": "PageGetInventoryPostingsForGoodIssueResponseV2"
+
+      }
+    },
+    "x-sap-shortText": "Perform inventory relevant activities, such as retrieving stock information and updating stock data.",
+    "x-servers": [
+        {
+            "url": "https://api.{regionHost}/inventory/v2",
+            "description": "Base URL",
+            "templates": {
+                "regionHost": {
+                    "description": "The data center where SAP Digital Manufacturing is provisioned for your organization",
+                    "enum": [
+                        "eu10.dmc.cloud.sap",
+                        "us10.dmc.cloud.sap",
+                        "eu20.dmc.cloud.sap",
+                        "us20.dmc.cloud.sap",
+                        "test.eu10.dmc.cloud.sap",
+                        "test.us10.dmc.cloud.sap",
+                        "test.eu20.dmc.cloud.sap",
+                        "test.us20.dmc.cloud.sap"
+                    ],
+                    "default": "test.eu10.dmc.cloud.sap"
+                },
+                "tokenHost": {
+                    "description": "The authentication token server where SAP Digital Manufacturing is provisioned for your organization",
+                    "enum": [
+                        "eu10.hana.ondemand.com",
+                        "us10.hana.ondemand.com",
+                        "eu20.hana.ondemand.com",
+                        "us20.hana.ondemand.com"
+                    ],
+                    "default": "eu10.hana.ondemand.com"
+                }
+            }
+        }
+    ]
+}

@@ -1,0 +1,439 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "The resources can be grouped by resource types. You can assigns resources to resource types. The primary purpose of assigning resources to a resource type is to control the selection of a resource at a manufacturing process.",
+        "version": "v1",
+        "title": "Resource Type",
+        "contact": {
+            "name": "SAP Digital Manufacturing Operations",
+            "email": "sap-dmoperation@sap.com"
+        }
+    },
+    "host": "hostname",
+    "basePath": "/",
+    "tags": [
+        {
+            "name": "ResourceType",
+            "description": "Resource Type Api Controller"
+        }
+    ],
+    "consumes": [
+        "application/json"
+    ],
+    "produces": [
+        "application/json"
+    ],
+    "security": [
+        {
+            "OauthClientCredentials": []
+        }
+    ],
+    "paths": {
+        "/resourcetypes": {
+            "get": {
+                "tags": [
+                    "ResourceType"
+                ],
+                "summary": "Searches for resource types by name.",
+                "description": "Finds a resource type containing resources by plant and name",
+                "operationId": "readUsingGET",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "plant",
+                        "in": "query",
+                        "description": "The plant where a resource type is defined.",
+                        "required": true,
+                        "type": "string",
+                        "pattern": "^(?! )[0-9A-Z_$!)(+~@^=\\-*. ]+(?<! )$"
+                    },
+                    {
+                        "name": "resourceType",
+                        "in": "query",
+                        "description": "The resource type value.",
+                        "required": false,
+                        "type": "string",
+                        "pattern": "^(?! )[0-9A-Z_$!)(+~@^=\\-*. ]+(?<! )$"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The resource type was found.",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/ResourceType"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "You are not authorized to call this resource.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Accessing the resource you are trying to reach is forbidden.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "The plant was not found.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "An internal error occured.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "ResourceType"
+                ],
+                "summary": "Creates a resource type.",
+                "description": "Creates a resource type with associated resources",
+                "operationId": "createUsingPOST",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "The resource type to create",
+                        "description": "resourceType",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/ResourceType"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "The resource type was created.",
+                        "schema": {
+                            "$ref": "#/definitions/ResourceType"
+                        }
+                    },
+                    "400": {
+                        "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "You are not authorized to call this resource.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Accessing the resource you are trying to reach is forbidden.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "The plant was not found.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "409": {
+                        "description": "The resource type already exists.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "An internal error occured.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "ResourceType"
+                ],
+                "summary": "Removes the given resource type.",
+                "description": "Removes the resource type for a given plant.",
+                "operationId": "deleteUsingDELETE",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "resourceType",
+                        "description": "resourceType",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/ResourceTypeId"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "The resource type was removed."
+                    },
+                    "400": {
+                        "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "You are not authorized to call this resource.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Accessing the resource you are trying to reach is forbidden.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "The resource type or plant was not found.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "An internal error occured.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "tags": [
+                    "ResourceType"
+                ],
+                "summary": "Updates a resource type.",
+                "description": "Updates a resource type for a given plant",
+                "operationId": "updateUsingPATCH",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "The resource type to update",
+                        "description": "resourceType",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/ResourceType"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The resource type was updated.",
+                        "schema": {
+                            "$ref": "#/definitions/ResourceType"
+                        }
+                    },
+                    "400": {
+                        "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "You are not authorized to call this resource.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Accessing the resource you are trying to reach is forbidden.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "The resource type or plant was not found.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "An internal error occured.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "securityDefinitions": {
+        "OauthClientCredentials": {
+            "type": "oauth2",
+            "tokenUrl": "https://{subdomain}.authentication.{tokenHost}/oauth/token",
+            "flow": "application"
+        }
+    },
+    "definitions": {
+        "ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "causeMessage": {
+                    "type": "string",
+                    "description": "Contains a technical reason for the error."
+                },
+                "code": {
+                    "type": "string",
+                    "description": "Internal error message"
+                },
+                "correlationId": {
+                    "type": "string",
+                    "description": "Contains a correlation ID for the error."
+                },
+                "message": {
+                    "type": "string",
+                    "description": "Contains additional information if any."
+                }
+            },
+            "title": "ErrorResponse"
+        },
+        "ResourceType": {
+            "title": "ResourceType",
+            "type": "object",
+            "properties": {
+                "plant": {
+                    "type": "string",
+                    "description": "The plant containing a resource type.",
+                    "pattern": "^(?! )[0-9A-Z_$!)(+~@^=\\-*. ]+(?<! )$"
+                },
+                "resourceType": {
+                    "type": "string",
+                    "description": "The resource type name.",
+                    "pattern": "^(?! )[0-9A-Z_$!)(+~@^=\\-*. ]+(?<! )$"
+                },
+                "description": {
+                    "type": "string",
+                    "description": "The resource type description."
+                },
+                "resources": {
+                    "type": "array",
+                    "description": "The associated resources.",
+                    "items": {
+                        "$ref": "#/definitions/ResourceId"
+                    }
+                },
+                "createdOn": {
+                    "type": "string",
+                    "format": "date-time",
+                    "example": "2021-04-08T07:00:05.000Z",
+                    "description": "The date and time (in UTC) when the resource type was created."
+                },  
+                "modifiedOn": {
+                    "type": "string",
+                    "format": "date-time",
+                    "example": "2021-04-08T07:00:05.000Z",
+                    "description": "The date and time (in UTC) when the the resource type was updated."
+                }
+            }
+        },
+       "ResourceId": {
+            "title": "ResourceId",
+            "description": "Resource identifier.",
+            "type": "object",
+            "required": [
+                "plant",
+                "resource"
+            ],
+            "properties": {
+                "plant": {
+                    "type": "string",
+                    "pattern": "^(?! )[0-9A-Z_$!)(+~@^=\\-*. ]+(?<! )$",
+                    "description": "The plant containing a resource."
+                },
+                "resource": {
+                    "type": "string",
+                    "pattern": "^(?! )[0-9A-Z_$!)(+~@^=\\-*. ]+(?<! )$",
+                    "description": "Resource name."
+                }
+            }
+        },
+        "ResourceTypeId": {
+            "title": "ResourceTypeId",
+            "type": "object",
+            "properties": {
+                "plant": {
+                    "type": "string",
+                    "description": "The plant containing a resource type."
+                },
+                "resourceType": {
+                    "type": "string",
+                    "description": "Resource type name."
+                }
+            }
+        }
+    },
+    "externalDocs": {
+        "description": "Prepare for API Production",
+        "url": "https://help.sap.com/docs/sap-digital-manufacturing/operations-guide/prepare-for-api-integration"
+    },
+    "schemes": [
+        "https"
+    ],
+    "x-sap-shortText": "Maintain resource types for a given plant.",
+    "x-servers": [
+        {
+            "url": "https://api.{regionHost}/resourcetype/v1",
+            "description": "Base URL",
+            "templates": {
+                "regionHost": {
+                    "description": "The data center where SAP Digital Manufacturing is provisioned for your organization",
+                    "enum": [
+                        "eu10.dmc.cloud.sap",
+                        "eu20.dmc.cloud.sap",
+                        "us10.dmc.cloud.sap",
+                        "us20.dmc.cloud.sap",
+                        "test.eu10.dmc.cloud.sap",
+                        "test.eu20.dmc.cloud.sap",
+                        "test.us10.dmc.cloud.sap",
+                        "test.us20.dmc.cloud.sap"
+                    ],
+                    "default": "test.eu10.dmc.cloud.sap"
+                },
+                "tokenHost": {
+                    "description": "The authentication server where SAP Digital Manufacturing is provisioned for your organization",
+                    "enum": [
+                        "eu10.hana.ondemand.com",
+                        "eu20.hana.ondemand.com",
+                        "us10.hana.ondemand.com",
+                        "us20.hana.ondemand.com"
+                    ],
+                    "default": "eu10.hana.ondemand.com"
+                }
+            }
+        }
+    ]
+}

@@ -1,0 +1,457 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "Manages shift assignments for a plant by retrieving existing assignments and labor non-availability, and assigning shifts and work centers to a list of labors under a given supervisor — all within a specified date range.",
+    "version": "v1",
+    "title": "Labor",
+    "contact": {
+      "name": "SAP Digital Manufacturing Operations",
+      "email": "sap-dmoperation@sap.com"
+    }
+  },
+  "host": "hostname",
+  "basePath": "/",
+  "tags": [
+    {
+      "name": "Labor"
+    }
+  ],
+  "security": [
+    {
+      "OAuthSecurity": []
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/laborshiftplans": {
+      "post": {
+        "tags": [
+          "Labor"
+        ],
+        "summary": "Retrieves labor shift assignments for a plant within a specified date range, with optional filters for shift and supervisor.",
+        "description": "Fetches labor shift assignments, including non-availability, for shop floor supervisors in a specified plant over a defined date range. You may apply optional filters for shift and supervisor to narrow the results, or omit them to retrieve all assignments within the given period.",
+        "operationId": "getLaborShiftPlansUsingPOST",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "request",
+            "description": "request",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/LaborReportRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Labor report retrieved successfully.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/LaborReport"
+              }
+            }
+          },
+          "400": {
+            "description": "Wrong format or structure of the provided request body.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to call this resource.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Access denied. You did not have the required permissions to access the resource.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "One of the related elements is not found.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/labors/shift-assignment": {
+      "post": {
+        "tags": [
+          "Labor"
+        ],
+        "summary": "Assigns shifts and work centers to selected workforce.",
+        "description": "This endpoint assigns specified shifts and work centers to a list of workforce for a given plant and supervisor, within a defined date range. It allows shift planning based on operational needs and supports optional assignment of work centers.",
+        "operationId": "postLaborShiftAssignments",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "request",
+            "description": "request",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/LaborShiftAssignmentRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Workforce assignments were posted successfully.",
+            "schema": {
+              "$ref": "#/definitions/ShiftAllocationResponse"
+            }
+          },
+          "400": {
+            "description": "The request body format or structure is invalid.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to access this resource. Authentication is required.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Access denied. You do not have the necessary permissions to access this resource.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "One or more referenced elements (e.g., shift, labor, or work center) were not found.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "An unexpected error occurred on the server.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "deprecated": false
+      }
+    }
+  },
+  "definitions": {
+    "ErrorResponse": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string",
+          "description": "Internal error message"
+        },
+        "correlationId": {
+          "type": "string",
+          "description": "Contains a correlation ID for the error."
+        },
+        "message": {
+          "type": "string",
+          "description": "Contains additional information if any."
+        }
+      },
+      "title": "ErrorResponse",
+      "description": "Error response"
+    },
+    "LaborReport": {
+      "type": "object",
+      "properties": {
+        "availability": {
+          "type": "string",
+          "description": "Specifies the availability of the user."
+        },
+        "duration": {
+          "type": "string",
+          "description": "Specifies the duration of the work center assigned."
+        },
+        "endDate": {
+          "type": "string",
+          "description": "Specifies the end date of the shift."
+        },
+        "endTime": {
+          "type": "string",
+          "description": "Specifies the end time of the work center assigned on the shift."
+        },
+        "labor": {
+          "type": "string",
+          "description": "Specifies the labor."
+        },
+        "maximumResource": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Specifies the maximum number of people that can work on work center."
+        },
+        "mininumResource": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Specifies the minimum number of people that can work on work center."
+        },
+        "qualification": {
+          "type": "string",
+          "description": "Specifies the qualification/certification of the user."
+        },
+        "shiftModel": {
+          "type": "string",
+          "description": "Specifies the shift model in which the user is currently in."
+        },
+        "shiftOverTime": {
+          "type": "boolean",
+          "description": "Specifies the shift overtime."
+        },
+        "startDate": {
+          "type": "string",
+          "description": "Specifies the start date of the shift."
+        },
+        "startTime": {
+          "type": "string",
+          "description": "Specifies the start time of the work center assigned on the shift."
+        },
+        "supervisor": {
+          "type": "string",
+          "description": "Specifies the supervisor."
+        },
+        "unavailabilityType": {
+          "type": "string",
+          "description": "Specifies the unavailability type."
+        },
+        "workCenter": {
+          "type": "string",
+          "description": "Specifies the work center Id."
+        },
+        "workCenterDesc": {
+          "type": "string",
+          "description": "Specifies the work center description."
+        }
+      },
+      "title": "LaborReport"
+    },
+    "LaborReportRequest": {
+      "type": "object",
+      "required": [
+        "endDate",
+        "plant",
+        "startDate"
+      ],
+      "properties": {
+        "endDate": {
+          "type": "string",
+          "description": "The horizon end date till when shift plans needs to be fetched. Format(YYYYMMDD)."
+        },
+        "plant": {
+          "type": "string",
+          "description": "The plant for which the request is executed."
+        },
+        "startDate": {
+          "type": "string",
+          "description": "The horizon start date from when the shift plans needs to be fetched. Format(YYYYMMDD)."
+        },
+        "user": {
+          "type": "string",
+          "description": "The email ID of the supervisor who wants to see the shift plans for the labors assigned."
+        },
+        "shift": {
+          "type": "string",
+          "description": "The shift for which the shift plans needs to be fetched. If not provided, all shift models will be considered."
+        }
+      },
+      "title": "LaborReportRequest"
+    },
+    "LaborShiftAssignmentRequest": {
+      "type": "object",
+      "required": [
+        "plant",
+        "supervisor",
+        "startDate",
+        "endDate",
+        "shiftAssignments"
+      ],
+      "properties": {
+        "plant": {
+          "type": "string",
+          "description": "The plant where the shift assignments are being made."
+        },
+        "supervisor": {
+          "type": "string",
+          "format": "email",
+          "description": "The email address of the supervisor responsible for the assignments."
+        },
+        "startDate": {
+          "type": "string",
+          "description": "The start date of the assignment period, in YYYYMMDD format."
+        },
+        "endDate": {
+          "type": "string",
+          "description": "The end date of the assignment period, in YYYYMMDD format."
+        },
+        "shiftAssignments": {
+          "type": "array",
+          "description": "A list of shift assignment objects to be applied within the given date range, each containing:",
+          "items": {
+            "$ref": "#/definitions/ShiftAssignment"
+          }
+        }
+      },
+      "title": "LaborShiftAssignmentRequest"
+    },
+    "ShiftAssignment": {
+      "type": "object",
+      "required": [
+        "labor",
+        "shift"
+      ],
+      "properties": {
+        "shift": {
+          "type": "string",
+          "description": "The name of the shift to be assigned (e.g., “Morning SHIFT”, “Evening SHIFT”)."
+        },
+        "labor": {
+          "type": "array",
+          "description": "List of workforce email addresses to be assigned to the shift.",
+          "items": {
+            "type": "string",
+            "format": "email"
+          }
+        },
+        "workCenter": {
+          "type": "string",
+          "description": "The work center where the workforce will be assigned."
+        }
+      },
+      "title": "ShiftAssignment"
+    },
+    "ShiftAllocationResponse": {
+      "type": "object",
+      "properties": {
+        "successfulAllocation": {
+          "type": "array",
+          "description": "List of labors successfully assigned to shifts.",
+          "items": {
+            "$ref": "#/definitions/SuccessfulAllocation"
+          }
+        },
+        "failedAllocation": {
+          "type": "array",
+          "description": "List of labors that could not be assigned to shifts.",
+          "items": {
+            "$ref": "#/definitions/FailedAllocation"
+          }
+        }
+      },
+      "title": "ShiftAllocationResponse"
+    },
+    "SuccessfulAllocation": {
+      "type": "object",
+      "properties": {
+        "labor": {
+          "type": "string",
+          "description": "Email ID of the labor who was successfully assigned."
+        },
+        "shift": {
+          "type": "string",
+          "description": "Shift to which the labor was successfully assigned."
+        }
+      },
+      "title": "SuccessfulAllocation"
+    },
+    "FailedAllocation": {
+      "type": "object",
+      "properties": {
+        "labor": {
+          "type": "string",
+          "description": "Email ID of the labor who could not be assigned."
+        },
+        "shift": {
+          "type": "string",
+          "description": "Shift to which the labor was attempted to be assigned."
+        },
+        "allocationDate": {
+          "type": "string",
+          "description": "Date when the allocation was attempted"
+        },
+        "errorMessage": {
+          "type": "string",
+          "description": "Reason for the failure in assignment."
+        }
+      },
+      "title": "FailedAllocation"
+    }
+  },
+  "securityDefinitions": {
+    "OAuthSecurity": {
+      "type": "oauth2",
+      "tokenUrl": "https://{subdomain}.authentication.{tokenHost}/oauth/token",
+      "flow": "application"
+    }
+  },
+  "externalDocs": {
+    "description": "Prepare for API Integration",
+    "url": "https://help.sap.com/docs/sap-digital-manufacturing/operations-guide/prepare-for-api-integration"
+  },
+  "schemes": [
+    "https"
+  ],
+  "x-sap-shortText": "Retrieves the shift assignments including non-availability of assigned labors.",
+  "x-servers": [
+    {
+      "url": "https://api.{regionHost}/labor/v1",
+      "description": "Base URL",
+      "templates": {
+        "regionHost": {
+          "description": "The data center where SAP Digital Manufacturing is provisioned for your organization.",
+          "enum": [
+            "eu10.dmc.cloud.sap",
+            "eu20.dmc.cloud.sap",
+            "us10.dmc.cloud.sap",
+            "us20.dmc.cloud.sap",
+            "test.eu10.dmc.cloud.sap",
+            "test.eu20.dmc.cloud.sap",
+            "test.us10.dmc.cloud.sap",
+            "test.us20.dmc.cloud.sap"
+          ],
+          "default": "test.eu10.dmc.cloud.sap"
+        },
+        "tokenHost": {
+          "description": "The authentication server where SAP Digital Manufacturing is provisioned for your organization.",
+          "enum": [
+            "eu10.hana.ondemand.com",
+            "eu20.hana.ondemand.com",
+            "us10.hana.ondemand.com",
+            "us20.hana.ondemand.com"
+          ],
+          "default": "eu10.hana.ondemand.com"
+        }
+      }
+    }
+  ]
+}

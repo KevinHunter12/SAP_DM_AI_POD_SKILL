@@ -1,0 +1,734 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "SAP Digital Manufacturing supports standard units of measure (UOM) for different business objects. Customers can also create custom units of measure. This API can be called to create, view, and delete custom units of measure.",
+    "version": "v1",
+    "title": "Unit of Measure",
+    "contact": {
+      "name": "SAP Digital Manufacturing Operations",
+      "email": "sap-dmoperation@sap.com"
+    }
+  },
+  "host": "hostname",
+  "basePath": "/",
+  "tags": [
+    {
+      "name": "uom",
+      "description": "Uom Api Controller"
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/v1/dimensions": {
+      "get": {
+        "tags": [
+          "uom"
+        ],
+        "summary": "Get all dimensions.",
+        "description": "Finds all dimensions that can be used with custom units of measure.",
+        "operationId": "getAllDimensionsUsingGET_1",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "The message was successfully processed.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Dimension"
+              }
+            }
+          },
+          "400": {
+            "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to call this resource.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Accessing the resource you are trying to reach is forbidden.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "An internal error occurred.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/v1/dimensions/{id}": {
+      "get": {
+        "tags": [
+          "uom"
+        ],
+        "summary": "Get dimension by name.",
+        "description": "Provides detailed information about specific dimension by dimension name.",
+        "operationId": "getDimensionUsingGET_1",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "id",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The message was successfully processed.",
+            "schema": {
+              "$ref": "#/definitions/Dimension"
+            }
+          },
+          "400": {
+            "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to call this resource.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Accessing the resource you are trying to reach is forbidden.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "One of the related elements was not found.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "An internal error occurred.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/v1/uoms": {
+      "get": {
+        "tags": [
+          "uom"
+        ],
+        "summary": "Get all units of measure.",
+        "description": "Retrieves all units of measure available for the tenant including custom ones.",
+        "operationId": "getAllUomsUsingGET_1",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "The message was successfully processed.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/UnitOfMeasure"
+              }
+            }
+          },
+          "400": {
+            "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to call this resource.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Accessing the resource you are trying to reach is forbidden.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "An internal error occurred.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "deprecated": false
+      },
+      "post": {
+        "tags": [
+          "uom"
+        ],
+        "summary": "Create custom units of measure.",
+        "description": "Custom units of measure are available for all plants for the tenant.",
+        "operationId": "createUomsUsingPOST_1",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "uoms",
+            "description": "uoms",
+            "required": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/UnitOfMeasure"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "The message was successfully processed.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/UnitOfMeasure"
+              }
+            }
+          },
+          "400": {
+            "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to call this resource.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Accessing the resource you are trying to reach is forbidden.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "One of the related elements was not found.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "409": {
+            "description": "One of the materials already exists.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "An internal error occurred.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/v1/uoms/{id}": {
+      "get": {
+        "tags": [
+          "uom"
+        ],
+        "summary": "Get unit of measure by id.",
+        "description": "Retrieves unit of measure by unit code.",
+        "operationId": "getUomUsingGET_1",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "id",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The message was successfully processed.",
+            "schema": {
+              "$ref": "#/definitions/UnitOfMeasure"
+            }
+          },
+          "400": {
+            "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to call this resource.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Accessing the resource you are trying to reach is forbidden.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "One of the related elements was not found.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "An internal error occurred.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "deprecated": true
+      },
+      "delete": {
+        "tags": [
+          "uom"
+        ],
+        "summary": "Delete a unit of measure by unit code.",
+        "description": "Only custom units of measure can be deleted.",
+        "operationId": "deleteUomUsingDELETE_1",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Unit Code",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "The message was successfully processed."
+          },
+          "400": {
+            "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to call this resource.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Accessing the resource you are trying to reach is forbidden.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "One of the related elements was not found.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "An internal error occurred.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "deprecated": true
+      }
+    },
+    "/v2/uoms": {
+      "get": {
+        "tags": [
+          "uom"
+        ],
+        "summary": "Get a unit of measure using unitCode.",
+        "description": "Gets a unit of measure object using its unitCode. Supports the unitCode parameter for special characters.",
+        "operationId": "getUomUsingGET_2",
+        "parameters": [
+          {
+            "name": "unitCode",
+            "in": "query",
+            "description": "A unit of measure ID for which the request is executed.",
+            "required": true,
+            "allowEmptyValue": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The message was successfully processed.",
+            "schema": {
+              "$ref": "#/definitions/UnitOfMeasure"
+            }
+          },
+          "400": {
+            "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponseV2"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to call this resource.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponseV2"
+            }
+          },
+          "403": {
+            "description": "Accessing the resource you are trying to reach is forbidden.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponseV2"
+            }
+          },
+          "404": {
+            "description": "One of the related elements was not found.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponseV2"
+            }
+          },
+          "500": {
+            "description": "An internal error occurred.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponseV2"
+            }
+          }
+        },
+        "deprecated": false
+      },
+      "delete": {
+        "tags": [
+          "uom"
+        ],
+        "summary": "Delete a unit of measure using unitCode.",
+        "description": "Only custom units of measure can be deleted. Supports the unitCode parameter for special characters.",
+        "operationId": "deleteUomUsingDELETE_2",
+        "parameters": [
+          {
+            "name": "unitCode",
+            "in": "query",
+            "description": "A unit of measure ID for which the request is executed.",
+            "required": true,
+            "allowEmptyValue": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "The message was successfully processed."
+          },
+          "400": {
+            "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponseV2"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to call this resource.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponseV2"
+            }
+          },
+          "403": {
+            "description": "Accessing the resource you are trying to reach is forbidden.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponseV2"
+            }
+          },
+          "404": {
+            "description": "One of the related elements was not found.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponseV2"
+            }
+          },
+          "500": {
+            "description": "An internal error occurred.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponseV2"
+            }
+          }
+        },
+        "deprecated": false
+      }
+    }
+  },
+  "securityDefinitions": {
+    "OAuthSecurity": {
+      "type": "oauth2",
+      "tokenUrl": "https://{subdomain}.authentication.{tokenHost}/oauth/token",
+      "flow": "application"
+    }
+  },
+  "definitions": {
+    "CommercialCode": {
+      "type": "object",
+      "properties": {
+        "commercialCode": {
+          "type": "string",
+          "description": "The commercial code of the unit of measure."
+        },
+        "language": {
+          "type": "string",
+          "description": "Language code of the descriptions."
+        },
+        "longText": {
+          "type": "string",
+          "description": "Long text description of the commercial code."
+        },
+        "shortText": {
+          "type": "string",
+          "description": "Short text description of the commercial code."
+        }
+      },
+      "title": "CommercialCode"
+    },
+    "Dimension": {
+      "type": "object",
+      "properties": {
+        "descriptions": {
+          "type": "array",
+          "description": "Descriptions of the dimension.",
+          "items": {
+            "$ref": "#/definitions/DimensionDescription"
+          }
+        },
+        "dimension": {
+          "type": "string",
+          "description": "Name of the dimension."
+        },
+        "siUnit": {
+          "type": "string",
+          "description": "SI unit of the dimension."
+        }
+      },
+      "title": "Dimension"
+    },
+    "DimensionDescription": {
+      "type": "object",
+      "properties": {
+        "language": {
+          "type": "string",
+          "description": "Language code of the description."
+        },
+        "text": {
+          "type": "string",
+          "description": "The description of the dimension."
+        }
+      },
+      "title": "DimensionDescription"
+    },
+    "ErrorResponse": {
+      "type": "object",
+      "properties": {
+        "displayMessage": {
+          "type": "string",
+          "description": "Contains additional information, if any"
+        },
+        "errorMessageKey": {
+          "type": "string",
+          "description": "Internal error message"
+        },
+        "status": {
+          "type": "integer",
+          "format": "int32",
+          "description": "HTTP status code"
+        },
+        "technicalMessage": {
+          "type": "string",
+          "description": "Contains technical reason for the error."
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "example": "2018-06-22T04:24:00Z",
+          "description": "The time when the error message is created."
+        }
+      },
+      "title": "ErrorResponse",
+      "description": "Error response. "
+    },
+    "UnitOfMeasure": {
+      "type": "object",
+      "properties": {
+        "additiveConstant": {
+          "type": "integer",
+          "format": "int32",
+          "description": "The additive constant value used during calculation."
+        },
+        "commercialCodes": {
+          "type": "array",
+          "description": "The commercial codes of the unit of measure.",
+          "items": {
+            "$ref": "#/definitions/CommercialCode"
+          }
+        },
+        "denominator": {
+          "type": "integer",
+          "format": "int32",
+          "description": "The denominator parameter value used during calculation."
+        },
+        "dimension": {
+          "type": "string",
+          "description": "The dimension of the unit."
+        },
+        "exponentialBase10": {
+          "type": "integer",
+          "format": "int32",
+          "description": "The exponent parameter value used during calculation."
+        },
+        "isPrimary": {
+          "type": "boolean",
+          "description": "If true, the unit has priority during calculation."
+        },
+        "isStandard": {
+          "type": "boolean",
+          "description": "If true, the unit of code is predefined. If false, the unit of code is custom. This field is read only."
+        },
+        "isoCode": {
+          "type": "string",
+          "description": "The ISO code of the unit of measure."
+        },
+        "numerator": {
+          "type": "integer",
+          "format": "int32",
+          "description": "The numerator parameter value used during calculation."
+        },
+        "unitCode": {
+          "type": "string",
+          "description": "The code of the unit of measure. "
+        }
+      },
+      "title": "UnitOfMeasure"
+    },
+    "ErrorResponseV2": {
+      "title": "ErrorResponse",
+      "type": "object",
+      "properties": {
+        "error": {
+          "$ref": "#/definitions/ErrorResponseApiModelV2"
+        }
+      }
+    },
+    "ErrorResponseApiModelV2": {
+      "title": "ErrorResponseApiModel",
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string",
+          "description": "Contains a technical code for the error."
+        },
+        "correlationId": {
+          "type": "string",
+          "description": "Contains a correlation ID for the error."
+        },
+        "message": {
+          "type": "string",
+          "description": "Error message."
+        },
+        "details": {
+          "type": "array",
+          "description": "Error message details.",
+          "items": {
+            "$ref": "#/definitions/ErrorDetailV2"
+          }
+        }
+      },
+      "description": "Error response."
+    },
+    "ErrorDetailV2": {
+      "title": "ErrorDetail",
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string",
+          "description": "Contains a technical code for the error."
+        },
+        "message": {
+          "type": "string",
+          "description": "Contains a detailed message for the error."
+        }
+      },
+      "description": "Error detail."
+    }
+  },
+  "externalDocs": {
+    "description": "Prepare for API Integration",
+    "url": "https://help.sap.com/docs/sap-digital-manufacturing/operations-guide/prepare-for-api-integration"
+  },
+  "schemes": [
+    "https"
+  ],
+  "security": [
+    {
+      "OAuthSecurity": []
+    }
+  ],
+  "x-sap-shortText": "Browse and modify custom units of measure",
+  "x-servers": [
+    {
+      "url": "https://api.{regionHost}/uom",
+      "description": "Base URL",
+      "templates": {
+        "regionHost": {
+          "description": "The data center where SAP Digital Manufacturing is provisioned for your organization",
+          "enum": [
+            "eu10.dmc.cloud.sap",
+            "eu20.dmc.cloud.sap",
+            "us10.dmc.cloud.sap",
+            "us20.dmc.cloud.sap",
+            "test.eu10.dmc.cloud.sap",
+            "test.eu20.dmc.cloud.sap",
+            "test.us10.dmc.cloud.sap",
+            "test.us20.dmc.cloud.sap"
+          ],
+          "default": "test.eu10.dmc.cloud.sap"
+        },
+        "tokenHost": {
+          "description": "The authentication server where SAP Digital Manufacturing is provisioned for your organization",
+          "enum": [
+            "eu10.hana.ondemand.com",
+            "eu20.hana.ondemand.com",
+            "us10.hana.ondemand.com",
+            "us20.hana.ondemand.com"
+          ],
+          "default": "eu10.hana.ondemand.com"
+        }
+      }
+    }
+  ]
+}

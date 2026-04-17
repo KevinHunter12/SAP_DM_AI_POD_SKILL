@@ -1,0 +1,452 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "description": "Allows you to modify a process lot by adding members and starting the process lot in a single streamlined operation.",
+    "version": "v2",
+    "title": "Process Lot",
+    "contact": {
+      "name": "SAP Digital Manufacturing Operations",
+      "email": "sap-dmoperation@sap.com"
+    }
+  },
+  "x-sap-stateInfo": {
+    "state": "Active"
+  },
+  "x-sap-shortText": "Perform update and start activities on Process Lot",
+  "servers": [
+    {
+      "url": "https://api.{regionHost}/processLot/v2",
+      "description": "Base URL",
+      "variables": {
+        "regionHost": {
+          "description": "The data center where SAP Digital Manufacturing is provisioned for your organization",
+          "enum": [
+            "eu10.dmc.cloud.sap",
+            "eu20.dmc.cloud.sap",
+            "us10.dmc.cloud.sap",
+            "us20.dmc.cloud.sap",
+            "test.eu10.dmc.cloud.sap",
+            "test.eu20.dmc.cloud.sap",
+            "test.us10.dmc.cloud.sap",
+            "test.us20.dmc.cloud.sap"
+          ],
+          "default": "test.eu10.dmc.cloud.sap"
+        },
+        "tokenHost": {
+          "description": "The authentication server where SAP Digital Manufacturing is provisioned for your organization",
+          "enum": [
+            "eu10.hana.ondemand.com",
+            "eu20.hana.ondemand.com",
+            "us10.hana.ondemand.com",
+            "us20.hana.ondemand.com"
+          ],
+          "default": "eu10.hana.ondemand.com"
+        }
+      }
+    }
+  ],
+  "tags": [
+    {
+      "name": "Process Lot"
+    }
+  ],
+  "paths": {
+    "/processLot/members": {
+      "post": {
+        "tags": [
+          "Process Lot"
+        ],
+        "summary": "Updates a Process Lot by adding members.",
+        "description": "This endpoint can be called to add members to the existing Process Lot. The required parameters are plant, process lot number, members, and the modified date and time.",
+        "operationId": "addMembersToProcessLotUsingPOST",
+        "requestBody": {
+          "description": "Request payload to add members to a process lot.",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateProcessLotRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Message successfully processed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProcessLotApiModel"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "You are not authorized to call this resource.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Accessing the resource you are trying to reach is forbidden.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "One of the related elements is not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The record has been modified by another user. Please check the modified date-time value.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "An internal error occurred.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/processLot/start": {
+      "post": {
+        "tags": [
+          "Process Lot Processing"
+        ],
+        "summary": "Start a Process Lot.",
+        "description": "This endpoint initiates processing activity for a specified process lot within a particular plant. To start the process lot, all SFCs associated with it must be on the same routing, at the same operation activity, have the same status, and be assigned to the same resource.",
+        "operationId": "startProcessLotUsingPOST",
+        "requestBody": {
+          "description": "Process lot start request payload.",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProcessLotStart"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Message successfully processed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProcessLotStartResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "You are not authorized to call this resource.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Accessing the resource you are trying to reach is forbidden.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "One of the related elements is not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The record has been updated by another user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "An internal error occurred.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "causeMessage": {
+            "type": "string",
+            "description": "Contains a technical reason for the error."
+          },
+          "code": {
+            "type": "string",
+            "description": "Internal error message"
+          },
+          "correlationId": {
+            "type": "string",
+            "description": "Contains correlationId for the error."
+          },
+          "message": {
+            "type": "string",
+            "description": "Contains additional information, if any"
+          },
+          "status": {
+            "type": "integer",
+            "format": "int32",
+            "description": "HTTP status code"
+          }
+        },
+        "title": "ErrorResponse",
+        "description": "Error response."
+      },
+      "UpdateProcessLotRequest": {
+        "type": "object",
+        "required": [
+          "number",
+          "plant"
+        ],
+        "properties": {
+          "plant": {
+            "type": "string",
+            "description": "The Plant where the Process Lot is used."
+          },
+          "number": {
+            "type": "string",
+            "description": "The Process Lot Number for the Plant."
+          },
+          "members": {
+            "type": "array",
+            "description": "The Members of the Process Lot.",
+            "items": {
+              "$ref": "#/components/schemas/ProcessLotMemberApiModel"
+            }
+          }
+        },
+        "title": "UpdateProcessLotRequest"
+      },
+      "ProcessLotApiModel": {
+        "type": "object",
+        "properties": {
+          "plant": {
+            "type": "string",
+            "description": "The Plant where the Process Lot is used."
+          },
+          "number": {
+            "type": "string",
+            "description": "The Process Lot Number for the Plant."
+          },
+          "members": {
+            "type": "array",
+            "description": "The Members of the Process Lot.",
+            "items": {
+              "$ref": "#/components/schemas/ProcessLotMemberApiModel"
+            }
+          },
+          "modifiedDateTime": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2021-09-08T13:50:45.751+00:00",
+            "description": "The time when the Process Lot was updated."
+          }
+        },
+        "title": "ProcessLotApiModel",
+        "description": "The object that represents the Process Lot."
+      },
+      "ProcessLotMemberApiModel": {
+        "type": "object",
+        "properties": {
+          "processLot": {
+            "description": "The Process Lot which is the content of a Process Lot.",
+            "$ref": "#/components/schemas/ProcessLot"
+          },
+          "sfc": {
+            "description": "The SFC which is the content of a Process Lot.",
+            "$ref": "#/components/schemas/SFC"
+          }
+        },
+        "title": "ProcessLotMemberApiModel"
+      },
+      "SFC": {
+        "type": "object",
+        "required": [
+          "sfc",
+          "plant"
+        ],
+        "properties": {
+          "plant": {
+            "type": "string",
+            "description": "The Plant of the SFC."
+          },
+          "sfc": {
+            "type": "string",
+            "description": "The name of the SFC."
+          }
+        },
+        "title": "SFC"
+      },
+      "ProcessLot": {
+        "type": "object",
+        "required": [
+          "number",
+          "plant"
+        ],
+        "properties": {
+          "plant": {
+            "type": "string",
+            "description": "The Plant where the Process Lot is used."
+          },
+          "number": {
+            "type": "string",
+            "description": "The Process Lot Number for the Plant."
+          },
+          "members": {
+            "type": "array",
+            "description": "The Members of the Process Lot. The Members of the Process Lot can include another Process Lot or an SFC.",
+            "items": {
+              "$ref": "#/components/schemas/ProcessLotMemberApiModel"
+            }
+          }
+        },
+        "title": "ProcessLot"
+      },
+      "ProcessLotStart": {
+        "type": "object",
+        "required": [
+          "plant",
+          "operation",
+          "resource",
+          "processLot"
+        ],
+        "properties": {
+          "plant": {
+            "type": "string",
+            "description": "The Plant where the Process Lot is used."
+          },
+          "operation": {
+            "type": "string",
+            "description": "The operation on which all SFCs of process lot need to be start."
+          },
+          "resource": {
+            "type": "string",
+            "description": "The resource used to start all SFCs of process lot."
+          },
+          "quantity": {
+            "type": "string",
+            "description": "The quantity used to start all SFCs of process lot."
+          },
+          "processLot": {
+            "type": "string",
+            "description": "Process Lot name to find SFCs and start them."
+          }
+        },
+        "title": "ProcessLotStart"
+      },
+      "ProcessLotStartResponse": {
+        "type": "object",
+        "properties": {
+          "sfcs": {
+            "type": "array",
+            "description": "The list of started SFCs.",
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 500
+          }
+        },
+        "title": "ProcessLotStartResponse",
+        "description": "Start Process Lot Response."
+      }
+    },
+    "securitySchemes": {
+      "OauthClientCredentials": {
+        "type": "oauth2",
+        "flows": {
+          "clientCredentials": {
+            "tokenUrl": "https://{subdomain}.authentication.{tokenHost}/oauth/token",
+            "scopes": {}
+          }
+        }
+      }
+    }
+  },
+  "security": [
+    {
+      "OauthClientCredentials": []
+    }
+  ],
+  "externalDocs": {
+    "description": "Prepare for API Integration",
+    "url": "https://help.sap.com/docs/sap-digital-manufacturing/operations-guide/prepare-for-api-integration"
+  }
+}

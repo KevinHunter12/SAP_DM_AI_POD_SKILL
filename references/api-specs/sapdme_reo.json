@@ -1,0 +1,673 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Order Schedules",
+    "description": "You use this service to retrieve and schedule operations to work centers or resources on a shop floor. Use these endpoints to retrieve planned operations for a specific plant supervisor and date range, and to schedule operations to corresponding resources and work centers for a specified date range.",
+    "contact": {
+      "name": "SAP Digital Manufacturing Operations",
+      "email": "sap-dmoperation@sap.com"
+    },
+    "version": "v1"
+  },
+  "externalDocs": {
+    "description": "Prepare for API Integration",
+    "url": "https://help.sap.com/docs/sap-digital-manufacturing/operations-guide/prepare-for-api-integration"
+  },
+  "servers": [
+    {
+      "url": "https://api.{regionHost}/reo/v1",
+      "description": "Base URL",
+      "variables": {
+        "regionHost": {
+          "description": "The data center where SAP Digital Manufacturing is provisioned for your organization.",
+          "enum": [
+            "eu10.dmc.cloud.sap",
+            "us10.dmc.cloud.sap",
+            "eu20.dmc.cloud.sap",
+            "us20.dmc.cloud.sap",
+            "test.eu10.dmc.cloud.sap",
+            "test.us10.dmc.cloud.sap",
+            "test.eu20.dmc.cloud.sap",
+            "test.us20.dmc.cloud.sap"
+          ],
+          "default": "test.eu10.dmc.cloud.sap"
+        },
+        "tokenHost": {
+          "description": "The authentication token server where SAP Digital Manufacturing is provisioned for your organization.",
+          "enum": [
+            "eu10.hana.ondemand.com",
+            "us10.hana.ondemand.com",
+            "eu20.hana.ondemand.com",
+            "us20.hana.ondemand.com"
+          ],
+          "default": "eu10.hana.ondemand.com"
+        }
+      }
+    }
+  ],
+  "security": [
+    {
+      "OauthClientCredentials": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "Order Schedules"
+    }
+  ],
+  "paths": {
+    "/shoporderschedules": {
+      "post": {
+        "tags": [
+          "Order Schedules"
+        ],
+        "summary": "Provides the shop order schedules of a plant for a given date range.",
+        "description": "Retrieve all operations scheduled on a shop floor for a date range.",
+        "operationId": "getShopOrderScheduleUsingPOST",
+        "requestBody": {
+          "description": "request",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ShopOrderScheduleRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Shop Order Schedule retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ShopOrderSchedule"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The request body is in the wrong format or structure.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "You are not authorized to call this resource.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Access denied. You did not have the required permissions to access the resource.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "One of the related elements could not be found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/scheduleOrders": {
+      "post": {
+        "tags": [
+          "Order Schedules"
+        ],
+        "summary": "Schedule an order to a specific resource and work center within a given range.",
+        "description": "Retrieves all operations for a given order and schedules it to the corresponding resource and work center on the shop floor for a specified date range, according to the selected scheduling mode; if none is specified, scheduling defaults to Infinite mode.",
+        "operationId": "saveOrderSchedulesUsingPOST",
+        "requestBody": {
+          "description": "request",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScheduleOrderRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "The order has been successfully scheduled or failed to schedule.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The request body is in the wrong format or structure.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "You are not authorized to call this resource.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Access denied. You did not have the required permissions to access the resource.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "One of the related elements could not be found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/rescheduleOrder": {
+      "post": {
+        "tags": [
+          "Order Schedules"
+        ],
+        "summary": "Reschedule an order to a specific resource for a given date.",
+        "description": "Retrieves all operations for a given order and schedules it to their respective resource for the specified date, according to the selected scheduling mode; if none is specified, scheduling defaults to Infinite mode.",
+        "operationId": "updateOrderSchedulesUsingPOST",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "singleOperation",
+            "description": "Reschedule for single operation.",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "request",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrderReschedule"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "The order has been successfully rescheduled or failed to schedule.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The request body is in the wrong format or structure.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "You are not authorized to call this resource.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Access denied. You do not have permissions to access the resource.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "One of the related elements could not be found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "Internal error message"
+          },
+          "correlationId": {
+            "type": "string",
+            "description": "Contains a correlation ID for the error."
+          },
+          "message": {
+            "type": "string",
+            "description": "Contains additional information if any."
+          }
+        },
+        "title": "ErrorResponse",
+        "description": "Error response"
+      },
+      "ShopOrderSchedule": {
+        "type": "object",
+        "properties": {
+          "confirmedQuantity": {
+            "type": "string",
+            "description": "Specifies the confirmed quantity."
+          },
+          "createdDateTime": {
+            "type": "string",
+            "description": "Specifies the created date and time. Format(YYYY-MM-DDThh:mm:ssZ)."
+          },
+          "customer": {
+            "type": "string",
+            "description": "Specifies the customer."
+          },
+          "customerOrder": {
+            "type": "string",
+            "description": "Specifies the customer order."
+          },
+          "dispatched": {
+            "type": "boolean",
+            "description": "Specifies whether to include dispatched orders."
+          },
+          "earliestProcessingStartDateTime": {
+            "type": "string",
+            "description": "Specifies the earliest processing start date and time. Format(YYYY-MM-DDThh:mm:ssZ)."
+          },
+          "earliestSetupStartDateTime": {
+            "type": "string",
+            "description": "Specifies the earliest setup start date and time. Format(YYYY-MM-DDThh:mm:ssZ)."
+          },
+          "earliestTeardownEndDateTime": {
+            "type": "string",
+            "description": "Specifies the earliest teardown end date and time. Format(YYYY-MM-DDThh:mm:ssZ)."
+          },
+          "earliestTeardownStartDateTime": {
+            "type": "string",
+            "description": "Specifies the earliest teardown start date and time. Format(YYYY-MM-DDThh:mm:ssZ)."
+          },
+          "endDateTime": {
+            "type": "string",
+            "description": "Specifies the end date and time. Format(YYYY-MM-DDThh:mm:ssZ)."
+          },
+          "erpOrder": {
+            "type": "string",
+            "description": "Specifies the ERP order."
+          },
+          "fixIndicator": {
+            "type": "boolean",
+            "description": "Specifies whether to include fix indicator."
+          },
+          "includeShiftBreaks": {
+            "type": "boolean",
+            "description": "Specifies whether to include shift breaks."
+          },
+          "item": {
+            "type": "string",
+            "description": "Specifies the material."
+          },
+          "itemGroup": {
+            "type": "string",
+            "description": "Specifies the material group."
+          },
+          "latestProcessingStartDateTime": {
+            "type": "string",
+            "description": "Specifies the latest processing start date and time. Format(YYYY-MM-DDThh:mm:ssZ)."
+          },
+          "latestSetupStartDateTime": {
+            "type": "string",
+            "description": "Specifies the latest setup start date and time. Format(YYYY-MM-DDThh:mm:ssZ)."
+          },
+          "latestTeardownEndDateTime": {
+            "type": "string",
+            "description": "Specifies the latest teardown end date and time. Format(YYYY-MM-DDThh:mm:ssZ)."
+          },
+          "latestTeardownStartDateTime": {
+            "type": "string",
+            "description": "Specifies the latest teardown start date and time. Format(YYYY-MM-DDThh:mm:ssZ)."
+          },
+          "modifiedDateTime": {
+            "type": "string",
+            "description": "Specifies the modified date and time. Format(YYYY-MM-DDThh:mm:ssZ)."
+          },
+          "opSplitId": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Specifies the operation split Id."
+          },
+          "operation": {
+            "type": "string",
+            "description": "Specifies the operation."
+          },
+          "orderPlannedCompDate": {
+            "type": "string",
+            "description": "Specifies the order planned complete date. Format(YYYY-MM-DD)."
+          },
+          "orderPlannedCompTime": {
+            "type": "string",
+            "description": "Specifies the order planned complete time. Format(hh:mm:ss)."
+          },
+          "orderPlannedStartDate": {
+            "type": "string",
+            "description": "Specifies the order planned start date. Format(YYYY-MM-DD)."
+          },
+          "orderPlannedStartTime": {
+            "type": "string",
+            "description": "Specifies the order planned start time. Format(hh:mm:ss)."
+          },
+          "orderScheduledStartDate": {
+            "type": "string",
+            "description": "Specifies the order scheduled start date. Format(YYYY-MM-DD)."
+          },
+          "orderScheduledStartTime": {
+            "type": "string",
+            "description": "Specifies the order scheduled start time. Format(hh:mm:ss)."
+          },
+          "planProcessingTime": {
+            "type": "string",
+            "description": "Specifies the plan processing time."
+          },
+          "planSetupTime": {
+            "type": "string",
+            "description": "Specifies the plan setup time."
+          },
+          "planTearDownTime": {
+            "type": "string",
+            "description": "Specifies the plan teardown time."
+          },
+          "plantId": {
+            "type": "string",
+            "description": "Specifies the plant Id."
+          },
+          "priority": {
+            "type": "string",
+            "description": "Specifies the priority."
+          },
+          "processingTimeUom": {
+            "type": "string",
+            "description": "Specifies the processing time UOM."
+          },
+          "quantityReleased": {
+            "type": "string",
+            "description": "Specifies the quantity released."
+          },
+          "quantityToBuild": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Specifies the quantity to build."
+          },
+          "releasedDateTime": {
+            "type": "string",
+            "description": "Specifies the released date and time. Format(YYYY-MM-DDThh:mm:ssZ)."
+          },
+          "resourceRefId": {
+            "type": "string",
+            "description": "Specifies the resource Id."
+          },
+          "resourceType": {
+            "type": "string",
+            "description": "Specifies the resource type."
+          },
+          "routerBO": {
+            "type": "string",
+            "description": "Specifies the router."
+          },
+          "sequence": {
+            "type": "string",
+            "description": "Specifies the sequence."
+          },
+          "setupTimeUom": {
+            "type": "string",
+            "description": "Specifies the setup time UOM."
+          },
+          "shopOrder": {
+            "type": "string",
+            "description": "Specifies the shop order."
+          },
+          "splitQuantity": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Specifies the split quantity."
+          },
+          "startDateTime": {
+            "type": "string",
+            "description": "Specifies the start date and time. Format(YYYY-MM-DDThh:mm:ssZ)."
+          },
+          "tearDownTimeUom": {
+            "type": "string",
+            "description": "Specifies the teardown time UOM."
+          },
+          "unitOfMeasure": {
+            "type": "string",
+            "description": "Specifies the unit of measure."
+          }
+        },
+        "title": "ShopOrderSchedule"
+      },
+      "ShopOrderScheduleRequest": {
+        "type": "object",
+        "required": [
+          "endDateTime",
+          "plant",
+          "startDateTime",
+          "user"
+        ],
+        "properties": {
+          "endDateTime": {
+            "type": "string",
+            "description": "The horizon end date and time till when shop order schedules needs to be fetched in UTC. Format(YYYY-MM-DDThh:mm:ssZ)."
+          },
+          "plant": {
+            "type": "string",
+            "description": "The plant for which the request is executed."
+          },
+          "startDateTime": {
+            "type": "string",
+            "description": "The horizon start date and time from when the shop order schedules needs to be fetched in UTC. Format(YYYY-MM-DDThh:mm:ssZ)."
+          },
+          "user": {
+            "type": "string",
+            "description": "The ID of the user for which shop order schedules needs to be fetched."
+          }
+        },
+        "title": "ShopOrderScheduleRequest"
+      },
+      "ScheduleOrderRequest": {
+        "type": "object",
+        "required": [
+          "startDateTime",
+          "endDateTime",
+          "plant",
+          "user",
+          "shopOrder"
+        ],
+        "properties": {
+          "startDateTime": {
+            "type": "string",
+            "description": "The horizon start date and time from which the shop order schedules need to be scheduled. The format should be in UTC and follow the format (YYYY-MM-DDThh:mm:ssZ)."
+          },
+          "endDateTime": {
+            "type": "string",
+            "description": "The horizon end date and time until which the shop order schedules need to be scheduled. The format should be in UTC and follow the format (YYYY-MM-DDThh:mm:ssZ)."
+          },
+          "plant": {
+            "type": "string",
+            "description": "The plant for which the request is being executed."
+          },
+          "user": {
+            "type": "string",
+            "description": "The user ID for retrieving the order schedules."
+          },
+          "order": {
+            "type": "string",
+            "description": "The order that needs to be scheduled."
+          },
+          "mode": {
+            "type": "string",
+            "description": "The mode that the order needs to be scheduled.(INFINITE,FINDSLOT)",
+            "default":"INFINITE"
+          }
+        },
+        "title": "ScheduleOrderRequest"
+      },
+      "OrderReschedule": {
+        "type": "object",
+        "required": [
+          "plant",
+          "order"
+        ],
+        "properties": {
+          "dateTime": {
+            "type": "string",
+            "description": "The start date and time for which the order needs to be rescheduled. The format should be in UTC and follow the format is YYYY-MM-DDThh:mm:ssZ."
+          },
+          "resource": {
+            "type": "string",
+            "description": "The resource on which operation needs to be scheduled. If this is not available, the next suitable resource will be chosen."
+          },
+          "plant": {
+            "type": "string",
+            "description": "The plant for which the request is being executed."
+          },
+          "operation": {
+            "type": "string",
+            "description": "The operation that needs to be rescheduled. If this is not specified, the first operation will be chosen."
+          },
+          "order": {
+            "type": "string",
+            "description": "The order that needs to be scheduled."
+          },
+          "includeShiftBreaks": {
+            "type": "boolean",
+            "description": "Shift breaks to be considered."
+          },
+          "mode": {
+            "type": "string",
+            "description": "The mode that the order needs to be scheduled.(INFINITE,FINDSLOT)",
+            "default":"INFINITE"
+          }
+        }
+      },
+      "SuccessResponse": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "Specifies status of shoporder, 'successfully scheduled' or 'failed to schedule'"
+          }
+        },
+        "title": "SuccessResponse",
+        "description": "Success Response"
+      }
+    },
+    "securitySchemes": {
+      "OauthClientCredentials": {
+        "type": "oauth2",
+        "flows": {
+          "clientCredentials": {
+            "tokenUrl": "https://{subdomain}.authentication.{tokenHost}/oauth/token",
+            "scopes": {}
+          }
+        }
+      }
+    }
+  },
+  "x-sap-shortText": "Retrieve and schedule the order schedules of a plant for a specific date range",
+  "x-original-swagger-version": "2.0"
+}

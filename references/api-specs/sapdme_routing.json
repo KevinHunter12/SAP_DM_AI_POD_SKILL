@@ -1,0 +1,2024 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "Allows you to interact with routings. For example, you can find, create, update, and delete routings with routing steps, routing step groups, routing operation groups, and custom values.",
+    "version": "v1",
+    "title": "Routing",
+    "contact": {
+      "name": "SAP Digital Manufacturing Operations",
+      "email": "sap-dmoperation@sap.com"
+    }
+  },
+  "host": "hostname",
+  "basePath": "/",
+  "tags": [
+    {
+      "name": "Routing"
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "security": [
+    {
+      "OAuthSecurity": []
+    }
+  ],
+  "paths": {
+    "/routings": {
+      "get": {
+        "tags": [
+          "Routing"
+        ],
+        "summary": "Finds a routing by plant, routing name, routing type, and routing version",
+        "description": "This endpoint can be called to find a routing by search parameters. The required parameters are plant, routing name, and type. The version is optional. If a version is not present, the current routing version will be returned.",
+        "operationId": "findRoutingByPlantAndNameAndTypeUsingGET_1",
+        "parameters": [
+          {
+            "name": "plant",
+            "in": "query",
+            "description": "Plant for which request is executed",
+            "required": true,
+            "type": "string",
+            "allowEmptyValue": false
+          },
+          {
+            "name": "routing",
+            "in": "query",
+            "description": "Routing name",
+            "required": true,
+            "type": "string",
+            "allowEmptyValue": false
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "description": "Routing type. \nPossible values: \nPRODUCTION - Production Router; \nSHOP_ORDER - Shop Order-specific Router; \nSPECIAL - Special Operation Router; \nNC - NC (Rework) Router); \nDISPOSITION - Disposition Router (used in disposition groups); \nCONFIGURABLE - Configurable Router Type; \n SERVICE_ORDER_ROUTING - Service Order Router Type.",
+            "required": true,
+            "type": "string",
+            "allowEmptyValue": false
+          },
+          {
+            "name": "version",
+            "in": "query",
+            "description": "The version of the routing. If not present, the current routing version will be returned",
+            "required": false,
+            "type": "string",
+            "allowEmptyValue": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Message successfully processed.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/RoutingResponse"
+              }
+            }
+          },
+          "400": {
+            "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to call this resource.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Accessing the resource you are trying to reach is forbidden.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "One of the related elements is not found.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "An internal error occurred.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuthSecurity": []
+          }
+        ],
+        "deprecated": false
+      },
+      "post": {
+        "tags": [
+          "Routing"
+        ],
+        "summary": "Creates a list of routings.",
+        "description": "Creates a list of routings for the given plant.",
+        "operationId": "createRoutingsPOST_1",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "routingApiModelList",
+            "description": "The list of routings to create.",
+            "required": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Routing"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "The message was successfully processed.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/RoutingResponse"
+              }
+            }
+          },
+          "400": {
+            "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to call this resource.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Accessing the resource you are trying to reach is forbidden.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "One of the related elements is not found.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "409": {
+            "description": "One of the routings already exists.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "An internal error occurred.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Routing"
+        ],
+        "summary": "Updates a list of routings.",
+        "description": "Updates a list of routings for the given plant. If the hasBeenReleased property is set to true, then the following fields are updated:\n - the description, current version, quantity validation, entry routing step ID, custom values, and routing operation groups fields of a routing;\n - the description, entry, work center, production process ID fields of a routing step;\n - the weight relevant field of a routing operation step;\n - the tolerance over and under fields of a routing step component.",
+        "operationId": "updateRoutingsPUT_1",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "routingApiModelList",
+            "description": "The list of routings to update.",
+            "required": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Routing"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "The message was successfully processed.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/RoutingResponse"
+              }
+            }
+          },
+          "400": {
+            "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to call this resource.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Accessing the resource you are trying to reach is forbidden.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "One of the related elements is not found.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "An internal error occurred.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Routing"
+        ],
+        "summary": "Deletes a routing by plant, routing name, routing version, and routing type.",
+        "description": "Deletes a routing by plant, routing name, version, and type.",
+        "operationId": "deleteRoutingDELETE_1",
+        "parameters": [
+          {
+            "name": "plant",
+            "in": "query",
+            "description": "The plant for which the request is executed",
+            "required": true,
+            "type": "string",
+            "allowEmptyValue": false
+          },
+          {
+            "name": "routing",
+            "in": "query",
+            "description": "Routing name",
+            "required": true,
+            "type": "string",
+            "allowEmptyValue": false
+          },
+          {
+            "name": "version",
+            "in": "query",
+            "description": "Routing version",
+            "required": true,
+            "type": "string",
+            "allowEmptyValue": false
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "description": "Routing type. \nPossible values: \nPRODUCTION - Production Router; \nSHOP_ORDER - Shop Order-specific Router; \nSPECIAL - Special Operation Router; \nNC - NC (Rework) Router); \nDISPOSITION - Disposition Router (used in disposition groups); \nCONFIGURABLE - Configurable Router Type;\n SERVICE_ORDER_ROUTING - Service Order Router Type.",
+            "required": true,
+            "type": "string",
+            "allowEmptyValue": false
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "The message was successfully processed."
+          },
+          "400": {
+            "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to call this resource.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Accessing the resource you are trying to reach is forbidden.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "One of the related elements is not found.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "An internal error occurred.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/routings/routingOperations": {
+      "get": {
+        "tags": [
+          "Routing"
+        ],
+        "summary": "Finds a routing operation by plant, routing name, routing type, and routing version",
+        "description": "This endpoint can be called to find a routing operation by search parameters. The required parameters are plant, routing name, and type. The version is optional. If a version is not present, the current routing version will be used.",
+        "operationId": "findRoutingOperationsByPlantAndNameAndTypeUsingGET_1",
+        "parameters": [
+          {
+            "name": "plant",
+            "in": "query",
+            "description": "A plant for which the request is executed",
+            "required": true,
+            "type": "string",
+            "allowEmptyValue": false
+          },
+          {
+            "name": "routing",
+            "in": "query",
+            "description": "Routing name",
+            "required": true,
+            "type": "string",
+            "allowEmptyValue": false
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "description": "Routing type. \nPossible values: \nPRODUCTION - Production Router; \nSHOP_ORDER - Shop Order-specific Router; \nSPECIAL - Special Operation Router; \nNC - NC (Rework) Router); \nDISPOSITION - Disposition Router (used in disposition groups); \nCONFIGURABLE - Configurable Router Type;\n SERVICE_ORDER_ROUTING - Service Order Router Type.",
+            "enum": [
+              "PRODUCTION",
+              "SHOP_ORDER",
+              "SPECIAL",
+              "NC",
+              "DISPOSITION",
+              "CONFIGURABLE",
+              "SERVICE_ORDER_ROUTING"
+            ],
+            "required": true,
+            "type": "string",
+            "allowEmptyValue": false
+          },
+          {
+            "name": "version",
+            "in": "query",
+            "description": "The version of the routing. If not present, the current routing version will be used",
+            "required": false,
+            "type": "string",
+            "allowEmptyValue": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Message successfully processed.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/BasicRoutingOperationStep"
+              }
+            }
+          },
+          "400": {
+            "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to call this resource.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "403": {
+            "description": "Accessing the resource you are trying to reach is forbidden.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "One of the related elements is not found.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "An internal error occurred.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuthSecurity": []
+          }
+        ],
+        "deprecated": false
+      }
+    },
+    "/routings/routingSteps": {
+      "get": {
+        "tags": [
+          "Routing"
+        ],
+        "summary": "Finds a routing's steps by plant, routing name, routing type, and routing version",
+        "description": "This endpoint can be called to find a routing's basic steps by search parameters. The required parameters are plant, routing name, and type. The version is optional. If a version is not present, the current routing version will be used.",
+        "operationId": "findRoutingBasicStepsByPlantAndNameAndTypeUsingGET_1",
+        "parameters": [
+          {
+            "name": "plant",
+            "in": "query",
+            "description": "A plant for which the request is executed",
+            "required": true,
+            "type": "string",
+            "allowEmptyValue": false
+          },
+          {
+            "name": "routing",
+            "in": "query",
+            "description": "Routing name",
+            "required": true,
+            "type": "string",
+            "allowEmptyValue": false
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "description": "Routing type. \nPossible values: \nPRODUCTION - Production Router; \nSHOP_ORDER - Shop Order-specific Router; \nSPECIAL - Special Operation Router; \nNC - NC (Rework) Router); \nDISPOSITION - Disposition Router (used in disposition groups); \nCONFIGURABLE - Configurable Router Type;\n SERVICE_ORDER_ROUTING - Service Order Router Type.",
+            "enum": [
+              "PRODUCTION",
+              "SHOP_ORDER",
+              "SPECIAL",
+              "NC",
+              "DISPOSITION",
+              "CONFIGURABLE",
+              "SERVICE_ORDER_ROUTING"
+            ],
+            "required": true,
+            "type": "string",
+            "allowEmptyValue": false
+          },
+          {
+            "name": "version",
+            "in": "query",
+            "description": "The version of the routing. If not present, the current routing version will be used",
+            "required": false,
+            "type": "string",
+            "allowEmptyValue": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Message successfully processed.",
+            "schema": {
+              "$ref": "#/definitions/BasicRouting"
+            }
+          },
+          "400": {
+            "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to call this resource.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "403": {
+            "description": "Accessing the resource you are trying to reach is forbidden.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "One of the related elements is not found.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "An internal error occurred.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuthSecurity": []
+          }
+        ],
+        "deprecated": false
+      }
+    },
+    "/routings/headerDetails": {
+      "get": {
+        "tags": [
+          "Routing"
+        ],
+        "summary": "Finds routing header details by plant, routing name, routing type, and routing version",
+        "description": "This endpoint can be called to find a routing's header details by search parameters. The required parameters are plant, routing name, and type. The version is optional. If a version is not present, the current routing version will be used.",
+        "operationId": "findHeaderDetailsByPlantAndNameAndTypeUsingGET_1",
+        "parameters": [
+          {
+            "name": "plant",
+            "in": "query",
+            "description": "A plant for which the request is executed",
+            "required": true,
+            "type": "string",
+            "allowEmptyValue": false
+          },
+          {
+            "name": "routing",
+            "in": "query",
+            "description": "The routing name",
+            "required": true,
+            "type": "string",
+            "allowEmptyValue": false
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "description": "The routing type. \nPossible values: \nPRODUCTION - Production Router; \nSHOP_ORDER - Shop Order-specific Router; \nSPECIAL - Special Operation Router; \nNC - NC (Rework) Router); \nDISPOSITION - Disposition Router (used in disposition groups); \nCONFIGURABLE - Configurable Router Type;\n SERVICE_ORDER_ROUTING - Service Order Router Type.",
+            "required": true,
+            "type": "string",
+            "allowEmptyValue": false,
+            "default": "PRODUCTION",
+            "enum": [
+              "PRODUCTION",
+              "SHOP_ORDER",
+              "SPECIAL",
+              "NC",
+              "DISPOSITION",
+              "CONFIGURABLE",
+              "SERVICE_ORDER_ROUTING"
+            ]
+          },
+          {
+            "name": "version",
+            "in": "query",
+            "description": "The version of the routing. If not present, the current routing version will be used",
+            "required": false,
+            "type": "string",
+            "allowEmptyValue": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Message successfully processed.",
+            "schema": {
+              "$ref": "#/definitions/RoutingHeaderDetails"
+            }
+          },
+          "400": {
+            "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to call this resource.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "403": {
+            "description": "Accessing the resource you are trying to reach is forbidden.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "One of the related elements is not found.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "An internal error occurred.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuthSecurity": []
+          }
+        ],
+        "deprecated": false
+      },
+      "patch": {
+        "tags": [
+          "Routing"
+        ],
+        "summary": "Update routing header details. Every unspecified field will remain unchanged",
+        "description": "This endpoint can be called to update a routing's header details.",
+        "operationId": "updateHeaderDetailsByPlantAndNameAndTypeUsingPATCH_1",
+        "parameters": [
+          {
+            "name": "plant",
+            "in": "query",
+            "description": "A plant for which the request is executed",
+            "required": true,
+            "type": "string",
+            "allowEmptyValue": false
+          },
+          {
+            "name": "routing",
+            "in": "query",
+            "description": "The routing name",
+            "required": true,
+            "type": "string",
+            "allowEmptyValue": false
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "description": "The routing type. \nPossible values: \nPRODUCTION - Production Router; \nSHOP_ORDER - Shop Order-specific Router; \nSPECIAL - Special Operation Router; \nNC - NC (Rework) Router); \nDISPOSITION - Disposition Router (used in disposition groups); \nCONFIGURABLE - Configurable Router Type; \n SERVICE_ORDER_ROUTING - Service Order Router Type.",
+            "required": true,
+            "type": "string",
+            "allowEmptyValue": false,
+            "default": "PRODUCTION",
+            "enum": [
+              "PRODUCTION",
+              "SHOP_ORDER",
+              "SPECIAL",
+              "NC",
+              "DISPOSITION",
+              "CONFIGURABLE",
+              "SERVICE_ORDER_ROUTING"
+            ]
+          },
+          {
+            "name": "version",
+            "in": "query",
+            "description": "The version of the routing. If not present, the current routing version will be used",
+            "required": false,
+            "type": "string",
+            "allowEmptyValue": false
+          },
+          {
+            "in": "body",
+            "name": "routingUpdateModel",
+            "description": "The routing header details to be updated.",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/RoutingUpdateHeaderDetails"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Message successfully processed.",
+            "schema": {
+              "$ref": "#/definitions/RoutingHeaderDetails"
+            }
+          },
+          "400": {
+            "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to call this resource.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "403": {
+            "description": "Accessing the resource you are trying to reach is forbidden.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "One of the related elements is not found.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "An internal error occurred.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuthSecurity": []
+          }
+        ],
+        "deprecated": false
+      }
+    }
+  },
+  "securityDefinitions": {
+    "OAuthSecurity": {
+      "type": "oauth2",
+      "tokenUrl": "https://{subdomain}.authentication.{tokenHost}/oauth/token",
+      "flow": "application"
+    }
+  },
+  "definitions": {
+    "BasicRouter": {
+      "type": "object",
+      "properties": {
+        "plant": {
+          "type": "string",
+          "description": "The plant of the routing."
+        },
+        "routing": {
+          "type": "string",
+          "description": "The name of the routing."
+        },
+        "routingType": {
+          "type": "string",
+          "description": "The routing type of the routing.",
+          "enum": [
+            "PRODUCTION",
+            "NC",
+            "SPECIAL",
+            "DISPOSITION_FUNCTION",
+            "SFC_SPECIFIC",
+            "SHOPORDER_SPECIFIC",
+            "CONFIGURABLE",
+            "PRODUCTION_RECIPE",
+            "SHOPORDER_SPECIFIC_RECIPE",
+            "SERVICE_ORDER_ROUTING"
+          ]
+        },
+        "version": {
+          "type": "string",
+          "description": "The version of the routing."
+        }
+      },
+      "title": "BasicRouter"
+    },
+    "CustomValue": {
+      "type": "object",
+      "properties": {
+        "attribute": {
+          "type": "string",
+          "description": "The attribute name."
+        },
+        "value": {
+          "type": "string",
+          "description": "The value of the attribute."
+        }
+      },
+      "title": "CustomValue"
+    },
+    "ErrorResponse": {
+      "type": "object",
+      "properties": {
+        "displayMessage": {
+          "type": "string",
+          "description": "Contains additional information, if any"
+        },
+        "errorMessageKey": {
+          "type": "string",
+          "description": "Internal error message"
+        },
+        "status": {
+          "type": "integer",
+          "format": "int32",
+          "description": "HTTP status code"
+        },
+        "technicalMessage": {
+          "type": "string",
+          "description": "Contains technical reason for the error."
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "example": "2018-06-22T04:24:00Z",
+          "description": "The time when the error message is created."
+        }
+      },
+      "title": "ErrorResponse",
+      "description": "Error response"
+    },
+    "Error": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string",
+          "description": "Contains additional information if any."
+        },
+        "code": {
+          "type": "string",
+          "description": "Contains a technical code for the error."
+        },
+        "causeMessage": {
+          "type": "string",
+          "description": "Contains a technical reason for the error."
+        },
+        "correlationId": {
+          "type": "string",
+          "description": "Contains a correlation ID for the error."
+        }
+      },
+      "description": "Error response"
+    },
+    "Operation": {
+      "type": "object",
+      "properties": {
+        "operationActivity": {
+          "type": "string",
+          "description": "Name of the operation."
+        },
+        "version": {
+          "type": "string",
+          "description": "Version of the operation."
+        }
+      },
+      "title": "Operation"
+    },
+    "Quantity": {
+      "type": "object",
+      "properties": {
+        "unitOfMeasure": {
+          "description": "The unit of measure of the quantity.",
+          "$ref": "#/definitions/UnitOfMeasure"
+        },
+        "value": {
+          "type": "number",
+          "description": "The value of the quantity."
+        }
+      },
+      "title": "Quantity"
+    },
+    "Routing": {
+      "type": "object",
+      "properties": {
+        "plant": {
+          "type": "string",
+          "description": "The plant this routing is assigned to."
+        },
+        "routing": {
+          "type": "string",
+          "description": "The name of the routing."
+        },
+        "routingType": {
+          "type": "string",
+          "description": "Indicates the type of routing that is being used.",
+          "enum": [
+            "PRODUCTION",
+            "NC",
+            "SPECIAL",
+            "DISPOSITION",
+            "SFC",
+            "SHOP_ORDER",
+            "CONFIGURABLE",
+            "PRODUCTION_RECIPE",
+            "SHOPORDER_SPECIFIC_RECIPE",
+            "SERVICE_ORDER_ROUTING"
+          ]
+        },
+        "status": {
+          "type": "string",
+          "description": "The status of the routing.",
+          "enum": [
+            "NEW",
+            "RELEASABLE",
+            "FROZEN",
+            "OBSOLETE",
+            "HOLD",
+            "HOLD_YIELD_RATE",
+            "HOLD_CONSEC_NC",
+            "HOLD_SPC_VIOLATION",
+            "HOLD_SPC_WARNING"
+          ]
+        },
+        "version": {
+          "type": "string",
+          "description": "The routing version."
+        },
+        "description": {
+          "type": "string",
+          "description": "The description of the routing."
+        },
+        "currentVersion": {
+          "type": "boolean",
+          "description": "If true, this version of the routing is the current one."
+        },
+        "customValues": {
+          "type": "array",
+          "description": "Routing custom data.",
+          "items": {
+            "$ref": "#/definitions/CustomValue"
+          }
+        },
+        "entryRoutingStepId": {
+          "type": "string",
+          "description": "The entry routing step for the routing."
+        },
+        "quantityValidation": {
+          "type": "boolean",
+          "description": "Indicates if quantity validation is required during production."
+        },
+        "relaxedFlow": {
+          "type": "boolean",
+          "description": "Indicates if the routing has a relaxed flow. By default, this value is false."
+        },
+        "automaticGoodsReceipt": {
+          "type": "boolean",
+          "description": "Indicates if the routing is configured for an automatic goods receipt."
+        },
+        "routingErpSequences": {
+          "type": "array",
+          "description": "The routing step sequences of the routing.",
+          "items": {
+            "$ref": "#/definitions/RoutingErpSequence"
+          }
+        },
+        "routingOperationGroups": {
+          "type": "array",
+          "description": "The operation groups of the routing.",
+          "items": {
+            "$ref": "#/definitions/RoutingOperationGroup"
+          }
+        },
+        "routingSteps": {
+          "type": "array",
+          "description": "The routing steps in the routing.",
+          "items": {
+            "$ref": "#/definitions/RoutingStep"
+          }
+        },
+        "createdDateTime": {
+          "type": "string",
+          "format": "date-time",
+          "example": "2018-06-22T04:24:000Z",
+          "description": "The time when the routing was created."
+        },
+        "modifiedDateTime": {
+          "type": "string",
+          "format": "date-time",
+          "example": "2018-06-22T04:24:000Z",
+          "description": "The time when the routing has most recently changed."
+        }
+      },
+      "title": "Routing"
+    },
+    "RoutingResponse": {
+      "type": "object",
+      "properties": {
+        "plant": {
+          "type": "string",
+          "description": "The plant this routing is assigned to."
+        },
+        "routing": {
+          "type": "string",
+          "description": "The name of the routing."
+        },
+        "routingType": {
+          "type": "string",
+          "description": "Indicates the type of routing that is being used.",
+          "enum": [
+            "PRODUCTION",
+            "NC",
+            "SPECIAL",
+            "DISPOSITION",
+            "SFC",
+            "SHOP_ORDER",
+            "CONFIGURABLE",
+            "PRODUCTION_RECIPE",
+            "SHOPORDER_SPECIFIC_RECIPE",
+            "SERVICE_ORDER_ROUTING"
+          ]
+        },
+        "status": {
+          "type": "string",
+          "description": "The status of the routing.",
+          "enum": [
+            "NEW",
+            "RELEASABLE",
+            "FROZEN",
+            "OBSOLETE",
+            "HOLD",
+            "HOLD_YIELD_RATE",
+            "HOLD_CONSEC_NC",
+            "HOLD_SPC_VIOLATION",
+            "HOLD_SPC_WARNING"
+          ]
+        },
+        "version": {
+          "type": "string",
+          "description": "The routing version."
+        },
+        "description": {
+          "type": "string",
+          "description": "The description of the routing."
+        },
+        "currentVersion": {
+          "type": "boolean",
+          "description": "If true, this version of the routing is the current one."
+        },
+        "customValues": {
+          "type": "array",
+          "description": "Routing custom data.",
+          "items": {
+            "$ref": "#/definitions/CustomValue"
+          }
+        },
+        "entryRoutingStepId": {
+          "type": "string",
+          "description": "The entry routing step for the routing."
+        },
+        "quantityValidation": {
+          "type": "boolean",
+          "description": "Indicates if quantity validation is required during production."
+        },
+        "relaxedFlow": {
+          "type": "boolean",
+          "description": "Indicates if the routing has a relaxed flow. By default, this value is false."
+        },
+        "automaticGoodsReceipt": {
+          "type": "boolean",
+          "description": "Indicates if the routing is configured for an automatic goods receipt."
+        },
+        "routingErpSequences": {
+          "type": "array",
+          "description": "The routing step sequences of the routing.",
+          "items": {
+            "$ref": "#/definitions/RoutingErpSequence"
+          }
+        },
+        "routingOperationGroups": {
+          "type": "array",
+          "description": "The operation groups of the routing.",
+          "items": {
+            "$ref": "#/definitions/RoutingOperationGroup"
+          }
+        },
+        "routingSteps": {
+          "type": "array",
+          "description": "The routing steps in the routing.",
+          "items": {
+            "$ref": "#/definitions/RoutingStepResponse"
+          }
+        },
+        "createdDateTime": {
+          "type": "string",
+          "format": "date-time",
+          "example": "2018-06-22T04:24:000Z",
+          "description": "The time when the routing was created."
+        },
+        "modifiedDateTime": {
+          "type": "string",
+          "format": "date-time",
+          "example": "2018-06-22T04:24:000Z",
+          "description": "The time when the routing has most recently changed."
+        }
+      },
+      "title": "RoutingResponse"
+    },
+    "RoutingDoneStep": {
+      "type": "object",
+      "properties": {
+        "routingStep": {
+          "description": "The routing step.",
+          "$ref": "#/definitions/RoutingStepId"
+        }
+      },
+      "title": "RoutingDoneStep"
+    },
+    "RoutingErpSequence": {
+      "type": "object",
+      "properties": {
+        "erpSequence": {
+          "type": "string",
+          "description": "The ERP sequence ID."
+        },
+        "description": {
+          "type": "string",
+          "description": "The description of the ERP routing sequence."
+        },
+        "category": {
+          "type": "string",
+          "description": "The ERP sequence category.",
+          "enum": [
+            "STANDARD",
+            "PARALLEL",
+            "ALTERNATE"
+          ]
+        },
+        "referenceSequence": {
+          "type": "string",
+          "description": "The ID of the ERP sequence to which the ERP sequence refers."
+        },
+        "branchOperation": {
+          "type": "string",
+          "description": "The ID of the branch operation."
+        },
+        "returnOperation": {
+          "type": "string",
+          "description": "The ID of the return operation."
+        }
+      },
+      "title": "The Routing ERP Sequence"
+    },
+    "RoutingHoldStep": {
+      "type": "object",
+      "properties": {
+        "routingStep": {
+          "description": "The routing step.",
+          "$ref": "#/definitions/RoutingStepId"
+        }
+      },
+      "title": "RoutingHoldStep"
+    },
+    "RoutingLink": {
+      "type": "object",
+      "properties": {
+        "router": {
+          "description": "The routing the link refers to.",
+          "$ref": "#/definitions/BasicRouter"
+        },
+        "routingStep": {
+          "description": "The routing step the link refers to.",
+          "$ref": "#/definitions/RoutingStep"
+        }
+      },
+      "title": "RoutingLink"
+    },
+    "RoutingOperationGroup": {
+      "type": "object",
+      "properties": {
+        "routingOperationGroup": {
+          "type": "string",
+          "description": "The name of the routing operation group."
+        },
+        "description": {
+          "type": "string",
+          "description": "The description of the routing operation group."
+        },
+        "erpOperationNumber": {
+          "type": "string",
+          "description": "ERP operation number."
+        },
+        "routingOperationGroupSteps": {
+          "type": "array",
+          "description": "The steps of the routing operation group.",
+          "items": {
+            "$ref": "#/definitions/RoutingOperationGroupStep"
+          }
+        }
+      },
+      "title": "RoutingOperationGroup"
+    },
+    "RoutingOperationGroupStep": {
+      "type": "object",
+      "properties": {
+        "routingStep": {
+          "description": "The routing step.",
+          "$ref": "#/definitions/RoutingStep"
+        }
+      },
+      "title": "RoutingOperationGroupStep"
+    },
+    "RoutingOperationStep": {
+      "type": "object",
+      "properties": {
+        "baseQuantity": {
+          "description": "Base quantity of the routing operation step.",
+          "$ref": "#/definitions/Quantity"
+        },
+        "maxLoop": {
+          "type": "number",
+          "description": "Limits how many times an SFC may be restarted. If 0, then there is no limit."
+        },
+        "operationActivity": {
+          "description": "The operation to be performed at the routing step.",
+          "$ref": "#/definitions/Operation"
+        },
+        "stepType": {
+          "type": "string",
+          "description": "The type of routing operation step."
+        },
+        "weighRelevant": {
+          "type": "boolean",
+          "description": "Indicates if the operation is weight relevant."
+        },
+        "automaticGoodsReceipt": {
+          "type": "boolean",
+          "description": "Indicates if the operation is configured for an automatic goods receipt."
+        },
+        "erpServiceActivityType": {
+          "type": "string",
+          "description": "Indicates the activity type used to execute a service order in SAP ERP."
+        },
+        "serviceWork": {
+          "type": "number",
+          "description": "Indicates the work needed to perform a requested service."
+        },
+        "serviceWorkUnit": {
+          "type": "string",
+          "description": "Indicates the unit of measure for service work."
+        },
+        "serviceDuration": {
+          "type": "number",
+          "description": "Indicates the amount of time needed to perform a requested service."
+        },
+        "serviceDurationUnit": {
+          "type": "string",
+          "description": "Indicates the unit of measure for a service duration."
+        },
+        "numberOfServiceCapacities": {
+          "type": "integer",
+          "description": "Indicates the number of service capacities needed to execute a service order."
+        },
+        "longText": {
+          "type": "string",
+          "description": "The long text field contains General information about the routing operation step.",
+          "maxLength": 250000
+        },
+        "customValues": {
+          "type": "array",
+          "description": "Custom data for the routing operation step.",
+          "items": {
+            "$ref": "#/definitions/CustomValue"
+          }
+        }
+      },
+      "title": "RoutingOperationStep"
+    },
+    "RoutingReturnStep": {
+      "type": "object",
+      "properties": {
+        "routingStep": {
+          "description": "The routing step.",
+          "$ref": "#/definitions/RoutingStepId"
+        },
+        "returnType": {
+          "type": "string",
+          "description": "The routing step return type.",
+          "enum": [
+            "RETURN_TO_ORIGINAL_AND_PREVIOUS",
+            "ORIGINAL_OPERATION",
+            "NEXT_OPERATION",
+            "ANY_PREVIOUS_OPERATION",
+            "ANY_OPERATION",
+            "PREVIOUS_OPERATION"
+          ]
+        },
+        "operation": {
+          "description": "The operation to return the SFC to (if valid on the original router).",
+          "$ref": "#/definitions/Operation"
+        }
+      },
+      "title": "RoutingReturnStep"
+    },
+    "RoutingScrapStep": {
+      "type": "object",
+      "properties": {
+        "routingStep": {
+          "description": "The routing step.",
+          "$ref": "#/definitions/RoutingStepId"
+        },
+        "sfcStatus": {
+          "type": "string",
+          "description": "The status applied to a scrapped SFC (when the entire SFC quantity is scrapped).",
+          "enum": [
+            "ALL",
+            "NEW",
+            "ACTIVE",
+            "HOLD",
+            "INQUEUE",
+            "DONE_HOLD",
+            "RETURNED",
+            "GOLDEN_UNIT",
+            "NOTDONE",
+            "DONE",
+            "SCRAPPED",
+            "INVALID",
+            "DELETED"
+          ]
+        },
+        "scrapAll": {
+          "type": "boolean",
+          "description": "Determines whether the option to scrap the parent and the child SFC components is available."
+        },
+        "scrapParent": {
+          "type": "boolean",
+          "description": "Determines whether the option to scrap the parent while leaving the components intact is available."
+        },
+        "scrapAndReturnComp": {
+          "type": "boolean",
+          "description": "Determines whether the option to scrap the parent and remove and return the child SFC components to inventory is available."
+        }
+      },
+      "title": "RoutingScrapStep"
+    },
+    "RoutingStep": {
+      "type": "object",
+      "properties": {
+        "description": {
+          "type": "string",
+          "description": "The description of the routing step."
+        },
+        "entry": {
+          "type": "boolean",
+          "description": "If true, this is an entry routing step."
+        },
+        "nextStepList": {
+          "type": "array",
+          "description": "The list of the next possible routing steps.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "productionProcessId": {
+          "type": "string",
+          "description": "The ID of the production process."
+        },
+        "productionProcessDefKey": {
+          "type": "string",
+          "description": "The production process definition key."
+        },
+        "routingDoneStep": {
+          "description": "The routing done step.",
+          "$ref": "#/definitions/RoutingDoneStep"
+        },
+        "routingHoldStep": {
+          "description": "The routing hold step.",
+          "$ref": "#/definitions/RoutingHoldStep"
+        },
+        "routingLink": {
+          "description": "The routing link associated with the routing step.",
+          "$ref": "#/definitions/RoutingLink"
+        },
+        "routingOperation": {
+          "description": "The operation to be performed at the routing step.",
+          "$ref": "#/definitions/RoutingOperationStep"
+        },
+        "routingStepGroup": {
+          "description": "The routing step group for simultaneous and any-order groups.",
+          "$ref": "#/definitions/RoutingStepGroup"
+        },
+        "routingReturnStep": {
+          "description": "The routing return step.",
+          "$ref": "#/definitions/RoutingReturnStep"
+        },
+        "routingScrapStep": {
+          "description": "The routing scrap step.",
+          "$ref": "#/definitions/RoutingScrapStep"
+        },
+        "stepId": {
+          "type": "string",
+          "description": "The step ID of the routing step. It should be either from 1 to 4 digits long, or follow one of the following formats: '1234-1234' or 'x(1 to 6 chars)-1234-1234'."
+        },
+        "sequence": {
+          "type": "number",
+          "description": "The sequence of the routing step."
+        },
+        "workCenter": {
+          "description": "The work center for the routing step.",
+          "$ref": "#/definitions/WorkCenterId"
+        },
+        "reportingStep": {
+          "type": "string",
+          "description": "Indicates how this step is known in an external system."
+        },
+        "erpSequence": {
+          "type": "string",
+          "description": "The routing step sequence in ERP external system."
+        },
+        "controlKey": {
+          "description": "The control key for the routing step.",
+          "$ref": "#/definitions/ControlKeyId"
+        },
+        "lastReportingStep": {
+          "type": "boolean",
+          "description": "Indicates if it is the last reporting step (by default it is set to 'true' for steps without any next steps, provided no other steps in the routing have this set to 'true.')."
+        },
+        "rework": {
+          "type": "boolean",
+          "description": "Indicates if this step is considered as rework."
+        },
+        "queueDecisionType": {
+          "type": "string",
+          "description": "This determines who decides where an SFC should be placed in queue when completing this step.",
+          "enum": [
+            "COMPLETING_OPERATOR",
+            "NEXT_OPERATOR"
+          ]
+        },
+        "routingStepComponentList": {
+          "type": "array",
+          "description": "The list of components to be assembled at this step.",
+          "items": {
+            "$ref": "#/definitions/RoutingStepComponent"
+          }
+        }
+      },
+      "title": "RoutingStep"
+    },
+    "RoutingStepResponse": {
+      "type": "object",
+      "properties": {
+        "description": {
+          "type": "string",
+          "description": "The description of the routing step."
+        },
+        "entry": {
+          "type": "boolean",
+          "description": "If true, this is an entry routing step."
+        },
+        "nextStepList": {
+          "type": "array",
+          "description": "The list of the next possible routing steps.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "productionProcessId": {
+          "type": "string",
+          "description": "The ID of the production process."
+        },
+        "productionProcessDefKey": {
+          "type": "string",
+          "description": "The production process definition key."
+        },
+        "routingDoneStep": {
+          "description": "The routing done step.",
+          "$ref": "#/definitions/RoutingDoneStep"
+        },
+        "routingHoldStep": {
+          "description": "The routing hold step.",
+          "$ref": "#/definitions/RoutingHoldStep"
+        },
+        "routingLink": {
+          "description": "The routing link associated with the routing step.",
+          "$ref": "#/definitions/RoutingLink"
+        },
+        "routingOperation": {
+          "description": "The operation to be performed at the routing step.",
+          "$ref": "#/definitions/RoutingOperationStep"
+        },
+        "routingStepGroup": {
+          "description": "The routing step group for simultaneous and any-order groups.",
+          "$ref": "#/definitions/RoutingStepGroup"
+        },
+        "routingReturnStep": {
+          "description": "The routing return step.",
+          "$ref": "#/definitions/RoutingReturnStep"
+        },
+        "routingScrapStep": {
+          "description": "The routing scrap step.",
+          "$ref": "#/definitions/RoutingScrapStep"
+        },
+        "stepId": {
+          "type": "string",
+          "description": "The step ID of the routing step. It should be either from 1 to 4 digits long, or follow one of the following formats: '1234-1234' or 'x(1 to 6 chars)-1234-1234'."
+        },
+        "sequence": {
+          "type": "number",
+          "description": "The sequence of the routing step."
+        },
+        "workCenter": {
+          "description": "The work center for the routing step.",
+          "$ref": "#/definitions/WorkCenterId"
+        },
+        "reportingStep": {
+          "type": "string",
+          "description": "Indicates how this step is known in an external system."
+        },
+        "erpSequence": {
+          "type": "string",
+          "description": "The routing step sequence in the external ERP system."
+        },
+        "erpSequenceCategory": {
+          "type": "string",
+          "description": "The ERP sequence category (a value is available for routings with multiple sequences).",
+          "enum": [
+            "STANDARD",
+            "PARALLEL",
+            "ALTERNATE"
+          ]
+        },
+        "controlKey": {
+          "description": "The control key for the routing step.",
+          "$ref": "#/definitions/ControlKeyId"
+        },
+        "lastReportingStep": {
+          "type": "boolean",
+          "description": "Indicates if it is the last reporting step (by default it is set to 'true' for steps without any next steps, provided no other steps in the routing have this set to 'true.')."
+        },
+        "rework": {
+          "type": "boolean",
+          "description": "Indicates if this step is considered as rework."
+        },
+        "queueDecisionType": {
+          "type": "string",
+          "description": "This determines who decides where an SFC should be placed in queue when completing this step.",
+          "enum": [
+            "COMPLETING_OPERATOR",
+            "NEXT_OPERATOR"
+          ]
+        },
+        "routingStepComponentList": {
+          "type": "array",
+          "description": "The list of components to be assembled at this step.",
+          "items": {
+            "$ref": "#/definitions/RoutingStepComponent"
+          }
+        }
+      },
+      "title": "RoutingStepResponse"
+    },
+    "RoutingStepComponent": {
+      "type": "object",
+      "properties": {
+        "bomComponent": {
+          "$ref": "#/definitions/BomComponentId"
+        },
+        "sequence": {
+          "type": "number",
+          "description": "Controls the order of display and execution of the component."
+        },
+        "quantity": {
+          "type": "number",
+          "description": "The number of pieces of the component to be assembled at this step."
+        },
+        "toleranceUnder": {
+          "type": "number",
+          "description": "The upper bound tolerance value."
+        },
+        "toleranceOver": {
+          "type": "number",
+          "description": "The lower bound tolerance value."
+        }
+      },
+      "description": "The list of components to be assembled at the step. "
+    },
+    "BomComponentId": {
+      "type": "object",
+      "properties": {
+        "bom": {
+          "$ref": "#/definitions/BOMId"
+        },
+        "material": {
+          "$ref": "#/definitions/MaterialId"
+        },
+        "sequence": {
+          "type": "integer",
+          "description": "The order the component is displayed in relation to other BOM components.",
+          "format": "int64"
+        }
+      },
+      "description": "The BOM component to assemble."
+    },
+    "BOMId": {
+      "type": "object",
+      "properties": {
+        "bom": {
+          "type": "string",
+          "description": "The name of the BOM."
+        },
+        "version": {
+          "type": "string",
+          "description": "The version of the BOM."
+        },
+        "bomType": {
+          "type": "string",
+          "description": "The type of the BOM.",
+          "enum": [
+            "USERBOM",
+            "SHOPORDERBOM",
+            "SFCBOM",
+            "CONFIGURABLEBOM"
+          ]
+        },
+        "plant": {
+          "type": "string",
+          "description": "The plant for which the BOM is defined."
+        }
+      },
+      "description": "BOM"
+    },
+    "MaterialId": {
+      "type": "object",
+      "properties": {
+        "plant": {
+          "type": "string",
+          "description": "The plant of the material."
+        },
+        "material": {
+          "type": "string",
+          "description": "The name of the material."
+        },
+        "version": {
+          "type": "string",
+          "description": "The version of the material."
+        }
+      },
+      "description": "Material used as a component in the BOM."
+    },
+    "UnitOfMeasure": {
+      "type": "object",
+      "properties": {
+        "longText": {
+          "type": "string"
+        },
+        "shortText": {
+          "type": "string"
+        },
+        "uom": {
+          "type": "string"
+        }
+      },
+      "title": "UnitOfMeasure"
+    },
+    "WorkCenterId": {
+      "type": "object",
+      "properties": {
+        "workCenter": {
+          "type": "string",
+          "description": "The name of the work center."
+        }
+      },
+      "title": "WorkCenterId"
+    },
+    "RoutingStepGroup": {
+      "type": "object",
+      "properties": {
+        "routingStep": {
+          "description": "The routing step.",
+          "$ref": "#/definitions/RoutingStepId"
+        },
+        "routingStepGroupType": {
+          "type": "string",
+          "description": "The type of router step group.",
+          "enum": [
+            "ANY_ORDER_GROUP",
+            "SIMULTANEOUS_ORDER_GROUP"
+          ]
+        },
+        "routingStepGroupStepList": {
+          "type": "array",
+          "description": "The list of routing step groups.",
+          "items": {
+            "$ref": "#/definitions/RoutingStepGroupStep"
+          }
+        }
+      },
+      "description": "The routing step group."
+    },
+    "RoutingStepGroupStep": {
+      "type": "object",
+      "properties": {
+        "routingStep": {
+          "description": "The routing step.",
+          "$ref": "#/definitions/RoutingStepId"
+        },
+        "sequence": {
+          "type": "number",
+          "description": "Controls the order the steps are controlled within the group."
+        },
+        "successors": {
+          "type": "string",
+          "description": "A comma-delimited list of next step successors for this particular step group member."
+        }
+      },
+      "description": "The list of routing step groups."
+    },
+    "ControlKeyId": {
+      "type": "object",
+      "properties": {
+        "controlKey": {
+          "type": "string",
+          "description": "The name of the Control Key."
+        }
+      },
+      "description": "The control key for the routing step."
+    },
+    "RoutingStepId": {
+      "type": "object",
+      "properties": {
+        "stepId": {
+          "type": "string",
+          "description": "The step ID of the routing step. It should be either from 1 to 4 digits long, or follow one of the following formats: '1234-1234' or 'x(1 to 6 chars)-1234-1234'."
+        }
+      },
+      "description": "The Routing Step ID"
+    },
+    "BasicRouting": {
+      "type": "object",
+      "properties": {
+        "plant": {
+          "type": "string",
+          "description": "The plant of the routing."
+        },
+        "routing": {
+          "type": "string",
+          "description": "The name of the routing."
+        },
+        "type": {
+          "type": "string",
+          "description": "The routing type of the routing.",
+          "enum": [
+            "PRODUCTION",
+            "NC",
+            "SPECIAL",
+            "DISPOSITION_FUNCTION",
+            "SFC_SPECIFIC",
+            "SHOPORDER_SPECIFIC",
+            "CONFIGURABLE",
+            "PRODUCTION_RECIPE",
+            "SHOPORDER_SPECIFIC_RECIPE",
+            "SERVICE_ORDER_ROUTING"
+          ]
+        },
+        "version": {
+          "type": "string",
+          "description": "The version of the routing."
+        },
+        "status": {
+          "type": "string",
+          "description": "The status of the routing.",
+          "enum": [
+            "NEW",
+            "RELEASABLE",
+            "FROZEN",
+            "OBSOLETE",
+            "HOLD",
+            "HOLD_YIELD_RATE",
+            "HOLD_CONSEC_NC",
+            "HOLD_SPC_VIOLATION",
+            "HOLD_SPC_WARNING"
+          ]
+        },
+        "currentVersion": {
+          "type": "boolean",
+          "description": "If true, the version of the routing is current.",
+          "default": true
+        },
+        "customValues": {
+          "type": "array",
+          "description": "Routing custom data.",
+          "items": {
+            "$ref": "#/definitions/CustomValue"
+          }
+        },
+        "relaxedFlow": {
+          "type": "boolean",
+          "description": "Indicates if the routing is a relaxed flow routing."
+        },
+        "routingSteps": {
+          "type": "array",
+          "description": "The routing steps in the routing.",
+          "items": {
+            "$ref": "#/definitions/BasicRoutingStep"
+          }
+        }
+      },
+      "title": "BasicRouting"
+    },
+    "BasicRoutingOperationStep": {
+      "type": "object",
+      "properties": {
+        "baseQuantity": {
+          "description": "Base quantity of the routing operation step.",
+          "$ref": "#/definitions/Quantity"
+        },
+        "maxLoop": {
+          "type": "number",
+          "description": "Limits how many times an SFC may be restarted. If 0, then there is no limit."
+        },
+        "operationActivity": {
+          "description": "The operation to be performed at the routing step.",
+          "$ref": "#/definitions/Operation"
+        },
+        "stepType": {
+          "type": "string",
+          "description": "The type of routing operation step."
+        },
+        "weighRelevant": {
+          "type": "boolean",
+          "description": "Indicates if the operation is weight relevant.",
+          "default": false
+        },
+        "automaticGoodsReceipt": {
+          "type": "boolean",
+          "description": "Indicates if the operation is configured for an automatic goods receipt.",
+          "default": false
+        },
+        "customValues": {
+          "type": "array",
+          "description": "Custom data for the routing operation step.",
+          "items": {
+            "$ref": "#/definitions/CustomValue"
+          }
+        }
+      },
+      "title": "BasicRoutingOperationStep"
+    },
+    "BasicRoutingStep": {
+      "type": "object",
+      "properties": {
+        "description": {
+          "type": "string",
+          "description": "The description of the routing step."
+        },
+        "routingOperation": {
+          "description": "The operation to be performed at the routing step.",
+          "$ref": "#/definitions/BasicRoutingOperationStep"
+        },
+        "stepId": {
+          "type": "string",
+          "description": "The step ID of the routing step. It should be either from 1 to 4 digits long, or follow one of the following formats: '1234-1234' or 'x(1 to 6 chars)-1234-1234'."
+        },
+        "workCenter": {
+          "description": "The work center for the routing step.",
+          "$ref": "#/definitions/WorkCenterId"
+        },
+        "erpSequence": {
+          "type": "string",
+          "description": "The routing step sequence in an ERP external system."
+        },
+        "isLastReportingStep": {
+          "type": "boolean",
+          "description": "Indicates if it is the last reporting step."
+        }
+      },
+      "title": "BasicRoutingStep"
+    },
+    "RoutingHeaderDetails": {
+      "type": "object",
+      "properties": {
+        "plant": {
+          "type": "string",
+          "description": "The plant of the routing."
+        },
+        "routing": {
+          "type": "string",
+          "description": "The name of the routing."
+        },
+        "type": {
+          "type": "string",
+          "description": "The routing type of the routing.",
+          "enum": [
+            "PRODUCTION",
+            "NC",
+            "SPECIAL",
+            "DISPOSITION_FUNCTION",
+            "SFC_SPECIFIC",
+            "SHOPORDER_SPECIFIC",
+            "CONFIGURABLE",
+            "SERVICE_ORDER_ROUTING"
+          ]
+        },
+        "version": {
+          "type": "string",
+          "description": "The version of the routing."
+        },
+        "status": {
+          "type": "string",
+          "description": "The status of the routing.",
+          "enum": [
+            "NEW",
+            "RELEASABLE",
+            "FROZEN",
+            "OBSOLETE",
+            "HOLD",
+            "HOLD_YIELD_RATE",
+            "HOLD_CONSEC_NC",
+            "HOLD_SPC_VIOLATION",
+            "HOLD_SPC_WARNING"
+          ]
+        },
+        "currentVersion": {
+          "type": "boolean",
+          "description": "If true, this version of the routing is the current one.",
+          "default": true
+        },
+        "quantityValidation": {
+          "type": "boolean",
+          "description": "Indicates if quantity validation is required during production.",
+          "default": false
+        },
+        "description": {
+          "type": "string",
+          "description": "The description of the routing."
+        },
+        "relaxedFlow": {
+          "type": "boolean",
+          "description": "Indicates if the routing is a relaxed flow routing.",
+          "default": false
+        },
+        "createdDateTime": {
+          "type": "string",
+          "format": "date-time",
+          "example": "2018-06-22T04:24:00.123Z",
+          "description": "The time when the routing was created."
+        },
+        "modifiedDateTime": {
+          "type": "string",
+          "format": "date-time",
+          "example": "2018-06-22T04:24:00.123Z",
+          "description": "The time when the routing has most recently changed."
+        }
+      },
+      "title": "RoutingHeaderDetails"
+    },
+    "RoutingUpdateHeaderDetails": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "description": "The status of the routing.",
+          "enum": [
+            "NEW",
+            "RELEASABLE",
+            "FROZEN",
+            "OBSOLETE",
+            "HOLD",
+            "HOLD_YIELD_RATE",
+            "HOLD_CONSEC_NC",
+            "HOLD_SPC_VIOLATION",
+            "HOLD_SPC_WARNING"
+          ]
+        },
+        "currentVersion": {
+          "type": "boolean",
+          "description": "If true, this version of the routing is the current one.",
+          "default": true
+        },
+        "quantityValidation": {
+          "type": "boolean",
+          "description": "Indicates if quantity validation is required during production.",
+          "default": false
+        },
+        "description": {
+          "type": "string",
+          "description": "The description of the routing."
+        },
+        "relaxedFlow": {
+          "type": "boolean",
+          "description": "Indicates if the routing is a relaxed flow routing.",
+          "default": false
+        }
+      },
+      "title": "RoutingUpdateHeaderDetails"
+    }
+  },
+  "externalDocs": {
+    "description": "Prepare for API Integration",
+    "url": "https://help.sap.com/docs/sap-digital-manufacturing/operations-guide/prepare-for-api-integration"
+  },
+  "schemes": [
+    "https"
+  ],
+  "x-sap-shortText": "Perform read, create, update and delete Routings",
+  "x-servers": [
+    {
+      "url": "https://api.{regionHost}/routing/v1",
+      "description": "Base URL",
+      "templates": {
+        "regionHost": {
+          "description": "The data center where SAP Digital Manufacturing is provisioned for your organization",
+          "enum": [
+            "eu10.dmc.cloud.sap",
+            "eu20.dmc.cloud.sap",
+            "us10.dmc.cloud.sap",
+            "us20.dmc.cloud.sap",
+            "test.eu10.dmc.cloud.sap",
+            "test.eu20.dmc.cloud.sap",
+            "test.us10.dmc.cloud.sap",
+            "test.us20.dmc.cloud.sap"
+          ],
+          "default": "test.eu10.dmc.cloud.sap"
+        },
+        "tokenHost": {
+          "description": "The authentication server where SAP Digital Manufacturing is provisioned for your organization",
+          "enum": [
+            "eu10.hana.ondemand.com",
+            "eu20.hana.ondemand.com",
+            "us10.hana.ondemand.com",
+            "us20.hana.ondemand.com"
+          ],
+          "default": "eu10.hana.ondemand.com"
+        }
+      }
+    }
+  ]
+}

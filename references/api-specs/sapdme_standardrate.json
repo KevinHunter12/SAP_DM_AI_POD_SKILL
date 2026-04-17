@@ -1,0 +1,761 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Standard Rates",
+    "description": "Retrieves standard rates for a given plant based on a resource or work center. Creates, updates, or deletes standard rates.\n Standard rates can be managed for a resource or work center to determine the rate at which the machine runs. This rate can be used for various calculations.",
+    "version": "v1",
+    "contact": {
+      "name": "SAP Digital Manufacturing Operations",
+      "email": "sap-dmoperation@sap.com"
+    }
+  },
+  "externalDocs": {
+    "description": "Prepare for API Integration",
+    "url": "https://help.sap.com/docs/sap-digital-manufacturing/operations-guide/prepare-for-api-integration"
+  },
+  "x-sap-shortText": "Get a list of standard rates by resource or workcenter.",
+  "x-servers": [
+    {
+      "url": "https://api.{regionHost}/standardRates",
+      "description": "Base URL",
+      "templates": {
+        "regionHost": {
+          "description": "The data center where SAP Digital Manufacturing is provisioned for your organization",
+          "enum": [
+            "eu10.dmc.cloud.sap",
+            "eu20.dmc.cloud.sap",
+            "us10.dmc.cloud.sap",
+            "us20.dmc.cloud.sap",
+            "test.eu10.dmc.cloud.sap",
+            "test.eu20.dmc.cloud.sap",
+            "test.us10.dmc.cloud.sap",
+            "test.us20.dmc.cloud.sap"
+          ],
+          "default": "test.eu10.dmc.cloud.sap"
+        },
+        "tokenHost": {
+          "description": "The authentication server where SAP Digital Manufacturing is provisioned for your organization",
+          "enum": [
+            "eu10.hana.ondemand.com",
+            "eu20.hana.ondemand.com",
+            "us10.hana.ondemand.com",
+            "us20.hana.ondemand.com"
+          ],
+          "default": "eu10.hana.ondemand.com"
+        }
+      }
+    }
+  ],
+  "host": "hostname",
+  "basePath": "/",
+  "schemes": [
+    "https"
+  ],
+  "securityDefinitions": {
+    "OAuthSecurity": {
+      "type": "oauth2",
+      "tokenUrl": "https://{subdomain}.authentication.{tokenHost}/oauth/token",
+      "flow": "application"
+    }
+  },
+  "security": [
+    {
+      "OAuthSecurity": []
+    }
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "paths": {
+    "/v1/standardRatesByResourceOrWorkCenter": {
+      "get": {
+        "tags": [
+          "Standard rates"
+        ],
+        "summary": "Standard Rates by Resource or Workcenter.",
+        "description": "Retrieves Standard Rates for a given plant based on a Resource or Workcenter.",
+        "parameters": [
+          {
+            "name": "plant",
+            "in": "query",
+            "description": "Plant provided as the input parameter.",
+            "required": true,
+            "type": "string",
+            "allowEmptyValue": false
+          },
+          {
+            "name": "resource",
+            "in": "query",
+            "description": "Resource provided as the input parameter.",
+            "required": false,
+            "type": "string",
+            "allowEmptyValue": false
+          },
+          {
+            "name": "workcenter",
+            "in": "query",
+            "description": "Workcenter provided as the input parameter.",
+            "required": false,
+            "type": "string",
+            "allowEmptyValue": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Message successfully processed.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/StandardRateResponse"
+              }
+            }
+          },
+          "400": {
+            "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to call this resource.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Accessing the resource you are trying to reach is forbidden.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "One of the related elements is not found.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "An internal error occurred.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/v1/standardRates": {
+      "post": {
+        "tags": [
+          "Standard rates"
+        ],
+        "summary": "Creates standard rates.",
+        "description": "Creates standard rates provided in the request.",
+        "parameters": [
+          {
+            "name": "CreateStandardRateRequest",
+            "in": "body",
+            "description": "The request for creating standard rates",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CreateStandardRateRequest"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "The request is successfully processed, the created standard rate is returned.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/StandardRateResponse"
+              }
+            }
+          },
+          "400": {
+            "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to call this resource.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Accessing the resource you are trying to reach is forbidden.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "One of the related elements is not found.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "An internal error occurred.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Standard rates"
+        ],
+        "summary": "Updates standard rate.",
+        "description": "The request to update the standard rate.",
+        "parameters": [
+          {
+            "name": "UpdateStandardRateRequest",
+            "in": "body",
+            "description": "The request for updating standard rates",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UpdateStandardRateRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request is successfully processed, the updated standard rate is returned.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/StandardRateResponse"
+              }
+            }
+          },
+          "400": {
+            "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to call this resource.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Accessing the resource you are trying to reach is forbidden.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "One of the related elements is not found.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "An internal error occurred.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Standard rates"
+        ],
+        "summary": "Deletes standard rates.",
+        "description": "The request to delete the standard rate.",
+        "parameters": [
+          {
+            "name": "DeleteStandardRateRequest",
+            "in": "body",
+            "description": "The request for deleting standard rates",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/DeleteStandardRateRequest"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "The request is successfully processed, the standard rate is deleted."
+          },
+          "400": {
+            "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to call this resource.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Accessing the resource you are trying to reach is forbidden.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "One of the related elements is not found.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "An internal error occurred.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "StandardRateResponse": {
+      "type": "object",
+      "title": "StandardRateByResourceListItem",
+      "description": "This business object defines the basic standard rate by resource object.",
+      "properties": {
+        "ref": {
+          "type": "string",
+          "description": "The reference of the standard rate."
+        },
+        "plant": {
+          "type": "string",
+          "description": "The plant number or ID."
+        },
+        "keyId": {
+          "type": "string",
+          "description": "The value of keyId."
+        },
+        "resourceId": {
+          "$ref": "#/definitions/ResourceId"
+        },
+        "workCenterId": {
+          "$ref": "#/definitions/WorkcenterId"
+        },
+        "operatorsQuantity": {
+          "type": "string",
+          "description": "operatorsQuantity"
+        },
+        "materialId": {
+          "$ref": "#/definitions/MaterialId"
+        },
+        "routingId": {
+          "$ref": "#/definitions/RoutingId"
+        },
+        "operationId": {
+          "$ref": "#/definitions/OperationId"
+        },
+        "timeUnitsType": {
+          "type": "string",
+          "description": "The time unit type."
+        },
+        "quantity": {
+          "type": "number",
+          "description": "Quantity."
+        },
+        "time": {
+          "type": "number",
+          "description": "Time duration."
+        },
+        "pace": {
+          "type": "number",
+          "description": "Pace number."
+        },
+        "createdDateTime": {
+          "description": "Creation date and time of the standard rate.",
+          "type": "string",
+          "format": "date-time",
+          "example": "2019-01-03T11:13:13.000Z"
+        },
+        "modifiedDateTime": {
+          "description": "Modification date and time of the standard rate.",
+          "type": "string",
+          "format": "date-time",
+          "example": "2019-01-03T11:13:13.000Z"
+        }
+      }
+    },
+    "ResourceId": {
+      "type": "object",
+      "title": "ResourceId",
+      "description": "This business object defines key fields of the resource object.",
+      "properties": {
+        "ref": {
+          "type": "string",
+          "description": "The reference of the standard rate."
+        },
+        "plant": {
+          "type": "string",
+          "description": "The plant the material belongs to."
+        },
+        "resource": {
+          "type": "string",
+          "description": "The identifier of the resource."
+        }
+      }
+    },
+    "WorkcenterId": {
+      "type": "object",
+      "title": "WorkcenterId",
+      "description": "This business object defines key fields of the resource object.",
+      "properties": {
+        "ref": {
+          "type": "string",
+          "description": "The reference of the standard rate."
+        },
+        "plant": {
+          "type": "string",
+          "description": "The plant the material belongs to."
+        },
+        "workcenter": {
+          "type": "string",
+          "description": "The identifier of the workcenter."
+        }
+      }
+    },
+    "MaterialId": {
+      "type": "object",
+      "title": "MaterialId",
+      "description": "This business object defines key fields of the material object.",
+      "properties": {
+        "ref": {
+          "type": "string",
+          "description": "The reference of the standard rate."
+        },
+        "plant": {
+          "type": "string",
+          "description": "The plant the material belongs to."
+        },
+        "material": {
+          "type": "string",
+          "description": "The name of the material."
+        },
+        "version": {
+          "type": "string",
+          "description": "The version of the material."
+        }
+      }
+    },
+    "RoutingId": {
+      "type": "object",
+      "title": "RoutingId",
+      "description": "This business object defines key fields of the routing or recipe object.",
+      "properties": {
+        "ref": {
+          "type": "string",
+          "description": "The reference of the standard rate."
+        },
+        "plant": {
+          "type": "string",
+          "description": "The plant the routing or recipe belongs to."
+        },
+        "routing": {
+          "type": "string",
+          "description": "The name of the routing or recipe."
+        },
+        "routingType": {
+          "type": "string",
+          "description": "Indicates the type of routing or recipe.",
+          "enum": [
+            "PRODUCTION",
+            "NC",
+            "SPECIAL",
+            "DISPOSITION_FUNCTION",
+            "SFC_SPECIFIC",
+            "SHOPORDER_SPECIFIC",
+            "CONFIGURABLE",
+            "PRODUCTION_RECIPE",
+            "SHOPORDER_SPECIFIC_RECIPE"
+          ]
+        },
+        "version": {
+          "type": "string",
+          "description": "The version of the routing."
+        }
+      }
+    },
+    "OperationId": {
+      "type": "object",
+      "title": "OperationId",
+      "description": "This business object defines key fields of the routing or recipe object.",
+      "properties": {
+        "ref": {
+          "type": "string",
+          "description": "The reference of the standard rate."
+        },
+        "plant": {
+          "type": "string",
+          "description": "The plant the operation ID belongs to."
+        },
+        "operation": {
+          "type": "string",
+          "description": "The operation ID."
+        },
+        "version": {
+          "type": "string",
+          "description": "The version of the operation ID."
+        }
+      }
+    },
+    "CreateStandardRateRequest": {
+      "type": "object",
+      "title": "CreateStandardRateRequest",
+      "description": "The request to create the standard rate.",
+      "required": [
+        "plant",
+        "quantity",
+        "time",
+        "timeUnitsType"
+      ],
+      "properties": {
+        "plant": {
+          "type": "string",
+          "description": "The plant the standard rate belongs to.",
+          "pattern": "^(?! )[0-9A-Z_$!)(+~@^=\\-*. ]+(?<! )$",
+          "minLength": 1,
+          "maxLength": 6
+        },
+        "resource": {
+          "type": "string",
+          "description": "The name of the resource.",
+          "maxLength": 36
+        },
+        "workcenter": {
+          "type": "string",
+          "description": "The name of the workcenter.",
+          "maxLength": 36
+        },
+        "material": {
+          "type": "string",
+          "description": "The name of the material.",
+          "maxLength": 128
+        },
+        "materialVersion": {
+          "type": "string",
+          "description": "The version of the material.",
+          "maxLength": 20
+        },
+        "routing": {
+          "type": "string",
+          "description": "The name of the routing.",
+          "maxLength": 128
+        },
+        "routingVersion": {
+          "type": "string",
+          "description": "The version of the routing.",
+          "maxLength": 20
+        },
+        "routingType": {
+          "type": "string",
+          "description": "The type of the routing.",
+          "enum": [
+            "PRODUCTION",
+            "NC",
+            "SPECIAL",
+            "DISPOSITION",
+            "SFC",
+            "SHOP_ORDER",
+            "CONFIGURABLE",
+            "PRODUCTION_RECIPE",
+            "SHOPORDER_SPECIFIC_RECIPE"
+          ]
+        },
+        "operation": {
+          "type": "string",
+          "description": "The name of the operation activity.",
+          "maxLength": 36
+        },
+        "operationVersion": {
+          "type": "string",
+          "description": "The version of the operation activity.",
+          "maxLength": 20
+        },
+        "quantity": {
+          "type": "number",
+          "description": "The standard rate quantity."
+        },
+        "pace": {
+          "type": "number",
+          "description": "The standard rate pace."
+        },
+        "time": {
+          "type": "number",
+          "description": "The number represents the length of a time slot in time units - 10 SECONDS, 10 MINUTES, and so on."
+        },
+        "timeUnitsType": {
+          "type": "string",
+          "description": "The standard rate time units.",
+          "enum": [
+            "SECONDS",
+            "MINUTES",
+            "HOURS",
+            "DAYS"
+          ]
+        }
+      }
+    },
+    "UpdateStandardRateRequest": {
+      "type": "object",
+      "title": "UpdateStandardRateRequest",
+      "description": "The request to update the standard rate.",
+      "required": [
+        "plant",
+        "keyId",
+        "modifiedDateTime"
+      ],
+      "properties": {
+        "plant": {
+          "type": "string",
+          "description": "The plant the standard rate belongs to.",
+          "pattern": "^(?! )[0-9A-Z_$!)(+~@^=\\-*. ]+(?<! )$",
+          "minLength": 1,
+          "maxLength": 6
+        },
+        "keyId": {
+          "type": "string",
+          "description": "The standard rate identifier."
+        },
+        "modifiedDateTime": {
+          "type": "string",
+          "description": "The last modification date and time. It is needed to prevent concurrent modification.",
+          "format": "date-time",
+          "example": "2019-01-03T11:13:13.000Z"
+        },
+        "resource": {
+          "type": "string",
+          "description": "The name of the resource.",
+          "maxLength": 36
+        },
+        "workcenter": {
+          "type": "string",
+          "description": "The name of the workcenter.",
+          "maxLength": 36
+        },
+        "material": {
+          "type": "string",
+          "description": "The name of the material.",
+          "maxLength": 128
+        },
+        "materialVersion": {
+          "type": "string",
+          "description": "The version of the material.",
+          "maxLength": 20
+        },
+        "routing": {
+          "type": "string",
+          "description": "The name of the routing.",
+          "maxLength": 128
+        },
+        "routingVersion": {
+          "type": "string",
+          "description": "The version of the routing.",
+          "maxLength": 20
+        },
+        "routingType": {
+          "type": "string",
+          "description": "The type of the routing.",
+          "enum": [
+            "PRODUCTION",
+            "NC",
+            "SPECIAL",
+            "DISPOSITION",
+            "SFC",
+            "SHOP_ORDER",
+            "CONFIGURABLE",
+            "PRODUCTION_RECIPE",
+            "SHOPORDER_SPECIFIC_RECIPE"
+          ]
+        },
+        "operation": {
+          "type": "string",
+          "description": "The name of the operation activity.",
+          "maxLength": 36
+        },
+        "operationVersion": {
+          "type": "string",
+          "description": "The version of the operation activity.",
+          "maxLength": 20
+        },
+        "quantity": {
+          "type": "number",
+          "description": "The standard rate quantity."
+        },
+        "pace": {
+          "type": "number",
+          "description": "The standard rate pace."
+        },
+        "time": {
+          "type": "number",
+          "description": "The number represents the length of a time slot in time units - 10 SECONDS, 10 MINUTES, and so on."
+        },
+        "timeUnitsType": {
+          "type": "string",
+          "description": "The standard rate time units.",
+          "enum": [
+            "SECONDS",
+            "MINUTES",
+            "HOURS",
+            "DAYS"
+          ]
+        }
+      }
+    },
+    "DeleteStandardRateRequest": {
+      "type": "object",
+      "title": "DeleteStandardRateRequest",
+      "description": "The request to delete the standard rate.",
+      "required": [
+        "plant",
+        "keyId"
+      ],
+      "properties": {
+        "plant": {
+          "type": "string",
+          "description": "The plant the standard rate belongs to.",
+          "pattern": "^(?! )[0-9A-Z_$!)(+~@^=\\-*. ]+(?<! )$",
+          "minLength": 1,
+          "maxLength": 6
+        },
+        "keyId": {
+          "type": "string",
+          "description": "The standard rate identifier."
+        }
+      }
+    },
+    "ErrorResponse": {
+      "type": "object",
+      "title": "ErrorResponse",
+      "description": "Error response.",
+      "properties": {
+        "causeMessage": {
+          "type": "string",
+          "description": "Contains a technical reason for the error."
+        },
+        "code": {
+          "type": "string",
+          "description": "Internal error message"
+        },
+        "correlationId": {
+          "type": "string",
+          "description": "Contains a correlation ID for the error."
+        },
+        "message": {
+          "type": "string",
+          "description": "Contains additional information if any."
+        }
+      }
+    }
+  }
+}

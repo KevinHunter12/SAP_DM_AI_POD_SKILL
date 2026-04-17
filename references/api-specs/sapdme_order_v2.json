@@ -1,0 +1,898 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Order",
+    "description": "An order defines the material you need to produce, the plant location for production, the date and time of production, and the quantity of goods required. It also specifies which components and sequence of operations are used and how the order costs are settled. You can call this API to perform order-related actions, like retrieving the order list.",
+    "version": "v2",
+    "contact": {
+      "name": "SAP Digital Manufacturing Operations",
+      "email": "sap-dmoperation@sap.com"
+    }
+  },
+  "externalDocs": {
+    "description": "Prepare for API Integration",
+    "url": "https://help.sap.com/docs/sap-digital-manufacturing/apis/flexible-order-release"
+  },
+  "servers": [
+    {
+      "url": "https://api.{regionHost}/order",
+      "description": "Base URL",
+      "variables": {
+        "regionHost": {
+          "description": "The data center where SAP Digital Manufacturing is provisioned for your organization",
+          "enum": [
+            "eu10.dmc.cloud.sap",
+            "eu20.dmc.cloud.sap",
+            "us10.dmc.cloud.sap",
+            "us20.dmc.cloud.sap",
+            "test.eu10.dmc.cloud.sap",
+            "test.eu20.dmc.cloud.sap",
+            "test.us10.dmc.cloud.sap",
+            "test.us20.dmc.cloud.sap"
+          ],
+          "default": "test.eu10.dmc.cloud.sap"
+        },
+        "tokenHost": {
+          "description": "The authentication server where SAP Digital Manufacturing is provisioned for your organization",
+          "enum": [
+            "eu10.hana.ondemand.com",
+            "eu20.hana.ondemand.com",
+            "us10.hana.ondemand.com",
+            "us20.hana.ondemand.com"
+          ],
+          "default": "eu10.hana.ondemand.com"
+        }
+      }
+    }
+  ],
+  "security": [
+    {
+      "OauthClientCredentials": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "Order List"
+    }
+  ],
+  "paths": {
+    "/v2/plants/{plant}/orders": {
+      "get": {
+        "tags": [
+          "Order List"
+        ],
+        "summary": "Finds a list of orders.",
+        "description": "Finds a list of orders for a given plant.",
+        "parameters": [
+          {
+            "name": "plant",
+            "in": "path",
+            "description": "Plant for which the request is performed.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "material",
+            "in": "query",
+            "description": "Material associated with the order.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "materialVersion",
+            "in": "query",
+            "description": "Version of the material",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "releaseStatuses",
+            "in": "query",
+            "description": "Release status",
+            "style": "form",
+            "explode": false,
+            "schema": {
+              "uniqueItems": true,
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "RELEASED",
+                  "RELEASABLE",
+                  "PARTIALLY_CREATED",
+                  "PARTIALLY_RELEASED",
+                  "HOLD"
+                ]
+              }
+            }
+          },
+          {
+            "name": "executionStatuses",
+            "in": "query",
+            "description": "Execution status",
+            "style": "form",
+            "explode": false,
+            "schema": {
+              "uniqueItems": true,
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "NOT_IN_EXECUTION",
+                  "ACTIVE",
+                  "HOLD",
+                  "CLOSED",
+                  "COMPLETED",
+                  "DISCARDED"
+                ]
+              }
+            }
+          },
+          {
+            "name": "workCenters",
+            "in": "query",
+            "description": "Work center names",
+            "style": "form",
+            "explode": false,
+            "schema": {
+              "uniqueItems": true,
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "order",
+            "in": "query",
+            "description": "The order to search for.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "salesOrder",
+            "in": "query",
+            "description": "Sales order",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "customer",
+            "in": "query",
+            "description": "Customer",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "plannedStart",
+            "in": "query",
+            "description": "Planned start date in UTC format (date-time). Orders with planned start equal to or later than this value are included.",
+            "example": "2022-04-23T09:53:03.000Z",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "plannedEnd",
+            "in": "query",
+            "description": "Planned completion date in UTC format (date-time). Orders with planned end equal to or earlier than this value are included.",
+            "example": "2022-04-23T09:53:03.000Z",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "scheduledStart",
+            "in": "query",
+            "description": "Scheduled start date in UTC format (date-time). Orders with scheduled start equal to or later than this value are included.",
+            "example": "2022-04-23T09:53:03.000Z",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "scheduledEnd",
+            "in": "query",
+            "description": "Scheduled completion date in UTC format (date-time). Orders with scheduled end equal to or earlier than this value are included.",
+            "example": "2022-04-23T09:53:03.000Z",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "The current page index (starts from 0). Default index is 0.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "description": "Specify the page size that determines how many orders display on a single page. It's 20 by default.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "description": "Sorting criteria in the format: property,asc/desc. The supported properties for sorting are: order, plant, plannedStart/End, scheduledStart/End, actualStart/End, plannedQuantity, buildQuantity, releasedQuantity, deliveredQuantity, priority, salesOrder.",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "default": [
+                "order,asc"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Orders have been retrieved.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Page_GetOrderListV2Response"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "You are not authorized to call this resource.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Accessing the resource you are trying to reach is forbidden.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "There was an internal error somewhere in the call chain.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/v2/orders/release": {
+      "post": {
+        "tags": [
+          "Order Processing"
+        ],
+        "summary": "Releases the order.",
+        "description": "Releases the order by given plant, order, and quantity for further manufacturing activities.",
+        "requestBody": {
+          "description": "Request to release the order",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReleaseOrderRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReleaseOrderV2Response"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The HTTP request is bad or invalid and can't be processed by the server.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "You are not authorized to call this resource.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Accessing the resource you are trying to reach is forbidden.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "There was an internal error in the call chain.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false,
+        "x-codegen-request-body-name": "request"
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Page_GetOrderListV2Response": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GetOrderListV2Response"
+            }
+          },
+          "empty": {
+            "type": "boolean",
+            "description": "Returns true if the result is empty."
+          },
+          "first": {
+            "type": "boolean",
+            "description": "Indicates that the current page is the first page."
+          },
+          "last": {
+            "type": "boolean",
+            "description": "Indicates that the current page is the last page."
+          },
+          "number": {
+            "type": "integer",
+            "format": "int32",
+            "description": "The page number."
+          },
+          "numberOfElements": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Number of orders on the current page."
+          },
+          "pageable": {
+            "$ref": "#/components/schemas/Pageable"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "sort": {
+            "$ref": "#/components/schemas/Sort"
+          },
+          "totalElements": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Total number of orders retrieved."
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Total number of pages retrieved."
+          }
+        }
+      },
+      "GetOrderListV2Response": {
+        "type": "object",
+        "properties": {
+          "order": {
+            "type": "string",
+            "description": "The found order"
+          },
+          "plant": {
+            "type": "string",
+            "description": "Plant"
+          },
+          "orderCategory": {
+            "type": "string",
+            "enum": [
+              "PRODUCTION_ORDER",
+              "PROCESS_ORDER",
+              "PLANNED_ORDER"
+            ],
+            "description": "Order category"
+          },
+          "plannedQuantity": {
+            "type": "number",
+            "description": "Order planned quantity in base unit of measure"
+          },
+          "plannedQuantityInProductionUom": {
+            "type": "number",
+            "description": "Order planned quantity in production unit of measure"
+          },
+          "buildQuantity": {
+            "type": "number",
+            "description": "Build quantity in base unit of measure"
+          },
+          "releasedQuantity": {
+            "type": "number",
+            "description": "Released quantity in base unit of measure"
+          },
+          "doneQuantity": {
+            "type": "number",
+            "description": "Done quantity in base unit of measure"
+          },
+          "scrappedQuantity": {
+            "type": "number",
+            "description": "Scrapped quantity in base unit of measure"
+          },
+          "deliveredQuantity": {
+            "type": "number",
+            "description": "Total header material delivered quantity in base unit of measure"
+          },
+          "baseUnitOfMeasure": {
+            "type": "string",
+            "description": "Base unit of measure in SAP code"
+          },
+          "productionUnitOfMeasure": {
+            "type": "string",
+            "description": "Production unit of measure in SAP code"
+          },
+          "releaseStatus": {
+            "type": "string",
+            "enum": [
+              "PARTIALLY_CREATED",
+              "RELEASABLE",
+              "PARTIALLY_RELEASED",
+              "RELEASED",
+              "HOLD",
+              "NOT_RELEASABLE"
+            ],
+            "description": "Release status"
+          },
+          "executionStatus": {
+            "type": "string",
+            "enum": [
+              "NOT_IN_EXECUTION",
+              "ACTIVE",
+              "HOLD",
+              "CLOSED",
+              "COMPLETED",
+              "DISCARDED"
+            ],
+            "description": "Execution status"
+          },
+          "material": {
+            "$ref": "#/components/schemas/Material"
+          },
+          "bom": {
+            "$ref": "#/components/schemas/GetOrderListV2Bom"
+          },
+          "routing": {
+            "$ref": "#/components/schemas/GetOrderListV2Routing"
+          },
+          "toleranceUnder": {
+            "type": "number",
+            "description": "The delivery undertolerance of the found order"
+          },
+          "minDeliveryQuantity": {
+            "type": "number",
+            "description": "The minimum delivery quantity of the found order"
+          },
+          "toleranceOver": {
+            "type": "number",
+            "description": "The delivery overtolerance of the found order"
+          },
+          "maxDeliveryQuantity": {
+            "type": "number",
+            "description": "The maximum delivery quantity of the found order"
+          },
+          "plannedEnd": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2022-04-23T09:53:03.000Z"
+          },
+          "plannedStart": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2022-04-23T09:53:03.000Z"
+          },
+          "scheduledStart": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2022-04-23T09:53:03.000Z"
+          },
+          "scheduledEnd": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2022-04-23T09:53:03.000Z"
+          },
+          "shopFloorScheduledStart": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2022-04-23T09:53:03.000Z"
+          },
+          "shopFloorScheduledEnd": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2022-04-23T09:53:03.000Z"
+          },
+          "actualStart": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2022-04-23T09:53:03.000Z"
+          },
+          "actualEnd": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2022-04-23T09:53:31.000Z"
+          },
+          "customer": {
+            "type": "string",
+            "description": "The customer associated with the found order"
+          },
+          "salesOrder": {
+            "type": "string",
+            "description": "The sales order associated with the found order"
+          },
+          "salesOrderItem": {
+            "type": "string",
+            "description": "The sales order item associated with the found order"
+          },
+          "batchNumber": {
+            "type": "string",
+            "description": "The batch number of the found order"
+          },
+          "warehouseNumber": {
+            "type": "string",
+            "description": "Warehouse number"
+          },
+          "putawayStorageLocation": {
+            "type": "string",
+            "description": "Putaway storage location"
+          },
+          "priority": {
+            "type": "number",
+            "description": "Priority"
+          },
+          "workCenters": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "The work center name"
+            },
+            "description": "The work centers of the order"
+          },
+          "inspectionLot": {
+            "type": "string",
+            "description": "Inspection lot"
+          },
+          "productionVersion": {
+            "type": "string",
+            "description": "Production version"
+          },
+          "erpRoutingGroup": {
+            "type": "string",
+            "description": "ERP routing group"
+          },
+          "erpRoutingGroupCounter": {
+            "type": "string",
+            "description": "ERP routing group counter"
+          },
+          "erpBomId": {
+            "type": "string",
+            "description": "ERP BOM ID"
+          },
+          "erpBomUsage": {
+            "type": "string",
+            "description": "ERP BOM usage"
+          },
+          "erpAlternativeBomId": {
+            "type": "string",
+            "description": "ERP alternative BOM ID"
+          }
+        },
+        "description": "Found orders."
+      },
+      "Material": {
+        "title": "Material",
+        "type": "object",
+        "properties": {
+          "material": {
+            "type": "string",
+            "description": "The name of the material object"
+          },
+          "version": {
+            "type": "string",
+            "description": "The version of the material object"
+          }
+        },
+        "description": "This object represents a material."
+      },
+      "GetOrderListV2Bom": {
+        "type": "object",
+        "properties": {
+          "bom": {
+            "type": "string",
+            "description": "BOM name"
+          },
+          "type": {
+            "type": "string",
+            "description": "BOM type",
+            "enum": [
+              "MASTER",
+              "SHOP_ORDER",
+              "SFC"
+            ]
+          },
+          "version": {
+            "type": "string",
+            "description": "BOM version"
+          }
+        },
+        "description": "BOM object"
+      },
+      "GetOrderListV2Routing": {
+        "type": "object",
+        "properties": {
+          "routing": {
+            "type": "string",
+            "description": "Routing name"
+          },
+          "type": {
+            "type": "string",
+            "description": "Routing type",
+            "enum": [
+              "PRODUCTION",
+              "NC",
+              "SPECIAL",
+              "DISPOSITION",
+              "SFC",
+              "SHOP_ORDER",
+              "CONFIGURABLE",
+              "PRODUCTION_RECIPE",
+              "SHOPORDER_SPECIFIC_RECIPE"
+            ]
+          },
+          "version": {
+            "type": "string",
+            "description": "Routing version"
+          }
+        },
+        "description": "Routing object"
+      },
+      "ReleaseOrderRequest": {
+        "title": "ReleaseOrderRequest",
+        "required": [
+          "order",
+          "plant"
+        ],
+        "type": "object",
+        "properties": {
+          "order": {
+            "type": "string",
+            "description": "The order to be released"
+          },
+          "plant": {
+            "type": "string",
+            "description": "Plant"
+          },
+          "quantityToRelease": {
+            "type": "number",
+            "description": "The quantity to be released. If you provide this field, then 'targetSfcs' will not be accepted. If you want to use 'targetSfcs' to control the SFCs to be released, then this field must be removed or be empty."
+          },
+          "ignoreMaterialLotSize": {
+            "type": "boolean",
+            "description": "Set it to 'true' if you want to ignore the lot size configuration on material. If it's 'false', the lot size configuration will take effect during the request validation and release process."
+          },
+          "ignoreReleasableQuantity": {
+            "type": "boolean",
+            "description": "Set it to 'true' if you want to release more than the available order quantity and ignore the order release status as well. If it's 'false', you cannot release more than the order quantity, and you cannot release the order if it's already in status 'Released'."
+          },
+          "ignoreBomAndRoutingStatus": {
+            "type": "boolean",
+            "description": "'false' by default,set it to 'true' if you want to skip bom and routing release status check."
+          },
+          "targetSfcs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReleaseOrderTargetSfc"
+            }
+          }
+        },
+        "description": "This object represents a request to release some SFC quantity from the order."
+      },
+      "ReleaseOrderTargetSfc": {
+        "title": "ReleaseOrderTargetSfc",
+        "type": "object",
+        "properties": {
+          "identifier": {
+            "type": "string",
+            "description": "The identifier that new SFC will be generated with. If it's not provided, the system will generate one according to the  numbering configuration."
+          },
+          "quantity": {
+            "type": "number",
+            "description": "The quantity that the new SFC will be generated with. If it's not provided, the system will calculate it by material lot size (if lot size is not ignored explicitly), or raise an exception accordingly."
+          },
+          "unitOfMeasure": {
+            "type": "string",
+            "description": "Internal code of the unit of measure of the SFC to be released. It will be converted to the material base unit of measure if an alternative unit is provided."
+          }
+        },
+        "description": "This object represents a target SFC in the release order request."
+      },
+      "ReleaseOrderV2Response": {
+        "title": "ReleaseOrderV2Response",
+        "type": "object",
+        "properties": {
+          "sfcs": {
+            "type": "array",
+            "description": "The list of SFCs for checking the component quantity",
+            "items": {
+              "$ref": "#/components/schemas/SfcV2"
+            }
+          }
+        },
+        "description": "The object represents a release order response."
+      },
+      "SfcV2": {
+        "title": "This is a shop floor control (SFC) object.",
+        "type": "object",
+        "properties": {
+          "identifier": {
+            "type": "string",
+            "description": "The sfc number of shop floor control (SFC)"
+          },
+          "quantity": {
+            "type": "number",
+            "description": "The shop floor control (SFC) quantity"
+          }
+        },
+        "description": "Shop floor control (SFC) object in order response object"
+      },
+      "ErrorResponse": {
+        "title": "ErrorResponse",
+        "type": "object",
+        "properties": {
+          "causeMessage": {
+            "type": "string",
+            "description": "Contains technical reason for the error."
+          },
+          "code": {
+            "type": "string",
+            "description": "Internal error message"
+          },
+          "correlationId": {
+            "type": "string",
+            "description": "Contains correlationId for the error."
+          },
+          "message": {
+            "type": "string",
+            "description": "Contains additional information, if any"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code",
+            "format": "int32"
+          }
+        },
+        "description": "Error response."
+      },
+      "Pageable": {
+        "type": "object",
+        "properties": {
+          "offset": {
+            "type": "integer",
+            "description": "Returns the orders according to the pageNumber and pageSize you set",
+            "format": "int64"
+          },
+          "pageNumber": {
+            "type": "integer",
+            "description": "Indicates the page where orders are retrieved",
+            "format": "int32"
+          },
+          "pageSize": {
+            "type": "integer",
+            "description": "Specify the number of records on one page.",
+            "format": "int32"
+          },
+          "paged": {
+            "type": "boolean",
+            "description": "Set it to 'true' if you want the orders to be retrieved based on the properties you set in Pageable. If set to 'false', all orders are retrieved."
+          },
+          "sort": {
+            "$ref": "#/components/schemas/Sort"
+          },
+          "unpaged": {
+            "type": "boolean",
+            "description": "Indicates if the orders are retrieved based on the properties you set in Pageable, or they are all retrieved. The value of this field is automatically filled."
+          }
+        }
+      },
+      "Sort": {
+        "type": "object",
+        "properties": {
+          "empty": {
+            "type": "boolean",
+            "description": "If the value is 'true', it indicates that no order is retrieved. If the value is 'false', it indicates that there are orders retrieved."
+          },
+          "sorted": {
+            "type": "boolean",
+            "description": "If the value is 'true', it indicates that the orders retrieved are sorted accordingly. If the value is 'false', it indicates that no order is retrieved."
+          },
+          "unsorted": {
+            "type": "boolean",
+            "description": "If the value is 'false', it indicates that the orders retrieved are sorted accordingly. If the value is 'true', it indicates that no order is retrieved."
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "OauthClientCredentials": {
+        "type": "oauth2",
+        "flows": {
+          "clientCredentials": {
+            "tokenUrl": "https://{subdomain}.authentication.{tokenHost}/oauth/token",
+            "scopes": {}
+          }
+        }
+      }
+    }
+  },
+  "x-sap-shortText": "Perform order related activities, such as getting order details and releasing the order for manufacturing"
+}

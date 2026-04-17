@@ -1,0 +1,713 @@
+{
+    "openapi": "3.0.1",
+    "info": {
+        "title": "Work Center",
+        "description": "A work center can be a place, a machine, or a labor where production operations or activities are performed. This API can be used to search for work centers.",
+        "contact": {
+            "name": "SAP Digital Manufacturing Operations",
+            "email": "sap-dmoperation@sap.com"
+        },
+        "version": "v3"
+    },
+    "externalDocs": {
+        "description": "Prepare for API Integration",
+        "url": "https://help.sap.com/docs/sap-digital-manufacturing/operations-guide/prepare-for-api-integration"
+    },
+    "x-sap-shortText": "Retrieves work centers for a given plant.",
+    "servers": [
+        {
+            "url": "https://api.{regionHost}/workcenter/v3",
+            "description": "Base URL",
+            "variables": {
+                "regionHost": {
+                    "description": "The data center where SAP Digital Manufacturing is provisioned for your organization.",
+                    "enum": [
+                        "eu10.dmc.cloud.sap",
+                        "us10.dmc.cloud.sap",
+                        "eu20.dmc.cloud.sap",
+                        "us20.dmc.cloud.sap",
+                        "test.eu10.dmc.cloud.sap",
+                        "test.us10.dmc.cloud.sap",
+                        "test.eu20.dmc.cloud.sap",
+                        "test.us20.dmc.cloud.sap"
+                    ],
+                    "default": "test.eu10.dmc.cloud.sap"
+                },
+                "tokenHost": {
+                    "description": "The authentication token server where SAP Digital Manufacturing is provisioned for your organization.",
+                    "enum": [
+                        "eu10.hana.ondemand.com",
+                        "us10.hana.ondemand.com",
+                        "eu20.hana.ondemand.com",
+                        "us20.hana.ondemand.com"
+                    ],
+                    "default": "eu10.hana.ondemand.com"
+                }
+            }
+        }
+    ],
+    "security": [
+        {
+            "OauthClientCredentials": []
+        }
+    ],
+    "tags": [
+        {
+            "name": "Work Center",
+            "description": "Work Center Api V3 Controller"
+        }
+    ],
+    "paths": {
+        "/workcenter": {
+            "get": {
+                "tags": [
+                    "Work Center"
+                ],
+                "summary": "Searches for a single work center by plant and work center values.",
+                "description": "Searches for a work center by a given plant and work center name. Returns the details for the found work center.",
+                "operationId": "readWorkCenterUsingGETV3",
+                "parameters": [
+                    {
+                        "name": "plant",
+                        "in": "query",
+                        "description": "The plant where a work center is defined.",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 6
+                        }
+                    },
+                    {
+                        "name": "workCenter",
+                        "in": "query",
+                        "description": "The work center value.",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 36
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The work center was found.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/WorkCenterV3Response"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponseApiModelV2"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "You are not authorized to call this resource.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponseApiModelV2"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Accessing the resource you are trying to reach is forbidden.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponseApiModelV2"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "An internal error occurred.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponseApiModelV2"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/workcenters": {
+            "get": {
+                "tags": [
+                    "Work Center"
+                ],
+                "summary": "Searches for work centers by plant and work center values.",
+                "description": "Searches for a work center for a given plant and returns the details.",
+                "operationId": "readWorkCentersUsingGETV3",
+                "parameters": [
+                    {
+                        "name": "plant",
+                        "in": "query",
+                        "description": "The plant where a work center is defined.",
+                        "required": true,
+                        "schema": {
+                            "maxLength": 6,
+                            "minLength": 1,
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "workCenter",
+                        "in": "query",
+                        "description": "The work center value.",
+                        "required": false,
+                        "schema": {
+                            "maxLength": 36,
+                            "minLength": 1,
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "assignedUser",
+                        "in": "query",
+                        "description": "The user identifier.",
+                        "required": false,
+                        "schema": {
+                            "maxLength": 120,
+                            "minLength": 1,
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "resourceMembers",
+                        "in": "query",
+                        "description": "The resource members.",
+                        "required": false,
+                        "schema": {
+                            "maxLength": 36,
+                            "minLength": 1,
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "size",
+                        "in": "query",
+                        "description": "The quantity of work center records to be returned. If it is not specified, the default value is 100. The maximum allowed value is 100.",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32",
+                            "minimum": 1,
+                            "maximum": 100
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "The number of a page to be returned. The page number starts from 0. If it is not defined, the first page is returned.",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32",
+                            "minimum": 0
+                        }
+                    },
+                    {
+                        "name": "sort",
+                        "in": "query",
+                        "description": "This parameter is used for sorting. To define the sorting order, use comma-separated values, like 'workcenter,desc'. The default sorting order is ascending. The following sorting parameters are supported: modifiedDateTime, createdDateTime, workcenter, description, and status.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "modifiedDateTime,desc"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The work center was found.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PageableWorkCenterBasicV3Response"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponseApiModelV2"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "You are not authorized to call this resource.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponseApiModelV2"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Accessing the resource you are trying to reach is forbidden.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponseApiModelV2"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "An internal error occurred.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponseApiModelV2"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "WorkCenterV3Response": {
+                "title": "WorkCenterV3Response",
+                "description": "Work center",
+                "type": "object",
+                "properties": {
+                    "plant": {
+                        "type": "string",
+                        "description": "The plant where a work center is defined.",
+                        "pattern": "^(?! )[0-9A-Z_$!)(+~@^=\\-*. ]+(?<! )$"
+                    },
+                    "workCenter": {
+                        "type": "string",
+                        "description": "The work center value.",
+                        "pattern": "^(?! )[0-9A-Z_$!)(+~@^=\\-*. ]+(?<! )$"
+                    },
+                    "status": {
+                        "type": "string",
+                        "description": "The work center status.",
+                        "enum": [
+                            "DISABLED",
+                            "ENABLED"
+                        ]
+                    },
+                    "canBeReleasedTo": {
+                        "type": "boolean",
+                        "description": "Indicates if this work center can be released."
+                    },
+                    "category": {
+                        "type": "string",
+                        "description": "Defines the category of the work center.",
+                        "enum": [
+                            "BUILDING",
+                            "CELL",
+                            "CELL_GROUP",
+                            "LINE",
+                            "LINE_GROUP",
+                            "NONE"
+                        ]
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "The work center description."
+                    },
+                    "isErp": {
+                        "type": "boolean",
+                        "description": "Indicates if a work center was transferred from SAP ERP."
+                    },
+                    "maxNumberPeople": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "Defines a maximum number of people for this work center."
+                    },
+                    "minNumberPeople": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "Defines a minimum number of people for this work center."
+                    },
+                    "productionSupplyArea": {
+                        "type": "string",
+                        "description": "Defines a production supply area."
+                    },
+                    "oeeMembers": {
+                        "type": "array",
+                        "description": "Work center OEE members",
+                        "items": {
+                            "$ref": "#/components/schemas/WorkCenterOeeMember"
+                        }
+                    },
+                    "members": {
+                        "type": "array",
+                        "description": "Work center members",
+                        "items": {
+                            "$ref": "#/components/schemas/WorkCenterMemberV2"
+                        }
+                    },
+                    "userAssignments": {
+                        "type": "array",
+                        "description": "The users who are assigned to this work center.",
+                        "items": {
+                            "$ref": "#/components/schemas/UserAssignmentId"
+                        }
+                    },
+                    "customValues": {
+                        "type": "array",
+                        "description": "Work center custom values",
+                        "items": {
+                            "$ref": "#/components/schemas/CustomValue"
+                        }
+                    },
+                    "createdDateTime": {
+                        "type": "string",
+                        "example": "2021-07-29T03:53:33Z",
+                        "description": "The date and time when the work center was created. Format (ISO-8601): yyyy-MM-dd'T'HH:mm:ss'Z'"
+                    },
+                    "modifiedDateTime": {
+                        "type": "string",
+                        "example": "2021-07-29T03:53:33Z",
+                        "description": "The date and time when the the work center was updated. Format (ISO-8601): yyyy-MM-dd'T'HH:mm:ss'Z'"
+                    }
+                }
+            },
+            "WorkCenterBasicV3Response": {
+                "title": "WorkCenterBasicV3Response",
+                "description": "Work center",
+                "type": "object",
+                "properties": {
+                    "plant": {
+                        "type": "string",
+                        "description": "The plant where a work center is defined.",
+                        "pattern": "^(?! )[0-9A-Z_$!)(+~@^=\\-*. ]+(?<! )$"
+                    },
+                    "workCenter": {
+                        "type": "string",
+                        "description": "The work center value.",
+                        "pattern": "^(?! )[0-9A-Z_$!)(+~@^=\\-*. ]+(?<! )$"
+                    },
+                    "status": {
+                        "type": "string",
+                        "description": "The work center status.",
+                        "enum": [
+                            "DISABLED",
+                            "ENABLED"
+                        ]
+                    },
+                    "canBeReleasedTo": {
+                        "type": "boolean",
+                        "description": "Indicates if this work center can be released."
+                    },
+                    "category": {
+                        "type": "string",
+                        "description": "Defines the category of the work center.",
+                        "enum": [
+                            "BUILDING",
+                            "CELL",
+                            "CELL_GROUP",
+                            "LINE",
+                            "LINE_GROUP",
+                            "NONE"
+                        ]
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "The work center description."
+                    },
+                    "isErp": {
+                        "type": "boolean",
+                        "description": "Indicates if a work center was transferred from SAP ERP."
+                    },
+                    "maxNumberPeople": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "Defines a maximum number of people for this work center."
+                    },
+                    "minNumberPeople": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "Defines a minimum number of people for this work center."
+                    },
+                    "productionSupplyArea": {
+                        "type": "string",
+                        "description": "Defines a production supply area."
+                    },
+                    "createdDateTime": {
+                        "type": "string",
+                        "example": "2021-07-29T03:53:33Z",
+                        "description": "The date and time when the work center was created. Format (ISO-8601): yyyy-MM-dd'T'HH:mm:ss'Z'"
+                    },
+                    "modifiedDateTime": {
+                        "type": "string",
+                        "example": "2021-07-29T03:53:33Z",
+                        "description": "The date and time when the the work center was updated. Format (ISO-8601): yyyy-MM-dd'T'HH:mm:ss'Z'"
+                    }
+                }
+            },
+            "WorkCenterMemberV2": {
+                "title": "WorkCenterMemberV2",
+                "description": "Defines the resources and work centers that are part of this work center.",
+                "type": "object",
+                "properties": {
+                    "resource": {
+                        "$ref": "#/components/schemas/ResourceId"
+                    },
+                    "workCenter": {
+                        "$ref": "#/components/schemas/WorkCenterId"
+                    },
+                    "defaultMember": {
+                        "type": "boolean",
+                        "description": "Indicates if it is a default member."
+                    },
+                    "monitoringRelevant": {
+                        "type": "boolean",
+                        "description": "Indicates if it is relevant for monitoring."
+                    },
+                    "schedulingRelevant": {
+                        "type": "boolean",
+                        "description": "Indicates if it is relevant for scheduling."
+                    }
+                }
+            },
+            "WorkCenterOeeMember": {
+                "title": "WorkCenterOeeMember",
+                "description": "Defines resource memebers that are part of the OEE hierarchy.",
+                "type": "object",
+                "properties": {
+                    "bottleneckMultiplier": {
+                        "type": "number",
+                        "description": "Represents a bottleneck multiplier."
+                    },
+                    "isBottleneck": {
+                        "type": "boolean",
+                        "description": "Indicates if this resource is a bottleneck."
+                    },
+                    "resource": {
+                        "$ref": "#/components/schemas/ResourceId"
+                    },
+                    "status": {
+                        "type": "string",
+                        "description": "The status of the OEE work center member.",
+                        "enum": [
+                            "DISABLED",
+                            "ENABLED"
+                        ]
+                    },
+                    "members": {
+                        "type": "array",
+                        "description": "Members of this node.",
+                        "items": {
+                            "$ref": "#/components/schemas/WorkCenterOeeMemberNode"
+                        }
+                    }
+                }
+            },
+            "WorkCenterOeeMemberNode": {
+                "title": "WorkCenterOeeMemberNode",
+                "description": "Defines resource members that are part of the OEE hierarchy.",
+                "type": "object",
+                "properties": {
+                    "bottleneckMultiplier": {
+                        "type": "number",
+                        "description": "Represents a bottleneck multiplier."
+                    },
+                    "isBottleneck": {
+                        "type": "boolean",
+                        "description": "Indicates if this resource is a bottleneck."
+                    },
+                    "resource": {
+                        "$ref": "#/components/schemas/ResourceId"
+                    },
+                    "status": {
+                        "type": "string",
+                        "description": "The status of the OEE work center member.",
+                        "enum": [
+                            "DISABLED",
+                            "ENABLED"
+                        ]
+                    }
+                }
+            },
+            "UserAssignmentId": {
+                "title": "UserAssignmentId",
+                "description": "The user unique data.",
+                "type": "object",
+                "required": [
+                    "plant",
+                    "userId"
+                ],
+                "properties": {
+                    "plant": {
+                        "type": "string",
+                        "description": "The plant where a user is created.",
+                        "pattern": "^(?! )[0-9A-Z_$!)(+~@^=\\-*. ]+(?<! )$"
+                    },
+                    "userId": {
+                        "type": "string",
+                        "description": "The user identifier.",
+                        "pattern": "^(?! )[0-9A-Z_$!)(+~@^=\\-*. ]+(?<! )$"
+                    }
+                }
+            },
+            "ResourceId": {
+                "title": "ResourceId",
+                "description": "Resource identifier.",
+                "type": "object",
+                "required": [
+                    "plant",
+                    "resource"
+                ],
+                "properties": {
+                    "plant": {
+                        "type": "string",
+                        "pattern": "^(?! )[0-9A-Z_$!)(+~@^=\\-*. ]+(?<! )$"
+                    },
+                    "resource": {
+                        "type": "string",
+                        "pattern": "^(?! )[0-9A-Z_$!)(+~@^=\\-*. ]+(?<! )$"
+                    }
+                }
+            },
+            "WorkCenterId": {
+                "title": "WorkCenterId",
+                "description": "The work center identifier.",
+                "type": "object",
+                "required": [
+                    "plant",
+                    "workcenter"
+                ],
+                "properties": {
+                    "plant": {
+                        "type": "string"
+                    },
+                    "workСenter": {
+                        "type": "string"
+                    }
+                }
+            },
+            "CustomValue": {
+                "title": "CustomValue",
+                "description": "Custom value",
+                "type": "object",
+                "properties": {
+                    "attribute": {
+                        "type": "string"
+                    },
+                    "value": {
+                        "type": "string"
+                    }
+                }
+            },
+            "ErrorResponseApiModelV2": {
+                "title": "ErrorResponse",
+                "type": "object",
+                "properties": {
+                    "error": {
+                        "$ref": "#/components/schemas/ErrorResponseApiModel"
+                    }
+                }
+            },
+            "ErrorResponseApiModel": {
+                "title": "ErrorResponseApiModel",
+                "type": "object",
+                "properties": {
+                    "code": {
+                        "type": "string",
+                        "description": "Contains a technical code for the error."
+                    },
+                    "correlationId": {
+                        "type": "string",
+                        "description": "Contains a correlation ID for the error."
+                    },
+                    "message": {
+                        "type": "string",
+                        "description": "Error message."
+                    },
+                    "details": {
+                        "type": "array",
+                        "description": "Error message details.",
+                        "items": {
+                            "$ref": "#/components/schemas/ErrorDetail"
+                        }
+                    }
+                },
+                "description": "Error response."
+            },
+            "ErrorDetail": {
+                "title": "ErrorDetail",
+                "type": "object",
+                "properties": {
+                    "code": {
+                        "type": "string",
+                        "description": "Contains a technical code for the error."
+                    },
+                    "message": {
+                        "type": "string",
+                        "description": "Contains a detailed message for the error."
+                    }
+                },
+                "description": "Error detail."
+            },
+            "PageableWorkCenterBasicV3Response": {
+                "description": "The work center page response.",
+                "type": "object",
+                "properties": {
+                    "content": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/WorkCenterBasicV3Response"
+                        }
+                    },
+                    "number": {
+                        "type": "number",
+                        "format": "int32",
+                        "description": "The current page number."
+                    },
+                    "size": {
+                        "type": "number",
+                        "format": "int32",
+                        "description": "The size of the page."
+                    },
+                    "totalElements": {
+                        "type": "number",
+                        "format": "int64",
+                        "description": "The total number of elements."
+                    },
+                    "totalPages": {
+                        "type": "number",
+                        "format": "int32",
+                        "description": "The total number of pages."
+                    },
+                    "empty": {
+                        "type": "boolean",
+                        "description": "Indicates if the page is empty."
+                    }
+                }
+            }
+        },
+        "securitySchemes": {
+            "OauthClientCredentials": {
+                "type": "oauth2",
+                "flows": {
+                    "clientCredentials": {
+                        "tokenUrl": "https://{subdomain}.authentication.{tokenHost}/oauth/token",
+                        "scopes": {}
+                    }
+                }
+            }
+        }
+    }
+}

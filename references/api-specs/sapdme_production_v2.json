@@ -1,0 +1,389 @@
+{
+    "openapi": "3.0.1",
+    "info": {
+        "title": "Production Change",
+        "description": "You use this service to assign a new Bill of Materials (BOM), a routing, or both to one or more Shop Floor Controls (SFCs). By using this endpoint, you can update the SFCs with the appropriate components and operation activities from the new BOM and routing. Additionally, this endpoint supports assigning a new routing to SFCs that have a partial quantity at a specific step. It also enables queueing at a particular routing step for each SFC and queueing at groups in the new routing.",
+        "version": "v2",
+        "contact": {
+            "name": "SAP Digital Manufacturing Operations",
+            "email": "sap-dmoperation@sap.com"
+        }
+    },
+    "externalDocs": {
+        "description": "Prepare for API Integration",
+        "url": "https://help.sap.com/docs/sap-digital-manufacturing/apis/production-change-v2"
+    },
+    "servers": [
+        {
+            "url": "https://api.{regionHost}/production/v2",
+            "description": "Base URL",
+            "variables": {
+                "regionHost": {
+                    "description": "The data center where SAP Digital Manufacturing is provisioned for your organization",
+                    "enum": [
+                        "eu10.dmc.cloud.sap",
+                        "eu20.dmc.cloud.sap",
+                        "us10.dmc.cloud.sap",
+                        "us20.dmc.cloud.sap",
+                        "test.eu10.dmc.cloud.sap",
+                        "test.eu20.dmc.cloud.sap",
+                        "test.us10.dmc.cloud.sap",
+                        "test.us20.dmc.cloud.sap"
+                    ],
+                    "default": "test.eu10.dmc.cloud.sap"
+                },
+                "tokenHost": {
+                    "description": "The authentication server where SAP Digital Manufacturing is provisioned for your organization",
+                    "enum": [
+                        "eu10.hana.ondemand.com",
+                        "eu20.hana.ondemand.com",
+                        "us10.hana.ondemand.com",
+                        "us20.hana.ondemand.com"
+                    ],
+                    "default": "eu10.hana.ondemand.com"
+                }
+            }
+        }
+    ],
+    "security": [
+        {
+            "OauthClientCredentials": []
+        }
+    ],
+    "tags": [
+        {
+            "name": "Production Change"
+        }
+    ],
+    "paths": {
+        "/changeProduction": {
+            "post": {
+                "tags": [
+                    "Production Change"
+                ],
+                "summary": "Assigns a new routing or BOM to SFCs",
+                "description": "Assigns a new routing or BOM, or both, to specific SFCs in the discrete industry. Before making the change, make sure each SFC is only being processed at one operation if the current router has relaxed flow enabled.",
+                "requestBody": {
+                    "description": "Request object to change production.",
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ChangeProductionRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Shop floor changes have been made to the production.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ChangeProductionResponse"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ChangeProductionResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "You are not authorized to call this resource.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ChangeProductionResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Accessing the resource you are trying to reach is forbidden.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ChangeProductionResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "One of the related elements is not found.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ChangeProductionResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "There was an internal error somewhere in the call chain.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ChangeProductionResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "ChangeProductionRequest": {
+                "type": "object",
+                "description": "Request object to change production.",
+                "required": [
+                    "plant",
+                    "sfcs"
+                ],
+                "properties": {
+                    "plant": {
+                        "type": "string",
+                        "description": "The plant of the SFC."
+                    },
+                    "sfcs": {
+                        "type": "array",
+                        "description": "The list of SFCs you want to make changes to.",
+                        "items": {
+                            "type": "object",
+                            "required": [
+                                "sfc"
+                            ],
+                            "properties": {
+                                "sfc": {
+                                    "type": "string",
+                                    "description": "Specify the SFC you want to make changes to."
+                                },
+                                "routingStepId": {
+                                    "description": "Identifies a specific routing step. If not provided, 'placeSFCIn' is used. If both are empty, SFC is queued at the first operation. If both are provided, 'routingStepId' is used.",
+                                    "type": "string"
+                                },
+                                "placeSFCIn": {
+                                    "type": "string",
+                                    "description": "Specifies SFC's queue location in new routing. If not provided, 'routingStepId' is used. If both are empty, SFC is queued at the first operation. If both are provided, 'routingStepId' is used.",
+                                    "$ref": "#/components/schemas/PlaceSFCIn"
+                                }
+                            }
+                        }
+                    },
+                    "routing": {
+                        "description": "The new routing to be assigned to the SFC. If you've filled both 'routing' and 'bom', then the relevant operation activities of the BOM components must exist or partially exist in the newly assigned routing. Otherwise, the assignment will fail.",
+                        "$ref": "#/components/schemas/RoutingId"
+                    },
+                    "routingStepId": {
+                        "description": "Identifies a specific routing step for all SFCs. If ‘routingStepId’ is provided at SFC level, it takes precedence. If not provided, 'placeSFCIn' is considered. If both are empty, SFC is queued at the first operation. If both are provided, 'routingStepId' is used.",
+                        "type": "string"
+                    },
+                    "placeSFCIn": {
+                        "type": "string",
+                        "description": "Specifies SFC's queue location for all SFCs. If ‘placeSFCIn’ is provided at SFC level, it takes precedence. If not provided, 'routingStepId' is considered. If both are empty, SFC is queued at the first operation. If both are provided, 'routingStepId' is used.",
+                        "$ref": "#/components/schemas/PlaceSFCIn"
+                    },
+                    "bom": {
+                        "description": "The new BOM to be assigned to the SFC. If you've filled both 'bom' and 'routing', then the relevant operation activities of the BOM components must exist or partially exist in the newly assigned routing. Otherwise, the assignment will fail.",
+                        "$ref": "#/components/schemas/BomId"
+                    },
+                    "quantityCopy": {
+                        "type": "boolean",
+                        "default": false,
+                        "description": "Flag to determine if step quantity data is copied to new routing."
+                    },
+                    "dataCollectionCopy": {
+                        "type": "boolean",
+                        "default": false,
+                        "description": "Flag to determine if data collection data is copied."
+                    },
+                    "activityConfirmationCopy": {
+                        "type": "boolean",
+                        "default": false,
+                        "description": "Flag to determine if activity confirmation data is copied."
+                    }
+                }
+            },
+            "ChangeProductionResponse": {
+                "type": "object",
+                "description": "Response object of production change.",
+                "properties": {
+                    "status": {
+                        "type": "string",
+                        "description": "The status of the production change which indicates either Success, Failure or Partial Success"
+                    },
+                    "data": {
+                        "type": "object",
+                        "description": "Response object that contains the success and failed list of SFCs",
+                        "properties": {
+                            "success": {
+                                "type": "array",
+                                "description": "The SFCs to change successfully.",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "sfc": {
+                                            "type": "string",
+                                            "description": "The SFC to change successfully."
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "description": "The message of the SFC to change successfully."
+                                        }
+                                    }
+                                }
+                            },
+                            "failed": {
+                                "type": "array",
+                                "description": "SFCs that have failed to change the production. The HTTP status of the response will have the greatest HTTP error status code of the failed SFCs.",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "code": {
+                                            "type": "string",
+                                            "description": "Internal error message."
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "description": "Contains additional information, if any."
+                                        },
+                                        "correlationId": {
+                                            "type": "string",
+                                            "description": "Contains correlationId for the error."
+                                        },
+                                        "causeMessage": {
+                                            "type": "string",
+                                            "description": "Contains technical reason for the error."
+                                        },
+                                        "arguments": {
+                                            "type": "array",
+                                            "description": "The SFC that failed to change production and/or other parameters relevant to the error message.",
+                                            "items": {
+                                                "type": "string"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "RoutingId": {
+                "type": "object",
+                "required": [
+                    "routing",
+                    "routingType",
+                    "version"
+                ],
+                "properties": {
+                    "routing": {
+                        "type": "string",
+                        "description": "Name of the new routing."
+                    },
+                    "routingType": {
+                        "type": "string",
+                        "description": "The type of the new routing. If the routingType is SHOPORDER_SPECIFIC, while the property 'bom' is not filled, then order-specific BOM will be assigned to the SFC with the assignment of the new routing.",
+                        "enum": [
+                            "PRODUCTION",
+                            "SHOPORDER_SPECIFIC"
+                        ]
+                    },
+                    "version": {
+                        "type": "string",
+                        "description": "The version of the new routing."
+                    }
+                },
+                "title": "RoutingId"
+            },
+            "BomId": {
+                "type": "object",
+                "required": [
+                    "bom",
+                    "bomType",
+                    "version"
+                ],
+                "properties": {
+                    "bom": {
+                        "type": "string",
+                        "description": "The name of the new Bill of Materials."
+                    },
+                    "bomType": {
+                        "type": "string",
+                        "description": "The type of the new Bill of Materials.",
+                        "enum": [
+                            "USERBOM",
+                            "SHOPORDERBOM",
+                            "SFCBOM"
+                        ]
+                    },
+                    "version": {
+                        "type": "string",
+                        "description": "The version of the new Bill of Materials."
+                    }
+                },
+                "title": "BomId"
+            },
+            "PlaceSFCIn": {
+                "type": "string",
+                "description": "It is used to specify the queueing rules to be applied when queueing at the new routing. Specify FIRST to queue the SFC at the first step of the new routing. Specify FIRST_UNCOMPLETED to queue the SFC at the first uncompleted step of the new routing. In the second case, the new routing must contain the operation which is currently being processed by the SFC.",
+                "enum": [
+                    "FIRST",
+                    "FIRST_UNCOMPLETED"
+                ]
+            }
+        },
+        "securitySchemes": {
+            "OauthClientCredentials": {
+                "type": "oauth2",
+                "flows": {
+                    "clientCredentials": {
+                        "tokenUrl": "https://{subdomain}.authentication.{tokenHost}/oauth/token",
+                        "scopes": {}
+                    }
+                }
+            }
+        }
+    },
+    "x-sap-shortText": "Perform production changes to a shop floor control",
+    "x-servers": [
+        {
+            "url": "https://api.{regionHost}/production/v2",
+            "description": "Base URL",
+            "templates": {
+                "regionHost": {
+                    "description": "The data center where SAP Digital Manufacturing is provisioned for your organization",
+                    "enum": [
+                        "eu10.dmc.cloud.sap",
+                        "us10.dmc.cloud.sap",
+                        "eu20.dmc.cloud.sap",
+                        "us20.dmc.cloud.sap",
+                        "test.eu10.dmc.cloud.sap",
+                        "test.us10.dmc.cloud.sap",
+                        "test.eu20.dmc.cloud.sap",
+                        "test.us20.dmc.cloud.sap"
+                    ],
+                    "default": "test.eu10.dmc.cloud.sap"
+                },
+                "tokenHost": {
+                    "description": "The authentication token server where SAP Digital Manufacturing is provisioned for your organization",
+                    "enum": [
+                        "eu10.hana.ondemand.com",
+                        "us10.hana.ondemand.com",
+                        "eu20.hana.ondemand.com",
+                        "us20.hana.ondemand.com"
+                    ],
+                    "default": "eu10.hana.ondemand.com"
+                }
+            }
+        }
+    ]
+}

@@ -1,0 +1,685 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Work in Process (WIP) Activities",
+    "description": "Work in process or work-in-process(WIP) products are semi-finished goods that are waiting for completion or usage in further production. The WIP API is designed for integration with Extended Warehouse Management (EWM). You can use this API service to perform a series of operations such as posting WIP storage, staging, and goods issue requests to EWM.",
+    "contact": {
+      "name": "SAP Digital Manufacturing Operations",
+      "email": "sap-dmoperation@sap.com"
+    },
+    "version": "v1"
+  },
+  "externalDocs": {
+    "description": "Prepare for API Integration",
+    "url": "https://help.sap.com/docs/sap-digital-manufacturing/operations-guide/prepare-for-api-integration"
+  },
+  "servers": [
+    {
+      "url": "https://api.{regionHost}/wip/v1",
+      "description": "Base URL",
+      "variables": {
+        "regionHost": {
+          "description": "The data center where SAP Digital Manufacturing is provisioned for your organization.",
+          "enum": [
+            "eu10.dmc.cloud.sap",
+            "us10.dmc.cloud.sap",
+            "eu20.dmc.cloud.sap",
+            "us20.dmc.cloud.sap",
+            "test.eu10.dmc.cloud.sap",
+            "test.us10.dmc.cloud.sap",
+            "test.eu20.dmc.cloud.sap",
+            "test.us20.dmc.cloud.sap"
+          ],
+          "default": "test.eu10.dmc.cloud.sap"
+        },
+        "tokenHost": {
+          "description": "The authentication token server where SAP Digital Manufacturing is provisioned for your organization.",
+          "enum": [
+            "eu10.hana.ondemand.com",
+            "us10.hana.ondemand.com",
+            "eu20.hana.ondemand.com",
+            "us20.hana.ondemand.com"
+          ],
+          "default": "eu10.hana.ondemand.com"
+        }
+      }
+    }
+  ],
+  "security": [
+    {
+      "OauthClientCredentials": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "WIP Handling"
+    }
+  ],
+  "paths": {
+    "/storageRequest": {
+      "post": {
+        "tags": [
+          "WIP Handling"
+        ],
+        "summary": "Posts a work-in-process (WIP) storage request to EWM.",
+        "description": "Posts a WIP storage request to EWM for a given plant. You can include WIP products from one or more orders in a single request, as long as you store them in the same warehouse.",
+        "operationId": "storageRequestPOST",
+        "requestBody": {
+          "description": "request",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WipStorageRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "The WIP storage request has been posted to EWM.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WipStorageResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The HTTP request is invalid and can't be processed by the server.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseApiModel"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid or expired token.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseApiModel"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "You are not authorized to access the resource.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseApiModel"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Some required properties (e.g. sfc or operation) couldn't be retrieved.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseApiModel"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "There was an internal error somewhere in the call chain.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseApiModel"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false,
+        "x-codegen-request-body-name": "request"
+      }
+    },
+    "/stagingRequest": {
+      "post": {
+        "tags": [
+          "WIP Handling"
+        ],
+        "summary": "Posts a work-in-process (WIP) staging request to EWM.",
+        "description": "Posts a WIP staging request to EWM for a given plant.",
+        "operationId": "stagingRequestPOST",
+        "requestBody": {
+          "description": "request",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WipStagingRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "The WIP staging request has been posted to EWM.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WipStagingResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The HTTP request is invalid and can't be processed by the server.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseApiModel"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid or expired token.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseApiModel"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "You are not authorized to access the resource.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseApiModel"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "One of the required elements couldn't be retrieved.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseApiModel"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "There was an internal error somewhere in the call chain.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseApiModel"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false,
+        "x-codegen-request-body-name": "request"
+      }
+    },
+    "/goodsIssueRequest": {
+      "post": {
+        "tags": [
+          "WIP Handling"
+        ],
+        "summary": "Posts a WIP goods issue request to EWM.",
+        "description": "Posts a WIP goods issue request to EWM for a given plant.",
+        "operationId": "goodsIssueRequestPOST",
+        "requestBody": {
+          "description": "request",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WipGoodsIssueRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "The WIP goods issue request has been posted to EWM.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WipGoodsIssueResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The HTTP request is invalid and can't be processed by the server.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseApiModel"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid or expired token.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseApiModel"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "You are not authorized to access the resource.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseApiModel"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "One of the required elements couldn't be retrieved.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseApiModel"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "There was an internal error somewhere in the call chain.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseApiModel"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false,
+        "x-codegen-request-body-name": "request"
+      }
+    },
+    "/storageRequest/discard": {
+      "post": {
+        "tags": [
+          "WIP Handling"
+        ],
+        "summary": "Discards a work-in-process (WIP) storage request.",
+        "description": "Discards a WIP storage request for a given plant and storage request number.",
+        "operationId": "discardWipStorage",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DiscardWipStorageRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "The WIP storage request has been discarded.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiscardWipStorageResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The HTTP request is invalid and can't be processed by the server.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseApiModel"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid or expired token.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseApiModel"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "You are not authorized to access the resource.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseApiModel"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "One of the required elements couldn't be retrieved.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseApiModel"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "There was an internal error somewhere in the call chain.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseApiModel"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "WipStorageRequest": {
+        "title": "WipStorageRequest",
+        "required": [
+          "plant",
+          "items"
+        ],
+        "type": "object",
+        "properties": {
+          "plant": {
+            "type": "string",
+            "description": "The plant where the WIP storage request is performed."
+          },
+          "warehouseNumber": {
+            "type": "string",
+            "description": "The EWM warehouse number where you store your WIP products. If you don't fill in this property, the system uses the warehouse number retrieved from the order. You need to either specify both the warehouse number and the storage location, or don't specify any at all."
+          },
+          "plannedDeliveryDateTime": {
+            "type": "string",
+            "description": "The date and time (UTC) when you plan to deliver the WIP products to the EWM warehouse.",
+            "format": "date-time",
+            "example": "2023-12-05T09:25:26.822Z"
+          },
+          "items": {
+            "type": "array",
+            "description": "The list of WIP storage request items.",
+            "items": {
+              "$ref": "#/components/schemas/StorageItems"
+            }
+          }
+        }
+      },
+      "StorageItems": {
+        "title": "StorageItems",
+        "type": "object",
+        "required": ["productionSupplyArea"],
+        "properties": {
+          "sfc": {
+            "type": "string",
+            "description": "The Shop Floor Control (SFC) for which the WIP storage request is performed. The specified SFC should not be packed in any packing unit. Provide either the SFC or the packing unit if you're requesting only a single item. For requests involving multiple items, you're able to specify multiple SFCs. The SFC, whether it's in a status of In Queue or Hold, need to be queued at a specific operation activity with the full quantity."
+          },
+          "packingUnit": {
+            "type": "string",
+            "description": "The packing unit of the WIP products. Provide either the SFC or the packing unit if you're requesting only a single item. You're unable to specify a packing unit in requests involving multiple items."
+          },
+          "storageLocation": {
+            "type": "string",
+            "description": "The storage location where you store the WIP products. It needs to be the location that's mapped to the specified warehouse number. If you don't fill in this property, the system defaults to using the storage location retrieved from the order. You need to either specify both the warehouse number and the storage location, or don't specify any at all."
+          },
+          "comment": {
+            "type": "string",
+            "description": "The comment you want to add to the WIP storage request item."
+          },
+          "material": {
+            "type": "string",
+            "description": "The material (finished goods) of the order for which the WIP storage request is performed. You can provide a custom value for this property, but it's optional. If you don't fill in this property, the system defaults to using the material retrieved from the order."
+          },
+          "productionVersion": {
+            "type": "string",
+            "description": "The production version of the order for which the WIP storage request is performed. You can provide a custom value for this property, but it's optional. If you don't fill in this property, the system defaults to using the production version retrieved from the order."
+          },
+          "erpRouting": {
+            "type": "string",
+            "description": "The routing of the order for which the WIP storage request is performed. You can provide a custom value for this property, but it's optional. If you don't fill in this property, the system defaults to using the ERP routing group retrieved from the order."
+          },
+          "erpOperation": {
+            "type": "string",
+            "description": "The most recent operation that the SFC completed. You can provide a custom value for this property, but it's optional. If you don't fill in this property, the system defaults to using the corresponding ERP operation retrieved from the order."
+          }
+        },
+        "description": "The list of items for the WIP storage request."
+      },
+      "WipStorageResponse": {
+        "title": "WipStorageResponse",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The response ID of the WIP storage request."
+          }
+        }
+      },
+      "WipStagingRequest": {
+        "title": "WipStagingRequest",
+        "required": [
+          "plant",
+          "items"
+        ],
+        "type": "object",
+        "properties": {
+          "plant": {
+            "type": "string",
+            "description": "The plant where the WIP staging request is performed."
+          },
+          "warehouseNumber": {
+            "type": "string",
+            "description": "The EWM warehouse number from which you stage the WIP products. If you don't fill in this property, the system uses the warehouse number retrieved from the order. You need to either specify both the warehouse number and the storage location, or don't specify any at all."
+          },
+          "items": {
+            "type": "array",
+            "description": "The list of WIP staging request items.",
+            "items": {
+              "$ref": "#/components/schemas/StagingItems"
+            }
+          }
+        }
+      },
+      "StagingItems": {
+        "title": "StagingItems",
+        "type": "object",
+        "required": ["productionSupplyArea"],
+        "properties": {
+          "sfc": {
+            "type": "string",
+            "description": "The Shop Floor Control (SFC) for which the WIP storage request is performed. The specified SFC should not be packed in any packing unit. Provide either the SFC or the packing unit if you're requesting only a single item. For requests involving multiple items, you're able to specify multiple SFCs."
+          },
+          "packingUnit": {
+            "type": "string",
+            "description": "The packing unit of the WIP products. Provide either the SFC or the packing unit if you're requesting only a single item. You're unable to specify a packing unit in requests involving multiple items."
+          },
+          "productionSupplyArea": {
+            "type": "string",
+            "description": "The production supply area where you deliver the staged WIP products."
+          },
+          "storageLocation": {
+            "type": "string",
+            "description": "The storage location where you stage the WIP products. It needs to be the location that's mapped to the specified warehouse number. If you don't fill in this property, the system uses the storage location retrieved from the order. You need to either specify both the warehouse number and the storage location, or don't specify any at all."
+          },
+          "plannedDeliveryDateTime": {
+            "type": "string",
+            "description": "The date and time (UTC) when you plan to deliver the staged WIP products to the production supply area.",
+            "format": "date-time",
+            "example": "2023-12-05T09:25:26.822Z"
+          }
+        },
+        "description": "The list of items for the WIP staging request."
+      },
+      "WipStagingResponse": {
+        "title": "WipStagingResponse",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The response ID of the WIP staging request."
+          }
+        }
+      },
+      "WipGoodsIssueRequest": {
+        "title": "WipGoodsIssueRequest",
+        "required": [
+          "plant",
+          "items"
+        ],
+        "type": "object",
+        "properties": {
+          "plant": {
+            "type": "string",
+            "description": "The plant where the WIP goods issue request is performed."
+          },
+          "warehouseNumber": {
+            "type": "string",
+            "description": "The EWM warehouse number where you consume your WIP products. If you don't fill in this property, the system uses the warehouse number retrieved from the order."
+          },
+          "items": {
+            "type": "array",
+            "description": "The list of WIP goods issue request items.",
+            "items": {
+              "$ref": "#/components/schemas/GoodsIssueItems"
+            }
+          }
+        }
+      },
+      "GoodsIssueItems": {
+        "title": "GoodsIssueItems",
+        "type": "object",
+        "required": ["productionSupplyArea"],
+        "properties": {
+          "sfc": {
+            "type": "string",
+            "description": "The Shop Floor Control (SFC) for which the WIP storage request is performed. The specified SFC should not be packed in any packing unit. Provide either the SFC or the packing unit if you're requesting only a single item. For requests involving multiple items, you're able to specify multiple SFCs."
+          },
+          "packingUnit": {
+            "type": "string",
+            "description": "The packing unit of the WIP products. Provide either the SFC or the packing unit if you're requesting only a single item. You're unable to specify a packing unit in requests involving multiple items."
+          },
+          "productionSupplyArea": {
+            "type": "string",
+            "description": "The production supply area where you consume the WIP products."
+          }
+        },
+        "description": "The list of items for the WIP goods issue request."
+      },
+      "WipGoodsIssueResponse": {
+        "title": "WipGoodsIssueResponse",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The response ID of the WIP goods issue request."
+          }
+        }
+      },
+      "DiscardWipStorageRequest": {
+        "required": [
+          "storageRequestNumber"
+        ],
+        "type": "object",
+        "properties": {
+          "plant": {
+            "type": "string",
+            "description": "The plant where the WIP storage request is discarded."
+          },
+          "storageRequestNumber": {
+            "type": "string",
+            "description": "The ID of the storage request you want to discard. You can find it in the response of the post storage request API."
+          }
+        }
+      },
+      "DiscardWipStorageResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "description": "Indicates if you have successfully discarded the WIP storage request or not.",
+            "enum": [
+              "SUCCESS",
+              "FAILURE"
+            ]
+          }
+        }
+      },
+      "ErrorResponseApiModel": {
+        "title": "ErrorResponseApiModel",
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "Contains a technical code for the error."
+          },
+          "correlationId": {
+            "type": "string",
+            "description": "Contains a correlation ID for the error."
+          },
+          "message": {
+            "type": "string",
+            "description": "Error message."
+          },
+          "details": {
+            "type": "array",
+            "description": "Error message details.",
+            "items": {
+              "$ref": "#/components/schemas/ErrorDetail"
+            }
+          }
+        },
+        "description": "Error response."
+      },
+      "ErrorDetail": {
+        "title": "ErrorDetail",
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "Contains a technical code for the error."
+          },
+          "message": {
+            "type": "string",
+            "description": "Error message."
+          }
+        },
+        "description": "Error detail."
+      }
+    },
+    "securitySchemes": {
+      "OauthClientCredentials": {
+        "type": "oauth2",
+        "flows": {
+          "clientCredentials": {
+            "tokenUrl": "https://{subdomain}.authentication.{tokenHost}/oauth/token",
+            "scopes": {}
+          }
+        }
+      }
+    }
+  },
+  "x-sap-shortText": "Perform production activities for work-in-process (WIP) products, such as storing, staging and consuming them by posting WIP requests to Extended Warehouse Management",
+  "x-original-swagger-version": "2.0"
+}

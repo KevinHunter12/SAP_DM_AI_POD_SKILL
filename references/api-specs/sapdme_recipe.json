@@ -1,0 +1,1370 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "Allows you to interact with recipes. For example, you can find, create, and delete recipes with phase steps, recipe operation groups, and custom values.",
+    "version": "v1",
+    "title": "Recipe",
+    "contact": {
+      "name": "SAP Digital Manufacturing Operations",
+      "email": "sap-dmoperation@sap.com"
+    }
+  },
+  "host": "hostname",
+  "basePath": "/",
+  "tags": [
+    {
+      "name": "recipe",
+      "description": "Recipe Api Controller"
+    }
+  ],
+  "security": [
+    {
+      "OAuthSecurity": []
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/recipes": {
+      "get": {
+        "tags": [
+          "Recipe"
+        ],
+        "summary": "Finds a recipe by plant, recipe name, recipe type, and recipe version",
+        "description": "This endpoint can be called to find a recipe by search parameters. The required parameters are plant, recipe name. The version is optional. If a version is not present, the current recipe version will be returned. The recipe type is optional, the default value is PRODUCTION",
+        "operationId": "findRecipeByPlantAndNameUsingGET_1",
+        "parameters": [
+          {
+            "name": "plant",
+            "in": "query",
+            "description": "The plant for which the request is executed.",
+            "required": true,
+            "type": "string",
+            "allowEmptyValue": false
+          },
+          {
+            "name": "recipe",
+            "in": "query",
+            "description": "The recipe name.",
+            "required": true,
+            "type": "string",
+            "allowEmptyValue": false
+          },
+          {
+            "name": "recipeType",
+            "in": "query",
+            "description": "The type of the recipe.",
+            "required": false,
+            "type": "string",
+            "default": "PRODUCTION",
+            "enum": [
+              "PRODUCTION",
+              "SHOP_ORDER"
+            ]
+          },
+          {
+            "name": "version",
+            "in": "query",
+            "description": "The version of the recipe.",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Message successfully processed.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Recipe"
+              }
+            }
+          },
+          "400": {
+            "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to call this resource.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Accessing the resource you are trying to reach is forbidden.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "One of the related elements is not found.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "An internal error occurred.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "deprecated": false
+      },
+      "post": {
+        "tags": [
+          "Recipe"
+        ],
+        "summary": "Creates a list of recipes.",
+        "description": "Creates a list of recipes for the given plant.",
+        "operationId": "createRecipePOST_1",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "recipeApiModelList",
+            "description": "The list of recipes to create.",
+            "required": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Recipe"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "The message was successfully processed.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Recipe"
+              }
+            }
+          },
+          "400": {
+            "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to call this resource.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Accessing the resource you are trying to reach is forbidden.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "One of the related elements is not found.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "409": {
+            "description": "One of the recipes already exists.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "An internal error occurred.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Recipe"
+        ],
+        "summary": "Updates a list of recipes.",
+        "description": "Updates a list of recipes for the given plant. If the hasBeenReleased property is set to true, then the following fields are updated:\n - the description, current version, quantity validation, entry phase ID, custom values, and operation groups fields of a recipe;\n - the description, entry, work center, production process ID fields of a recipe phase;\n - the weight relevant field of a recipe operation phase;\n - the tolerance over and under fields of a recipe phase component.",
+        "operationId": "updateRecipesPUT_1",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "recipeApiModelList",
+            "description": "The list of recipes to update.",
+            "required": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Recipe"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "The message was successfully processed.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Recipe"
+              }
+            }
+          },
+          "400": {
+            "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to call this resource.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Accessing the resource you are trying to reach is forbidden.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "One of the related elements is not found.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "An internal error occurred.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Recipe"
+        ],
+        "summary": "Deletes a recipe by plant, recipe name, recipe version, and recipe type.",
+        "description": "Deletes a recipe by plant, recipe name, version, and recipe type.",
+        "operationId": "deleteRecipeDELETE_1",
+        "parameters": [
+          {
+            "name": "plant",
+            "in": "query",
+            "description": "The plant for which request is executed.",
+            "required": true,
+            "type": "string",
+            "allowEmptyValue": false
+          },
+          {
+            "name": "recipe",
+            "in": "query",
+            "description": "The recipe name.",
+            "required": true,
+            "type": "string",
+            "allowEmptyValue": false
+          },
+          {
+            "name": "version",
+            "in": "query",
+            "description": "The version of the recipe.",
+            "required": true,
+            "type": "string",
+            "allowEmptyValue": false
+          },
+          {
+            "name": "recipeType",
+            "in": "query",
+            "description": "The type of the recipe.",
+            "required": true,
+            "allowEmptyValue": false,
+            "type": "string",
+            "default": "PRODUCTION",
+            "enum": [
+              "PRODUCTION",
+              "SHOP_ORDER"
+            ]
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "The message was successfully processed."
+          },
+          "400": {
+            "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to call this resource.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Accessing the resource you are trying to reach is forbidden.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "One of the related elements is not found.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "An internal error occurred.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/recipes/headerDetails": {
+      "get": {
+        "tags": [
+          "Recipe"
+        ],
+        "summary": "Finds recipe header details by plant, recipe name, recipe type, and recipe version",
+        "description": "This endpoint can be called to find a recipe's header details by search parameters. The required parameters are plant, recipe name, and recipe type. The version is optional. If a version is not present, the current recipe version will be used.",
+        "operationId": "findRecipeHeaderDetialsByPlantAndNameUsingGET_1",
+        "parameters": [
+          {
+            "name": "plant",
+            "in": "query",
+            "description": "The plant for which the request is executed.",
+            "required": true,
+            "type": "string",
+            "allowEmptyValue": false
+          },
+          {
+            "name": "recipe",
+            "in": "query",
+            "description": "The recipe name.",
+            "required": true,
+            "type": "string",
+            "allowEmptyValue": false
+          },
+          {
+            "name": "recipeType",
+            "in": "query",
+            "description": "The type of the recipe.",
+            "required": true,
+            "type": "string",
+            "default": "PRODUCTION",
+            "enum": [
+              "PRODUCTION",
+              "SHOP_ORDER"
+            ]
+          },
+          {
+            "name": "version",
+            "in": "query",
+            "description": "The version of the recipe.If not present, the current recipe version will be used.",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Message successfully processed.",
+            "schema": {
+              "$ref": "#/definitions/RecipeHeaderDetails"
+            }
+          },
+          "400": {
+            "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to call this resource.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Accessing the resource you are trying to reach is forbidden.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "One of the related elements is not found.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "An internal error occurred.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "deprecated": false
+      },
+      "patch": {
+        "tags": [
+          "Recipe"
+        ],
+        "summary": "Updates the recipe header details.Every unspecified field will remain unchanged.",
+        "description": "This endpoint can be called to update a recipe's header details.",
+        "operationId": "updateRecipeHeaderDetailsPATCH_1",
+        "parameters": [
+          {
+            "name": "plant",
+            "in": "query",
+            "description": "The plant for which the request is executed.",
+            "required": true,
+            "type": "string",
+            "allowEmptyValue": false
+          },
+          {
+            "name": "recipe",
+            "in": "query",
+            "description": "The recipe name.",
+            "required": true,
+            "type": "string",
+            "allowEmptyValue": false
+          },
+          {
+            "name": "recipeType",
+            "in": "query",
+            "description": "The type of the recipe.",
+            "required": true,
+            "type": "string",
+            "default": "PRODUCTION",
+            "enum": [
+              "PRODUCTION",
+              "SHOP_ORDER"
+            ]
+          },
+          {
+            "name": "version",
+            "in": "query",
+            "description": "The version of the recipe.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "recipeUpdateModel",
+            "description": "The recipe header details to be updated.",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/RecipeUpdateHeaderDetails"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The message was successfully processed.",
+            "schema": {
+              "$ref": "#/definitions/RecipeHeaderDetails"
+            }
+          },
+          "400": {
+            "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to call this resource.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Accessing the resource you are trying to reach is forbidden.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "One of the related elements is not found.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "An internal error occurred.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/recipes/{recipe}/{version}/{recipeType}/recipeDetailsAndPhases": {
+      "patch": {
+        "tags": [
+          "Recipe and Phases"
+        ],
+        "summary": "Update the recipe header details and phases details.",
+        "description": "Update the recipe header details and phases details. Finds needed phases by phaseId and updates specified fields. Every unspecified field will remain unchanged.",
+        "operationId": "updateRecipeDetailsAndPhasesPATCH_1",
+        "parameters": [
+          {
+            "name": "plant",
+            "in": "query",
+            "description": "The plant for which request is executed.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "recipe",
+            "in": "path",
+            "description": "The recipe name.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "version",
+            "in": "path",
+            "description": "The version of the recipe.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "recipeType",
+            "in": "path",
+            "description": "The type of the recipe.",
+            "required": true,
+            "type": "string",
+            "default": "PRODUCTION",
+            "enum": [
+              "PRODUCTION",
+              "SHOP_ORDER"
+            ]
+          },
+          {
+            "in": "body",
+            "name": "recipeUpdateModel",
+            "description": "The recipe details with phases details to update.",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/RecipeUpdate"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The message was successfully processed.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Recipe"
+              }
+            }
+          },
+          "400": {
+            "description": "The HTTP request is bad or invalid and cannot be processed by the server.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to call this resource.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Accessing the resource you are trying to reach is forbidden.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "One of the related elements is not found.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "An internal error occurred.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      }
+    }
+  },
+  "securityDefinitions": {
+    "OAuthSecurity": {
+      "type": "oauth2",
+      "tokenUrl": "https://{subdomain}.authentication.{regionHost}/oauth/token",
+      "flow": "application"
+    }
+  },
+  "definitions": {
+    "ControlKeyId": {
+      "type": "object",
+      "properties": {
+        "controlKey": {
+          "type": "string",
+          "description": "The name of the Control Key."
+        }
+      },
+      "description": "The control key for the routing step."
+    },
+    "CustomValue": {
+      "type": "object",
+      "properties": {
+        "attribute": {
+          "type": "string",
+          "description": "The attribute name."
+        },
+        "value": {
+          "type": "string",
+          "description": "The value of the attribute."
+        }
+      },
+      "title": "CustomValue"
+    },
+    "ErrorResponse": {
+      "type": "object",
+      "properties": {
+        "displayMessage": {
+          "type": "string",
+          "description": "Contains additional information, if any"
+        },
+        "errorMessageKey": {
+          "type": "string",
+          "description": "Internal error message"
+        },
+        "status": {
+          "type": "integer",
+          "format": "int32",
+          "description": "HTTP status code"
+        },
+        "technicalMessage": {
+          "type": "string",
+          "description": "Contains technical reason for the error."
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "example": "2018-06-22T04:24:00Z",
+          "description": "The time when the error message is created."
+        }
+      },
+      "title": "ErrorResponse",
+      "description": "Error response. "
+    },
+    "Operation": {
+      "type": "object",
+      "properties": {
+        "operationActivity": {
+          "type": "string",
+          "description": "Name of the operation."
+        },
+        "version": {
+          "type": "string",
+          "description": "Version of the operation."
+        }
+      },
+      "title": "Operation"
+    },
+    "Quantity": {
+      "type": "object",
+      "properties": {
+        "unitOfMeasure": {
+          "description": "The unit of measure of the quantity.",
+          "$ref": "#/definitions/UnitOfMeasure"
+        },
+        "value": {
+          "type": "number",
+          "description": "The value of the quantity."
+        }
+      },
+      "title": "Quantity"
+    },
+    "Recipe": {
+      "type": "object",
+      "properties": {
+        "plant": {
+          "type": "string",
+          "description": "The plant this recipe is assigned to."
+        },
+        "recipe": {
+          "type": "string",
+          "description": "The name of the recipe."
+        },
+        "version": {
+          "type": "string",
+          "description": "The recipe version."
+        },
+        "type": {
+          "type": "string",
+          "description": "Indicates the type of the recipe.",
+          "enum": [
+            "PRODUCTION_RECIPE",
+            "SHOPORDER_SPECIFIC_RECIPE"
+          ]
+        },
+        "status": {
+          "type": "string",
+          "description": "The status of the recipe.",
+          "enum": [
+            "NEW",
+            "RELEASABLE",
+            "FROZEN",
+            "OBSOLETE",
+            "HOLD",
+            "HOLD_YIELD_RATE",
+            "HOLD_CONSEC_NC",
+            "HOLD_SPC_VIOLATION",
+            "HOLD_SPC_WARNING"
+          ]
+        },
+        "currentVersion": {
+          "type": "boolean",
+          "description": "If true, the version of the recipe is current."
+        },
+        "description": {
+          "type": "string",
+          "description": "The description of the recipe."
+        },
+        "quantityValidation": {
+          "type": "boolean",
+          "description": "Indicates if Quantity Validation is required during production."
+        },
+        "relaxedFlow": {
+          "type": "boolean",
+          "description": "Indicates if the recipe has a relaxed flow."
+        },
+        "automaticGoodsReceipt": {
+          "type": "boolean",
+          "description": "Indicates if the recipe is configured for an automatic goods receipt."
+        },
+        "entryPhaseId": {
+          "type": "string",
+          "description": "The entry recipe phase for the recipe."
+        },
+        "customValues": {
+          "type": "array",
+          "description": "The recipe custom data.",
+          "items": {
+            "$ref": "#/definitions/CustomValue"
+          }
+        },
+        "operationGroups": {
+          "type": "array",
+          "description": "The operation groups of the recipe.",
+          "items": {
+            "$ref": "#/definitions/RecipeOperationGroup"
+          }
+        },
+        "phases": {
+          "type": "array",
+          "description": "Recipe phases in the recipe.",
+          "items": {
+            "$ref": "#/definitions/RecipePhase"
+          }
+        },
+        "modifiedDateTime": {
+          "type": "string",
+          "description": "The time when the recipe has most recently changed.",
+          "format": "date-time",
+          "readOnly": true,
+          "example": "2018-06-22T04:24:000Z"
+        },
+        "createdDateTime": {
+          "type": "string",
+          "description": "The time when the recipe was created.",
+          "format": "date-time",
+          "readOnly": true,
+          "example": "2018-06-22T04:24:000Z"
+        }
+      },
+      "title": "Recipe"
+    },
+    "RecipeId": {
+      "type": "object",
+      "properties": {
+        "plant": {
+          "type": "string",
+          "description": "The plant this recipe is assigned to."
+        },
+        "recipe": {
+          "type": "string",
+          "description": "The name of the recipe."
+        },
+        "version": {
+          "type": "string",
+          "description": "The recipe version."
+        }
+      },
+      "title": "RecipeId"
+    },
+    "RecipeLink": {
+      "type": "object",
+      "properties": {
+        "phaseId": {
+          "type": "string",
+          "description": "The recipe phase the link refers to."
+        },
+        "recipe": {
+          "description": "The recipe the link refers to.",
+          "$ref": "#/definitions/RecipeId"
+        }
+      },
+      "title": "RecipeLink"
+    },
+    "RecipeOperationGroup": {
+      "type": "object",
+      "properties": {
+        "recipeOperationGroup": {
+          "type": "string",
+          "description": "The name of the recipe operation group."
+        },
+        "description": {
+          "type": "string",
+          "description": "The description of the recipe operation group."
+        },
+        "recipeOperationGroupSteps": {
+          "type": "array",
+          "description": "The steps of the recipe operation group.",
+          "items": {
+            "$ref": "#/definitions/RecipeOperationGroupStep"
+          }
+        }
+      },
+      "title": "RecipeOperationGroup"
+    },
+    "RecipeOperationGroupStep": {
+      "type": "object",
+      "properties": {
+        "recipePhase": {
+          "description": "The recipe phase.",
+          "$ref": "#/definitions/RecipePhase"
+        }
+      },
+      "title": "RecipeOperationGroupStep"
+    },
+    "RecipeOperationPhase": {
+      "type": "object",
+      "properties": {
+        "baseQuantity": {
+          "description": "Base quantity of the routing operation step.",
+          "$ref": "#/definitions/Quantity"
+        },
+        "maxLoop": {
+          "type": "number",
+          "description": "Limits how many times an SFC may be restarted. If 0, then there is no limit."
+        },
+        "operationActivity": {
+          "description": "The operation to be performed at the routing step.",
+          "$ref": "#/definitions/Operation"
+        },
+        "phaseType": {
+          "type": "string",
+          "description": "The type of recipe operation phase."
+        },
+        "weighRelevant": {
+          "type": "boolean",
+          "description": "Indicates if the phase is weight relevant."
+        },
+        "automaticGoodsReceipt": {
+          "type": "boolean",
+          "description": "Indicates if the phase is configured for an automatic goods receipt."
+        },
+        "longText": {
+          "type": "string",
+          "description": "The long text field contains General information about the routing operation step.",
+          "maxLength": 250000
+        },
+        "customValues": {
+          "type": "array",
+          "description": "Custom data for the recipe operation phase.",
+          "items": {
+            "$ref": "#/definitions/CustomValue"
+          }
+        }
+      },
+      "title": "RecipeOperationPhase"
+    },
+    "RecipePhase": {
+      "type": "object",
+      "properties": {
+        "controlKey": {
+          "$ref": "#/definitions/ControlKeyId"
+        },
+        "description": {
+          "type": "string",
+          "description": "The description of the recipe phase."
+        },
+        "donePhaseId": {
+          "type": "string",
+          "description": "The routing done step."
+        },
+        "entry": {
+          "type": "boolean",
+          "description": "If true, this is an entry recipe phase."
+        },
+        "holdPhaseId": {
+          "type": "string",
+          "description": "The recipe hold phase."
+        },
+        "lastReportingPhase": {
+          "type": "boolean",
+          "description": "Indicates if it is the last reporting step."
+        },
+        "nextPhaseList": {
+          "type": "array",
+          "description": "The list of next possible recipe phases.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "queueDecisionType": {
+          "type": "string",
+          "description": "This determines the operator who decides where an SFC should be placed in queue when completing this phase.",
+          "enum": [
+            "COMPLETING_OPERATOR",
+            "NEXT_OPERATOR"
+          ]
+        },
+        "recipePhaseComponentList": {
+          "type": "array",
+          "description": "The list of components to be assembled at the phase.",
+          "items": {
+            "$ref": "#/definitions/RoutingStepComponent"
+          }
+        },
+        "rework": {
+          "type": "boolean",
+          "description": "Indicates if this phase is considered as rework."
+        },
+        "phaseId": {
+          "type": "string",
+          "description": "The step ID of the recipe phase."
+        },
+        "recipeLink": {
+          "description": "The routing link associated with the routing step.",
+          "$ref": "#/definitions/RecipeLink"
+        },
+        "recipeOperation": {
+          "description": "The operation to be performed at the recipe phase.",
+          "$ref": "#/definitions/RecipeOperationPhase"
+        },
+        "returnPhaseId": {
+          "type": "string",
+          "description": "The recipe return phase."
+        },
+        "recipeReturnPhase": {
+          "$ref": "#/definitions/RecipeReturnPhase"
+        },
+        "scrapPhaseId": {
+          "type": "string",
+          "description": "The recipe scrap phase."
+        },
+        "recipeScrapPhase": {
+          "$ref": "#/definitions/RecipeScrapStep"
+        },
+        "workCenter": {
+          "type": "string",
+          "description": "The work center for the recipe phase."
+        },
+        "reportingStep": {
+          "type": "string",
+          "description": "Indicates how this step is known in the external system."
+        },
+        "productionProcessId": {
+          "type": "string",
+          "description": "The ID of the production process."
+        },
+        "productionProcessDefKey": {
+          "type": "string",
+          "description": "The Production Process Definition Key."
+        }
+      },
+      "title": "RecipePhase"
+    },
+    "RecipeReturnPhase": {
+      "type": "object",
+      "properties": {
+        "returnType": {
+          "type": "string",
+          "description": "Return type.",
+          "enum": [
+            "RETURN_TO_ORIGINAL_AND_PREVIOUS",
+            "ORIGINAL_OPERATION",
+            "NEXT_OPERATION",
+            "ANY_PREVIOUS_OPERATION",
+            "ANY_OPERATION",
+            "PREVIOUS_OPERATION"
+          ]
+        },
+        "operationActivity": {
+          "$ref": "#/definitions/Operation"
+        }
+      },
+      "description": "The recipe return phase."
+    },
+    "RecipeScrapStep": {
+      "type": "object",
+      "properties": {
+        "sfcStatus": {
+          "type": "string",
+          "description": "The status applied to a scrapped SFC (when the entire SFC quantity is scrapped).",
+          "enum": [
+            "ALL",
+            "NEW",
+            "ACTIVE",
+            "HOLD",
+            "INQUEUE",
+            "DONE_HOLD",
+            "RETURNED",
+            "GOLDEN_UNIT",
+            "NOTDONE",
+            "DONE",
+            "SCRAPPED",
+            "INVALID",
+            "DELETED"
+          ]
+        },
+        "scrapParent": {
+          "type": "boolean",
+          "description": "Determines whether the option to scrap the parent while leaving the components intact is available."
+        }
+      },
+      "description": "The recipe scrap phase."
+    },
+    "RecipeUpdate": {
+      "type": "object",
+      "properties": {
+        "phases": {
+          "type": "array",
+          "description": "Recipe phases in the recipe.",
+          "items": {
+            "$ref": "#/definitions/RecipePhaseUpdate"
+          }
+        },
+        "quantityValidation": {
+          "type": "boolean",
+          "description": "Indicates if Quantity Validation is required during production."
+        },
+        "relaxedFlow": {
+          "type": "boolean",
+          "description": "Indicates if the recipe has a relaxed flow."
+        }
+      },
+      "title": "RecipeUpdate"
+    },
+    "RecipePhaseUpdate": {
+      "type": "object",
+      "properties": {
+        "phaseId": {
+          "type": "string",
+          "description": "The step ID of the recipe phase."
+        },
+        "productionProcessId": {
+          "type": "string",
+          "description": "The ID of the production process."
+        },
+        "productionProcessDefKey": {
+          "type": "string",
+          "description": "The Production Process Definition Key."
+        },
+        "recipeOperation": {
+          "description": "The operation to be performed at the recipe phase.",
+          "$ref": "#/definitions/RecipeOperationPhaseUpdate"
+        }
+      },
+      "title": "RecipePhaseUpdate"
+    },
+    "RecipeOperationPhaseUpdate": {
+      "type": "object",
+      "properties": {
+        "weighRelevant": {
+          "type": "boolean",
+          "description": "Indicates if the phase is weight relevant."
+        }
+      },
+      "title": "RecipeOperationPhaseUpdate"
+    },
+    "RoutingStepComponent": {
+      "type": "object",
+      "properties": {
+        "bomComponent": {
+          "$ref": "#/definitions/BomComponentId"
+        },
+        "sequence": {
+          "type": "number",
+          "description": "Controls the order of display and execution of the component."
+        },
+        "quantity": {
+          "type": "number",
+          "description": "The number of pieces of the component to be assembled at this step."
+        },
+        "toleranceUnder": {
+          "type": "number",
+          "description": "The upper bound tolerance value."
+        },
+        "toleranceOver": {
+          "type": "number",
+          "description": "The lower bound tolerance value."
+        }
+      },
+      "description": "The list of components to be assembled at the phase."
+    },
+    "BomComponentId": {
+      "type": "object",
+      "properties": {
+        "bom": {
+          "$ref": "#/definitions/BOMId"
+        },
+        "material": {
+          "$ref": "#/definitions/MaterialId"
+        },
+        "sequence": {
+          "type": "integer",
+          "description": "The order the component is displayed in relation to other BOM components.",
+          "format": "int64"
+        }
+      },
+      "description": "The BOM component to assemble."
+    },
+    "BOMId": {
+      "type": "object",
+      "properties": {
+        "bom": {
+          "type": "string",
+          "description": "The name of the BOM."
+        },
+        "version": {
+          "type": "string",
+          "description": "The version of the BOM."
+        },
+        "bomType": {
+          "type": "string",
+          "description": "The type of the BOM.",
+          "enum": [
+            "USERBOM",
+            "SHOPORDERBOM",
+            "SFCBOM",
+            "CONFIGURABLEBOM"
+          ]
+        },
+        "plant": {
+          "type": "string",
+          "description": "The plant for which the BOM is defined."
+        }
+      },
+      "description": "BOM"
+    },
+    "MaterialId": {
+      "type": "object",
+      "properties": {
+        "plant": {
+          "type": "string",
+          "description": "The plant of the material."
+        },
+        "material": {
+          "type": "string",
+          "description": "The name of the material."
+        },
+        "version": {
+          "type": "string",
+          "description": "The version of the material."
+        }
+      },
+      "description": "Material used as a component in the BOM."
+    },
+    "UnitOfMeasure": {
+      "type": "object",
+      "properties": {
+        "internalUom": {
+          "type": "string"
+        },
+        "longText": {
+          "type": "string"
+        },
+        "shortText": {
+          "type": "string"
+        },
+        "uom": {
+          "type": "string"
+        }
+      },
+      "title": "UnitOfMeasure"
+    },
+    "RecipeHeaderDetails": {
+      "type": "object",
+      "properties": {
+        "plant": {
+          "type": "string",
+          "description": "The plant this recipe is assigned to."
+        },
+        "recipe": {
+          "type": "string",
+          "description": "The name of the recipe."
+        },
+        "version": {
+          "type": "string",
+          "description": "The recipe version."
+        },
+        "recipeType": {
+          "type": "string",
+          "description": "Indicates the type of the recipe.",
+          "enum": [
+            "PRODUCTION_RECIPE",
+            "SHOPORDER_SPECIFIC_RECIPE"
+          ]
+        },
+        "status": {
+          "type": "string",
+          "description": "The status of the recipe.",
+          "enum": [
+            "NEW",
+            "RELEASABLE",
+            "FROZEN",
+            "OBSOLETE",
+            "HOLD",
+            "HOLD_YIELD_RATE",
+            "HOLD_CONSEC_NC",
+            "HOLD_SPC_VIOLATION",
+            "HOLD_SPC_WARNING"
+          ]
+        },
+        "currentVersion": {
+          "type": "boolean",
+          "description": "If true, the version of the recipe is the current one.",
+          "default": "true"
+        },
+        "description": {
+          "type": "string",
+          "description": "The description of the recipe."
+        },
+        "quantityValidation": {
+          "type": "boolean",
+          "description": "Indicates if quantity validation is required during production.",
+          "default": "false"
+        },
+        "relaxedFlow": {
+          "type": "boolean",
+          "description": "Indicates if the recipe is a relaxed flow recipe.",
+          "default": "false"
+        },
+        "automaticGoodsReceipt": {
+          "type": "boolean",
+          "description": "Indicates if the recipe is configured for an automatic goods receipt.",
+          "default": "false"
+        },
+        "modifiedDateTime": {
+          "type": "string",
+          "description": "The time when the recipe has most recently been changed.",
+          "format": "date-time",
+          "readOnly": true,
+          "example": "2018-06-22T04:24:00.123Z"
+        },
+        "createdDateTime": {
+          "type": "string",
+          "description": "The time when the recipe was created.",
+          "format": "date-time",
+          "readOnly": true,
+          "example": "2018-06-22T04:24:00.123Z"
+        }
+      },
+      "title": "RecipeHeaderDetails"
+    },
+    "RecipeUpdateHeaderDetails": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "description": "The status of the recipe.",
+          "enum": [
+            "NEW",
+            "RELEASABLE",
+            "FROZEN",
+            "OBSOLETE",
+            "HOLD",
+            "HOLD_YIELD_RATE",
+            "HOLD_CONSEC_NC",
+            "HOLD_SPC_VIOLATION",
+            "HOLD_SPC_WARNING"
+          ]
+        },
+        "currentVersion": {
+          "type": "boolean",
+          "description": "If true, the version of the recipe is the current one.",
+          "default": "true"
+        },
+        "description": {
+          "type": "string",
+          "description": "The description of the recipe."
+        },
+        "quantityValidation": {
+          "type": "boolean",
+          "description": "Indicates if quantity validation is required during production.",
+          "default": "false"
+        },
+        "relaxedFlow": {
+          "type": "boolean",
+          "description": "Indicates if the relaxed flow recipe.",
+          "default": "false"
+        }
+      },
+      "title": "RecipeUpdateHeaderDetails"
+    }
+  },
+  "externalDocs": {
+    "description": "Prepare for API Integration",
+    "url": "https://help.sap.com/docs/sap-digital-manufacturing/operations-guide/prepare-for-api-integration"
+  },
+  "schemes": [
+    "https"
+  ],
+  "x-sap-shortText": "Perform read, create, update and delete Recipes",
+  "x-servers": [
+    {
+      "url": "https://api.{regionHost}/recipe/v1",
+      "description": "Base URL",
+      "templates": {
+        "regionHost": {
+          "description": "The data center where SAP Digital Manufacturing is provisioned for your organization",
+          "enum": [
+            "eu10.dmc.cloud.sap",
+            "eu20.dmc.cloud.sap",
+            "us10.dmc.cloud.sap",
+            "us20.dmc.cloud.sap",
+            "test.eu10.dmc.cloud.sap",
+            "test.eu20.dmc.cloud.sap",
+            "test.us10.dmc.cloud.sap",
+            "test.us20.dmc.cloud.sap"
+          ],
+          "default": "test.eu10.dmc.cloud.sap"
+        },
+        "tokenHost": {
+          "description": "The authentication server where SAP Digital Manufacturing is provisioned for your organization",
+          "enum": [
+            "eu10.hana.ondemand.com",
+            "eu20.hana.ondemand.com",
+            "us10.hana.ondemand.com",
+            "us20.hana.ondemand.com"
+          ],
+          "default": "eu10.hana.ondemand.com"
+        }
+      }
+    }
+  ]
+}
