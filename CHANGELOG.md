@@ -1,5 +1,148 @@
 # POD Plugin Skill - Update Changelog
 
+## Version 12.1.0 - 2026-04-17
+
+### 📚 NEW FEATURE: Alternative i18n Approach (ResourceModel)
+
+This update adds a second, simpler approach for internationalization using `ResourceModel` with synchronous loading in the constructor.
+
+---
+
+## ✅ What Was Added
+
+### 1. **New i18n Section: ResourceModel-Based Pattern**
+
+**File:** `references/widget-patterns.md` (new section after existing i18n pattern)
+
+**Content:**
+- Complete alternative i18n implementation using `sap/ui/model/resource/ResourceModel`
+- Synchronous loading in constructor (vs async in onInit)
+- Dot notation for bundleName (vs URL path)
+- When to use each approach
+- Complete working example with MultilingualWidget
+- Comparison table: ResourceBundle vs ResourceModel
+- Namespace convention with CRITICAL bundleName format
+- Common mistakes specific to ResourceModel approach
+
+**Key Difference:**
+```javascript
+// OLD APPROACH (ResourceBundle - Async)
+"sap/base/i18n/ResourceBundle"
+// Load in onInit() with await
+url: `${sModulePath}/i18n/i18n.properties`
+
+// NEW APPROACH (ResourceModel - Sync)
+"sap/ui/model/resource/ResourceModel"
+// Load in constructor immediately
+bundleName: "custom.pod2.myproject.i18n.i18n"  // Dots!
+```
+
+---
+
+### 2. **Updated Quick Start Guide**
+
+**File:** `SKILL.md` (Step 3 added)
+
+**Added Step 3: Add i18n Support (Optional but Recommended)**
+
+Now shows BOTH approaches with clear labels:
+- **Approach A**: ResourceModel (Synchronous - Simpler)
+- **Approach B**: ResourceBundle (Async - More Control)
+
+Developers can choose based on their needs:
+- Simple widgets → ResourceModel
+- Complex async setup → ResourceBundle
+
+---
+
+## 📊 Comparison Matrix
+
+| Feature | ResourceBundle.create() | ResourceModel |
+|---------|------------------------|---------------|
+| Loading | Async (await in onInit) | Sync (in constructor) |
+| Import | `sap/base/i18n/ResourceBundle` | `sap/ui/model/resource/ResourceModel` |
+| Bundle Name | URL: `"${path}/i18n/i18n.properties"` | Dots: `"namespace.i18n.i18n"` |
+| Available When | After onInit() completes | Immediately in constructor |
+| Best For | Complex widgets with async | Simple widgets, immediate use |
+
+---
+
+## 🎯 Use Cases
+
+### Use ResourceModel (New) When:
+- ✅ You want the simplest possible implementation
+- ✅ You need i18n available in constructor/before onInit()
+- ✅ Your i18n follows standard structure
+- ✅ You prefer synchronous loading
+
+### Use ResourceBundle (Existing) When:
+- ✅ You need async initialization
+- ✅ You prefer explicit URL control
+- ✅ You want try/catch error handling in onInit()
+- ✅ You're loading from non-standard locations
+
+---
+
+## 📝 Example: ResourceModel Implementation
+
+```javascript
+constructor(oConfig) {
+    super(Button, oConfig);
+    this._oResourceBundle = null;
+    this._loadI18n();  // ✅ Sync in constructor
+}
+
+_loadI18n() {
+    const oResourceModel = new ResourceModel({
+        bundleName: "custom.pod2.myproject.i18n.i18n"  // ← Dots!
+    });
+    this._oResourceBundle = oResourceModel.getResourceBundle();
+}
+
+_getI18nText(sKey, aParams) {
+    return this._oResourceBundle?.getText(sKey, aParams) || sKey;
+}
+```
+
+---
+
+## 🚨 Critical Convention
+
+**bundleName must use DOT notation:**
+```javascript
+✅ CORRECT: "custom.pod2.myproject.i18n.i18n"
+❌ WRONG:   "custom/pod2/myproject/i18n/i18n"  // Slashes fail!
+❌ WRONG:   "${path}/i18n/i18n.properties"     // URL path fails!
+```
+
+---
+
+## Statistics
+
+- **New Documentation:** ~200 lines added to widget-patterns.md
+- **Files Modified:** 2 files (SKILL.md, widget-patterns.md)
+- **New Approach:** ResourceModel synchronous pattern
+- **Updated:** Quick Start guide with both approaches
+- **Comparison Table:** Side-by-side feature comparison
+
+---
+
+## 🔍 Why This Matters
+
+**The Problem:**
+The existing ResourceBundle async approach is correct but more complex than needed for simple widgets.
+
+**The Solution:**
+ResourceModel provides a simpler, synchronous alternative for straightforward use cases.
+
+**The Impact:**
+- Developers have clear choice based on needs
+- Simple widgets can use simpler approach
+- Complex widgets still have async control
+- Both approaches documented with pros/cons
+
+---
+
 ## Version 12.0.0 - 2026-04-17
 
 ### 🚨 CRITICAL FIX: Parent Property Spreading Contradiction Resolved

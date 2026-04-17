@@ -1,9 +1,9 @@
 ---
 name: pod-plugin
-description: Create SAP Digital Manufacturing POD 1.0 and POD 2.0 plugins with proper architecture. **ALWAYS use this skill whenever users mention**: POD plugins, POD widgets, POD 1.0, POD 2.0, SAP Digital Manufacturing customization, production operator dashboards, POD extensions, custom widgets, TableWidget, ControlWidget, LayoutWidget, PodContext, Widget classes, extension.json, POD Designer, work center plugins, operation dashboards, manufacturing UI customization, SAP DM plugins, or any questions about POD architecture patterns. Expert in both legacy POD 1.0 (UI5 component-based) and modern POD 2.0 (ES6 class-based) plugin development. **Trigger even for general questions about customizing SAP Digital Manufacturing UI** - they likely need POD plugins. Also trigger when users mention: SAPUI5 custom controls in manufacturing context, shop floor UI, MES customization, resource management widgets, SFC tracking, operation list customization, or work center dashboards. **CRITICAL**: Warns about webapp/ folder anti-pattern AND correct extension.json placement inside namespace folder. **Automatically creates deployment zip file** when plugin is complete. **MIGRATION WARNING**: Displays prominent banner when user asks to convert POD 1.0 to POD 2.0, explaining that re-architecting is better than direct conversion. **ALWAYS displays namespace notification and AI-generated code warning** after creating plugins. **File structure aligned with official SAP POD 2.0 Developer's Guide** using widget/, action/, util/ folder pattern. **extension.json must be INSIDE namespace folder** for module path resolution. **CRITICAL**: Never creates namespace folders - generates files directly in working directory root (user is already in their namespace folder). **i18n IMPLEMENTATION**: Comprehensive documentation for internationalization in POD 2.0 widgets including manual ResourceBundle loading pattern. **PRODUCTION PATTERNS**: Includes real SAP production code patterns (JSDoc, private fields, Object.freeze enums, design mode checks, ContentHandler patterns, subscription patterns, delegate patterns, error handling from actual SAP widgets). **COMPLETE PATTERNS**: Copy-paste ready widget templates including minimal widget, context-aware widget, API widget, full TableWidget, ControlWidget, LayoutWidget, and ContentHandler implementations. **PARENT PROPERTY SPREADING CLARITY**: Clear decision rules for when to spread parent properties (YES for TableWidget/LayoutWidget, NO for Widget/ControlWidget base classes).
-version: 12.0.0
+description: Create SAP Digital Manufacturing POD 1.0 and POD 2.0 plugins with proper architecture. **ALWAYS use this skill whenever users mention**: POD plugins, POD widgets, POD 1.0, POD 2.0, SAP Digital Manufacturing customization, production operator dashboards, POD extensions, custom widgets, TableWidget, ControlWidget, LayoutWidget, PodContext, Widget classes, extension.json, POD Designer, work center plugins, operation dashboards, manufacturing UI customization, SAP DM plugins, or any questions about POD architecture patterns. Expert in both legacy POD 1.0 (UI5 component-based) and modern POD 2.0 (ES6 class-based) plugin development. **Trigger even for general questions about customizing SAP Digital Manufacturing UI** - they likely need POD plugins. Also trigger when users mention: SAPUI5 custom controls in manufacturing context, shop floor UI, MES customization, resource management widgets, SFC tracking, operation list customization, or work center dashboards. **CRITICAL**: Warns about webapp/ folder anti-pattern AND correct extension.json placement inside namespace folder. **Automatically creates deployment zip file** when plugin is complete. **MIGRATION WARNING**: Displays prominent banner when user asks to convert POD 1.0 to POD 2.0, explaining that re-architecting is better than direct conversion. **ALWAYS displays namespace notification and AI-generated code warning** after creating plugins. **File structure aligned with official SAP POD 2.0 Developer's Guide** using widget/, action/, util/ folder pattern. **extension.json must be INSIDE namespace folder** for module path resolution. **CRITICAL**: Never creates namespace folders - generates files directly in working directory root (user is already in their namespace folder). **i18n IMPLEMENTATION**: TWO comprehensive approaches documented - ResourceModel (synchronous, simpler) and ResourceBundle (async, more control). Both patterns fully explained with complete working examples. **PRODUCTION PATTERNS**: Includes real SAP production code patterns (JSDoc, private fields, Object.freeze enums, design mode checks, ContentHandler patterns, subscription patterns, delegate patterns, error handling from actual SAP widgets). **COMPLETE PATTERNS**: Copy-paste ready widget templates including minimal widget, context-aware widget, API widget, full TableWidget, ControlWidget, LayoutWidget, and ContentHandler implementations. **PARENT PROPERTY SPREADING CLARITY**: Clear decision rules for when to spread parent properties (YES for TableWidget/LayoutWidget, NO for Widget/ControlWidget base classes).
+version: 12.1.0
 author: Claude
-tags: [sap, digital-manufacturing, pod, plugin, pod2, no-binding-in-widgetproperty, conditional-parent-spreading, getDefaultConfig-official-pattern, getI18nText-method, stringpropertyeditor-no-default, callback-parameter-order, real-world-patterns, widget-architecture, createView-before-onInit, no-webapp-folder, pod-vs-sapui5, auto-deployment-zip, migration-warning, pod1-to-pod2, namespace-notification, ai-code-warning, official-sap-structure, widget-action-util-folders, extension-json-placement, module-path-resolution, no-namespace-folder-creation, generate-in-cwd-root, production-sap-patterns, jsdoc-patterns, private-fields-encapsulation, object-freeze-enums, design-mode-patterns, contenthandler-patterns, subscription-patterns, delegate-patterns, copy-paste-templates, spreading-decision-rules]
+tags: [sap, digital-manufacturing, pod, plugin, pod2, no-binding-in-widgetproperty, conditional-parent-spreading, getDefaultConfig-official-pattern, getI18nText-method, stringpropertyeditor-no-default, callback-parameter-order, real-world-patterns, widget-architecture, createView-before-onInit, no-webapp-folder, pod-vs-sapui5, auto-deployment-zip, migration-warning, pod1-to-pod2, namespace-notification, ai-code-warning, official-sap-structure, widget-action-util-folders, extension-json-placement, module-path-resolution, no-namespace-folder-creation, generate-in-cwd-root, production-sap-patterns, jsdoc-patterns, private-fields-encapsulation, object-freeze-enums, design-mode-patterns, contenthandler-patterns, subscription-patterns, delegate-patterns, copy-paste-templates, spreading-decision-rules, i18n-resourcemodel, i18n-resourcebundle, dual-i18n-approaches, sync-async-i18n]
 compatibility:
   environment: SAP Business Technology Platform (BTP) with SAP Digital Manufacturing
   requirements:
@@ -555,7 +555,59 @@ _createView() {
 }
 ```
 
-**Step 3: File structure**
+**Step 3: Add i18n Support (Optional but Recommended)**
+
+Choose one of two approaches:
+
+**Approach A: ResourceModel (Synchronous - Simpler)**
+```javascript
+// 1. Import ResourceModel
+"sap/ui/model/resource/ResourceModel"
+
+// 2. Load in constructor
+constructor(oConfig) {
+    super(BaseClass, oConfig);
+    this._oResourceBundle = null;
+    this._loadI18n();
+}
+
+_loadI18n() {
+    const oResourceModel = new ResourceModel({
+        bundleName: "your.namespace.i18n.i18n"  // Dots, not slashes!
+    });
+    this._oResourceBundle = oResourceModel.getResourceBundle();
+}
+
+// 3. Helper method
+_getI18nText(sKey, aParams) {
+    return this._oResourceBundle?.getText(sKey, aParams) || sKey;
+}
+```
+
+**Approach B: ResourceBundle (Async - More Control)**
+```javascript
+// 1. Import ResourceBundle
+"sap/base/i18n/ResourceBundle"
+
+// 2. Load in onInit()
+async onInit() {
+    await super.onInit();
+    const sModulePath = sap.ui.require.toUrl("your/namespace");
+    this._oResourceBundle = await ResourceBundle.create({
+        url: `${sModulePath}/i18n/i18n.properties`,
+        async: true
+    });
+}
+
+// 3. Helper method (same as above)
+_getI18nText(sKey, aParams) {
+    return this._oResourceBundle?.getText(sKey, aParams) || sKey;
+}
+```
+
+**See:** [i18n Patterns](references/widget-patterns.md#i18n-internationalization-pattern) for complete examples
+
+**Step 4: File structure**
 ```
 <working-directory-root>/     # User is already here
 ├── extension.json            # Generate at root

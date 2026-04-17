@@ -1115,6 +1115,204 @@ async _loadData() {
 
 ---
 
+## Alternative: ResourceModel-Based i18n Pattern (Synchronous)
+
+### Overview
+
+An alternative to the async `ResourceBundle.create()` approach is using `ResourceModel`, which loads synchronously in the constructor. This approach is simpler but doesn't use async/await.
+
+### When to Use This Approach
+
+- ✅ Simple widgets that don't need async initialization
+- ✅ Want i18n available immediately in constructor
+- ✅ Prefer synchronous loading pattern
+- ❌ Avoid if you need fine-grained control over bundle loading timing
+
+### Complete Implementation
+
+```javascript
+sap.ui.define([
+    "sap/dm/dme/pod2/widget/ControlWidget",
+    "sap/dm/dme/pod2/widget/metadata/WidgetCategory",
+    "sap/m/Button",
+    "sap/m/MessageToast",
+    "sap/ui/model/resource/ResourceModel"  // ← Use ResourceModel instead
+], (ControlWidget, WidgetCategory, Button, MessageToast, ResourceModel) => {
+    "use strict";
+
+    class MultilingualWidget extends ControlWidget {
+        constructor(oConfig) {
+            super(Button, oConfig);
+            this._oResourceBundle = null;
+            this._loadI18n();  // ✅ Load synchronously in constructor
+        }
+
+        static getDisplayName() {
+            return "Multilingual Widget";
+        }
+
+        static getIcon() {
+            return "sap-icon://world";
+        }
+
+        static getCategory() {
+            return WidgetCategory.Elements;
+        }
+
+        /**
+         * Load i18n using ResourceModel (synchronous)
+         */
+        _loadI18n() {
+            // Replace with your actual namespace
+            const sModulePath = "custom/pod2/yournamespace";
+            const oResourceModel = new ResourceModel({
+                bundleName: sModulePath + ".i18n.i18n"  // ← Dot notation!
+            });
+            this._oResourceBundle = oResourceModel.getResourceBundle();
+        }
+
+        /**
+         * Get translated text with optional parameters
+         * @param {string} sKey - i18n key
+         * @param {Array} aParams - Optional parameters for placeholders
+         * @returns {string} Translated text or key as fallback
+         */
+        _getI18nText(sKey, aParams) {
+            if (!this._oResourceBundle) {
+                return sKey;  // Fallback to key if bundle not loaded
+            }
+            return this._oResourceBundle.getText(sKey, aParams);
+        }
+
+        _createView() {
+            const oConfig = this.getConfig();
+            return new Button(oConfig.id, {
+                text: this._getI18nText("button.submit"),  // ✅ Available immediately!
+                press: () => this._onPress()
+            });
+        }
+
+        _onPress() {
+            const sMessage = this._getI18nText("message.success");
+            MessageToast.show(sMessage);
+        }
+
+        onExit() {
+            super.onExit();
+            this._oResourceBundle = null;
+        }
+    }
+
+    return MultilingualWidget;
+});
+```
+
+### Key Differences: ResourceBundle vs ResourceModel
+
+| Feature | ResourceBundle.create() | ResourceModel |
+|---------|------------------------|---------------|
+| Loading | Async (await in onInit) | Sync (in constructor) |
+| Import | `sap/base/i18n/ResourceBundle` | `sap/ui/model/resource/ResourceModel` |
+| Bundle Name | URL path: `"${path}/i18n/i18n.properties"` | Dot notation: `"namespace.i18n.i18n"` |
+| Available When | After onInit() completes | Immediately in constructor |
+| Best For | Complex widgets with async setup | Simple widgets, immediate use |
+
+### Namespace Convention (CRITICAL!)
+
+The `bundleName` must match your namespace structure:
+
+```javascript
+// If namespace is: custom/pod2/myproject
+// Then bundleName is: "custom/pod2/myproject.i18n.i18n"
+//                      ^^^^ Slashes become dots ^^^^
+
+const oResourceModel = new ResourceModel({
+    bundleName: "custom/pod2/myproject.i18n.i18n"
+    //          ^namespace^  ^folder^ ^basename^
+});
+```
+
+### File Structure (Same for Both Approaches)
+
+```
+<namespace-folder>/
+├── extension.json
+├── widget/
+│   └── MyWidget.js
+└── i18n/
+    ├── i18n.properties        (fallback/default)
+    ├── i18n_en.properties     (English)
+    ├── i18n_de.properties     (German)
+    └── i18n_fr.properties     (French)
+```
+
+### Example: Dynamic Messages with Parameters
+
+```javascript
+// In i18n/i18n.properties:
+// message.itemsSelected=You have selected {0} items
+// message.error=Error {0}: {1}
+
+_showSelection(iCount) {
+    const sMsg = this._getI18nText("message.itemsSelected", [5]);
+    // Result: "You have selected 5 items"
+    MessageToast.show(sMsg);
+}
+
+_showError(sCode, sMessage) {
+    const sError = this._getI18nText("message.error", ["404", "Not Found"]);
+    // Result: "Error 404: Not Found"
+    MessageToast.show(sError);
+}
+```
+
+### Common Mistakes with ResourceModel Approach
+
+❌ **WRONG: Using slash notation for bundleName**
+
+```javascript
+// ❌ This will fail!
+new ResourceModel({
+    bundleName: "custom/pod2/myproject/i18n/i18n"  // Slashes don't work!
+});
+```
+
+❌ **WRONG: Using URL path**
+
+```javascript
+// ❌ ResourceModel doesn't accept URLs!
+new ResourceModel({
+    bundleName: `${sap.ui.require.toUrl("custom/pod2/myproject")}/i18n/i18n.properties`
+});
+```
+
+✅ **CORRECT: Dot notation for namespace**
+
+```javascript
+// ✅ Convert slashes to dots!
+new ResourceModel({
+    bundleName: "custom.pod2.myproject.i18n.i18n"  // Dots work!
+});
+```
+
+### Comparison Summary
+
+**Use ResourceBundle.create() (Async) when:**
+- You need async initialization
+- You prefer explicit URL control
+- You want to handle loading errors with try/catch in onInit()
+- You're loading from non-standard locations
+
+**Use ResourceModel (Sync) when:**
+- You want simplest possible implementation
+- You need i18n available in constructor/before onInit()
+- Your i18n follows standard structure
+- You prefer synchronous loading
+
+Both approaches work correctly - choose based on your widget's needs!
+
+---
+
 ## Navigation
 
 📖 **Back to main skill**: [SKILL.md](../SKILL.md)
