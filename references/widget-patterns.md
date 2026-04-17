@@ -715,41 +715,57 @@ sap.ui.define([
 
 ## i18n (Internationalization) Pattern
 
-POD 2.0 widgets require manual resource bundle loading for internationalization.
+POD 2.0 framework automatically loads i18n models - widgets provide static `getI18nModel()` and use inherited methods.
 
-**CRITICAL**: `getResourceBundle()` is NOT available on Widget base classes!
+**CRITICAL**: Do NOT manually load ResourceBundle/ResourceModel - framework handles this!
 
 ### Complete i18n Implementation
 
+**Pattern from SAP Production Code:**
+
 ```javascript
 sap.ui.define([
-    "sap/m/Button",
     "sap/dm/dme/pod2/widget/ControlWidget",
     "sap/dm/dme/pod2/widget/metadata/WidgetCategory",
     "sap/dm/dme/pod2/widget/metadata/WidgetProperty",
     "sap/dm/dme/pod2/propertyeditor/StringPropertyEditor",
-    "sap/base/i18n/ResourceBundle",  // ✅ REQUIRED for i18n
+    "sap/dm/dme/pod2/model/I18nResourceModel",  // ← Framework i18n model
+    "sap/dm/dme/pod2/context/PodContext",
+    "sap/m/Button",
     "sap/m/VBox",
-    "sap/m/Text"
+    "sap/m/Label",
+    "sap/m/MessageToast"
 ], (
-    Button,
     ControlWidget,
     WidgetCategory,
     WidgetProperty,
     StringPropertyEditor,
-    ResourceBundle,  // ✅ Import ResourceBundle
+    I18nResourceModel,
+    PodContext,
+    Button,
     VBox,
-    Text
+    Label,
+    MessageToast
 ) => {
     "use strict";
 
     /**
-     * Example widget with proper i18n implementation
+     * Example widget with framework-driven i18n
      * @alias mycompany.widget.I18nExampleWidget
      * @extends sap.dm.dme.pod2.widget.ControlWidget
      */
     class I18nExampleWidget extends ControlWidget {
-        #oResourceBundle = null;  // ✅ Store resource bundle instance
+
+        // ✅ STEP 1: Define static private i18n model
+        static #oI18nModel = new I18nResourceModel({
+            bundleName: "mycompany.widget.i18n.i18n"  // Namespace with dots!
+        });
+
+        // ✅ STEP 2: Static getter for framework
+        // Framework calls this during widget registration and loads the model
+        static getI18nModel() {
+            return this.#oI18nModel;
+        }
 
         static getDisplayName() {
             return "i18n Example Widget";
@@ -772,114 +788,61 @@ sap.ui.define([
         }
 
         constructor(oConfig) {
-            super(Button, oConfig);
+            super(VBox, oConfig);
         }
 
-        /**
-         * STEP 1: Load resource bundle in onInit()
-         * @override
-         */
         async onInit() {
             await super.onInit();
-
-            // Load i18n resource bundle
-            try {
-                // Get module path for this widget
-                const sModulePath = sap.ui.require.toUrl("mycompany/widget");
-                
-                // Create resource bundle from i18n.properties file
-                this.#oResourceBundle = await ResourceBundle.create({
-                    url: `${sModulePath}/i18n/i18n.properties`,
-                    async: true
-                });
-                
-                console.log("Resource bundle loaded successfully");
-            } catch (error) {
-                console.error("Failed to load resource bundle:", error);
-                // Widget continues to work with fallback values
-            }
-
-            // Continue with other initialization...
+            // No manual i18n loading needed - framework already loaded it!
+            console.log("Widget initialized - i18n ready");
         }
 
-        /**
-         * STEP 2: Use resource bundle in getProperties()
-         * @override
-         */
+        // ✅ STEP 3: Use inherited getI18nText() method
         getProperties() {
             return [
                 new WidgetProperty({
-                    displayName: this._getI18nText("property.customMessage"),  // ✅ Method call, not binding!
-                    description: this._getI18nText("property.customMessage.description"),
+                    // Use inherited method - no manual loading!
+                    displayName: this.getI18nText("property.customMessage"),
+                    description: this.getI18nText("property.customMessage.description"),
                     category: "Main",
                     propertyEditor: new StringPropertyEditor(this, "customMessage")
                 })
             ];
         }
 
-        /**
-         * STEP 3: Create helper method for text retrieval
-         * Includes fallback values in case bundle fails to load
-         */
-        _getI18nText(sKey, aParams) {
-            // Try to get text from loaded bundle
-            if (this.#oResourceBundle) {
-                const sText = this.#oResourceBundle.getText(sKey, aParams);
-                if (sText) {
-                    return sText;
-                }
-            }
-
-            // Fallback to hardcoded defaults
-            const fallbacks = {
-                "property.customMessage": "Custom Message",
-                "property.customMessage.description": "Enter a custom message to display",
-                "button.text": "Click Me",
-                "button.text.description": "Button text",
-                "message.success": "Operation completed successfully",
-                "message.error": "An error occurred",
-                "label.placeholder": "Enter text here"
-            };
-
-            return fallbacks[sKey] || sKey;  // Return key if no fallback
-        }
-
-        /**
-         * Use i18n text in UI creation
-         * @override
-         */
+        // ✅ STEP 4: Use inherited getI18nText() in UI creation
         _createView() {
             const oConfig = this.getConfig();
 
-            if (!oConfig || !oConfig.id) {
-                return new VBox({
-                    items: [
-                        new Text({ text: this._getI18nText("message.error") })
-                    ]
-                });
-            }
-
-            // Create button with i18n text
-            const oButton = new Button(oConfig.id, {
-                text: this._getI18nText("button.text"),
-                press: () => this._onButtonPress()
+            return new VBox(oConfig.id, {
+                items: [
+                    // Method 1: Use inherited getI18nText()
+                    new Label({ 
+                        text: this.getI18nText("label.welcome") 
+                    }),
+                    
+                    // Method 2: Use binding syntax for controls
+                    new Button({
+                        text: "{i18n>button.submit}",
+                        press: () => this._onButtonPress()
+                    }),
+                    
+                    // Method 3: With parameters
+                    new Label({ 
+                        text: this.getI18nText("label.itemCount", [5]) 
+                    })
+                ]
             });
-
-            return oButton;
         }
 
         _onButtonPress() {
-            const sMessage = this._getI18nText("message.success");
-            sap.m.MessageToast.show(sMessage);
-        }
-
-        /**
-         * STEP 4: Clean up in onExit()
-         * @override
-         */
-        onExit() {
-            super.onExit();
-            this.#oResourceBundle = null;  // ✅ Clean up reference
+            // Use inherited method
+            const sSuccess = this.getI18nText("message.success");
+            MessageToast.show(sSuccess);
+            
+            // Alternative: Use PodContext static method
+            const sAlternative = PodContext.getI18nText("message.alternative");
+            console.log(sAlternative);
         }
     }
 
@@ -887,53 +850,56 @@ sap.ui.define([
 });
 ```
 
+### Three Ways to Use i18n
+
+POD 2.0 provides three methods for using internationalized text:
+
+#### Method 1: Inherited `this.getI18nText()` (Recommended)
+
+```javascript
+// Available anywhere in widget instance
+const sText = this.getI18nText("myWidget.greeting");
+const sWithParams = this.getI18nText("myWidget.title", [arg1, arg2]);
+```
+
+**Use when:** You're inside widget instance methods
+
+#### Method 2: Static `PodContext.getI18nText()`
+
+```javascript
+// Static method, works anywhere
+const sText = PodContext.getI18nText("myWidget.error");
+const sWithParams = PodContext.getI18nText("myWidget.message", [count]);
+```
+
+**Use when:** You need i18n in static methods or outside widget context
+
+#### Method 3: Binding Syntax `"{i18n>key}"`
+
+```javascript
+// In control properties
+new Button({
+    text: "{i18n>myWidget.button.label}",
+    tooltip: "{i18n>myWidget.button.tooltip}"
+});
+```
+
+**Use when:** Creating SAPUI5 controls with property bindings
+
 ### File Structure
 
 **Required folder structure:**
 
 ```
-mycompany/
+mycompany/                        # Your namespace folder
 ├── extension.json
 ├── widget/
-│   ├── I18nExampleWidget.js
-│   └── i18n/                      # ✅ i18n folder inside widget folder
-│       ├── i18n.properties        # Default (English)
-│       ├── i18n_en.properties     # English (explicit)
-│       ├── i18n_de.properties     # German
-│       ├── i18n_fr.properties     # French
-│       └── i18n_es.properties     # Spanish
-└── util/
-```
-
-**Alternative structure (i18n at namespace root):**
-
-```
-mycompany/
-├── extension.json
-├── i18n/                          # ✅ i18n folder at root
-│   ├── i18n.properties
-│   ├── i18n_de.properties
-│   └── i18n_fr.properties
-└── widget/
-    └── I18nExampleWidget.js
-```
-
-**Adjust module path accordingly:**
-
-```javascript
-// For widget/i18n/ structure:
-const sModulePath = sap.ui.require.toUrl("mycompany/widget");
-this.#oResourceBundle = await ResourceBundle.create({
-    url: `${sModulePath}/i18n/i18n.properties`,
-    async: true
-});
-
-// For root i18n/ structure:
-const sModulePath = sap.ui.require.toUrl("mycompany");
-this.#oResourceBundle = await ResourceBundle.create({
-    url: `${sModulePath}/i18n/i18n.properties`,
-    async: true
-});
+│   └── I18nExampleWidget.js
+└── i18n/                         # ✅ i18n folder at namespace root
+    ├── i18n.properties           # Default (English)
+    ├── i18n_en.properties        # English (explicit)
+    ├── i18n_de.properties        # German
+    └── i18n_fr.properties        # French
 ```
 
 ### i18n.properties File Example
@@ -948,26 +914,20 @@ widget.description=Example widget with internationalization
 # Properties
 property.customMessage=Custom Message
 property.customMessage.description=Enter a custom message to display
-property.apiEndpoint=API Endpoint
-property.apiEndpoint.description=Enter the API endpoint URL
+
+# Labels
+label.welcome=Welcome to the Widget
+label.itemCount=You have {0} items
 
 # Button Labels
-button.text=Click Me
-button.save=Save
+button.submit=Submit
 button.cancel=Cancel
 button.delete=Delete
-button.refresh=Refresh
 
 # Messages
 message.success=Operation completed successfully
 message.error=An error occurred
-message.loading=Loading data...
-message.noData=No data available
-
-# Labels
-label.placeholder=Enter text here
-label.required=Required field
-label.optional=Optional
+message.alternative=Alternative message text
 ```
 
 **i18n_de.properties** (German):
@@ -980,63 +940,47 @@ widget.description=Beispiel-Widget mit Internationalisierung
 # Properties
 property.customMessage=Benutzerdefinierte Nachricht
 property.customMessage.description=Geben Sie eine benutzerdefinierte Nachricht ein
-property.apiEndpoint=API-Endpunkt
-property.apiEndpoint.description=Geben Sie die API-Endpunkt-URL ein
+
+# Labels
+label.welcome=Willkommen zum Widget
+label.itemCount=Sie haben {0} Elemente
 
 # Button Labels
-button.text=Klicke mich
-button.save=Speichern
+button.submit=Absenden
 button.cancel=Abbrechen
 button.delete=Löschen
-button.refresh=Aktualisieren
 
 # Messages
 message.success=Vorgang erfolgreich abgeschlossen
 message.error=Ein Fehler ist aufgetreten
-message.loading=Daten werden geladen...
-message.noData=Keine Daten verfügbar
-
-# Labels
-label.placeholder=Text hier eingeben
-label.required=Pflichtfeld
-label.optional=Optional
+message.alternative=Alternativer Meldungstext
 ```
 
-### Advanced: i18n with Parameters
+### Parameters in i18n Text
 
-Use `getText()` with parameters for dynamic values:
+Use `{0}`, `{1}`, etc. for dynamic values:
 
 ```javascript
 // In i18n.properties:
-// message.itemsSelected={0} item(s) selected
+// message.itemsSelected={0} item(s) selected out of {1} total
 
-_showSelectionCount(iCount) {
-    const sMessage = this._getI18nText("message.itemsSelected", [iCount]);
-    // Result: "5 item(s) selected"
-    sap.m.MessageToast.show(sMessage);
+_showSelectionCount(iSelected, iTotal) {
+    const sMessage = this.getI18nText("message.itemsSelected", [iSelected, iTotal]);
+    // Result: "5 item(s) selected out of 20 total"
+    MessageToast.show(sMessage);
 }
 ```
 
-### Advanced: Locale Detection
+### Common Usage Patterns
 
-ResourceBundle automatically detects user locale from browser settings. The loading order is:
-
-1. `i18n_de_DE.properties` (exact locale match)
-2. `i18n_de.properties` (language match)
-3. `i18n.properties` (fallback/default)
-
-No additional configuration needed - SAPUI5 handles this automatically!
-
-### Common Patterns
-
-**Pattern 1: Using i18n in WidgetProperty (CORRECT)**
+**Pattern 1: Property Editor Labels**
 
 ```javascript
 getProperties() {
     return [
         new WidgetProperty({
-            displayName: this._getI18nText("property.apiEndpoint"),  // ✅ Method call!
-            description: this._getI18nText("property.apiEndpoint.description"),
+            displayName: this.getI18nText("property.apiEndpoint"),
+            description: this.getI18nText("property.apiEndpoint.description"),
             category: "Main",
             propertyEditor: new StringPropertyEditor(this, "apiEndpoint")
         })
@@ -1044,16 +988,31 @@ getProperties() {
 }
 ```
 
-**Pattern 2: Using i18n in Control Creation**
+**Pattern 2: Dynamic Messages**
+
+```javascript
+async _loadData() {
+    try {
+        const oData = await ApiClient.custom.get("/data");
+        const sSuccess = this.getI18nText("message.success");
+        MessageToast.show(sSuccess);
+    } catch (error) {
+        const sError = this.getI18nText("message.error");
+        MessageBox.error(sError);
+    }
+}
+```
+
+**Pattern 3: Binding in Controls**
 
 ```javascript
 _createView() {
     return new VBox(this.getConfig().id, {
         items: [
-            new Label({ text: this._getI18nText("label.username") }),
-            new Input({ placeholder: this._getI18nText("label.placeholder") }),
+            new Label({ text: "{i18n>label.username}" }),
+            new Input({ placeholder: "{i18n>label.placeholder}" }),
             new Button({
-                text: this._getI18nText("button.save"),
+                text: "{i18n>button.save}",
                 press: () => this._onSave()
             })
         ]
@@ -1061,255 +1020,49 @@ _createView() {
 }
 ```
 
-**Pattern 3: Dynamic Messages**
+### Locale Detection
 
-```javascript
-async _loadData() {
-    try {
-        const oData = await ApiClient.custom.get("/data");
-        const sMessage = this._getI18nText("message.success");
-        sap.m.MessageToast.show(sMessage);
-    } catch (error) {
-        const sError = this._getI18nText("message.error");
-        sap.m.MessageBox.error(sError);
-    }
-}
-```
+`I18nResourceModel` automatically detects user locale from browser settings. The loading order is:
+
+1. `i18n_de_DE.properties` (exact locale match)
+2. `i18n_de.properties` (language match)
+3. `i18n.properties` (fallback/default)
+
+No additional configuration needed - framework handles this automatically!
 
 ### Critical Rules
 
 ✅ **DO:**
-- Load ResourceBundle manually in `onInit()`
-- Use `sap.ui.require.toUrl()` to get module path
-- Store bundle in instance variable
-- Provide fallback defaults
-- Clean up in `onExit()`
-- Use method calls in `getProperties()`: `this._getI18nText("key")`
+- Define static `getI18nModel()` returning `I18nResourceModel`
+- Use inherited `this.getI18nText(key, params)` method
+- Use `PodContext.getI18nText(key, params)` for static contexts
+- Use binding syntax `"{i18n>key}"` in controls
+- Place i18n folder at namespace root
+- Use dot notation for bundleName: `"namespace.i18n.i18n"`
 
 ❌ **DON'T:**
-- Assume `getResourceBundle()` exists
-- Use binding syntax in `WidgetProperty`: `"{i18n>key}"`
-- Load bundle synchronously
-- Forget fallback values
-- Hard-code user-visible text
+- Manually load ResourceBundle or ResourceModel
+- Create custom `_loadI18n()` methods
+- Store `_oResourceBundle` instance variables
+- Load in `onInit()` - framework already loaded it!
+- Use slash notation: `"namespace/i18n/i18n"`
 
 ### Troubleshooting
 
-**Issue**: "TypeError: this.getResourceBundle is not a function"
-**Solution**: Widget classes don't have this method. Load ResourceBundle manually.
+**Issue**: "this.getI18nText is not a function"
+**Solution**: Ensure you defined static `getI18nModel()` returning `I18nResourceModel`. Framework calls this during registration.
 
 **Issue**: Resource bundle not found (404 error)
-**Solution**: Check module path with `console.log(sap.ui.require.toUrl("mycompany/widget"))`. Verify i18n folder location.
-
-**Issue**: Binding syntax errors in property editor
-**Solution**: Never use `"{i18n>key}"` in WidgetProperty. Use `this._getI18nText("key")` instead.
+**Solution**: Verify bundleName matches namespace structure with dots: `"mycompany.widget.i18n.i18n"` and i18n folder exists at namespace root.
 
 **Issue**: Text shows as key (e.g., "button.text" instead of "Click Me")
-**Solution**: Check fallback object includes the key, or verify i18n.properties file is loaded correctly.
+**Solution**: Check i18n.properties file syntax and ensure key exists. Use browser console to verify bundle loaded.
 
 ### See Also
 
-- [Mistake #2: Using Binding Syntax in WidgetProperty](common-mistakes.md#mistake-2-using-binding-syntax-in-widgetproperty-metadata)
-- [Mistake #12: Assuming getResourceBundle() Exists](common-mistakes.md#mistake-12-assuming-getresourcebundle-exists-on-widget)
-- **SAPUI5 Documentation**: ResourceBundle API Reference
-
----
-
-## Alternative: ResourceModel-Based i18n Pattern (Synchronous)
-
-### Overview
-
-An alternative to the async `ResourceBundle.create()` approach is using `ResourceModel`, which loads synchronously in the constructor. This approach is simpler but doesn't use async/await.
-
-### When to Use This Approach
-
-- ✅ Simple widgets that don't need async initialization
-- ✅ Want i18n available immediately in constructor
-- ✅ Prefer synchronous loading pattern
-- ❌ Avoid if you need fine-grained control over bundle loading timing
-
-### Complete Implementation
-
-```javascript
-sap.ui.define([
-    "sap/dm/dme/pod2/widget/ControlWidget",
-    "sap/dm/dme/pod2/widget/metadata/WidgetCategory",
-    "sap/m/Button",
-    "sap/m/MessageToast",
-    "sap/ui/model/resource/ResourceModel"  // ← Use ResourceModel instead
-], (ControlWidget, WidgetCategory, Button, MessageToast, ResourceModel) => {
-    "use strict";
-
-    class MultilingualWidget extends ControlWidget {
-        constructor(oConfig) {
-            super(Button, oConfig);
-            this._oResourceBundle = null;
-            this._loadI18n();  // ✅ Load synchronously in constructor
-        }
-
-        static getDisplayName() {
-            return "Multilingual Widget";
-        }
-
-        static getIcon() {
-            return "sap-icon://world";
-        }
-
-        static getCategory() {
-            return WidgetCategory.Elements;
-        }
-
-        /**
-         * Load i18n using ResourceModel (synchronous)
-         */
-        _loadI18n() {
-            // Replace with your actual namespace
-            const sModulePath = "custom/pod2/yournamespace";
-            const oResourceModel = new ResourceModel({
-                bundleName: sModulePath + ".i18n.i18n"  // ← Dot notation!
-            });
-            this._oResourceBundle = oResourceModel.getResourceBundle();
-        }
-
-        /**
-         * Get translated text with optional parameters
-         * @param {string} sKey - i18n key
-         * @param {Array} aParams - Optional parameters for placeholders
-         * @returns {string} Translated text or key as fallback
-         */
-        _getI18nText(sKey, aParams) {
-            if (!this._oResourceBundle) {
-                return sKey;  // Fallback to key if bundle not loaded
-            }
-            return this._oResourceBundle.getText(sKey, aParams);
-        }
-
-        _createView() {
-            const oConfig = this.getConfig();
-            return new Button(oConfig.id, {
-                text: this._getI18nText("button.submit"),  // ✅ Available immediately!
-                press: () => this._onPress()
-            });
-        }
-
-        _onPress() {
-            const sMessage = this._getI18nText("message.success");
-            MessageToast.show(sMessage);
-        }
-
-        onExit() {
-            super.onExit();
-            this._oResourceBundle = null;
-        }
-    }
-
-    return MultilingualWidget;
-});
-```
-
-### Key Differences: ResourceBundle vs ResourceModel
-
-| Feature | ResourceBundle.create() | ResourceModel |
-|---------|------------------------|---------------|
-| Loading | Async (await in onInit) | Sync (in constructor) |
-| Import | `sap/base/i18n/ResourceBundle` | `sap/ui/model/resource/ResourceModel` |
-| Bundle Name | URL path: `"${path}/i18n/i18n.properties"` | Dot notation: `"namespace.i18n.i18n"` |
-| Available When | After onInit() completes | Immediately in constructor |
-| Best For | Complex widgets with async setup | Simple widgets, immediate use |
-
-### Namespace Convention (CRITICAL!)
-
-The `bundleName` must match your namespace structure:
-
-```javascript
-// If namespace is: custom/pod2/myproject
-// Then bundleName is: "custom/pod2/myproject.i18n.i18n"
-//                      ^^^^ Slashes become dots ^^^^
-
-const oResourceModel = new ResourceModel({
-    bundleName: "custom/pod2/myproject.i18n.i18n"
-    //          ^namespace^  ^folder^ ^basename^
-});
-```
-
-### File Structure (Same for Both Approaches)
-
-```
-<namespace-folder>/
-├── extension.json
-├── widget/
-│   └── MyWidget.js
-└── i18n/
-    ├── i18n.properties        (fallback/default)
-    ├── i18n_en.properties     (English)
-    ├── i18n_de.properties     (German)
-    └── i18n_fr.properties     (French)
-```
-
-### Example: Dynamic Messages with Parameters
-
-```javascript
-// In i18n/i18n.properties:
-// message.itemsSelected=You have selected {0} items
-// message.error=Error {0}: {1}
-
-_showSelection(iCount) {
-    const sMsg = this._getI18nText("message.itemsSelected", [5]);
-    // Result: "You have selected 5 items"
-    MessageToast.show(sMsg);
-}
-
-_showError(sCode, sMessage) {
-    const sError = this._getI18nText("message.error", ["404", "Not Found"]);
-    // Result: "Error 404: Not Found"
-    MessageToast.show(sError);
-}
-```
-
-### Common Mistakes with ResourceModel Approach
-
-❌ **WRONG: Using slash notation for bundleName**
-
-```javascript
-// ❌ This will fail!
-new ResourceModel({
-    bundleName: "custom/pod2/myproject/i18n/i18n"  // Slashes don't work!
-});
-```
-
-❌ **WRONG: Using URL path**
-
-```javascript
-// ❌ ResourceModel doesn't accept URLs!
-new ResourceModel({
-    bundleName: `${sap.ui.require.toUrl("custom/pod2/myproject")}/i18n/i18n.properties`
-});
-```
-
-✅ **CORRECT: Dot notation for namespace**
-
-```javascript
-// ✅ Convert slashes to dots!
-new ResourceModel({
-    bundleName: "custom.pod2.myproject.i18n.i18n"  // Dots work!
-});
-```
-
-### Comparison Summary
-
-**Use ResourceBundle.create() (Async) when:**
-- You need async initialization
-- You prefer explicit URL control
-- You want to handle loading errors with try/catch in onInit()
-- You're loading from non-standard locations
-
-**Use ResourceModel (Sync) when:**
-- You want simplest possible implementation
-- You need i18n available in constructor/before onInit()
-- Your i18n follows standard structure
-- You prefer synchronous loading
-
-Both approaches work correctly - choose based on your widget's needs!
+- [Production Patterns: i18n from SAP Code](production-patterns-sap.md)
+- [SKILL.md: Step 3 - i18n Implementation](../SKILL.md)
+- **SAPUI5 Documentation**: I18nResourceModel API Reference
 
 ---
 

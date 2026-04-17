@@ -1,9 +1,9 @@
 ---
 name: pod-plugin
-description: Create SAP Digital Manufacturing POD 1.0 and POD 2.0 plugins with proper architecture. **ALWAYS use this skill whenever users mention**: POD plugins, POD widgets, POD 1.0, POD 2.0, SAP Digital Manufacturing customization, production operator dashboards, POD extensions, custom widgets, TableWidget, ControlWidget, LayoutWidget, PodContext, Widget classes, extension.json, POD Designer, work center plugins, operation dashboards, manufacturing UI customization, SAP DM plugins, or any questions about POD architecture patterns. Expert in both legacy POD 1.0 (UI5 component-based) and modern POD 2.0 (ES6 class-based) plugin development. **Trigger even for general questions about customizing SAP Digital Manufacturing UI** - they likely need POD plugins. Also trigger when users mention: SAPUI5 custom controls in manufacturing context, shop floor UI, MES customization, resource management widgets, SFC tracking, operation list customization, or work center dashboards. **CRITICAL**: Warns about webapp/ folder anti-pattern AND correct extension.json placement inside namespace folder. **Automatically creates deployment zip file** when plugin is complete. **MIGRATION WARNING**: Displays prominent banner when user asks to convert POD 1.0 to POD 2.0, explaining that re-architecting is better than direct conversion. **ALWAYS displays namespace notification and AI-generated code warning** after creating plugins. **File structure aligned with official SAP POD 2.0 Developer's Guide** using widget/, action/, util/ folder pattern. **extension.json must be INSIDE namespace folder** for module path resolution. **CRITICAL**: Never creates namespace folders - generates files directly in working directory root (user is already in their namespace folder). **i18n IMPLEMENTATION**: TWO comprehensive approaches documented - ResourceModel (synchronous, simpler) and ResourceBundle (async, more control). Both patterns fully explained with complete working examples. **PRODUCTION PATTERNS**: Includes real SAP production code patterns (JSDoc, private fields, Object.freeze enums, design mode checks, ContentHandler patterns, subscription patterns, delegate patterns, error handling from actual SAP widgets). **COMPLETE PATTERNS**: Copy-paste ready widget templates including minimal widget, context-aware widget, API widget, full TableWidget, ControlWidget, LayoutWidget, and ContentHandler implementations. **PARENT PROPERTY SPREADING CLARITY**: Clear decision rules for when to spread parent properties (YES for TableWidget/LayoutWidget, NO for Widget/ControlWidget base classes).
-version: 12.1.0
+description: Create SAP Digital Manufacturing POD 1.0 and POD 2.0 plugins with proper architecture. **ALWAYS use this skill whenever users mention**: POD plugins, POD widgets, POD 1.0, POD 2.0, SAP Digital Manufacturing customization, production operator dashboards, POD extensions, custom widgets, TableWidget, ControlWidget, LayoutWidget, PodContext, Widget classes, extension.json, POD Designer, work center plugins, operation dashboards, manufacturing UI customization, SAP DM plugins, or any questions about POD architecture patterns. Expert in both legacy POD 1.0 (UI5 component-based) and modern POD 2.0 (ES6 class-based) plugin development. **Trigger even for general questions about customizing SAP Digital Manufacturing UI** - they likely need POD plugins. Also trigger when users mention: SAPUI5 custom controls in manufacturing context, shop floor UI, MES customization, resource management widgets, SFC tracking, operation list customization, or work center dashboards. **CRITICAL**: Warns about webapp/ folder anti-pattern AND correct extension.json placement inside namespace folder. **Automatically creates deployment zip file** when plugin is complete. **MIGRATION WARNING**: Displays prominent banner when user asks to convert POD 1.0 to POD 2.0, explaining that re-architecting is better than direct conversion. **ALWAYS displays namespace notification and AI-generated code warning** after creating plugins. **File structure aligned with official SAP POD 2.0 Developer's Guide** using widget/, action/, util/ folder pattern. **extension.json must be INSIDE namespace folder** for module path resolution. **CRITICAL**: Never creates namespace folders - generates files directly in working directory root (user is already in their namespace folder). **i18n IMPLEMENTATION**: Framework-driven pattern using static getI18nModel() with I18nResourceModel - widgets use inherited this.getI18nText() method (no manual ResourceBundle/ResourceModel loading!). **PRODUCTION PATTERNS**: Includes real SAP production code patterns (JSDoc, private fields, Object.freeze enums, design mode checks, ContentHandler patterns, subscription patterns, delegate patterns, error handling from actual SAP widgets). **COMPLETE PATTERNS**: Copy-paste ready widget templates including minimal widget, context-aware widget, API widget, full TableWidget, ControlWidget, LayoutWidget, and ContentHandler implementations. **PARENT PROPERTY SPREADING CLARITY**: Clear decision rules for when to spread parent properties (YES for TableWidget/LayoutWidget, NO for Widget/ControlWidget base classes).
+version: 13.0.0
 author: Claude
-tags: [sap, digital-manufacturing, pod, plugin, pod2, no-binding-in-widgetproperty, conditional-parent-spreading, getDefaultConfig-official-pattern, getI18nText-method, stringpropertyeditor-no-default, callback-parameter-order, real-world-patterns, widget-architecture, createView-before-onInit, no-webapp-folder, pod-vs-sapui5, auto-deployment-zip, migration-warning, pod1-to-pod2, namespace-notification, ai-code-warning, official-sap-structure, widget-action-util-folders, extension-json-placement, module-path-resolution, no-namespace-folder-creation, generate-in-cwd-root, production-sap-patterns, jsdoc-patterns, private-fields-encapsulation, object-freeze-enums, design-mode-patterns, contenthandler-patterns, subscription-patterns, delegate-patterns, copy-paste-templates, spreading-decision-rules, i18n-resourcemodel, i18n-resourcebundle, dual-i18n-approaches, sync-async-i18n]
+tags: [sap, digital-manufacturing, pod, plugin, pod2, no-binding-in-widgetproperty, conditional-parent-spreading, getDefaultConfig-official-pattern, getI18nText-method, I18nResourceModel, framework-driven-i18n, stringpropertyeditor-no-default, callback-parameter-order, real-world-patterns, widget-architecture, createView-before-onInit, no-webapp-folder, pod-vs-sapui5, auto-deployment-zip, migration-warning, pod1-to-pod2, namespace-notification, ai-code-warning, official-sap-structure, widget-action-util-folders, extension-json-placement, module-path-resolution, no-namespace-folder-creation, generate-in-cwd-root, production-sap-patterns, jsdoc-patterns, private-fields-encapsulation, object-freeze-enums, design-mode-patterns, contenthandler-patterns, subscription-patterns, delegate-patterns, copy-paste-templates, spreading-decision-rules]
 compatibility:
   environment: SAP Business Technology Platform (BTP) with SAP Digital Manufacturing
   requirements:
@@ -557,53 +557,49 @@ _createView() {
 
 **Step 3: Add i18n Support (Optional but Recommended)**
 
-Choose one of two approaches:
+POD 2.0 framework automatically loads i18n models - you just provide the model via static method:
 
-**Approach A: ResourceModel (Synchronous - Simpler)**
 ```javascript
-// 1. Import ResourceModel
-"sap/ui/model/resource/ResourceModel"
+import I18nResourceModel from "sap/dm/dme/pod2/model/I18nResourceModel";
 
-// 2. Load in constructor
-constructor(oConfig) {
-    super(BaseClass, oConfig);
-    this._oResourceBundle = null;
-    this._loadI18n();
-}
-
-_loadI18n() {
-    const oResourceModel = new ResourceModel({
-        bundleName: "your.namespace.i18n.i18n"  // Dots, not slashes!
+class YourWidget extends Widget {
+    
+    // 1. Define static private i18n model
+    static #oI18nModel = new I18nResourceModel({
+        bundleName: "your.namespace.i18n.i18n"  // Use dots, not slashes!
     });
-    this._oResourceBundle = oResourceModel.getResourceBundle();
-}
-
-// 3. Helper method
-_getI18nText(sKey, aParams) {
-    return this._oResourceBundle?.getText(sKey, aParams) || sKey;
+    
+    // 2. Static getter for framework (framework calls this during widget registration)
+    static getI18nModel() {
+        return this.#oI18nModel;
+    }
+    
+    // 3. Use inherited getI18nText() method anywhere in widget
+    _someMethod() {
+        const sText = this.getI18nText("myWidget.greeting");
+        const sTitle = this.getI18nText("myWidget.title", arg1, arg2);
+    }
+    
+    // 4. Alternative: Use PodContext static method
+    _anotherMethod() {
+        const sError = PodContext.getI18nText("myWidget.error");
+    }
+    
+    // 5. Alternative: Use binding in controls
+    _createView() {
+        return new Button({
+            text: "{i18n>myWidget.button.label}"
+        });
+    }
 }
 ```
 
-**Approach B: ResourceBundle (Async - More Control)**
-```javascript
-// 1. Import ResourceBundle
-"sap/base/i18n/ResourceBundle"
-
-// 2. Load in onInit()
-async onInit() {
-    await super.onInit();
-    const sModulePath = sap.ui.require.toUrl("your/namespace");
-    this._oResourceBundle = await ResourceBundle.create({
-        url: `${sModulePath}/i18n/i18n.properties`,
-        async: true
-    });
-}
-
-// 3. Helper method (same as above)
-_getI18nText(sKey, aParams) {
-    return this._oResourceBundle?.getText(sKey, aParams) || sKey;
-}
-```
+**Key Points:**
+- Framework automatically calls `getI18nModel()` during widget registration
+- Use inherited `this.getI18nText(key, ...args)` method (no manual loading!)
+- Or use `PodContext.getI18nText(key, ...args)` static method
+- Or use binding syntax `"{i18n>key}"` in controls
+- Model is loaded once per widget class, not per instance
 
 **See:** [i18n Patterns](references/widget-patterns.md#i18n-internationalization-pattern) for complete examples
 
