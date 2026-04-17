@@ -1066,10 +1066,489 @@ No additional configuration needed - framework handles this automatically!
 
 ---
 
+## SAP DM API Integration Pattern
+
+POD widgets can call any of the 70+ SAP Digital Manufacturing REST APIs for production operations, material management, quality, inventory, and more.
+
+### API Reference
+
+📖 **Complete API Reference**: [references/sapdm-api-reference.md](sapdm-api-reference.md)  
+📖 **API Specifications**: [references/api-specs/](api-specs/)
+
+### Authentication & Base URL Pattern
+
+All SAP DM APIs use OAuth 2.0. PodContext provides token and service registry:
+
+```javascript
+const oContext = PodContext.getContext();
+const sToken = oContext.token;                           // OAuth 2.0 Bearer token
+const sPlant = oContext.plant;                           // Current plant
+const sBaseUrl = oContext.serviceRegistry.getApiUrl("sfc"); // Get API base URL
+```
+
+### Common API Categories
+
+**Production APIs:**
+- **SFC (Shop Floor Control)**: Start, complete, serialize, split, merge SFCs
+- **Order**: Find orders, release for production, update custom values
+- **Activity/Quantity Confirmation**: Confirm labor, yield, scrap, rework
+- **Assembly**: Assemble/unassemble components to SFCs
+
+**Material & BOM APIs:**
+- **Material**: Create, search, update materials with routing, BOM, storage locations
+- **BOM**: Define material components required for production
+- **Batch**: Manage material batches and traceability
+
+**Quality & Data Collection APIs:**
+- **Data Collection**: Log parameter values at manufacturing process points
+- **Quality Inspection**: Create and manage quality inspections for SFCs
+- **Nonconformance**: Report and manage defects/issues
+
+**Inventory & Logistics APIs:**
+- **Inventory**: Manage inventory levels, locations, movements
+- **Staging**: Stage materials for production operations
+- **WIP**: Track work in process inventory
+
+### API Call Pattern (Fetch)
+
+```javascript
+import PodContext from "sap/dm/dme/pod2/context/PodContext";
+import MessageToast from "sap/m/MessageToast";
+
+class MyApiWidget extends Widget {
+    
+    /**
+     * Fetch SFC details from SAP DM SFC API
+     * @param {string} sSfc - SFC number
+     * @returns {Promise<Object>} SFC details
+     */
+    async _fetchSfcDetails(sSfc) {
+        const oContext = PodContext.getContext();
+        const sPlant = oContext.plant;
+        const sBaseUrl = oContext.serviceRegistry.getApiUrl("sfc");
+        const sUrl = `${sBaseUrl}/sfcs?plant=${sPlant}&sfc=${sSfc}`;
+        
+        try {
+            const oResponse = await fetch(sUrl, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${oContext.token}`
+                }
+            });
+            
+            if (!oResponse.ok) {
+                const oError = await oResponse.json();
+                throw new Error(oError.message || `HTTP ${oResponse.status}`);
+            }
+            
+            return await oResponse.json();
+            
+        } catch (oError) {
+            console.error("Failed to fetch SFC details:", oError);
+            MessageToast.show(this.getI18nText("api.error.sfc"));
+            throw oError;
+        }
+    }
+    
+    /**
+     * Start SFCs at operation
+     * @param {Array<string>} aSfcs - SFC numbers to start
+     * @param {string} sOperation - Operation activity
+     * @param {string} sResource - Resource name
+     * @returns {Promise<Object>} Start response
+     */
+    async _startSfcs(aSfcs, sOperation, sResource) {
+        const oContext = PodContext.getContext();
+        const sBaseUrl = oContext.serviceRegistry.getApiUrl("sfc");
+        
+        const oRequest = {
+            plant: oContext.plant,
+            sfcs: aSfcs.map(sSfc => ({ sfc: sSfc })),
+            operationActivity: sOperation,
+            resource: sResource
+        };
+        
+        try {
+            const oResponse = await fetch(`${sBaseUrl}/sfcs/start`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${oContext.token}`
+                },
+                body: JSON.stringify(oRequest)
+            });
+            
+            if (!oResponse.ok) {
+                throw new Error(`Start failed: HTTP ${oResponse.status}`);
+            }
+            
+            return await oResponse.json();
+            
+        } catch (oError) {
+            console.error("Failed to start SFCs:", oError);
+            throw oError;
+        }
+    }
+}
+```
+
+### API Call Pattern (jQuery Ajax - SAPUI5 Standard)
+
+```javascript
+import PodContext from "sap/dm/dme/pod2/context/PodContext";
+
+class MyApiWidget extends Widget {
+    
+    /**
+     * Log data collection values
+     * @param {Object} oData - Data collection request
+     * @returns {Promise<Object>} Log response
+     */
+    _logDataCollection(oData) {
+        const oContext = PodContext.getContext();
+        const sUrl = `${oContext.serviceRegistry.getApiUrl("datacollection")}/log`;
+        
+        return new Promise((resolve, reject) => {
+            jQuery.ajax({
+                url: sUrl,
+                method: "POST",
+                contentType: "application/json",
+                data: JSON.stringify(oData),
+                headers: {
+                    "Authorization": `Bearer ${oContext.token}`
+                },
+                success: (oResponse) => {
+                    console.log("Data collection logged:", oResponse);
+                    resolve(oResponse);
+                },
+                error: (oError) => {
+                    console.error("Data collection failed:", oError);
+                    reject(oError);
+                }
+            });
+        });
+    }
+}
+```
+
+### Complete API Widget Example
+
+```javascript
+sap.ui.define([
+    "sap/dm/dme/pod2/widget/Widget",
+    "sap/dm/dme/pod2/context/PodContext",
+    "sap/dm/dme/pod2/context/ModelPath",
+    "sap/m/VBox",
+    "sap/m/Input",
+    "sap/m/Button",
+    "sap/m/Text",
+    "sap/m/MessageToast",
+    "sap/dm/dme/pod2/model/I18nResourceModel"
+], (Widget, PodContext, ModelPath, VBox, Input, Button, Text, MessageToast, I18nResourceModel) => {
+    "use strict";
+    
+    /**
+     * Widget that fetches SFC details from SAP DM API
+     */
+    class SfcDetailsWidget extends Widget {
+        
+        // Static i18n model
+        static #oI18nModel = new I18nResourceModel({
+            bundleName: "custom.pod2.sfcdetails.i18n.i18n"
+        });
+        
+        static getI18nModel() {
+            return this.#oI18nModel;
+        }
+        
+        static getDisplayName() {
+            return "SFC Details Widget";
+        }
+        
+        static getIcon() {
+            return "sap-icon://product";
+        }
+        
+        constructor(oConfig) {
+            super(Widget, oConfig);
+            this._oSfcInput = null;
+            this._oResultText = null;
+        }
+        
+        /**
+         * Create widget view
+         */
+        _createView() {
+            this._oSfcInput = new Input({
+                placeholder: this.getI18nText("sfcDetails.input.placeholder"),
+                width: "15rem"
+            });
+            
+            const oFetchButton = new Button({
+                text: this.getI18nText("sfcDetails.button.fetch"),
+                press: () => this._onFetchSfc()
+            });
+            
+            this._oResultText = new Text({
+                text: ""
+            });
+            
+            return new VBox({
+                items: [
+                    this._oSfcInput,
+                    oFetchButton,
+                    this._oResultText
+                ],
+                class: "sapUiSmallMargin"
+            });
+        }
+        
+        /**
+         * Initialize widget - subscribe to context
+         */
+        async onInit() {
+            await super.onInit();
+            
+            // Subscribe to selected SFC changes
+            this.subscribe(ModelPath.SelectedSfc, this._onSfcSelected.bind(this));
+        }
+        
+        /**
+         * Handle selected SFC change
+         */
+        _onSfcSelected(sSfc, sPath) {
+            if (sSfc) {
+                this._oSfcInput.setValue(sSfc);
+                this._onFetchSfc();
+            }
+        }
+        
+        /**
+         * Fetch SFC details from API
+         */
+        async _onFetchSfc() {
+            const sSfc = this._oSfcInput.getValue();
+            
+            if (!sSfc) {
+                MessageToast.show(this.getI18nText("sfcDetails.error.noSfc"));
+                return;
+            }
+            
+            try {
+                const oData = await this._fetchSfcDetails(sSfc);
+                
+                const sResult = `SFC: ${oData.sfc}\n` +
+                               `Material: ${oData.material}\n` +
+                               `Status: ${oData.status}\n` +
+                               `Quantity: ${oData.quantity}`;
+                
+                this._oResultText.setText(sResult);
+                
+            } catch (oError) {
+                this._oResultText.setText(this.getI18nText("sfcDetails.error.fetch"));
+            }
+        }
+        
+        /**
+         * Call SAP DM SFC API to get SFC details
+         */
+        async _fetchSfcDetails(sSfc) {
+            const oContext = PodContext.getContext();
+            const sPlant = oContext.plant;
+            const sBaseUrl = oContext.serviceRegistry.getApiUrl("sfc");
+            const sUrl = `${sBaseUrl}/sfcs?plant=${sPlant}&sfc=${sSfc}`;
+            
+            const oResponse = await fetch(sUrl, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${oContext.token}`
+                }
+            });
+            
+            if (!oResponse.ok) {
+                throw new Error(`HTTP ${oResponse.status}: ${oResponse.statusText}`);
+            }
+            
+            return await oResponse.json();
+        }
+        
+        /**
+         * Cleanup on destroy
+         */
+        onExit() {
+            this.unsubscribe();
+            super.onExit();
+        }
+    }
+    
+    return SfcDetailsWidget;
+});
+```
+
+### API Best Practices
+
+✅ **DO:**
+- Cache OAuth tokens from PodContext (already cached by framework)
+- Use `serviceRegistry.getApiUrl()` for base URLs
+- Handle errors gracefully with user-friendly messages
+- Show loading indicators for long API calls
+- Validate input before making API calls
+- Use async/await for cleaner code
+- Log errors for debugging
+- Check HTTP status codes
+
+❌ **DON'T:**
+- Request new OAuth token for every API call
+- Hardcode API base URLs
+- Show raw error messages to users
+- Make synchronous API calls (blocks UI)
+- Trust user input without validation
+- Ignore error responses
+- Make redundant API calls (cache when appropriate)
+
+### Error Handling Pattern
+
+```javascript
+async _callApi(sEndpoint, oData) {
+    const oContext = PodContext.getContext();
+    const sUrl = `${oContext.serviceRegistry.getApiUrl("service")}${sEndpoint}`;
+    
+    try {
+        const oResponse = await fetch(sUrl, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${oContext.token}`
+            },
+            body: JSON.stringify(oData)
+        });
+        
+        if (!oResponse.ok) {
+            const oError = await oResponse.json();
+            throw new Error(oError.message || `HTTP ${oResponse.status}`);
+        }
+        
+        return await oResponse.json();
+        
+    } catch (oError) {
+        console.error(`API call failed (${sEndpoint}):`, oError);
+        
+        // Show user-friendly error message
+        const sErrorKey = oError.code ? `api.error.${oError.code}` : "api.error.generic";
+        MessageToast.show(this.getI18nText(sErrorKey));
+        
+        throw oError;
+    }
+}
+```
+
+### Pagination Pattern
+
+Many list APIs support pagination:
+
+```javascript
+async _fetchMaterialList(sSearchTerm, iPage = 0, iSize = 20) {
+    const oContext = PodContext.getContext();
+    const sBaseUrl = oContext.serviceRegistry.getApiUrl("material");
+    const sUrl = `${sBaseUrl}/v1/materials/list?plant=${oContext.plant}&page=${iPage}&size=${iSize}&search=${sSearchTerm}`;
+    
+    const oResponse = await fetch(sUrl, {
+        headers: {
+            "Authorization": `Bearer ${oContext.token}`
+        }
+    });
+    
+    const oData = await oResponse.json();
+    
+    return {
+        items: oData.content,
+        totalItems: oData.totalElements,
+        totalPages: oData.totalPages,
+        currentPage: oData.page
+    };
+}
+```
+
+### Async Operations Pattern
+
+Some APIs support async processing:
+
+```javascript
+async _startSfcsAsync(aSfcs) {
+    const oContext = PodContext.getContext();
+    const sBaseUrl = oContext.serviceRegistry.getApiUrl("sfc");
+    
+    // Start async operation
+    const oResponse = await fetch(`${sBaseUrl}/sfcs/start?async=true`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${oContext.token}`
+        },
+        body: JSON.stringify({
+            plant: oContext.plant,
+            sfcs: aSfcs.map(sSfc => ({ sfc: sSfc })),
+            operationActivity: "OPER_1,1",
+            resource: "RESOURCE_1"
+        })
+    });
+    
+    const { asyncExecutionId } = await oResponse.json();
+    
+    // Poll for completion
+    return await this._pollAsyncResult(asyncExecutionId);
+}
+
+async _pollAsyncResult(sExecutionId, iMaxAttempts = 30) {
+    const oContext = PodContext.getContext();
+    const sBaseUrl = oContext.serviceRegistry.getApiUrl("sfc");
+    
+    for (let i = 0; i < iMaxAttempts; i++) {
+        await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2s
+        
+        const oResponse = await fetch(`${sBaseUrl}/async/${sExecutionId}`, {
+            headers: {
+                "Authorization": `Bearer ${oContext.token}`
+            }
+        });
+        
+        const oResult = await oResponse.json();
+        
+        if (oResult.status === "COMPLETED") {
+            return oResult.data;
+        } else if (oResult.status === "FAILED") {
+            throw new Error(oResult.error || "Async operation failed");
+        }
+    }
+    
+    throw new Error("Async operation timeout");
+}
+```
+
+### API Documentation
+
+📖 **See Also:**
+- **[sapdm-api-reference.md](sapdm-api-reference.md)** - Complete reference for all 70+ SAP DM APIs
+- **[api-specs/](api-specs/)** - Full OpenAPI/Swagger specifications
+- **SAP Help Portal**: [API Integration Guide](https://help.sap.com/docs/sap-digital-manufacturing/operations-guide/prepare-for-api-integration)
+
+**Common APIs:**
+- SFC API: `api-specs/sapdme_sfc.json` - Shop floor control operations
+- Order API: `api-specs/sapdme_order.json` - Production order management
+- Material API: `api-specs/sapdme_material.json` - Material master data
+- Data Collection API: `api-specs/sapdme_datacollection.json` - Parameter logging
+- Quality Inspection API: `api-specs/sapdme_qualityinspection.json` - Quality checks
+- Inventory API: `api-specs/sapdme_inventory.json` - Inventory management
+
+---
+
 ## Navigation
 
 📖 **Back to main skill**: [SKILL.md](../SKILL.md)
 
 **Other references**:
 - [Common Mistakes](common-mistakes.md) - All mistakes with fixes
+- [SAP DM API Reference](sapdm-api-reference.md) - Complete API documentation
 - [Glossary](glossary.md) - Key terms & definitions
