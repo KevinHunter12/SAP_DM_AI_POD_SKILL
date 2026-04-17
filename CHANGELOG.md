@@ -1,5 +1,96 @@
 # POD Plugin Skill - Update Changelog
 
+## Version 9.8.0 - 2026-04-17
+
+### 🚨 CRITICAL FIX: No Namespace Folder Creation During File Generation
+
+This update fixes a **CRITICAL file generation error** that caused files to be created in wrong locations (nested namespace folders instead of working directory root).
+
+---
+
+## ✅ Changes Made
+
+### 1. **CRITICAL: Fixed File Generation Location**
+
+**The Problem** (identified by user):
+Skill was creating nested namespace folders (e.g., `mycompany/extension.json` or `custom/pod2/sfcdetails/extension.json`) when it should generate files directly in the working directory root.
+
+**What Was Wrong:**
+- Skill assumed it needed to CREATE namespace folders during generation
+- Files were written to paths like `mycompany/extension.json` instead of `extension.json`
+- Created nested structures like `custom/pod2/sfcdetails/` 
+- User's working directory IS already the namespace folder
+
+**Root Cause:**
+- Documentation showed namespace folders for **illustration** (final zip structure)
+- Skill incorrectly interpreted this as needing to CREATE those folders
+- But user is already IN their namespace folder (working directory IS the namespace folder)
+
+**What Is Correct:**
+```
+User is in: /home/user/myproject/
+Generate files at root:
+- extension.json (NOT mycompany/extension.json)
+- widget/MyWidget.js (NOT mycompany/widget/MyWidget.js)
+- action/MyAction.js (NOT mycompany/action/MyAction.js)
+```
+
+**Why:**
+- Working directory IS the namespace folder
+- Files must be at root level for correct module path resolution
+- For deployment, user will `cd ..` and zip the working directory
+
+### 2. **Updated All Documentation**
+
+**SKILL.md changes:**
+- Added new critical section: "File Generation - NO Namespace Folder Creation!"
+- Explains that user is already IN their namespace folder
+- Shows WRONG (nested folders) vs CORRECT (root level generation)
+- Added file path conventions for Write tool usage
+- Updated version to 9.8.0 with new tags
+- Clarified deployment zip creation requires cd to parent directory
+
+**references/glossary.md changes:**
+- Added "File Generation Approach" section explaining working directory IS namespace folder
+- Updated file structure to show `<working-directory>/` instead of `mycompany/`
+- Added "File Path Convention When Generating" with correct examples
+- Updated zip creation section to clarify user must cd to parent first
+
+**references/common-mistakes.md changes:**
+- Added NEW Mistake #0: "Creating Namespace Folder During File Generation" (CRITICAL!)
+- Renumbered all existing mistakes (#1→#2, #2→#3, etc.)
+- Detailed explanation of why this happens and how to fix
+- Shows WRONG (nested folders) vs CORRECT (root level) file generation
+- Explains 100% failure rate when namespace folders are created
+
+### 3. **Added New Mistake #0 (Most Critical)**
+
+Complete documentation of the file generation error:
+- Error symptoms: Files in wrong location, incorrect folder nesting
+- Why it happens: misunderstanding namespace folder concept
+- How to fix: Write files to working directory root
+- Prevention: Never create namespace folders like `mycompany/`, `custom/pod2/`
+- Remember: Namespace folder concept is for documentation only!
+
+---
+
+## 📋 Impact
+
+This was a **CRITICAL** error that would cause files to be generated in wrong locations with nested folder structures.
+
+**Affected Versions:** v9.0.0 - v9.7.0
+
+**Symptoms:**
+- Files created in nested folders (e.g., `mycompany/mycompany/extension.json`)
+- Module paths don't match file locations
+- Deployment zip has incorrect structure
+- Extension Center upload fails or widgets don't load
+
+**Resolution:**
+Files must be generated directly in working directory root (no namespace folder creation).
+
+---
+
 ## Version 9.7.0 - 2026-04-15
 
 ### 🚨 CRITICAL FIX: extension.json Placement Correction

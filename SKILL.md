@@ -1,9 +1,9 @@
 ---
 name: pod-plugin
-description: Create SAP Digital Manufacturing POD 1.0 and POD 2.0 plugins with proper architecture. **ALWAYS use this skill whenever users mention**: POD plugins, POD widgets, POD 1.0, POD 2.0, SAP Digital Manufacturing customization, production operator dashboards, POD extensions, custom widgets, TableWidget, ControlWidget, LayoutWidget, PodContext, Widget classes, extension.json, POD Designer, work center plugins, operation dashboards, manufacturing UI customization, SAP DM plugins, or any questions about POD architecture patterns. Expert in both legacy POD 1.0 (UI5 component-based) and modern POD 2.0 (ES6 class-based) plugin development. **Trigger even for general questions about customizing SAP Digital Manufacturing UI** - they likely need POD plugins. Also trigger when users mention: SAPUI5 custom controls in manufacturing context, shop floor UI, MES customization, resource management widgets, SFC tracking, operation list customization, or work center dashboards. **CRITICAL**: Warns about webapp/ folder anti-pattern AND correct extension.json placement inside namespace folder. **Automatically creates deployment zip file** when plugin is complete. **MIGRATION WARNING**: Displays prominent banner when user asks to convert POD 1.0 to POD 2.0, explaining that re-architecting is better than direct conversion. **ALWAYS displays namespace notification and AI-generated code warning** after creating plugins. **File structure aligned with official SAP POD 2.0 Developer's Guide** using widget/, action/, util/ folder pattern. **extension.json must be INSIDE namespace folder** for module path resolution.
-version: 9.7.0
+description: Create SAP Digital Manufacturing POD 1.0 and POD 2.0 plugins with proper architecture. **ALWAYS use this skill whenever users mention**: POD plugins, POD widgets, POD 1.0, POD 2.0, SAP Digital Manufacturing customization, production operator dashboards, POD extensions, custom widgets, TableWidget, ControlWidget, LayoutWidget, PodContext, Widget classes, extension.json, POD Designer, work center plugins, operation dashboards, manufacturing UI customization, SAP DM plugins, or any questions about POD architecture patterns. Expert in both legacy POD 1.0 (UI5 component-based) and modern POD 2.0 (ES6 class-based) plugin development. **Trigger even for general questions about customizing SAP Digital Manufacturing UI** - they likely need POD plugins. Also trigger when users mention: SAPUI5 custom controls in manufacturing context, shop floor UI, MES customization, resource management widgets, SFC tracking, operation list customization, or work center dashboards. **CRITICAL**: Warns about webapp/ folder anti-pattern AND correct extension.json placement inside namespace folder. **Automatically creates deployment zip file** when plugin is complete. **MIGRATION WARNING**: Displays prominent banner when user asks to convert POD 1.0 to POD 2.0, explaining that re-architecting is better than direct conversion. **ALWAYS displays namespace notification and AI-generated code warning** after creating plugins. **File structure aligned with official SAP POD 2.0 Developer's Guide** using widget/, action/, util/ folder pattern. **extension.json must be INSIDE namespace folder** for module path resolution. **CRITICAL**: Never creates namespace folders - generates files directly in working directory root (user is already in their namespace folder).
+version: 9.8.0
 author: Claude
-tags: [sap, digital-manufacturing, pod, plugin, pod2, no-binding-in-widgetproperty, no-parent-spreading, getDefaultConfig-official-pattern, getI18nText-method, stringpropertyeditor-no-default, callback-parameter-order, real-world-patterns, widget-architecture, createView-before-onInit, no-webapp-folder, pod-vs-sapui5, auto-deployment-zip, migration-warning, pod1-to-pod2, namespace-notification, ai-code-warning, official-sap-structure, widget-action-util-folders, extension-json-placement, module-path-resolution]
+tags: [sap, digital-manufacturing, pod, plugin, pod2, no-binding-in-widgetproperty, no-parent-spreading, getDefaultConfig-official-pattern, getI18nText-method, stringpropertyeditor-no-default, callback-parameter-order, real-world-patterns, widget-architecture, createView-before-onInit, no-webapp-folder, pod-vs-sapui5, auto-deployment-zip, migration-warning, pod1-to-pod2, namespace-notification, ai-code-warning, official-sap-structure, widget-action-util-folders, extension-json-placement, module-path-resolution, no-namespace-folder-creation, generate-in-cwd-root]
 compatibility:
   environment: SAP Business Technology Platform (BTP) with SAP Digital Manufacturing
   requirements:
@@ -13,6 +13,65 @@ compatibility:
 ---
 
 You are an expert SAP Digital Manufacturing POD plugin developer with deep knowledge of real-world POD 2.0 architecture patterns from production SAP code. Help users create, scaffold, and develop custom POD plugins for both POD 1.0 and POD 2.0.
+
+## 🚨 CRITICAL: File Generation - NO Namespace Folder Creation!
+
+**IMPORTANT**: When creating or generating plugin files:
+
+### ❌ NEVER DO THIS:
+```
+Don't create nested namespace folders like:
+- custom/pod2/sfcdetails/
+- sfcdetails/
+- mycompany/
+- acme/
+```
+
+### ✅ ALWAYS DO THIS:
+```
+Generate files directly in the working directory root:
+- extension.json        (in current directory)
+- widget/              (subfolder in current directory)
+- action/              (subfolder in current directory)
+- util/                (subfolder in current directory)
+```
+
+### Why?
+- **The user is already IN their namespace folder** (their working directory IS the namespace folder)
+- Creating additional nested folders causes incorrect file paths
+- Module resolution will fail if files are in unexpected locations
+- The working directory will become the zip content, so everything should be at the root level
+
+### Example:
+If user's working directory is `/home/user/myproject`, generate:
+```
+/home/user/myproject/
+├── extension.json          # ← Root of working directory
+├── widget/
+│   └── MyWidget.js
+├── action/
+│   └── MyAction.js
+└── util/
+    └── Helper.js
+```
+
+**NOT**:
+```
+/home/user/myproject/
+└── myproject/              # ← ❌ Don't create this!
+    ├── extension.json
+    └── widget/MyWidget.js
+```
+
+### File Path Convention:
+When using Write tool, paths should be:
+- `extension.json` (not `mycompany/extension.json`)
+- `widget/MyWidget.js` (not `mycompany/widget/MyWidget.js`)
+- `action/MyAction.js` (not `mycompany/action/MyAction.js`)
+
+**The namespace folder concept is for documentation only** - showing users how their final zip structure looks. During file generation, assume the current working directory IS that namespace folder.
+
+---
 
 ## 🚨 CRITICAL: POD 1.0 to POD 2.0 Migration Warning
 
@@ -118,23 +177,29 @@ webapp/                  # ❌ WRONG! This breaks upload!
 
 ### ✅ CORRECT POD 2.0 Plugin Structure (Official SAP Pattern):
 
-**Your Development Folder:**
+**Your Development Folder (Working Directory IS the Namespace Folder):**
 ```
-mycompany/               # Namespace folder (your project root)
-├── extension.json       # ← INSIDE the namespace folder!
-├── widget/              # Widget folder (recommended by SAP)
-│   └── MyWidget.js      # Your widget class file
-├── action/              # Action folder (for custom actions)
+<current-working-directory>/    # ← User is already here (this IS the namespace folder)
+├── extension.json              # ← Generate in working directory root
+├── widget/                     # Widget folder (recommended by SAP)
+│   └── MyWidget.js             # Your widget class file
+├── action/                     # Action folder (for custom actions)
 │   └── MyAction.js
-└── util/                # Utility folder (for reusable logic)
+└── util/                       # Utility folder (for reusable logic)
     └── Helper.js
 ```
 
+**🚨 CRITICAL: DO NOT CREATE NAMESPACE FOLDER - User is already in it!**
+- ❌ Don't write files to `mycompany/extension.json`
+- ❌ Don't create nested folders like `mycompany/` or `custom/pod2/`
+- ✅ Write files directly: `extension.json`, `widget/MyWidget.js`
+- ✅ The working directory IS the namespace folder
+
 **🚨 CRITICAL: When You Create the ZIP for Upload:**
 ```
-mycompany.zip
-└── mycompany/           # ← Namespace folder IS the zip content
-    ├── extension.json   # ← INSIDE namespace folder, not at zip root!
+mycompany.zip                   # Zip the entire working directory
+└── mycompany/                  # ← Namespace folder IS the zip content
+    ├── extension.json          # ← INSIDE namespace folder, not at zip root!
     ├── widget/
     │   └── MyWidget.js
     ├── action/
@@ -143,11 +208,21 @@ mycompany.zip
         └── Helper.js
 ```
 
+**To create the zip from parent directory:**
+```bash
+# User needs to cd to PARENT directory first
+cd ..
+zip -r mycompany.zip mycompany/
+# Or PowerShell:
+Compress-Archive -Path mycompany -DestinationPath mycompany.zip
+```
+
 **Key Points:**
-- Namespace folder (e.g., `mycompany/`) contains everything including extension.json
-- When zipping: zip the namespace folder itself, not its contents
+- **During development**: User's working directory IS the namespace folder
+- **File generation**: Write files to working directory root (`./extension.json`, not `./mycompany/extension.json`)
+- **For deployment**: User zips their working directory from parent folder
+- **In the zip**: Namespace folder contains everything including extension.json
 - Module path example: `mycompany/widget/MyWidget`
-- The path in extension.json is relative to extension.json's location
 
 ### ❌ WRONG ZIP Structure (Causes "Missing file" errors):
 ```
@@ -280,12 +355,17 @@ _createView() {
 
 **Step 3: File structure**
 ```
-extension.json          # ONLY widgets + actions arrays!
-plugins/
-  └── yourwidget.js     # Your widget class
-  └── i18n/
-      └── i18n_en.properties
+<working-directory-root>/     # User is already here
+├── extension.json            # Generate at root
+├── widget/                   # Create subfolder
+│   └── YourWidget.js         # Widget file
+└── i18n/                     # i18n subfolder  
+    └── i18n_en.properties
 ```
+
+**🚨 CRITICAL**: Write files to current directory root, NOT nested namespace folders!
+- ✅ Correct: `extension.json`, `widget/MyWidget.js`
+- ❌ Wrong: `mycompany/extension.json`, `mycompany/widget/MyWidget.js`
 
 **Step 4: Critical imports** (Use `context/` NOT `model/`!)
 ```javascript
@@ -583,37 +663,42 @@ sap.ui.define([
 
 1. **Verify Structure First**
    ```bash
-   # Check that you're in the PARENT directory of the namespace folder
+   # Check that you're in the working directory (namespace folder)
    ls -la
-   # Should show: mycompany/ folder (your namespace folder)
-   
-   cd mycompany
-   ls -la
-   # Should show: extension.json, widget/, action/, util/
-   cd ..
+   # Should show: extension.json, widget/, action/, util/ at root level
    ```
 
 2. **Create Zip File**
    
-   **🚨 CRITICAL: Zip the namespace folder itself, not its contents!**
+   **🚨 CRITICAL: User must cd to PARENT directory and zip the working directory!**
    
    **Windows (PowerShell):**
    ```powershell
-   # From PARENT directory of namespace folder
-   Compress-Archive -Path mycompany -DestinationPath mycompany.zip -Force
+   # First, cd to PARENT directory
+   cd ..
+   # Then zip the namespace folder
+   Compress-Archive -Path <namespace-folder-name> -DestinationPath <namespace-folder-name>.zip -Force
    ```
    
    **Mac/Linux:**
    ```bash
-   # From PARENT directory of namespace folder
+   # First, cd to PARENT directory  
+   cd ..
+   # Then zip the namespace folder
+   zip -r <namespace-folder-name>.zip <namespace-folder-name>/
+   ```
+   
+   **Example (if namespace folder is "mycompany"):**
+   ```bash
+   cd ..
    zip -r mycompany.zip mycompany/
    ```
    
    **What this creates:**
    ```
    mycompany.zip
-   └── mycompany/           # ← Namespace folder in zip
-       ├── extension.json
+   └── mycompany/              # ← Namespace folder in zip
+       ├── extension.json      # ← At namespace folder root
        ├── widget/
        └── action/
    ```

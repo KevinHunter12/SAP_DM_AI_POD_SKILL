@@ -168,27 +168,38 @@ Key terms and definitions for SAP Digital Manufacturing POD plugin development.
 
 ## File Structure
 
-**CRITICAL**: POD plugins do NOT use webapp/ folder! extension.json must be INSIDE the namespace folder!
+**CRITICAL**: POD plugins do NOT use webapp/ folder! Files are generated in working directory root!
+
+### 🚨 IMPORTANT: File Generation Approach
+- **User is already IN their namespace folder** (working directory IS the namespace folder)
+- **Generate files directly in working directory root**, NOT nested namespace subfolders
+- ❌ Don't create `mycompany/`, `custom/pod2/`, or any namespace folders
+- ✅ Create files at root: `extension.json`, `widget/MyWidget.js`
 
 ### ✅ Correct Structure (Official SAP Pattern):
 ```
-mycompany/                      # Namespace folder (your project root)
-├── extension.json              # ← INSIDE the namespace folder!
-├── widget/                     # Widgets folder (SAP recommended)
-│   ├── MyWidget.js             # Widget implementation
+<working-directory>/             # ← User is already here (this IS the namespace folder)
+├── extension.json               # ← Generate at working directory root
+├── widget/                      # Widgets folder (SAP recommended)
+│   ├── MyWidget.js              # Widget implementation
 │   └── i18n/
-│       └── i18n.properties     # Translations
-├── action/                     # Actions folder (SAP recommended)
+│       └── i18n.properties      # Translations
+├── action/                      # Actions folder (SAP recommended)
 │   └── MyAction.js
-└── util/                       # Utilities folder (SAP recommended)
+└── util/                        # Utilities folder (SAP recommended)
     └── Helper.js
 ```
 
-**Module Path Convention:**
-- Namespace folder = top-level folder (e.g., `mycompany/`, `acme/`)
-- extension.json = inside namespace folder at root level
+**File Path Convention When Generating:**
+- `extension.json` (NOT `mycompany/extension.json`)
+- `widget/MyWidget.js` (NOT `mycompany/widget/MyWidget.js`)
+- `action/MyAction.js` (NOT `mycompany/action/MyAction.js`)
+
+**Module Path Convention (for extension.json content):**
+- Namespace folder = working directory name (e.g., if user is in `/home/user/mycompany`, namespace is `mycompany`)
+- extension.json = at working directory root
 - Subfolders = module organization (`widget/`, `action/`, `util/`)
-- Full module path: `mycompany/widget/MyWidget`
+- Full module path: `mycompany/widget/MyWidget` (namespace prefix + relative path)
 - Module paths in extension.json are relative to extension.json location
 
 ### ❌ WRONG Structure (SAPUI5 App - Don't do this!):
@@ -238,11 +249,19 @@ mycompany.zip
 
 **How to Create Correct Zip:**
 ```bash
-# From PARENT directory of namespace folder
+# User must cd to PARENT directory first, then zip their working directory
+cd ..
 zip -r mycompany.zip mycompany/
 # or PowerShell:
+cd ..
 Compress-Archive -Path mycompany -DestinationPath mycompany.zip
 ```
+
+**Why This Matters:**
+- **During development**: Working directory IS the namespace folder (generate files at root level)
+- **For deployment**: Zip the working directory from parent folder
+- **In the zip**: Namespace folder contains extension.json and all files
+- **Module resolution**: Paths are relative to extension.json location
 
 ---
 

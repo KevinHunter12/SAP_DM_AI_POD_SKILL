@@ -4,7 +4,89 @@ Complete guide to the most common POD plugin development mistakes and their solu
 
 ---
 
-## Mistake #1: Using Binding Syntax in WidgetProperty Metadata ❌ → ✅
+## Mistake #0: Creating Namespace Folder During File Generation ❌ → ✅ (CRITICAL!)
+
+**Error**: Files generated in wrong location (e.g., `mycompany/extension.json` instead of `extension.json`)
+
+**This is the #1 mistake when generating plugins!** The user is already IN their namespace folder (their working directory IS the namespace folder). Creating additional nested namespace folders breaks file paths and deployment.
+
+### ❌ WRONG - Creating namespace folders during generation:
+```
+# If user is in: /home/user/myproject/
+# DON'T create nested structure:
+myproject/
+└── myproject/                    # ❌ WRONG! Don't create this!
+    ├── extension.json
+    └── widget/MyWidget.js
+
+# Or even worse:
+myproject/
+└── custom/                       # ❌ WRONG!
+    └── pod2/                     # ❌ WRONG!
+        └── myproject/            # ❌ WRONG!
+            ├── extension.json
+            └── widget/MyWidget.js
+```
+
+### ✅ CORRECT - Generate files in working directory root:
+```
+# User is in: /home/user/myproject/
+# Generate directly at root:
+myproject/                        # ← User is already here (cwd)
+├── extension.json                # ← Generate at root
+├── widget/                       # ← Subfolder
+│   └── MyWidget.js
+├── action/
+│   └── MyAction.js
+└── util/
+    └── Helper.js
+```
+
+### Why This Happens:
+- Documentation shows namespace folders for **illustration** (how the final zip looks)
+- Developer incorrectly assumes they need to **create** those folders
+- But the user's working directory **IS** already the namespace folder
+- Creating nested folders breaks module path resolution
+
+### How to Fix:
+**When using Write tool:**
+```javascript
+// ❌ WRONG - Don't prepend namespace folder to paths!
+Write("mycompany/extension.json", content)
+Write("mycompany/widget/MyWidget.js", content)
+Write("custom/pod2/acme/extension.json", content)
+
+// ✅ CORRECT - Write to working directory root!
+Write("extension.json", content)
+Write("widget/MyWidget.js", content) 
+Write("action/MyAction.js", content)
+```
+
+**Understanding the Context:**
+1. User is already in their namespace folder (e.g., `/home/user/mycompany`)
+2. Current working directory IS the namespace folder
+3. Files should be generated relative to current directory
+4. For deployment, user will `cd ..` and zip the entire folder
+
+### Impact:
+- **100% failure rate** when namespace folders are created
+- Files are in wrong location
+- Module paths don't match extension.json
+- Deployment zip has incorrect structure
+- Extension Center upload fails with "Missing file" errors
+
+### Prevention:
+- ✅ Always write files to current directory root: `extension.json`
+- ✅ Create subfolders relative to root: `widget/`, `action/`, `util/`
+- ❌ Never create namespace folders like `mycompany/`, `custom/pod2/`, `acme/`
+- ❌ Never nest the namespace folder name in file paths
+
+### Remember:
+**The namespace folder concept is for documentation only!** When generating files, assume the working directory IS the namespace folder. Write files at the root level, not in nested namespace subfolders.
+
+---
+
+## Mistake #2: Using Binding Syntax in WidgetProperty Metadata ❌ → ✅
 
 **Error**: `"/production/process/execute" is of type string, expected sap.m.InputType for property "type"`
 
@@ -68,7 +150,7 @@ https://help.sap.com/docs/help/95abdf318cec40bb84bc487fdaa03691/8dbdab1343184bf1
 
 ---
 
-## Mistake #2: Wrong PodContext Import Path ❌ → ✅
+## Mistake #3: Wrong PodContext Import Path ❌ → ✅
 
 **Error**: `404 - Failed to load PodContext.js`
 
@@ -86,7 +168,7 @@ import ModelPath from "sap/dm/dme/pod2/context/ModelPath";
 
 ---
 
-## Mistake #3: Passing Default Value to StringPropertyEditor ❌ → ✅
+## Mistake #4: Passing Default Value to StringPropertyEditor ❌ → ✅
 
 **Issue**: Passing a default value as the 3rd parameter to `StringPropertyEditor` can cause issues.
 
@@ -131,7 +213,7 @@ getPropertyValue(sName) {
 
 ---
 
-## Mistake #4: Wrong Callback Parameter Order ❌ → ✅
+## Mistake #5: Wrong Callback Parameter Order ❌ → ✅
 
 **Error**: `TypeError: aResources.map is not a function`
 
@@ -158,7 +240,7 @@ PodContext.subscribe(ModelPath.FilterResources, (aResources, sPath) => {
 
 ---
 
-## Mistake #5: Missing View ID in _createView() ❌ → ✅
+## Mistake #6: Missing View ID in _createView() ❌ → ✅
 
 **Error**: `"getView method returned a view with a different ID than configuration"`
 
@@ -191,7 +273,7 @@ _createView() {
 
 ---
 
-## Mistake #6: No Defensive Type Checking ❌ → ✅
+## Mistake #7: No Defensive Type Checking ❌ → ✅
 
 **Error**: `Cannot read property 'map' of undefined`
 
@@ -223,7 +305,7 @@ _onResourceChanged(aResources, sPath) {
 
 ---
 
-## Mistake #7: Invalid extension.json Structure ❌ → ✅
+## Mistake #8: Invalid extension.json Structure ❌ → ✅
 
 **Error**: `"Failed to create custom extensions: Error encountered when processing the extension components file"`
 
@@ -253,7 +335,7 @@ _onResourceChanged(aResources, sPath) {
 
 ---
 
-## Mistake #8: Spreading Parent Properties in getDefaultConfig() ❌ → ✅
+## Mistake #9: Spreading Parent Properties in getDefaultConfig() ❌ → ✅
 
 **Error**: `"/production/process/execute" is of type string, expected sap.m.InputType for property "type"`
 
@@ -312,7 +394,7 @@ https://help.sap.com/docs/help/95abdf318cec40bb84bc487fdaa03691/8dbdab1343184bf1
 
 ---
 
-## Mistake #9: Using "class" Instead of "styleClass" ❌ → ✅
+## Mistake #10: Using "class" Instead of "styleClass" ❌ → ✅
 
 **Error**: `Assertion failed: ManagedObject.apply: encountered unknown setting 'class' for class 'sap.m.VBox'`
 
@@ -341,7 +423,7 @@ return new VBox(oConfig.id, {
 
 ---
 
-## Mistake #10: Third-Party Library Loading Fails ❌ → ✅
+## Mistake #11: Third-Party Library Loading Fails ❌ → ✅
 
 **Error**: `ReferenceError: moment is not defined` or library not available even after script loads
 
@@ -422,7 +504,7 @@ plugins/
 
 ---
 
-## Mistake #11: Model Not Initialized Before _createView() ❌ → ✅
+## Mistake #12: Model Not Initialized Before _createView() ❌ → ✅
 
 **Error**: Widget UI flashes/flickers repeatedly, or bindings like `{/layout}` don't work
 
@@ -502,7 +584,7 @@ class MyWidget extends Widget {
 
 ---
 
-## Mistake #12: extension.json Outside Namespace Folder ❌ → ✅
+## Mistake #13: extension.json Outside Namespace Folder ❌ → ✅
 
 **Error**: `"Failed to load module"`, `"Missing file"`, or plugin widgets don't appear in POD Designer
 
@@ -608,9 +690,9 @@ rm -r temp
 
 ---
 
-## Mistake #13: Using webapp/ Folder Structure ❌ → ✅
+## Mistake #14: Using webapp/ Folder Structure ❌ → ✅
 
-## Mistake #13: Using webapp/ Folder Structure ❌ → ✅
+## Mistake #14: Using webapp/ Folder Structure ❌ → ✅
 
 **Error**: `"Failed to create custom extension"` or plugin doesn't appear in POD Designer
 
