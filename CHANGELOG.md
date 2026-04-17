@@ -1,5 +1,274 @@
 # POD Plugin Skill - Update Changelog
 
+## Version 11.0.0 - 2026-04-17
+
+### 🚨 CRITICAL FIX: Namespace Handling - User Must Provide Hierarchical Namespace
+
+This is a **MAJOR BREAKING CHANGE** that fixes a fundamental error in namespace detection. Previous versions (9.9.0 - 10.0.0) incorrectly assumed the namespace was just the working directory basename, but namespaces are hierarchical (e.g., `custom/pod2/projectname`).
+
+---
+
+## ✅ The Critical Fix
+
+### ❌ WRONG (Versions 9.9.0 - 10.0.0):
+```bash
+# Detected namespace from basename
+NAMESPACE=$(basename $(pwd))  # Result: "three"
+
+# Used in extension.json:
+"modulePath": "three/widget/MyWidget"
+```
+
+**Problem:** Upload fails with error "extension.json references files that do not start with the correct namespace" because user enters `custom/pod2/three` but extension.json has `three/widget/MyWidget`.
+
+### ✅ CORRECT (Version 11.0.0+):
+```bash
+# ASK user for full hierarchical namespace
+Assistant: "What namespace would you like to use? (e.g., custom/pod2/myproject)"
+User: "custom/pod2/three"
+
+# Used in extension.json:
+"modulePath": "custom/pod2/three/widget/MyWidget"
+```
+
+**Why This Works:** Namespace in extension.json matches exactly what user enters during upload.
+
+---
+
+## 🔍 What Was Wrong
+
+**The Fundamental Error:**
+- Previous versions tried to "detect" namespace using `basename $(pwd)`
+- This only gives the last part of the path (e.g., "three" from "/path/to/three")
+- But actual namespace is hierarchical: `custom/pod2/three`
+- The working directory basename is NOT the namespace!
+
+**Why This Matters:**
+- SAP DM requires namespace during extension upload
+- Namespace in extension.json MUST match what user enters
+- Mismatch causes: "extension.json references files that do not start with the correct namespace"
+- Upload fails even though zip structure is correct
+
+**The Confusion:**
+- Namespace can be hierarchical (multiple levels with slashes)
+- Examples: `custom/pod2/project`, `acme/manufacturing`, `mycompany/widgets`
+- Basename only gives last segment, missing the hierarchy
+- Users know their namespace, we shouldn't guess
+
+---
+
+## ✅ Changes Made
+
+### 1. **Completely Rewrote "STEP 0" Section**
+
+**OLD (WRONG) - "STEP 0: ALWAYS Detect the Namespace First":**
+- Ran `basename $(pwd)` to "detect" namespace
+- Assumed folder name = namespace
+- Used generic placeholders in examples
+
+**NEW (CORRECT) - "STEP 0: ALWAYS Ask for Namespace First":**
+- Asks user: "What namespace would you like to use?"
+- Suggests default: `custom/pod2/$(basename $(pwd))`
+- Uses exact user-provided namespace
+- Explains namespace is hierarchical
+- Shows slash → dot conversion for type field
+
+---
+
+### 2. **Added "WORKING EXAMPLE" Section**
+
+Real-world success case showing exact structure:
+
+**Setup:**
+- Working directory: `C:\VSCodeProjects\pod2plugins\three`
+- User-provided namespace: `custom/pod2/three` (hierarchical!)
+- Plugin name: animationblending
+
+**extension.json:**
+```json
+{
+  "widgets": [{
+    "modulePath": "custom/pod2/three/plugins/animationblending",
+    "type": "custom.pod2.three.plugins.animationblending"
+  }]
+}
+```
+
+**Zip structure:**
+```
+three.zip
+├── extension.json     # ✅ At root
+└── plugins/           # ✅ At root
+    └── animationblending.js
+```
+
+**Upload process:**
+- Enter namespace: `custom/pod2/three` ← Exact text
+- Upload succeeds! ✅
+
+---
+
+### 3. **Updated All Examples to Show Hierarchical Namespaces**
+
+**Complete Basic Example:**
+- OLD: `myawesomeplugin` (just basename)
+- NEW: `custom/pod2/myawesomeplugin` (hierarchical)
+
+**Quick Start:**
+- OLD: Detect namespace with `basename $(pwd)`
+- NEW: Ask user for namespace (suggest `custom/pod2/<basename>`)
+
+---
+
+### 4. **Fixed Pre-Deployment Validation**
+
+**OLD validation:**
+```bash
+NAMESPACE=$(basename $(pwd))  # Wrong - only gets last part
+```
+
+**NEW validation:**
+```bash
+# Ask user: "What namespace did you provide?"
+USER_NAMESPACE="custom/pod2/myproject"  # User tells us
+TYPE_PREFIX=$(echo "$USER_NAMESPACE" | tr '/' '.')  # Convert for type field
+```
+
+---
+
+### 5. **Enhanced Namespace Notification**
+
+**Updated notification template to emphasize matching:**
+
+```
+⚠️  IMPORTANT: When uploading to Extension Center,
+    USE THIS NAMESPACE: [user-provided-namespace]
+
+    This MUST MATCH the namespace in extension.json modulePath!
+
+⚠️  CRITICAL: If the namespace you enter during upload doesn't match
+    the namespace in extension.json, the upload will FAIL with error:
+    "extension.json references files that do not start with the correct namespace"
+```
+
+---
+
+### 6. **Updated Final Reminders**
+
+**#1 (Most Critical):**
+- OLD: "ALWAYS detect working directory name FIRST"
+- NEW: "ALWAYS ask user for namespace FIRST (hierarchical, e.g., custom/pod2/project)"
+
+**Added:**
+- Suggest default: `custom/pod2/$(basename $(pwd))`
+- Use exact user-provided namespace
+- Convert namespace for type field (slashes → dots)
+- Remind user: namespace entered during upload MUST match extension.json
+
+---
+
+## 📊 Impact
+
+**Breaking Change:**
+- Any plugins created with versions 9.9.0 - 10.0.0 may have WRONG namespace
+- They need extension.json updated with correct hierarchical namespace
+- Re-upload with corrected namespace
+
+**How to Fix Old Plugins:**
+
+1. Ask user: "What is your full namespace?" (e.g., "custom/pod2/myproject")
+2. Update extension.json modulePath to start with full namespace
+3. Update extension.json type to use dots instead of slashes
+4. Re-create zip (structure stays same)
+5. Upload with correct namespace
+
+**Example Fix:**
+
+```json
+// OLD (WRONG):
+{
+  "widgets": [{
+    "modulePath": "myproject/widget/MyWidget",
+    "type": "myproject.widget.MyWidget"
+  }]
+}
+
+// NEW (CORRECT):
+{
+  "widgets": [{
+    "modulePath": "custom/pod2/myproject/widget/MyWidget",
+    "type": "custom.pod2.myproject.widget.MyWidget"
+  }]
+}
+```
+
+---
+
+## 🔑 Key Rules Documented
+
+1. **Namespace is a PREFIX** that can be hierarchical (slashes allowed)
+2. **modulePath MUST START** with the full namespace
+3. **type uses dots** instead of slashes: `custom.pod2.project.widget.MyWidget`
+4. **Zip NEVER contains** namespace folder - only extension.json + content folders at root
+5. **Working directory basename** is NOT the namespace - user must specify it
+6. **User enters namespace** during upload - must match extension.json exactly
+
+---
+
+## 📋 Correct Workflow
+
+1. ✅ Ask user for namespace (e.g., "custom/pod2/myproject")
+2. ✅ Suggest default: `custom/pod2/$(basename $(pwd))`
+3. ✅ Use exact namespace in modulePath
+4. ✅ Convert slashes to dots for type field
+5. ✅ Create zip with correct structure (extension.json at root)
+6. ✅ Remind user to use same namespace when uploading
+7. ✅ Show namespace notification with exact value to use
+
+---
+
+## 📝 Files Updated
+
+- `SKILL.md` - Completely rewrote "STEP 0", added "WORKING EXAMPLE", updated all examples
+- `CHANGELOG.md` - This file
+- Version bumped to 11.0.0 (major version due to breaking change)
+
+---
+
+## 💡 Why This Approach Is Better
+
+**OLD Approach (Detecting):**
+- ❌ Assumes basename = namespace
+- ❌ Doesn't handle hierarchical namespaces
+- ❌ Causes upload failures
+- ❌ User confusion when upload fails
+
+**NEW Approach (Asking):**
+- ✅ User knows their namespace structure
+- ✅ Handles hierarchical namespaces correctly
+- ✅ Namespace matches between extension.json and upload
+- ✅ Clear communication and validation
+- ✅ Prevents upload errors
+
+---
+
+## 🎯 Critical Importance
+
+This was a **CRITICAL** error that would cause upload failures for ANY plugin using hierarchical namespaces.
+
+**Affected Versions:** v9.9.0 - v10.0.0
+
+**Symptoms:**
+- Upload fails with: "extension.json references files that do not start with the correct namespace"
+- Zip structure is correct, but namespace mismatch
+- User enters `custom/pod2/project` but extension.json has `project/widget/MyWidget`
+- Confusion about why upload fails
+
+**Resolution:**
+Always ASK user for full hierarchical namespace, never assume from basename.
+
+---
+
 ## Version 10.0.0 - 2026-04-17
 
 ### 🚨 CRITICAL FIX: Zip Structure Completely WRONG - Fixed!

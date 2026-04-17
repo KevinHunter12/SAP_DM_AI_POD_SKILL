@@ -1,7 +1,7 @@
 ---
 name: pod-plugin
 description: Create SAP Digital Manufacturing POD 1.0 and POD 2.0 plugins with proper architecture. **ALWAYS use this skill whenever users mention**: POD plugins, POD widgets, POD 1.0, POD 2.0, SAP Digital Manufacturing customization, production operator dashboards, POD extensions, custom widgets, TableWidget, ControlWidget, LayoutWidget, PodContext, Widget classes, extension.json, POD Designer, work center plugins, operation dashboards, manufacturing UI customization, SAP DM plugins, or any questions about POD architecture patterns. Expert in both legacy POD 1.0 (UI5 component-based) and modern POD 2.0 (ES6 class-based) plugin development. **Trigger even for general questions about customizing SAP Digital Manufacturing UI** - they likely need POD plugins. Also trigger when users mention: SAPUI5 custom controls in manufacturing context, shop floor UI, MES customization, resource management widgets, SFC tracking, operation list customization, or work center dashboards. **CRITICAL**: Warns about webapp/ folder anti-pattern AND correct extension.json placement inside namespace folder. **Automatically creates deployment zip file** when plugin is complete. **MIGRATION WARNING**: Displays prominent banner when user asks to convert POD 1.0 to POD 2.0, explaining that re-architecting is better than direct conversion. **ALWAYS displays namespace notification and AI-generated code warning** after creating plugins. **File structure aligned with official SAP POD 2.0 Developer's Guide** using widget/, action/, util/ folder pattern. **extension.json must be INSIDE namespace folder** for module path resolution. **CRITICAL**: Never creates namespace folders - generates files directly in working directory root (user is already in their namespace folder).
-version: 10.0.0
+version: 11.0.0
 author: Claude
 tags: [sap, digital-manufacturing, pod, plugin, pod2, no-binding-in-widgetproperty, no-parent-spreading, getDefaultConfig-official-pattern, getI18nText-method, stringpropertyeditor-no-default, callback-parameter-order, real-world-patterns, widget-architecture, createView-before-onInit, no-webapp-folder, pod-vs-sapui5, auto-deployment-zip, migration-warning, pod1-to-pod2, namespace-notification, ai-code-warning, official-sap-structure, widget-action-util-folders, extension-json-placement, module-path-resolution, no-namespace-folder-creation, generate-in-cwd-root]
 compatibility:
@@ -73,48 +73,169 @@ When using Write tool, paths should be:
 
 ---
 
-## 🚨 STEP 0: ALWAYS Detect the Namespace First!
+## 🚨 STEP 0: ALWAYS Ask for Namespace First!
 
-**BEFORE generating ANY files, you MUST:**
+**BEFORE generating ANY files, you MUST ask the user for their namespace.**
 
-1. **Detect the working directory name** (this IS the namespace):
-   ```bash
-   basename $(pwd)
-   # OR
-   pwd | xargs basename
+### Why Namespace Must Be Provided by User
+
+The namespace is a **hierarchical prefix** that can contain multiple levels (e.g., `custom/pod2/myproject`, `acme/manufacturing/sfctracker`). The working directory basename only gives the last part (e.g., "myproject"), not the full namespace hierarchy.
+
+**CRITICAL**: The namespace is NOT the same as the folder basename!
+
+### Step-by-Step Workflow
+
+1. **Ask the user for their namespace:**
+   ```
+   "What namespace would you like to use for this plugin? 
+   (e.g., custom/pod2/myproject, or acme/manufacturing)"
    ```
 
-2. **Use this exact name as the namespace in:**
-   - `extension.json` modulePath: `<detected-name>/widget/MyWidget`
-   - `extension.json` type: `<detected-name>.widget.MyWidget`
+2. **Provide a helpful default suggestion:**
+   ```bash
+   BASENAME=$(basename $(pwd))
+   # Suggest: custom/pod2/$BASENAME
+   ```
+   Example: If user is in folder "sfctracker", suggest "custom/pod2/sfctracker"
 
-3. **Never use generic placeholders like:**
-   - ❌ `custom/pod2/something`
-   - ❌ `mycompany`
-   - ❌ `acme`
-   - ✅ Use the ACTUAL folder name detected in step 1
+3. **Use the exact namespace provided:**
+   - In `extension.json` modulePath: `<user-namespace>/widget/MyWidget`
+   - In `extension.json` type: Replace slashes with dots: `<namespace-with-dots>.widget.MyWidget`
 
-**Example Workflow:**
+### Example Workflow
 
 ```bash
-$ pwd
-/home/user/myproject
-
+# User is in directory: /home/user/newproject
 $ basename $(pwd)
-myproject          # ← THIS is your namespace!
+newproject
+
+# Assistant asks: "What namespace? (e.g., custom/pod2/newproject)"
+# User responds: "custom/pod2/newproject"
 
 # extension.json must use:
-"modulePath": "myproject/widget/MyWidget"
-"type": "myproject.widget.MyWidget"
+"modulePath": "custom/pod2/newproject/widget/MyWidget"
+"type": "custom.pod2.newproject.widget.MyWidget"
 ```
 
-**Critical Rule**: The working directory name = namespace. Module paths must start with the actual folder name. SAP DM looks for files relative to the namespace. Wrong namespace = "file not found" errors on upload.
+### Converting Namespace: Slashes to Dots
 
-**The Rule**: Run `basename $(pwd)` FIRST, use result everywhere!
+For the `type` field in extension.json, convert slashes to dots:
+- Namespace: `custom/pod2/myproject` → Type: `custom.pod2.myproject.widget.MyWidget`
+- Namespace: `acme/manufacturing` → Type: `acme.manufacturing.widget.MyWidget`
+
+### ❌ Common Mistakes to Avoid
+
+1. **❌ Using only basename:** `myproject` instead of `custom/pod2/myproject`
+2. **❌ Not asking user:** Assuming namespace from folder name
+3. **❌ Wrong type syntax:** Using slashes instead of dots in type field
+4. **❌ Generic placeholders:** Using hardcoded examples like "mycompany"
+
+### ✅ Correct Approach
+
+1. Ask user for full hierarchical namespace
+2. Suggest `custom/pod2/<basename>` as default
+3. Use exact namespace in modulePath
+4. Convert slashes to dots for type field
+5. Remind user to use same namespace during upload
 
 ---
 
-## 🚨 CRITICAL: POD 1.0 to POD 2.0 Migration Warning
+## 📚 WORKING EXAMPLE - Real World Success Case
+
+This example shows the EXACT structure that works in production:
+
+### Setup
+- **Working directory**: `C:\VSCodeProjects\pod2plugins\three`
+- **User-provided namespace** (during upload): `custom/pod2/three`
+- **Plugin name**: animationblending
+
+### Files Generated
+
+**extension.json** (at working directory root):
+```json
+{
+  "widgets": [{
+    "modulePath": "custom/pod2/three/plugins/animationblending",
+    "type": "custom.pod2.three.plugins.animationblending"
+  }],
+  "actions": []
+}
+```
+
+**plugins/animationblending.js** (in plugins subfolder):
+```javascript
+sap.ui.define([
+    "sap/dm/dme/pod2/widget/Widget",
+    // ... other imports
+], (Widget, ...) => {
+    "use strict";
+    class AnimationBlending extends Widget {
+        // ... implementation
+    }
+    return AnimationBlending;
+});
+```
+
+### Zip Structure Created
+
+```bash
+# Command used (from parent directory):
+cd "C:\VSCodeProjects\pod2plugins"
+zip -r three.zip three/
+
+# OR from inside the "three" directory:
+cd "C:\VSCodeProjects\pod2plugins\three"
+zip -r ../three.zip extension.json plugins/
+```
+
+**Zip contents** (three.zip):
+```
+three.zip
+├── extension.json              # ✅ At root of zip
+└── plugins/                    # ✅ At root of zip
+    └── animationblending.js
+```
+
+**❌ NOT like this** (this would fail):
+```
+three.zip
+└── custom/                     # ❌ Wrong! No namespace folders in zip
+    └── pod2/
+        └── three/
+            ├── extension.json
+            └── plugins/
+```
+
+### Upload Process
+
+1. Open SAP DM Extension Center
+2. Click "Upload Extension"
+3. **Enter namespace**: `custom/pod2/three` ← EXACT text entered by user
+4. Select file: `three.zip`
+5. Upload ✅ Success!
+
+### Key Takeaways
+
+1. **Namespace is hierarchical**: `custom/pod2/three` (not just "three")
+2. **modulePath starts with namespace**: `custom/pod2/three/plugins/animationblending`
+3. **type uses dots**: `custom.pod2.three.plugins.animationblending` (slashes → dots)
+4. **Zip has NO namespace folder**: extension.json at root, plugins/ at root
+5. **Working directory IS the namespace folder**: Don't create nested folders during development
+6. **User enters same namespace during upload**: `custom/pod2/three`
+
+### Error Prevention
+
+**Upload WILL FAIL if:**
+- ❌ extension.json references `custom/pod2/three/...` but user enters namespace `three`
+- ❌ Zip contains `three/extension.json` instead of `extension.json` at root
+- ❌ modulePath doesn't start with the exact namespace
+
+**Upload WILL SUCCEED when:**
+- ✅ extension.json modulePath: `custom/pod2/three/plugins/animationblending`
+- ✅ User enters namespace: `custom/pod2/three` (matches exactly)
+- ✅ Zip structure: extension.json at root, no namespace wrapper folder
+
+---
 
 **If the user asks to convert, migrate, or port a POD 1.0 plugin to POD 2.0, IMMEDIATELY display this banner:**
 
@@ -370,11 +491,12 @@ static getDefaultConfig() {
 
 ### For POD 2.0 (Recommended):
 
-**Step 0: Detect your namespace (REQUIRED FIRST!)**
-```bash
-# Get working directory name - this IS your namespace
-NAMESPACE=$(basename $(pwd))
-echo "Using namespace: $NAMESPACE"
+**Step 0: Ask user for namespace (REQUIRED FIRST!)**
+```
+"What namespace would you like to use for this plugin?
+(e.g., custom/pod2/<projectname>, or acme/manufacturing)"
+
+Default suggestion: custom/pod2/$(basename $(pwd))
 ```
 
 **Step 1: Choose your base class**
@@ -588,18 +710,20 @@ _someMethod() {
 
 ## Complete Basic Example
 
-**Step 1: Detect namespace**
-```bash
-# Assume working directory is: /home/user/myawesomeplugin
-NAMESPACE=$(basename $(pwd))  # Result: myawesomeplugin
+**Step 1: Ask user for namespace**
+```
+Assistant: "What namespace would you like to use for this plugin?
+            (e.g., custom/pod2/myproject, or acme/manufacturing)"
+
+User: "custom/pod2/myawesomeplugin"
 ```
 
-**Step 2: Create extension.json with detected namespace**
+**Step 2: Create extension.json with user-provided namespace**
 ```json
 {
   "widgets": [{
-    "modulePath": "myawesomeplugin/widget/BasicPlugin",  // ← Uses detected name
-    "type": "myawesomeplugin.widget.BasicPlugin"          // ← Uses detected name
+    "modulePath": "custom/pod2/myawesomeplugin/widget/BasicPlugin",
+    "type": "custom.pod2.myawesomeplugin.widget.BasicPlugin"
   }],
   "actions": []
 }
@@ -726,18 +850,29 @@ sap.ui.define([
 Before creating the zip file, verify:
 
 ```bash
-# 1. Get namespace from folder
-NAMESPACE=$(basename $(pwd))
+# 1. Ask user: "What namespace did you provide?" (e.g., "custom/pod2/myproject")
+USER_NAMESPACE="custom/pod2/myproject"  # Example - use actual user response
 
-# 2. Check extension.json contains the correct namespace
-grep "\"modulePath\": \"$NAMESPACE/" extension.json
-grep "\"type\": \"$NAMESPACE." extension.json
+# 2. Convert namespace for type field (slashes → dots)
+TYPE_PREFIX=$(echo "$USER_NAMESPACE" | tr '/' '.')  # Result: custom.pod2.myproject
 
-# 3. Verify files exist at paths specified in extension.json
+# 3. Check extension.json contains the correct namespace
+grep "\"modulePath\": \"$USER_NAMESPACE/" extension.json
+grep "\"type\": \"$TYPE_PREFIX." extension.json
+
+# 4. Verify files exist at paths specified in extension.json
 # (extract paths from extension.json and check they exist)
 ```
 
-**If any check fails, FIX extension.json before proceeding!**
+**If any check fails:**
+1. Ask user to confirm their intended namespace
+2. Update extension.json with correct namespace
+3. Re-run validation
+
+**Critical Rules:**
+- Namespace in extension.json MUST match what user will enter during upload
+- modulePath uses slashes: `custom/pod2/project/widget/MyWidget`
+- type uses dots: `custom.pod2.project.widget.MyWidget`
 
 ---
 
@@ -855,20 +990,27 @@ Ready to upload to SAP DM Extension Center!
 
 Your plugin uses the following namespace:
 
-  📋 Namespace: [namespace-folder]
-  📂 Module Path: [namespace-folder]/plugins/[pluginname]
-  🏷️  Type: [namespace-with-dots].plugins.[pluginname]
+  📋 Namespace: [user-provided-namespace]
+  📂 Module Path: [user-provided-namespace]/widget/[WidgetName]
+  🏷️  Type: [namespace-with-dots].widget.[WidgetName]
 
 ⚠️  IMPORTANT: When uploading to SAP Digital Manufacturing Extension Center,
     you will be asked to provide the namespace.
 
-    USE THIS NAMESPACE: [namespace-folder]
+    USE THIS NAMESPACE: [user-provided-namespace]
+
+    This MUST MATCH the namespace in extension.json modulePath!
 
 📝 Why You Need This:
    - SAP DM requires namespace during extension upload
+   - Must match exactly what's in extension.json modulePath
    - Groups related plugins together
    - Prevents naming conflicts
    - Enables selective activation/deactivation
+
+⚠️  CRITICAL: If the namespace you enter during upload doesn't match
+    the namespace in extension.json, the upload will FAIL with error:
+    "extension.json references files that do not start with the correct namespace"
 
 💾 Make note of this namespace before uploading!
 ═══════════════════════════════════════════════════════════════
@@ -883,19 +1025,26 @@ Your plugin uses the following namespace:
 Your plugin uses the following namespace:
 
   📋 Namespace: custom/pod2/acme
-  📂 Module Path: custom/pod2/acme/plugins/ProductionStatus
-  🏷️  Type: custom.pod2.acme.plugins.ProductionStatus
+  📂 Module Path: custom/pod2/acme/widget/ProductionStatus
+  🏷️  Type: custom.pod2.acme.widget.ProductionStatus
 
 ⚠️  IMPORTANT: When uploading to SAP Digital Manufacturing Extension Center,
     you will be asked to provide the namespace.
 
     USE THIS NAMESPACE: custom/pod2/acme
 
+    This MUST MATCH the namespace in extension.json modulePath!
+
 📝 Why You Need This:
    - SAP DM requires namespace during extension upload
+   - Must match exactly what's in extension.json modulePath
    - Groups related plugins together
    - Prevents naming conflicts
    - Enables selective activation/deactivation
+
+⚠️  CRITICAL: If the namespace you enter during upload doesn't match
+    the namespace in extension.json, the upload will FAIL with error:
+    "extension.json references files that do not start with the correct namespace"
 
 💾 Make note of this namespace before uploading!
 ═══════════════════════════════════════════════════════════════
@@ -990,20 +1139,22 @@ This skill includes comprehensive reference files:
 
 ## Final Reminders
 
-1. ✅ **ALWAYS** detect working directory name FIRST and use it as namespace
-   ```bash
-   basename $(pwd)  # Use this exact result in extension.json
-   ```
-2. ✅ **Always** use `context/` import path, NOT `model/`
-3. ✅ **Never** use binding syntax in WidgetProperty
-4. ✅ **Never** spread parent properties in getDefaultConfig()
-5. ✅ **Always** pass `oConfig.id` as first parameter in _createView()
-6. ✅ **Always** validate types (use `Array.isArray()`, optional chaining)
-7. ✅ **Always** unsubscribe from PodContext in onExit()
-8. ✅ **Remember** callback signature is `(value, path)` not `(path, value)`
-9. ✅ **Initialize** JSONModels in _createView(), not onInit()
-10. ✅ **Create deployment zip file** automatically when plugin is complete
-11. ✅ **Display namespace notification** after creating plugin (required for upload)
-12. ✅ **Display AI-generated code warning** after creating ANY plugin code
+1. ✅ **ALWAYS** ask user for namespace FIRST (hierarchical, e.g., "custom/pod2/project")
+   - Suggest: `custom/pod2/$(basename $(pwd))` as default
+   - User provides the full namespace (don't assume from folder name)
+2. ✅ **Use exact user-provided namespace** in extension.json modulePath
+3. ✅ **Convert namespace** for type field: slashes → dots (e.g., `custom/pod2/project` → `custom.pod2.project`)
+4. ✅ **Always** use `context/` import path, NOT `model/`
+5. ✅ **Never** use binding syntax in WidgetProperty
+6. ✅ **Never** spread parent properties in getDefaultConfig()
+7. ✅ **Always** pass `oConfig.id` as first parameter in _createView()
+8. ✅ **Always** validate types (use `Array.isArray()`, optional chaining)
+9. ✅ **Always** unsubscribe from PodContext in onExit()
+10. ✅ **Remember** callback signature is `(value, path)` not `(path, value)`
+11. ✅ **Initialize** JSONModels in _createView(), not onInit()
+12. ✅ **Create deployment zip file** automatically when plugin is complete
+13. ✅ **Display namespace notification** after creating plugin (show exact namespace to use)
+14. ✅ **Display AI-generated code warning** after creating ANY plugin code
+15. ✅ **Remind user**: Namespace entered during upload MUST match extension.json modulePath
 
 📖 **For detailed help**, consult the reference documentation files above.
