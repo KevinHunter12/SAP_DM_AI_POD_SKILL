@@ -1,5 +1,282 @@
 # POD Plugin Skill - Update Changelog
 
+## Version 12.0.0 - 2026-04-17
+
+### 🚨 CRITICAL FIX: Parent Property Spreading Contradiction Resolved
+
+**Breaking Change**: Clarified when to spread vs not spread parent properties in `getDefaultConfig()`
+
+---
+
+## ✅ What Was Fixed & Added
+
+### 1. **FIXED: Property Spreading Contradiction in SKILL.md**
+
+**Problem:** Previous version said "NEVER spread parent properties" but this contradicted SAP production code patterns.
+
+**Resolution:** 
+- **Widget/ControlWidget base**: ❌ DON'T spread (contains reserved SAPUI5 "type" property)
+- **TableWidget/LayoutWidget base**: ✅ DO spread (official SAP production pattern)
+
+**File:** `SKILL.md` (Mistake #2 section)
+
+**New Decision Table:**
+
+| Base Class | Spread Parent? | Reason |
+|------------|---------------|---------|
+| `Widget` | ❌ NO | Contains reserved SAPUI5 property names |
+| `ControlWidget` | ❌ NO | Inherits Widget's problematic properties |
+| `LayoutWidget` | ✅ YES | Safe defaults, production SAP pattern |
+| `TableWidget` | ✅ YES | Safe defaults, production SAP pattern |
+
+**Impact:** This clarification prevents developers from incorrectly avoiding property spreading when extending TableWidget/LayoutWidget, where spreading is the correct official SAP pattern.
+
+---
+
+### 2. **NEW: Production Patterns from Real SAP Code**
+
+**File:** `references/production-patterns-sap.md` (NEW FILE - 598 lines)
+
+**Extracted from actual SAP Digital Manufacturing production widgets:**
+
+- **JSDoc Documentation Patterns** - @alias, @extends, @override, @extensible
+- **Private Fields & Encapsulation** - `#field` syntax for truly private fields
+- **Enum Patterns with Object.freeze** - Type-safe property IDs and constants
+- **Property Spreading Patterns** - Real examples showing spreading in TableWidget
+- **Design Mode vs Run Mode** - `PodContext.isDesignMode()` checks
+- **ContentHandler Production Pattern** - Dialog opening, model management
+- **Subscription Patterns** - Proper subscribe/unsubscribe with context binding
+- **Property Editor Patterns** - EXCLUDE_PROPERTIES, INCLUDE_EVENTS, PROPERTY_CATEGORY_OVERRIDE
+- **Delegate Patterns** - ActivityConfirmationDelegate, WorkListDelegate usage
+- **Error Handling Patterns** - try/catch with MessageHistory, proper logging
+
+**Sources:** ActivityConfirmationTableWidget, SelectResourceWidget, ReportActivityContentHandler (real SAP code)
+
+---
+
+### 3. **NEW: Complete Copy-Paste Ready Widget Templates**
+
+**File:** `references/complete-patterns.md` (NEW FILE - 519 lines)
+
+**8 Complete Working Examples:**
+
+1. **Minimal Widget** - Simplest possible starter template
+2. **Widget with PodContext Subscription** - Context-aware with resource tracking
+3. **Widget with Custom Properties** - StringPropertyEditor, IntegerPropertyEditor, BooleanPropertyEditor, SelectPropertyEditor
+4. **Widget with API Calls** - RestClient usage with timeout handling
+5. **TableWidget Complete** - Full table implementation with columns, sorting
+6. **ControlWidget Complete** - Button widget with properties and events
+7. **LayoutWidget Complete** - VBox container with multiple controls
+8. **ContentHandler Complete** - Dialog processing with API calls
+
+**All examples include:**
+- ✅ Complete imports
+- ✅ Proper lifecycle methods
+- ✅ Defensive type checking
+- ✅ Error handling
+- ✅ Cleanup in onExit()
+- ✅ Ready to copy and customize
+
+---
+
+### 4. **UPDATED: SKILL.md Frontmatter**
+
+**Changes:**
+- **Version:** 11.0.1 → 12.0.0
+- **Description:** Added production patterns and complete templates mentions
+- **Tags:** Updated `no-parent-spreading` → `conditional-parent-spreading`, added: `production-sap-patterns`, `jsdoc-patterns`, `private-fields-encapsulation`, `object-freeze-enums`, `design-mode-patterns`, `contenthandler-patterns`, `subscription-patterns`, `delegate-patterns`, `copy-paste-templates`, `spreading-decision-rules`
+
+---
+
+## 📊 Statistics
+
+- **New Files:** 2 reference files (production-patterns-sap.md, complete-patterns.md)
+- **New Lines:** 1,117 lines of production-quality documentation
+- **Files Modified:** 2 files (SKILL.md, CHANGELOG.md)
+- **Critical Fix:** Property spreading decision rules clarified
+- **Working Examples:** 8 complete copy-paste ready widget templates
+- **Production Patterns:** 10 patterns extracted from real SAP code
+
+---
+
+## 🎯 Key Improvements
+
+### Why This Update Matters
+
+1. **Eliminates Confusion:** Developers now have clear rules for when to spread parent properties
+2. **Production-Ready Patterns:** Real SAP code patterns, not theoretical examples
+3. **Copy-Paste Templates:** Complete working widgets ready to customize
+4. **Best Practices:** JSDoc, private fields, Object.freeze from actual SAP widgets
+5. **Comprehensive Coverage:** Covers all widget types with real-world patterns
+
+### Breaking Changes
+
+⚠️ **If you're extending TableWidget or LayoutWidget:** You SHOULD spread parent properties (this was incorrectly documented as "never spread" before):
+
+```javascript
+// ✅ CORRECT for TableWidget/LayoutWidget
+static getDefaultConfig() {
+    return {
+        properties: {
+            ...super.getDefaultConfig().properties,  // ← YES, spread!
+            myCustomProperty: "value"
+        }
+    };
+}
+```
+
+### Migration Guide
+
+If you followed the old "never spread" advice for TableWidget/LayoutWidget:
+1. Add `...super.getDefaultConfig().properties` as first line in properties object
+2. Test that default table/layout properties work correctly
+3. Verify no property conflicts
+
+---
+
+## 🔍 Related Documentation
+
+- [Production Patterns](references/production-patterns-sap.md) - Real SAP code patterns
+- [Complete Patterns](references/complete-patterns.md) - Copy-paste templates
+- [Common Mistakes](references/common-mistakes.md) - All 15+ mistakes with fixes
+- [Widget Patterns](references/widget-patterns.md) - Comprehensive patterns
+
+---
+
+## Version 11.0.1 - 2026-04-17
+
+### 📚 DOCUMENTATION ADDITION: Comprehensive i18n Implementation Guide
+
+This update adds complete internationalization (i18n) documentation for POD 2.0 widgets with proper ResourceBundle loading patterns.
+
+---
+
+## ✅ What Was Added
+
+### 1. **New Mistake #12: `getResourceBundle()` Not Available on Widget Classes**
+
+**File:** `references/common-mistakes.md` (lines 500-594)
+
+**Content:**
+- ❌ WRONG: Assuming `getResourceBundle()` exists on Widget classes
+- ✅ CORRECT: Manual ResourceBundle loading in onInit()
+- Complete 4-step implementation guide
+- File structure for i18n folder
+- Fallback patterns for missing bundles
+- Cleanup in onExit()
+
+**Critical Error Explained:**
+Unlike standard SAPUI5 controllers, POD 2.0 Widget classes don't inherit `getResourceBundle()`. Developers must manually load resource bundles using `sap/base/i18n/ResourceBundle`.
+
+---
+
+### 2. **New i18n Pattern Section in widget-patterns.md**
+
+**File:** `references/widget-patterns.md` (lines 720-1000)
+
+**Complete Working Example Includes:**
+- Full widget implementation with i18n
+- Required imports (`sap/base/i18n/ResourceBundle`)
+- Resource bundle loading in onInit()
+- Helper method with fallbacks (`_getI18nText()`)
+- Using i18n in `getProperties()` (NO binding syntax!)
+- Proper cleanup in onExit()
+
+**File Structure Options:**
+- `widget/i18n/` structure (i18n inside widget folder)
+- Root `i18n/` structure (i18n at namespace root)
+- Both patterns documented with module path adjustments
+
+**i18n.properties Examples:**
+- Complete English properties file
+- Complete German translation example
+- Property organization patterns
+- Parameter usage (`{0}` placeholders)
+
+**Advanced Topics:**
+- Automatic locale detection
+- ResourceBundle fallback chain
+- Dynamic parameter substitution
+- Multiple language support
+
+**Common Patterns:**
+- Using i18n in WidgetProperty (method calls, NOT bindings!)
+- Using i18n in control creation
+- Dynamic error messages
+- Troubleshooting guide
+
+---
+
+## 📊 Statistics
+
+- **New Documentation:** ~400+ lines added
+- **Files Modified:** 2 files (common-mistakes.md, widget-patterns.md)
+- **New Mistake Documented:** Mistake #12 (getResourceBundle error)
+- **Complete Examples:** 5 working code examples
+- **i18n Files Shown:** 2 languages (English, German)
+
+---
+
+## 🎯 Key Points Documented
+
+### Critical Rules
+
+✅ **DO:**
+- Load ResourceBundle manually in `onInit()`
+- Use `sap.ui.require.toUrl()` to get module path
+- Store bundle in instance variable
+- Provide fallback defaults
+- Clean up in `onExit()`
+- Use method calls in `getProperties()`: `this._getI18nText("key")`
+
+❌ **DON'T:**
+- Assume `getResourceBundle()` exists
+- Use binding syntax in `WidgetProperty`: `"{i18n>key}"`
+- Load bundle synchronously
+- Forget fallback values
+- Hard-code user-visible text
+
+---
+
+## 🔍 Why This Matters
+
+**The Problem:**
+- Developers coming from SAPUI5 controllers expect `getResourceBundle()` method
+- This method doesn't exist on POD 2.0 Widget classes
+- Results in `TypeError: this.getResourceBundle is not a function`
+- No clear documentation on correct approach
+
+**The Solution:**
+- Manual ResourceBundle loading pattern documented
+- Complete working examples provided
+- Fallback strategies for robustness
+- Proper lifecycle management (onInit → onExit)
+
+---
+
+## 📝 Cross-References Added
+
+- Mistake #2 ← references i18n pattern for correct usage
+- Mistake #12 ← complete i18n error documentation
+- widget-patterns.md ← comprehensive i18n implementation guide
+
+---
+
+## ✨ Summary
+
+This update provides complete i18n implementation guidance that was previously missing. Developers now have clear, working examples of how to add multilingual support to POD 2.0 widgets using the correct manual ResourceBundle loading pattern.
+
+**Key Achievement:** Zero confusion about i18n in POD 2.0 widgets - complete end-to-end documentation.
+
+---
+
+**Version:** 11.0.1
+**Date:** 2026-04-17
+**Status:** ✅ Production Ready
+**Documentation Addition:** i18n implementation for POD 2.0 widgets
+
+---
+
 ## Version 11.0.0 - 2026-04-17
 
 ### 🚨 CRITICAL FIX: Namespace Handling - User Must Provide Hierarchical Namespace

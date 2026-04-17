@@ -578,7 +578,108 @@ plugins/
 
 ---
 
-## Mistake #12: Model Not Initialized Before _createView() ❌ → ✅
+## Mistake #12: Assuming `getResourceBundle()` Exists on Widget ❌ → ✅
+
+**Error**: `TypeError: this.getResourceBundle is not a function`
+
+**CRITICAL**: `getResourceBundle()` is NOT available on Widget base classes in POD 2.0!
+
+Unlike standard SAPUI5 controllers, POD 2.0 widgets don't inherit `getResourceBundle()` from their base class. You must manually load the resource bundle using `sap/base/i18n/ResourceBundle`.
+
+```javascript
+// ❌ WRONG - This method doesn't exist!
+_getI18nText(sKey) {
+    const oResourceBundle = this.getResourceBundle();  // 💥 Method doesn't exist!
+    return oResourceBundle.getText(sKey);
+}
+
+// ✅ CORRECT - Manual resource bundle loading
+// Step 1: Add required imports
+sap.ui.define([
+    "sap/dm/dme/pod2/widget/ControlWidget",
+    "sap/base/i18n/ResourceBundle",  // ✅ Required for i18n
+    // ... other imports
+], (ControlWidget, ResourceBundle, ...) => {
+
+    class MyWidget extends ControlWidget {
+        #oResourceBundle = null;  // ✅ Store resource bundle
+
+        constructor(oConfig) {
+            super(Button, oConfig);
+        }
+
+        // Step 2: Load resource bundle in onInit()
+        async onInit() {
+            await super.onInit();
+
+            // Load i18n resource bundle
+            try {
+                const sModulePath = sap.ui.require.toUrl("your/namespace/here");
+                this.#oResourceBundle = await ResourceBundle.create({
+                    url: `${sModulePath}/i18n/i18n.properties`,
+                    async: true
+                });
+            } catch (error) {
+                console.error("Failed to load resource bundle:", error);
+            }
+
+            // ... rest of onInit
+        }
+
+        // Step 3: Use resource bundle with fallbacks
+        _getI18nText(sKey) {
+            if (this.#oResourceBundle) {
+                return this.#oResourceBundle.getText(sKey) || sKey;
+            }
+
+            // Fallback to hardcoded defaults if bundle not loaded
+            const fallbacks = {
+                "button.text": "Default Button Text",
+                "message.error": "An error occurred"
+            };
+            return fallbacks[sKey] || sKey;
+        }
+
+        // Step 4: Clean up in onExit()
+        onExit() {
+            super.onExit();
+            this.#oResourceBundle = null;  // ✅ Clean up reference
+        }
+    }
+
+    return MyWidget;
+});
+```
+
+**File Structure for i18n:**
+
+```
+your-plugin/
+├── extension.json
+├── widget/
+│   └── YourWidget.js
+└── i18n/
+    ├── i18n.properties       # Default (English)
+    ├── i18n_en.properties    # English
+    ├── i18n_de.properties    # German
+    └── i18n_fr.properties    # French
+```
+
+**Key Points:**
+- ✅ Always load ResourceBundle manually in onInit()
+- ✅ Use `sap.ui.require.toUrl()` to get the correct module path
+- ✅ Store bundle in instance variable (`this.#oResourceBundle`)
+- ✅ Provide fallback defaults in case bundle fails to load
+- ✅ Clean up reference in onExit()
+- ❌ Never assume `getResourceBundle()` exists on Widget classes
+
+**Why this happens**: Widget base classes in POD 2.0 don't extend SAPUI5 Controller, so controller convenience methods like `getResourceBundle()` are not available. You must handle resource bundle loading yourself.
+
+**See Also**: [i18n Implementation Pattern](widget-patterns.md#i18n-internationalization-pattern) for complete working examples.
+
+---
+
+## Mistake #13: Model Not Initialized Before _createView() ❌ → ✅
 
 **Error**: Widget UI flashes/flickers repeatedly, or bindings like `{/layout}` don't work
 
@@ -658,7 +759,7 @@ class MyWidget extends Widget {
 
 ---
 
-## Mistake #13: extension.json NOT at Zip Root ❌ → ✅
+## Mistake #14: extension.json NOT at Zip Root ❌ → ✅
 
 **Error**: `"Failed to load module"`, `"Missing file"`, or plugin widgets don't appear in POD Designer
 
@@ -764,9 +865,9 @@ rm -r temp
 
 ---
 
-## Mistake #14: Using webapp/ Folder Structure ❌ → ✅
+## Mistake #15: Using webapp/ Folder Structure ❌ → ✅
 
-## Mistake #14: Using webapp/ Folder Structure ❌ → ✅
+## Mistake #15: Using webapp/ Folder Structure ❌ → ✅
 
 **Error**: `"Failed to create custom extension"` or plugin doesn't appear in POD Designer
 

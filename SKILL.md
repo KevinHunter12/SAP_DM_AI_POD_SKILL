@@ -1,9 +1,9 @@
 ---
 name: pod-plugin
-description: Create SAP Digital Manufacturing POD 1.0 and POD 2.0 plugins with proper architecture. **ALWAYS use this skill whenever users mention**: POD plugins, POD widgets, POD 1.0, POD 2.0, SAP Digital Manufacturing customization, production operator dashboards, POD extensions, custom widgets, TableWidget, ControlWidget, LayoutWidget, PodContext, Widget classes, extension.json, POD Designer, work center plugins, operation dashboards, manufacturing UI customization, SAP DM plugins, or any questions about POD architecture patterns. Expert in both legacy POD 1.0 (UI5 component-based) and modern POD 2.0 (ES6 class-based) plugin development. **Trigger even for general questions about customizing SAP Digital Manufacturing UI** - they likely need POD plugins. Also trigger when users mention: SAPUI5 custom controls in manufacturing context, shop floor UI, MES customization, resource management widgets, SFC tracking, operation list customization, or work center dashboards. **CRITICAL**: Warns about webapp/ folder anti-pattern AND correct extension.json placement inside namespace folder. **Automatically creates deployment zip file** when plugin is complete. **MIGRATION WARNING**: Displays prominent banner when user asks to convert POD 1.0 to POD 2.0, explaining that re-architecting is better than direct conversion. **ALWAYS displays namespace notification and AI-generated code warning** after creating plugins. **File structure aligned with official SAP POD 2.0 Developer's Guide** using widget/, action/, util/ folder pattern. **extension.json must be INSIDE namespace folder** for module path resolution. **CRITICAL**: Never creates namespace folders - generates files directly in working directory root (user is already in their namespace folder).
-version: 11.0.0
+description: Create SAP Digital Manufacturing POD 1.0 and POD 2.0 plugins with proper architecture. **ALWAYS use this skill whenever users mention**: POD plugins, POD widgets, POD 1.0, POD 2.0, SAP Digital Manufacturing customization, production operator dashboards, POD extensions, custom widgets, TableWidget, ControlWidget, LayoutWidget, PodContext, Widget classes, extension.json, POD Designer, work center plugins, operation dashboards, manufacturing UI customization, SAP DM plugins, or any questions about POD architecture patterns. Expert in both legacy POD 1.0 (UI5 component-based) and modern POD 2.0 (ES6 class-based) plugin development. **Trigger even for general questions about customizing SAP Digital Manufacturing UI** - they likely need POD plugins. Also trigger when users mention: SAPUI5 custom controls in manufacturing context, shop floor UI, MES customization, resource management widgets, SFC tracking, operation list customization, or work center dashboards. **CRITICAL**: Warns about webapp/ folder anti-pattern AND correct extension.json placement inside namespace folder. **Automatically creates deployment zip file** when plugin is complete. **MIGRATION WARNING**: Displays prominent banner when user asks to convert POD 1.0 to POD 2.0, explaining that re-architecting is better than direct conversion. **ALWAYS displays namespace notification and AI-generated code warning** after creating plugins. **File structure aligned with official SAP POD 2.0 Developer's Guide** using widget/, action/, util/ folder pattern. **extension.json must be INSIDE namespace folder** for module path resolution. **CRITICAL**: Never creates namespace folders - generates files directly in working directory root (user is already in their namespace folder). **i18n IMPLEMENTATION**: Comprehensive documentation for internationalization in POD 2.0 widgets including manual ResourceBundle loading pattern. **PRODUCTION PATTERNS**: Includes real SAP production code patterns (JSDoc, private fields, Object.freeze enums, design mode checks, ContentHandler patterns, subscription patterns, delegate patterns, error handling from actual SAP widgets). **COMPLETE PATTERNS**: Copy-paste ready widget templates including minimal widget, context-aware widget, API widget, full TableWidget, ControlWidget, LayoutWidget, and ContentHandler implementations. **PARENT PROPERTY SPREADING CLARITY**: Clear decision rules for when to spread parent properties (YES for TableWidget/LayoutWidget, NO for Widget/ControlWidget base classes).
+version: 12.0.0
 author: Claude
-tags: [sap, digital-manufacturing, pod, plugin, pod2, no-binding-in-widgetproperty, no-parent-spreading, getDefaultConfig-official-pattern, getI18nText-method, stringpropertyeditor-no-default, callback-parameter-order, real-world-patterns, widget-architecture, createView-before-onInit, no-webapp-folder, pod-vs-sapui5, auto-deployment-zip, migration-warning, pod1-to-pod2, namespace-notification, ai-code-warning, official-sap-structure, widget-action-util-folders, extension-json-placement, module-path-resolution, no-namespace-folder-creation, generate-in-cwd-root]
+tags: [sap, digital-manufacturing, pod, plugin, pod2, no-binding-in-widgetproperty, conditional-parent-spreading, getDefaultConfig-official-pattern, getI18nText-method, stringpropertyeditor-no-default, callback-parameter-order, real-world-patterns, widget-architecture, createView-before-onInit, no-webapp-folder, pod-vs-sapui5, auto-deployment-zip, migration-warning, pod1-to-pod2, namespace-notification, ai-code-warning, official-sap-structure, widget-action-util-folders, extension-json-placement, module-path-resolution, no-namespace-folder-creation, generate-in-cwd-root, production-sap-patterns, jsdoc-patterns, private-fields-encapsulation, object-freeze-enums, design-mode-patterns, contenthandler-patterns, subscription-patterns, delegate-patterns, copy-paste-templates, spreading-decision-rules]
 compatibility:
   environment: SAP Business Technology Platform (BTP) with SAP Digital Manufacturing
   requirements:
@@ -454,34 +454,67 @@ new WidgetProperty({
 })
 ```
 
-### Mistake #2: NEVER Spread Parent Properties in getDefaultConfig()!
+### Mistake #2: When to Spread Parent Properties in getDefaultConfig()
+
+**CRITICAL DECISION**: Whether to spread parent properties depends on your **base class**!
+
+#### ❌ DON'T Spread for Widget Base Class
 
 ```javascript
-// ❌ WRONG - Causes property conflicts!
-static getDefaultConfig() {
-    return {
-        properties: {
-            ...super.getDefaultConfig()?.properties,  // ❌ DON'T DO THIS!
-            myProperty: "value"
-        }
-    };
-}
-
-// ✅ CORRECT - Direct property definition
-static getDefaultConfig() {
-    return {
-        properties: {
-            myProperty: "value"  // Simple, direct, no spreading
-        }
-    };
+// ❌ WRONG - For direct Widget extensions, don't spread!
+class MyWidget extends Widget {
+    static getDefaultConfig() {
+        return {
+            properties: {
+                ...super.getDefaultConfig()?.properties,  // ❌ NO! Widget base has "type"
+                myProperty: "value"
+            }
+        };
+    }
 }
 ```
 
-**Why These Cause Errors:**
-1. **Binding syntax** in metadata is parsed incorrectly, causing property value assignments to wrong control properties
-2. **Parent spreading** introduces reserved SAPUI5 property names (like `"type"`) that conflict with control properties
+**Why**: Widget base class properties include reserved SAPUI5 names like `"type"` that cause conflicts.
 
-**See**: [references/common-mistakes.md](references/common-mistakes.md) for all 11 mistakes with detailed fixes.
+#### ✅ DO Spread for TableWidget/LayoutWidget
+
+```javascript
+// ✅ CORRECT - For TableWidget/LayoutWidget, DO spread!
+class MyTableWidget extends TableWidget {
+    static getDefaultConfig() {
+        return {
+            properties: {
+                ...super.getDefaultConfig().properties,  // ✅ YES! Inherit parent config
+                showNoData: true,
+                mode: ListMode.SingleSelectMaster,
+                myCustomProperty: "value"
+            }
+        };
+    }
+}
+```
+
+**Why**: TableWidget and LayoutWidget have safe defaults that should be inherited. This is the **official SAP production pattern**.
+
+#### Decision Rule:
+
+| Base Class | Spread Parent? | Reason |
+|------------|---------------|---------|
+| `Widget` | ❌ NO | Contains reserved SAPUI5 property names |
+| `ControlWidget` | ❌ NO | Inherits Widget's problematic properties |
+| `LayoutWidget` | ✅ YES | Safe defaults, production SAP pattern |
+| `TableWidget` | ✅ YES | Safe defaults, production SAP pattern |
+
+**Common Error Message (when spreading Widget base):**
+```
+"[value] is of type string, expected sap.m.InputType for property "type"
+```
+
+**Official SAP Pattern Sources:**
+- SAP Production Code: ActivityConfirmationTableWidget, SelectResourceWidget
+- See also: [references/production-patterns-sap.md](references/production-patterns-sap.md) for real SAP production patterns
+
+**See**: [references/common-mistakes.md](references/common-mistakes.md) for all mistakes with detailed fixes.
 
 ---
 
