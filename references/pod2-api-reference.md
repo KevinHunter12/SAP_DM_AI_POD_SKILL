@@ -11,18 +11,19 @@ This document provides a comprehensive API reference for SAP Digital Manufacturi
 1. [Common Imports Reference](#common-imports-reference)
 2. [Widget Base Class](#widget-base-class)
 3. [Widget Subclasses](#widget-subclasses)
-4. [PodContext](#podcontext)
-5. [ModelPath Constants](#modelpath-constants)
-6. [Action Base Class](#action-base-class)
-7. [Core Action Classes](#core-action-classes)
-8. [Property Editors](#property-editors)
-9. [REST Client](#rest-client)
-10. [OData Clients](#odata-clients)
-11. [Public API Clients](#public-api-clients)
-12. [Logger](#logger)
-13. [DateTimeUtils](#datetimeutils)
-14. [Widget Registry](#widget-registry)
-15. [Action Registry](#action-registry)
+4. [Property and Event Filtering](#property-and-event-filtering)
+5. [PodContext](#podcontext)
+6. [ModelPath Constants](#modelpath-constants)
+7. [Action Base Class](#action-base-class)
+8. [Core Action Classes](#core-action-classes)
+9. [Property Editors](#property-editors)
+10. [REST Client](#rest-client)
+11. [OData Clients](#odata-clients)
+12. [Public API Clients](#public-api-clients)
+13. [Logger](#logger)
+14. [DateTimeUtils](#datetimeutils)
+15. [Widget Registry](#widget-registry)
+16. [Action Registry](#action-registry)
 
 ---
 
@@ -98,6 +99,50 @@ import BooleanPropertyEditor from "sap/dm/dme/pod2/propertyeditor/BooleanPropert
 import SelectPropertyEditor from "sap/dm/dme/pod2/propertyeditor/SelectPropertyEditor";
 import ColorPropertyEditor from "sap/dm/dme/pod2/propertyeditor/ColorPropertyEditor";
 import IconPropertyEditor from "sap/dm/dme/pod2/propertyeditor/IconPropertyEditor";
+```
+
+---
+
+## PROPERTY AND EVENT FILTERING
+
+Control which properties and events are exposed in POD Designer:
+
+```javascript
+class MyWidget extends ControlWidget {
+    // Only these properties available in POD Designer
+    static INCLUDE_PROPERTIES = ["title", "visible", "enabled"];
+    
+    // Only these events available
+    static INCLUDE_EVENTS = ["press"];
+    
+    getProperties() {
+        const aAllProperties = super.getProperties();
+        // Framework automatically filters based on INCLUDE_PROPERTIES
+        return aAllProperties;
+    }
+}
+```
+
+**How it works**:
+- If `INCLUDE_PROPERTIES` defined, only listed properties exposed
+- If `INCLUDE_EVENTS` defined, only listed events exposed
+- Empty array = NO properties/events
+- Undefined = ALL properties/events
+
+**Examples**:
+
+```javascript
+// Minimal configuration
+class ReadOnlyWidget extends TextWidget {
+    static INCLUDE_PROPERTIES = ["size"];
+    static INCLUDE_EVENTS = [];
+}
+
+// Selective exposure
+class CustomButton extends ButtonWidget {
+    static INCLUDE_PROPERTIES = ["text", "icon", "type", "enabled"];
+    static INCLUDE_EVENTS = ["press"];
+}
 ```
 
 ### Correct ModelPath Constants
@@ -2334,6 +2379,445 @@ class MyWidget extends Widget {
 - **Location:** https://github.com/SAP-samples/digital-manufacturing-extension-samples/blob/main/documentation/jsdoc_pod2.zip
 - **Version:** Based on documentation dated August 21, 2025
 - **Extracted:** March 12, 2026
+
+
+
+## PodContext Direct Getters
+
+Direct getters provide one-time access to context without subscription.
+
+### When to Use Direct Getters vs Subscription
+
+| Use Direct Getter | Use Subscription |
+|-------------------|------------------|
+| One-time read during onInit() | React to context changes |
+| Building request objects | Update UI when context changes |
+| Button click handlers | Data refresh on selection |
+| Validation checks | Live filtering/updates |
+
+### Complete Direct Getter API
+
+```javascript
+// Plant context
+const sPlant = PodContext.getPlant();
+// Returns: "PLANT_1001" (string)
+
+// Selected operations
+const aSelectedOps = PodContext.getSelectedOperationActivities();
+// Returns: [{ sfc: "...", operationActivity: "...", ... }] (array)
+
+// Selected worklist items
+const aWorklistItems = PodContext.getSelectedWorkListItems();
+// Returns: [{ sfc: "...", operation: "...", ... }] (array)
+
+// Current resource
+const oResource = PodContext.getCurrentResource();
+// Returns: { resource: "...", resourceType: "...", ... } (object)
+
+// Current user
+const sUser = PodContext.getUser();
+// Returns: "USER123" (string)
+
+// Current work center
+const sWorkCenter = PodContext.getWorkCenter();
+// Returns: "WC-001" (string)
+
+// Operation list
+const aOperations = PodContext.getOperations();
+// Returns: [{ operation: "...", version: "...", ... }] (array)
+
+// Material list
+const aMaterials = PodContext.getMaterials();
+// Returns: [{ material: "...", version: "...", ... }] (array)
+```
+
+### Usage Examples
+
+**Example 1: One-time read in onInit()**
+```javascript
+async onInit() {
+    await super.onInit();
+    
+    // Direct getter - only need plant once
+    const sPlant = PodContext.getPlant();
+    this.#oModel.setProperty("/plant", sPlant);
+}
+```
+
+**Example 2: Building request objects**
+```javascript
+_getRequest() {
+    // Direct getters for request data
+    const aSelectedOps = PodContext.getSelectedOperationActivities();
+    if (!aSelectedOps || aSelectedOps.length === 0) {
+        return null;
+    }
+
+    return {
+        plant: PodContext.getPlant(),
+        sfcs: aSelectedOps.map(op => op.sfc),
+        operations: aSelectedOps.map(op => op.operationActivity)
+    };
+}
+```
+
+**Example 3: Button handler**
+```javascript
+async onButtonPress() {
+    // Direct getter in event handler
+    const aSelectedOps = PodContext.getSelectedOperationActivities();
+    
+    if (aSelectedOps.length === 0) {
+        MessageBox.warning("Please select at least one operation");
+        return;
+    }
+    
+    await this._processOperations(aSelectedOps);
+}
+```
+
+**Example 4: Combined with subscription**
+```javascript
+async onInit() {
+    await super.onInit();
+    
+    // Direct getter for initial load
+    const sPlant = PodContext.getPlant();
+    this._fetchData(sPlant);
+    
+    // Subscribe for changes
+    PodContext.subscribe(
+        ModelPath.SelectedOperationActivities,
+        this._onOperationsChange,
+        this
+    );
+}
+
+_onOperationsChange(aOperations, sPath) {
+    // Direct getter in callback for related data
+    const sPlant = PodContext.getPlant();
+    this._fetchData(sPlant, aOperations);
+}
+```
+
+### Comparison: Direct vs Subscription
+
+```javascript
+// Overkill - don't subscribe for one-time read
+async onInit() {
+    await super.onInit();
+    PodContext.subscribe(ModelPath.Plant, (sPlant) => {
+        this.#oModel.setProperty("/plant", sPlant);
+    }, this);
+}
+
+// Correct - direct getter for one-time read
+async onInit() {
+    await super.onInit();
+    const sPlant = PodContext.getPlant();
+    this.#oModel.setProperty("/plant", sPlant);
+}
+
+// Correct - subscription when reacting to changes
+async onInit() {
+    await super.onInit();
+    PodContext.subscribe(
+        ModelPath.SelectedOperationActivities,
+        this._refreshData,
+        this
+    );
+}
+```
+
+### Null Safety
+
+All getters can return null/undefined/empty arrays. Always check:
+
+```javascript
+const aSelectedOps = PodContext.getSelectedOperationActivities();
+if (!aSelectedOps || aSelectedOps.length === 0) {
+    // Handle no selection
+    return;
+}
+```
+
+---
+
+## ApiClient.internal - Undocumented Internal APIs
+
+⚠️ **Warning:** `ApiClient.internal` contains APIs not in official documentation. Use with caution.
+
+### Common Internal Endpoints
+
+```javascript
+// Assembly operations
+const aComponents = await ApiClient.internal.assembly.getComponents({
+    plant: "PLANT_1001",
+    sfcs: ["SFC-001", "SFC-002"],
+    operations: ["OP-10", "OP-20"]
+});
+
+// Order details
+const oOrder = await ApiClient.internal.order.getOrderDetails({
+    plant: "PLANT_1001",
+    orderId: "ORDER-001"
+});
+
+// SFC details (extended)
+const oSfcDetails = await ApiClient.internal.sfc.getSfcDetails({
+    plant: "PLANT_1001",
+    sfc: "SFC-001"
+});
+```
+
+### Usage Pattern with Error Handling
+
+```javascript
+async _fetchInternalData() {
+    try {
+        this.setBusy(true);
+        
+        const oRequest = {
+            plant: PodContext.getPlant(),
+            sfcs: this._getSelectedSfcs()
+        };
+
+        // Internal API call
+        const aData = await ApiClient.internal.assembly.getComponents(oRequest);
+        
+        this._getModel().setProperty("/data", aData);
+        this.#oLog.info(`Fetched ${aData.length} items from internal API`);
+        
+    } catch (oError) {
+        this.#oLog.error("Internal API call failed", oError);
+        
+        // More detailed error handling for internal APIs
+        if (oError.status === 404) {
+            MessageBox.information("No data found");
+        } else if (oError.status === 403) {
+            MessageBox.error("Access denied. Check authorization.");
+        } else {
+            MessageBox.error(`API Error: ${oError.message}`);
+        }
+    } finally {
+        this.setBusy(false);
+    }
+}
+```
+
+### Best Practices for Internal APIs
+
+1. **Always add error handling** - Internal APIs less stable than public
+2. **Log all calls** - Helps debugging when APIs change
+3. **Defensive coding** - Check response structure
+4. **Document usage** - Comment why you're using internal API
+5. **Monitor for deprecation** - Internal APIs can change without notice
+
+### Migration Strategy
+
+If an internal API is later added to public docs:
+
+```javascript
+// Old internal API
+const aData = await ApiClient.internal.assembly.getComponents(oRequest);
+
+// After migration to public API (hypothetical)
+const aData = await ApiClient.assembly.getComponents(oRequest);
+
+// Keep error handling, just change the path
+```
+
+### When to Use Internal APIs
+
+✅ **Use when:**
+- Required data not available via public APIs
+- POD plugin requires specific assembly/order data
+- Approved by SAP support/documentation team
+
+❌ **Avoid when:**
+- Public API exists for same data
+- Building long-term production code
+- No fallback strategy if API changes
+
+### Request/Response Logging
+
+```javascript
+async _callInternalApi(oRequest) {
+    this.#oLog.debug("Internal API request", oRequest);
+    
+    const oResponse = await ApiClient.internal.someEndpoint(oRequest);
+    
+    this.#oLog.debug("Internal API response", {
+        recordCount: oResponse?.length || 0,
+        responseKeys: Object.keys(oResponse || {})
+    });
+    
+    return oResponse;
+}
+```
+
+---
+
+---
+
+## Utility Classes Reference
+
+### GrowingJSONModel
+
+**Import:** `sap/dm/dme/pod2/model/GrowingJSONModel`
+
+**Use Case:** Tables with pagination/lazy loading
+
+**Usage:**
+```javascript
+import GrowingJSONModel from "sap/dm/dme/pod2/model/GrowingJSONModel";
+
+#oModel = new GrowingJSONModel();
+#iPage = 0;
+#iPageSize = 20;
+
+// Binding parameters
+this.#oTable.bindItems({
+    path: "/items",
+    template: oTemplate,
+    parameters: {
+        countPath: "/totalCount",      // Path to total count
+        listControl: this.#oTable,     // Table reference
+        onGrowing: () => this._fetch() // Next page callback
+    }
+});
+
+// Fetch method
+async _fetch() {
+    const iPage = this.#iPage++;  // Increment page!
+    const oResponse = await API.get({ page: iPage, size: this.#iPageSize });
+    return [oResponse.items, oResponse.totalCount];
+}
+```
+
+**See also:** [widget-patterns.md - GrowingJSONModel](widget-patterns.md#tablewidget-with-growingjsonmodel-pagination-pattern)
+
+---
+
+### MessageHistory
+
+**Import:** `sap/dm/dme/pod2/context/MessageHistory`
+
+**Methods:**
+- `MessageHistory.toast({ message, type })` - Toast notification
+- `MessageHistory.showError(sMessage)` - Error dialog
+- `MessageHistory.showWarning(sMessage, { actions, onClose })` - Warning with actions
+- `MessageHistory.dismissMessage(oMessage)` - Close message
+
+**Types:** `MessageHistory.Success`, `MessageHistory.Error`, `MessageHistory.Warning`
+
+**Examples:**
+```javascript
+// Success toast
+MessageHistory.toast({ 
+    message: "Posted successfully", 
+    type: MessageHistory.Success 
+});
+
+// Error dialog
+MessageHistory.showError("Failed to post goods receipt");
+
+// Warning with actions (retry pattern)
+const oMessage = MessageHistory.showWarning("Quantity exceeds tolerance. Continue?", {
+    actions: [MessageBox.Action.YES, MessageBox.Action.NO],
+    onClose: (sAction) => {
+        if (sAction === MessageBox.Action.YES) {
+            this._retryPost();
+        }
+        MessageHistory.dismissMessage(oMessage);
+    }
+});
+```
+
+---
+
+### Logger
+
+**Import:** `sap/dm/dme/pod2/Logger`
+
+**Usage:**
+```javascript
+import Logger from "sap/dm/dme/pod2/Logger";
+
+class MyWidget extends Widget {
+    #oLog = Logger.getLogger("my.namespace.MyWidget");
+    
+    _someMethod() {
+        this.#oLog.info("Method called");
+        this.#oLog.error("Failed to fetch data", oError);
+        this.#oLog.debug("Debug info", { param: value });
+    }
+}
+```
+
+**Methods:**
+- `Logger.getLogger(sName)` - Get logger instance
+- `logger.info(sMessage, ...args)` - Info level
+- `logger.error(sMessage, oError)` - Error level
+- `logger.debug(sMessage, ...args)` - Debug level
+- `logger.warn(sMessage, ...args)` - Warning level
+
+---
+
+### ValidationUtils (Production Pattern)
+
+**Import:** `sap/dm/dme/pod2/utils/ValidationUtils` (if available)
+
+**Usage (from SAP production code):**
+```javascript
+import ValidationUtils from "sap/dm/dme/pod2/utils/ValidationUtils";
+
+_onQuantityChange(oEvent) {
+    const oSource = oEvent.getSource();
+    try {
+        ValidationUtils.validateQuantity(oSource.getValue());
+        oSource.setValueState(ValueState.None);
+        this.#bIsQuantityValid = true;
+    } catch (oException) {
+        oSource.setValueState(ValueState.Error);
+        oSource.setValueStateText(oException.message);
+        this.#bIsQuantityValid = false;
+    }
+}
+```
+
+**Note:** Check if available in your SAP DM version. If not, implement custom validation.
+
+---
+
+### I18nResourceModel
+
+**Import:** `sap/dm/dme/pod2/model/I18nResourceModel`
+
+**Usage (Framework-driven pattern):**
+```javascript
+import I18nResourceModel from "sap/dm/dme/pod2/model/I18nResourceModel";
+
+class MyWidget extends Widget {
+    // Static private i18n model
+    static #oI18nModel = new I18nResourceModel({
+        bundleName: "custom.company.project.i18n.i18n"  // Dots, not slashes!
+    });
+    
+    // Static getter (framework calls this)
+    static getI18nModel() {
+        return this.#oI18nModel;
+    }
+    
+    // Use inherited method
+    _someMethod() {
+        const sText = this.getI18nText("myWidget.greeting");
+        const sTitle = this.getI18nText("myWidget.title", arg1, arg2);
+    }
+}
+```
+
+**See also:** [SKILL.md i18n section](../SKILL.md#step-3-add-i18n-support-optional-but-recommended)
 
 ---
 

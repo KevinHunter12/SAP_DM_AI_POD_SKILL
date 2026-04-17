@@ -102,6 +102,71 @@ sap.ui.define([
 - `HTMLWidget` - HTML content
 - `IFrameWidget` - Embedded content
 
+### IconWidget Complete Pattern ⭐⭐⭐⭐
+
+**Base**: `sap.dm.dme.pod2.widget.core.IconWidget` | **Wraps**: `sap.ui.core.Icon`
+
+```javascript
+import IconWidget from "sap/dm/dme/pod2/widget/core/IconWidget";
+import IconColor from "sap/ui/core/IconColor";
+
+class StatusIconWidget extends IconWidget {
+    static GOOD_ICON = "sap-icon://accept";
+    static BAD_ICON = "sap-icon://error";
+    static GOOD_COLOR = IconColor.Positive;
+    static BAD_COLOR = IconColor.Negative;
+    
+    #static = /** @type {typeof StatusIconWidget} */(this.constructor);
+    
+    static getDefaultConfig() {
+        return { properties: { size: "2rem", width: "3rem", height: "3rem" } };
+    }
+    
+    static INCLUDE_PROPERTIES = ["size", "width", "height"];
+    static INCLUDE_EVENTS = [];
+    
+    _createView() {
+        const oIcon = /** @type {sap.ui.core.Icon} */ (super._createView());
+        oIcon.setColor("white");
+        
+        if (PodContext.isDesignMode()) {
+            this._setView(oIcon);
+            this._updateIcon("GOOD");
+        }
+        
+        return oIcon;
+    }
+    
+    async onInit() {
+        await super.onInit();
+        if (PodContext.isRunMode()) {
+            PodContext.subscribe(ModelPath.CurrentOperation, this._onOperationChanged, this);
+        }
+    }
+    
+    _updateIcon(sStatus) {
+        const oIcon = /** @type {sap.ui.core.Icon} */ (this.getView());
+        oIcon.setSrc(sStatus === "GOOD" ? this.#static.GOOD_ICON : this.#static.BAD_ICON);
+        oIcon.setBackgroundColor(sStatus === "GOOD" ? this.#static.GOOD_COLOR : this.#static.BAD_COLOR);
+        
+        if (PodContext.isRunMode()) {
+            oIcon.setTooltip(this.getI18nText(`status.${sStatus.toLowerCase()}`));
+        }
+    }
+    
+    onExit() {
+        super.onExit();
+        if (PodContext.isRunMode()) {
+            PodContext.unsubscribe(ModelPath.CurrentOperation, this._onOperationChanged, this);
+        }
+    }
+}
+```
+
+**IconColor values**: `Positive` (green), `Negative` (red), `Critical` (orange), `Neutral` (grey)
+
+**Common icons**: `accept`, `error`, `alert`, `information`, `connected`, `disconnected`, `status-positive`
+
 ---
 
 ## LayoutWidget Pattern (For Containers)
@@ -150,204 +215,265 @@ sap.ui.define([
 
 ---
 
-## TableWidget Pattern (For Complex Tables)
+## TableWidget Complete Pattern (For Complex Tables)
 
 TableWidget is the most complex base class, used for displaying tabular data with columns, sorting, and pagination.
 
-### Complete TableWidget Example
+### Required Static Methods
+
+TableWidget requires specific static methods and lifecycle management for proper functionality.
+
+```javascript
+class ComponentTableWidget extends TableWidget {
+    // 1. Static Field enum (column identifiers)
+    static Field = Object.freeze({
+        componentSequence: "componentSequence",
+        componentAndVersion: "componentAndVersion",
+        quantity: "quantity"
+    });
+
+    // 2. Define columns (must be static)
+    static getFields() {
+        return [
+            {
+                field: this.Field.componentSequence,
+                text: "{i18n>columns.sequence}",
+                width: "15%"
+            },
+            {
+                field: this.Field.componentAndVersion,
+                text: "{i18n>columns.component}",
+                width: "25%"
+            },
+            {
+                field: this.Field.quantity,
+                text: "{i18n>columns.quantity}",
+                width: "15%"
+            }
+        ];
+    }
+
+    // 3. Define default visible columns (must be static)
+    static getDefaultFields() {
+        return [
+            this.Field.componentSequence,
+            this.Field.componentAndVersion
+        ];
+    }
+}
+```
+
+### Complete Lifecycle Implementation
 
 ```javascript
 sap.ui.define([
-    "sap/m/library",
-    "sap/ui/core/library",
+    "sap/ui/model/json/JSONModel",
     "sap/dm/dme/pod2/context/ModelPath",
     "sap/dm/dme/pod2/context/PodContext",
+    "sap/dm/dme/pod2/api/ApiClient",
     "sap/dm/dme/pod2/widget/core/TableWidget",
-    "sap/dm/dme/pod2/widget/metadata/WidgetCategory"
+    "sap/dm/dme/pod2/widget/metadata/WidgetCategory",
+    "sap/dm/dme/pod2/Logger",
+    "sap/m/MessageBox"
 ], (
-    SapMLibrary,
-    SapUiCoreLibrary,
+    JSONModel,
     ModelPath,
     PodContext,
+    ApiClient,
     TableWidget,
-    WidgetCategory
+    WidgetCategory,
+    Logger,
+    MessageBox
 ) => {
     "use strict";
 
-    const { ListMode, Text, ObjectIdentifier } = SapMLibrary;
-    const { Priority, TextAlign } = SapUiCoreLibrary;
-
     /**
-     * @alias sap.dm.dme.pod2.widget.custom.MyTableWidget
+     * @alias namespace.plugins.components.ComponentTableWidget
      * @extends sap.dm.dme.pod2.widget.core.TableWidget
      */
-    class MyTableWidget extends TableWidget {
-
-        /**
-         * Define field names as enum for type safety
-         * @enum {string}
-         */
+    class ComponentTableWidget extends TableWidget {
+        // Static Field enum
         static Field = Object.freeze({
-            SFC: "sfc",
-            Material: "material",
-            Quantity: "quantity",
-            Status: "status"
+            componentSequence: "componentSequence",
+            componentAndVersion: "componentAndVersion",
+            quantity: "quantity"
         });
 
+        // Private fields
+        #oLog = Logger.getLogger("namespace.plugins.components.ComponentTableWidget");
+        #oModel = new JSONModel([]);
+
         static getDisplayName() {
-            return "My Table Widget";
+            return "Component Table";
         }
 
         static getIcon() {
-            return "sap-icon://table-view";
+            return "sap-icon://product";
         }
 
-        /**
-         * Define available columns with metadata
-         * @override
-         * @returns {Array}
-         */
+        static getCategory() {
+            return WidgetCategory.Assembly;  // Assembly operations (component lists, BOM, kitting)
+        }
+
         static getFields() {
-            const { Field } = this;
             return [
                 {
-                    field: Field.SFC,
-                    text: "{i18n>sfc}",           // i18n key
-                    importance: Priority.High,
-                    width: "150px",
-                    sortable: true
+                    field: this.Field.componentSequence,
+                    text: "{i18n>columns.sequence}",
+                    width: "15%"
                 },
                 {
-                    field: Field.Material,
-                    text: "{i18n>material}",
-                    width: "180px",
-                    sortable: true
+                    field: this.Field.componentAndVersion,
+                    text: "{i18n>columns.component}",
+                    width: "25%"
                 },
                 {
-                    field: Field.Quantity,
-                    text: "{i18n>quantity}",
-                    width: "80px",
-                    sortable: true,
-                    hAlign: TextAlign.End      // Right-align numbers
-                },
-                {
-                    field: Field.Status,
-                    text: "{i18n>status}",
-                    width: "100px",
-                    sortable: false
+                    field: this.Field.quantity,
+                    text: "{i18n>columns.quantity}",
+                    width: "15%"
                 }
             ];
         }
 
-        /**
-         * Define which fields to show by default
-         * @override
-         * @returns {Array<string>}
-         */
         static getDefaultFields() {
-            const { Field } = this;
-            return [Field.SFC, Field.Material, Field.Quantity];
+            return [
+                this.Field.componentSequence,
+                this.Field.componentAndVersion
+            ];
         }
-
-        /**
-         * Define default configuration
-         * @override
-         */
-        static getDefaultConfig() {
-            // CRITICAL: Defensive null check - base Widget returns null!
-            const oParentConfig = super.getDefaultConfig();
-            const oParentProperties = oParentConfig?.properties || {};
-
-            return {
-                properties: {
-                    ...oParentProperties,
-                    mode: ListMode.SingleSelectMaster,
-                    growingScrollToLoad: true,
-                    pageSize: 100,
-                    defaultSorting: [{
-                        sortBy: this.Field.SFC,
-                        descending: false
-                    }]
-                }
-            };
-        }
-
-        static getCategory() {
-            return WidgetCategory.Elements;
-        }
-
-        static EXCLUDE_PROPERTIES = [
-            ...TableWidget.EXCLUDE_PROPERTIES,
-            "headerText"  // Hide specific properties
-        ];
 
         constructor(oConfig) {
             super(oConfig);
         }
 
-        /**
-         * REQUIRED: Specify model path for table data
-         * @override
-         * @returns {string}
-         */
-        _getModelPath() {
-            return ModelPath.WorkListItems;  // Or custom path like "/materials"
-        }
-
-        /**
-         * Optional: Specify count path for pagination
-         * @override
-         * @returns {string}
-         */
-        _getCountPath() {
-            return ModelPath.WorkListCount;
-        }
-
-        /**
-         * REQUIRED: Create cell controls for each column
-         * @override
-         * @param {Object} oColumnConfig
-         * @returns {sap.ui.core.Control}
-         */
-        _createCell(oColumnConfig) {
-            switch (oColumnConfig.field) {
-                case MyTableWidget.Field.SFC:
-                    // Clickable identifier
-                    return this._createIdentifierCell(oColumnConfig, "sfc");
-
-                case MyTableWidget.Field.Material:
-                case MyTableWidget.Field.Quantity:
-                    // Simple text
-                    return this._createTextCell(oColumnConfig, oColumnConfig.field);
-
-                case MyTableWidget.Field.Status:
-                    // Custom control
-                    return new Text({
-                        text: "{statusCode}"
-                    });
-
-                default:
-                    // Handle custom fields
-                    if (oColumnConfig.field.startsWith("customFields/")) {
-                        return this._createTextCell(oColumnConfig, oColumnConfig.field);
-                    }
-                    throw new Error(`Unsupported field: ${oColumnConfig.field}`);
+        async onInit() {
+            await super.onInit();
+            
+            if (PodContext.isRunMode()) {
+                this._fetchComponents();
+                
+                // Subscribe to context changes
+                PodContext.subscribe(
+                    ModelPath.SelectedOperationActivities,
+                    this._onSelectedOperationsChange,
+                    this
+                );
             }
         }
 
-        /**
-         * Optional: Handle sorting changes
-         * @override
-         */
-        _onSort(aSorting) {
-            PodContext.setWorkListSorting(aSorting);
-            // Trigger data refresh
+        // ⚠️ CRITICAL: Always implement onExit()
+        onExit() {
+            super.onExit(); // TableWidget cleanup
+            
+            if (PodContext.isRunMode()) {
+                PodContext.unsubscribe(
+                    ModelPath.SelectedOperationActivities,
+                    this._onSelectedOperationsChange,
+                    this
+                );
+            }
+            
+            // Clean up private fields
+            this.#oLog = null;
+            this.#oModel = null;
+        }
+
+        // Required: Return your JSONModel
+        _getModel() {
+            return this.#oModel;
+        }
+
+        // Required: Path to array in model
+        _getModelPath() {
+            return "/components";
+        }
+
+        // Define cell rendering
+        _createCell(oColumnConfig) {
+            switch (oColumnConfig.field) {
+                case ComponentTableWidget.Field.componentSequence:
+                    return this._createTextCell(oColumnConfig, "{componentSequence}");
+                    
+                case ComponentTableWidget.Field.componentAndVersion:
+                    // Composite binding - see separate section
+                    return this._createTextCell(
+                        oColumnConfig,
+                        "{component/material} / {component/version}"
+                    );
+                    
+                case ComponentTableWidget.Field.quantity:
+                    return this._createTextCell(
+                        oColumnConfig,
+                        "{quantity/value} {quantity/unitOfMeasure}"
+                    );
+                    
+                default:
+                    return this._createTextCell(oColumnConfig, oColumnConfig.field);
+            }
+        }
+
+        // Data loading with error handling
+        async _fetchComponents() {
+            try {
+                this.setBusy(true);
+                
+                const oRequest = this._getRequest();
+                if (!oRequest) {
+                    this._getModel().setProperty(this._getModelPath(), []);
+                    return;
+                }
+
+                const aComponents = await ApiClient.internal.assembly.getComponents(oRequest);
+                this._getModel().setProperty(this._getModelPath(), aComponents);
+                this.#oLog.info(`Fetched ${aComponents.length} components`);
+                
+            } catch (oError) {
+                this.#oLog.error("Failed to fetch components", oError);
+                MessageBox.error(`Failed to load components: ${oError.message}`);
+            } finally {
+                this.setBusy(false);
+            }
+        }
+
+        // Context change callback with null safety
+        _onSelectedOperationsChange(aOperations, sPath) {
+            if (!Array.isArray(aOperations)) {
+                this.#oLog.warn("Invalid operations received", aOperations);
+                return;
+            }
+            this._fetchComponents();
+        }
+
+        // Request builder
+        _getRequest() {
+            const aSelectedOps = PodContext.getSelectedOperationActivities();
+            if (!aSelectedOps || aSelectedOps.length === 0) {
+                return null;
+            }
+
+            return {
+                sfcs: aSelectedOps.map((oOp) => oOp.sfc),
+                operations: aSelectedOps.map((oOp) => oOp.operationActivity)
+            };
         }
     }
 
-    return MyTableWidget;
+    return ComponentTableWidget;
 });
 ```
+
+### TableWidget Checklist
+
+✅ Static Field enum defined  
+✅ Static getFields() implemented  
+✅ Static getDefaultFields() implemented  
+✅ Private #oModel created as JSONModel  
+✅ _getModel() returns private model  
+✅ _getModelPath() returns array path  
+✅ _createCell() handles all fields  
+✅ onInit() calls super.onInit()  
+✅ onExit() calls super.onExit() and unsubscribes  
+✅ Error handling in async methods  
 
 ### TableWidget Helper Methods
 
@@ -366,6 +492,509 @@ _createDateCell(oColumnConfig, vBinding, fnFormatter)
 // Quantity bullet chart
 _createQuantityBulletChartCell(oBindPaths)
 ```
+
+---
+
+---
+
+## Error Handling & Loading States Pattern
+
+Always wrap async API calls with try-catch-finally and loading indicators.
+
+### Complete Pattern
+
+```javascript
+async _fetchData() {
+    try {
+        // 1. Show loading indicator
+        this.setBusy(true);
+        
+        // 2. Build request with validation
+        const oRequest = this._buildRequest();
+        if (!oRequest) {
+            this._clearData();
+            return;
+        }
+
+        // 3. Call API
+        const aData = await ApiClient.someEndpoint(oRequest);
+        
+        // 4. Update model
+        this._updateModel(aData);
+        this.#oLog.info(`Fetched ${aData.length} items`);
+        
+    } catch (oError) {
+        // 5. Log and display error
+        this.#oLog.error("Failed to fetch data", oError);
+        
+        MessageBox.error(
+            `Failed to load data: ${oError.message}`,
+            { title: "Error" }
+        );
+        
+    } finally {
+        // 6. Always hide loading indicator
+        this.setBusy(false);
+    }
+}
+
+_buildRequest() {
+    const aSelectedOps = PodContext.getSelectedOperationActivities();
+    if (!aSelectedOps || aSelectedOps.length === 0) {
+        this.#oLog.warn("No operations selected");
+        return null;
+    }
+    return { /* request object */ };
+}
+
+_clearData() {
+    this._getModel().setProperty(this._getModelPath(), []);
+}
+
+_updateModel(aData) {
+    this._getModel().setProperty(this._getModelPath(), aData);
+}
+```
+
+### Error Handling Checklist
+
+✅ try-catch-finally around all async calls  
+✅ setBusy(true) before API call  
+✅ setBusy(false) in finally block  
+✅ Null checks before API calls  
+✅ User-friendly error messages  
+✅ Logging with context  
+✅ Clear data on error/null request  
+
+### Common Patterns
+
+**Pattern 1: Handle empty context gracefully**
+```javascript
+const oContext = PodContext.getSomething();
+if (!oContext) {
+    this.#oLog.info("No context available, clearing data");
+    this._clearData();
+    return;
+}
+```
+
+**Pattern 2: Defensive callback handling**
+```javascript
+_onContextChange(aItems, sPath) {
+    // Validate callback data
+    if (!Array.isArray(aItems)) {
+        this.#oLog.warn("Invalid items received", aItems);
+        return;
+    }
+    
+    if (aItems.length === 0) {
+        this._clearData();
+        return;
+    }
+    
+    this._fetchData();
+}
+```
+
+**Pattern 3: API error status codes**
+```javascript
+catch (oError) {
+    if (oError.status === 404) {
+        MessageBox.warning("No data found for selected items");
+    } else if (oError.status === 403) {
+        MessageBox.error("You don't have permission to view this data");
+    } else {
+        MessageBox.error(`Failed to load data: ${oError.message}`);
+    }
+    this.#oLog.error("API call failed", oError);
+}
+```
+
+---
+
+---
+
+## Composite Binding Syntax in TableWidget
+
+Composite bindings combine multiple model properties into one cell.
+
+### Basic Syntax Rules
+
+```javascript
+_createCell(oColumnConfig) {
+    switch (oColumnConfig.field) {
+        case MyWidget.Field.MaterialAndVersion:
+            // ✅ CORRECT: Each binding wrapped in {}
+            return this._createTextCell(
+                oColumnConfig,
+                "{material} / {version}"
+            );
+            
+        case MyWidget.Field.FullAddress:
+            // ✅ Multiple properties from nested objects
+            return this._createTextCell(
+                oColumnConfig,
+                "{address/street}, {address/city}, {address/country}"
+            );
+            
+        case MyWidget.Field.QuantityWithUOM:
+            // ✅ Text between bindings
+            return this._createTextCell(
+                oColumnConfig,
+                "{quantity} {unitOfMeasure}"
+            );
+    }
+}
+```
+
+### Common Composite Patterns
+
+**Pattern 1: Material with version**
+```javascript
+// Data: { material: "MAT-001", version: "v2.0" }
+// Binding: "{material} / {version}"
+// Result: "MAT-001 / v2.0"
+```
+
+**Pattern 2: Name with ID in parentheses**
+```javascript
+// Data: { name: "Work Center A", id: "WC-123" }
+// Binding: "{name} ({id})"
+// Result: "Work Center A (WC-123)"
+```
+
+**Pattern 3: Nested object properties**
+```javascript
+// Data: { component: { material: "COMP-X", version: "1.0" } }
+// Binding: "{component/material} v{component/version}"
+// Result: "COMP-X v1.0"
+```
+
+**Pattern 4: Multiple nested levels**
+```javascript
+// Data: { order: { sfc: { name: "SFC-001" }, operation: { name: "OP-10" } } }
+// Binding: "{order/sfc/name} @ {order/operation/name}"
+// Result: "SFC-001 @ OP-10"
+```
+
+### ❌ Common Mistakes
+
+**Mistake 1: Missing braces around bindings**
+```javascript
+// ❌ WRONG - will display literal text
+"{material} / version"  // Shows: "MAT-001 / version"
+
+// ✅ CORRECT
+"{material} / {version}"  // Shows: "MAT-001 / v2.0"
+```
+
+**Mistake 2: Typo in composite binding (missing brace)**
+```javascript
+// ❌ WRONG - parsing error
+"{material / {version}"  // Error!
+
+// ✅ CORRECT
+"{material} / {version}"
+```
+
+**Mistake 3: Using wrong separator**
+```javascript
+// Context: Path separator in nested objects
+"{component.material}"   // ❌ Wrong separator
+"{component/material}"   // ✅ Correct
+```
+
+### When to Use Composite Bindings
+
+- ✅ Combining related data in one column
+- ✅ Adding context (units, versions, IDs)
+- ✅ Human-readable combinations
+- ❌ Don't use for complex formatting (use formatters instead)
+- ❌ Don't use for calculations (use computed properties)
+
+---
+
+---
+
+
+        // Context change callback with null safety
+        _onSelectedOperationsChange(aOperations, sPath) {
+            if (!Array.isArray(aOperations)) {
+                this.#oLog.warn("Invalid operations received", aOperations);
+                return;
+            }
+            this._fetchComponents();
+        }
+
+        // Request builder
+        _getRequest() {
+            const aSelectedOps = PodContext.getSelectedOperationActivities();
+            if (!aSelectedOps || aSelectedOps.length === 0) {
+                return null;
+            }
+
+            return {
+                sfcs: aSelectedOps.map((oOp) => oOp.sfc),
+                operations: aSelectedOps.map((oOp) => oOp.operationActivity)
+            };
+        }
+    }
+
+    return ComponentTableWidget;
+});
+```
+
+### TableWidget Checklist
+
+✅ Static Field enum defined  
+✅ Static getFields() implemented  
+✅ Static getDefaultFields() implemented  
+✅ Private #oModel created as JSONModel  
+✅ _getModel() returns private model  
+✅ _getModelPath() returns array path  
+✅ _createCell() handles all fields  
+✅ onInit() calls super.onInit()  
+✅ onExit() calls super.onExit() and unsubscribes  
+✅ Error handling in async methods  
+
+### TableWidget Helper Methods
+
+TableWidget provides these helper methods for creating cells:
+
+```javascript
+// Text cell with binding
+_createTextCell(oColumnConfig, vBindPath)
+
+// Identifier cell (clickable object name)
+_createIdentifierCell(oColumnConfig, vBindPath)
+
+// Date cell with formatting
+_createDateCell(oColumnConfig, vBinding, fnFormatter)
+
+// Quantity bullet chart
+_createQuantityBulletChartCell(oBindPaths)
+```
+
+---
+
+---
+
+## Error Handling & Loading States Pattern
+
+Always wrap async API calls with try-catch-finally and loading indicators.
+
+### Complete Pattern
+
+```javascript
+async _fetchData() {
+    try {
+        // 1. Show loading indicator
+        this.setBusy(true);
+        
+        // 2. Build request with validation
+        const oRequest = this._buildRequest();
+        if (!oRequest) {
+            this._clearData();
+            return;
+        }
+
+        // 3. Call API
+        const aData = await ApiClient.someEndpoint(oRequest);
+        
+        // 4. Update model
+        this._updateModel(aData);
+        this.#oLog.info(`Fetched ${aData.length} items`);
+        
+    } catch (oError) {
+        // 5. Log and display error
+        this.#oLog.error("Failed to fetch data", oError);
+        
+        MessageBox.error(
+            `Failed to load data: ${oError.message}`,
+            { title: "Error" }
+        );
+        
+    } finally {
+        // 6. Always hide loading indicator
+        this.setBusy(false);
+    }
+}
+
+_buildRequest() {
+    const aSelectedOps = PodContext.getSelectedOperationActivities();
+    if (!aSelectedOps || aSelectedOps.length === 0) {
+        this.#oLog.warn("No operations selected");
+        return null;
+    }
+    return { /* request object */ };
+}
+
+_clearData() {
+    this._getModel().setProperty(this._getModelPath(), []);
+}
+
+_updateModel(aData) {
+    this._getModel().setProperty(this._getModelPath(), aData);
+}
+```
+
+### Error Handling Checklist
+
+✅ try-catch-finally around all async calls  
+✅ setBusy(true) before API call  
+✅ setBusy(false) in finally block  
+✅ Null checks before API calls  
+✅ User-friendly error messages  
+✅ Logging with context  
+✅ Clear data on error/null request  
+
+### Common Patterns
+
+**Pattern 1: Handle empty context gracefully**
+```javascript
+const oContext = PodContext.getSomething();
+if (!oContext) {
+    this.#oLog.info("No context available, clearing data");
+    this._clearData();
+    return;
+}
+```
+
+**Pattern 2: Defensive callback handling**
+```javascript
+_onContextChange(aItems, sPath) {
+    // Validate callback data
+    if (!Array.isArray(aItems)) {
+        this.#oLog.warn("Invalid items received", aItems);
+        return;
+    }
+    
+    if (aItems.length === 0) {
+        this._clearData();
+        return;
+    }
+    
+    this._fetchData();
+}
+```
+
+**Pattern 3: API error status codes**
+```javascript
+catch (oError) {
+    if (oError.status === 404) {
+        MessageBox.warning("No data found for selected items");
+    } else if (oError.status === 403) {
+        MessageBox.error("You don't have permission to view this data");
+    } else {
+        MessageBox.error(`Failed to load data: ${oError.message}`);
+    }
+    this.#oLog.error("API call failed", oError);
+}
+```
+
+---
+
+---
+
+## Composite Binding Syntax in TableWidget
+
+Composite bindings combine multiple model properties into one cell.
+
+### Basic Syntax Rules
+
+```javascript
+_createCell(oColumnConfig) {
+    switch (oColumnConfig.field) {
+        case MyWidget.Field.MaterialAndVersion:
+            // ✅ CORRECT: Each binding wrapped in {}
+            return this._createTextCell(
+                oColumnConfig,
+                "{material} / {version}"
+            );
+            
+        case MyWidget.Field.FullAddress:
+            // ✅ Multiple properties from nested objects
+            return this._createTextCell(
+                oColumnConfig,
+                "{address/street}, {address/city}, {address/country}"
+            );
+            
+        case MyWidget.Field.QuantityWithUOM:
+            // ✅ Text between bindings
+            return this._createTextCell(
+                oColumnConfig,
+                "{quantity} {unitOfMeasure}"
+            );
+    }
+}
+```
+
+### Common Composite Patterns
+
+**Pattern 1: Material with version**
+```javascript
+// Data: { material: "MAT-001", version: "v2.0" }
+// Binding: "{material} / {version}"
+// Result: "MAT-001 / v2.0"
+```
+
+**Pattern 2: Name with ID in parentheses**
+```javascript
+// Data: { name: "Work Center A", id: "WC-123" }
+// Binding: "{name} ({id})"
+// Result: "Work Center A (WC-123)"
+```
+
+**Pattern 3: Nested object properties**
+```javascript
+// Data: { component: { material: "COMP-X", version: "1.0" } }
+// Binding: "{component/material} v{component/version}"
+// Result: "COMP-X v1.0"
+```
+
+**Pattern 4: Multiple nested levels**
+```javascript
+// Data: { order: { sfc: { name: "SFC-001" }, operation: { name: "OP-10" } } }
+// Binding: "{order/sfc/name} @ {order/operation/name}"
+// Result: "SFC-001 @ OP-10"
+```
+
+### ❌ Common Mistakes
+
+**Mistake 1: Missing braces around bindings**
+```javascript
+// ❌ WRONG - will display literal text
+"{material} / version"  // Shows: "MAT-001 / version"
+
+// ✅ CORRECT
+"{material} / {version}"  // Shows: "MAT-001 / v2.0"
+```
+
+**Mistake 2: Typo in composite binding (missing brace)**
+```javascript
+// ❌ WRONG - parsing error
+"{material / {version}"  // Error!
+
+// ✅ CORRECT
+"{material} / {version}"
+```
+
+**Mistake 3: Using wrong separator**
+```javascript
+// Context: Path separator in nested objects
+"{component.material}"   // ❌ Wrong separator
+"{component/material}"   // ✅ Correct
+```
+
+### When to Use Composite Bindings
+
+- ✅ Combining related data in one column
+- ✅ Adding context (units, versions, IDs)
+- ✅ Human-readable combinations
+- ❌ Don't use for complex formatting (use formatters instead)
+- ❌ Don't use for calculations (use computed properties)
+
+---
 
 ---
 

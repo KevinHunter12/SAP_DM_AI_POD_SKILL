@@ -1,9 +1,9 @@
 ---
 name: pod-plugin
-description: Create SAP Digital Manufacturing POD 1.0 and POD 2.0 plugins with proper architecture. **ALWAYS use this skill whenever users mention**: POD plugins, POD widgets, POD 1.0, POD 2.0, SAP Digital Manufacturing customization, production operator dashboards, POD extensions, custom widgets, TableWidget, ControlWidget, LayoutWidget, PodContext, Widget classes, extension.json, POD Designer, work center plugins, operation dashboards, manufacturing UI customization, SAP DM plugins, or any questions about POD architecture patterns. Expert in both legacy POD 1.0 (UI5 component-based) and modern POD 2.0 (ES6 class-based) plugin development. **Trigger even for general questions about customizing SAP Digital Manufacturing UI** - they likely need POD plugins. Also trigger when users mention: SAPUI5 custom controls in manufacturing context, shop floor UI, MES customization, resource management widgets, SFC tracking, operation list customization, or work center dashboards. **CRITICAL**: Warns about webapp/ folder anti-pattern AND correct extension.json placement inside namespace folder. **Automatically creates deployment zip file** when plugin is complete. **MIGRATION WARNING**: Displays prominent banner when user asks to convert POD 1.0 to POD 2.0, explaining that re-architecting is better than direct conversion. **ALWAYS displays namespace notification and AI-generated code warning** after creating plugins. **File structure aligned with official SAP POD 2.0 Developer's Guide** using widget/, action/, util/ folder pattern. **extension.json must be INSIDE namespace folder** for module path resolution. **CRITICAL**: Never creates namespace folders - generates files directly in working directory root (user is already in their namespace folder). **i18n IMPLEMENTATION - CRITICAL**: Framework-driven pattern using static getI18nModel() with I18nResourceModel. **ALWAYS use this.getI18nText() method calls in _createView() - NEVER use binding syntax "{i18n>key}" as i18n model is NOT available during view creation!** Method calls work everywhere; bindings fail during initialization phase. **PRODUCTION PATTERNS**: Includes real SAP production code patterns (JSDoc, private fields, Object.freeze enums, design mode checks, ContentHandler patterns, subscription patterns, delegate patterns, error handling from actual SAP widgets). **COMPLETE PATTERNS**: Copy-paste ready widget templates including minimal widget, context-aware widget, API widget, full TableWidget, ControlWidget, LayoutWidget, and ContentHandler implementations. **PARENT PROPERTY SPREADING CLARITY**: Clear decision rules for when to spread parent properties (YES for TableWidget/LayoutWidget, NO for Widget/ControlWidget base classes). **IMPORT & MODELPATH VALIDATION**: Comprehensive validation checklist prevents common errors (PlacementType from sap/m, ModelPath constants plural, PodContext from context/). **SAP DM API INTEGRATION**: Complete reference for all 70+ SAP Digital Manufacturing REST APIs (SFC, orders, materials, BOMs, data collection, quality inspection, inventory, process manufacturing) with authentication patterns, base URLs, request/response examples, and best practices for API integration in POD widgets.
-version: 16.0.0
+description: Create SAP Digital Manufacturing POD 1.0 and POD 2.0 plugins with proper architecture. **ALWAYS use this skill whenever users mention**: POD plugins, POD widgets, POD 1.0, POD 2.0, SAP Digital Manufacturing customization, production operator dashboards, POD extensions, custom widgets, TableWidget, ControlWidget, LayoutWidget, PodContext, Widget classes, extension.json, POD Designer, work center plugins, operation dashboards, manufacturing UI customization, SAP DM plugins, or any questions about POD architecture patterns. Expert in both legacy POD 1.0 (UI5 component-based) and modern POD 2.0 (ES6 class-based) plugin development. **Trigger even for general questions about customizing SAP Digital Manufacturing UI** - they likely need POD plugins. Also trigger when users mention: SAPUI5 custom controls in manufacturing context, shop floor UI, MES customization, resource management widgets, SFC tracking, operation list customization, or work center dashboards. **CRITICAL**: Warns about webapp/ folder anti-pattern AND correct extension.json placement inside namespace folder. **Automatically creates deployment zip file** when plugin is complete. **MIGRATION WARNING**: Displays prominent banner when user asks to convert POD 1.0 to POD 2.0, explaining that re-architecting is better than direct conversion. **ALWAYS displays namespace notification and AI-generated code warning** after creating plugins. **File structure aligned with official SAP POD 2.0 Developer's Guide** using widget/, action/, util/ folder pattern. **extension.json must be INSIDE namespace folder** for module path resolution. **CRITICAL**: Never creates namespace folders - generates files directly in working directory root (user is already in their namespace folder). **i18n IMPLEMENTATION - CRITICAL**: Framework-driven pattern using static getI18nModel() with I18nResourceModel. **ALWAYS use this.getI18nText() method calls in _createView() - NEVER use binding syntax "{i18n>key}" as i18n model is NOT available during view creation!** Method calls work everywhere; bindings fail during initialization phase. **BINDING SYNTAX RULES**: Bindings NOT allowed in WidgetProperty; allowed in getDefaultConfig() and control properties after model load. **ADVANCED PRODUCTION PATTERNS**: 20 enterprise-grade patterns from real SAP production code including: modern JavaScript private fields (#), static PropertyId/Field enums with Object.freeze(), advanced TableWidget with custom toolbars and complex cells, dynamic button enabling with authorization checks, ContentHandler with dialogs and forms, custom Dialog extensions, Formatter utility classes, UOM handling patterns, data delegate patterns, custom field extensibility, warning dialogs, validation workflows, API posting patterns, expression binding, custom widget events, async popovers, contextual no-data messages, programmatic table selection, NavContainer master-detail, EXCLUDE_PROPERTIES. **PRODUCTION FORM PATTERNS**: GrowingJSONModel pagination, PodDialog extension with async loading, ContentHandler architecture, multi-model forms, real-time validation, error handling & retry, dynamic column creation. **COMPLETE PATTERNS**: Copy-paste ready widget templates including minimal widget, context-aware widget, API widget, full TableWidget, ControlWidget, LayoutWidget, ContentHandler, and advanced production patterns. **PARENT PROPERTY SPREADING CLARITY**: Clear decision rules for when to spread parent properties (YES for TableWidget/LayoutWidget, NO for Widget/ControlWidget base classes). **IMPORT & MODELPATH VALIDATION**: Comprehensive validation checklist prevents common errors (PlacementType from sap/m, ModelPath constants plural, PodContext from context/). **SAP DM API INTEGRATION**: Complete reference for all 70+ SAP Digital Manufacturing REST APIs (SFC, orders, materials, BOMs, data collection, quality inspection, inventory, process manufacturing) with authentication patterns, base URLs, request/response examples, and best practices for API integration in POD widgets.
+version: 20.0.0
 author: Claude
-tags: [sap, digital-manufacturing, pod, plugin, pod2, no-binding-in-widgetproperty, conditional-parent-spreading, getDefaultConfig-official-pattern, getI18nText-method, I18nResourceModel, framework-driven-i18n, stringpropertyeditor-no-default, callback-parameter-order, real-world-patterns, widget-architecture, createView-before-onInit, no-webapp-folder, pod-vs-sapui5, auto-deployment-zip, migration-warning, pod1-to-pod2, namespace-notification, ai-code-warning, official-sap-structure, widget-action-util-folders, extension-json-placement, module-path-resolution, no-namespace-folder-creation, generate-in-cwd-root, production-sap-patterns, jsdoc-patterns, private-fields-encapsulation, object-freeze-enums, design-mode-patterns, contenthandler-patterns, subscription-patterns, delegate-patterns, copy-paste-templates, spreading-decision-rules, import-validation, modelpath-validation, placementtype-import, context-not-model-import, plural-modelpath-constants, pre-generation-checklist, sapdm-api-reference, rest-api-integration, api-specs, sfc-api, order-api, material-api, bom-api, datacollection-api, quality-api, inventory-api, process-manufacturing-api, oauth2-authentication, api-best-practices]
+tags: [sap, digital-manufacturing, pod, plugin, pod2, no-binding-in-widgetproperty, conditional-parent-spreading, getDefaultConfig-official-pattern, getI18nText-method, I18nResourceModel, framework-driven-i18n, stringpropertyeditor-no-default, callback-parameter-order, real-world-patterns, widget-architecture, createView-before-onInit, no-webapp-folder, pod-vs-sapui5, auto-deployment-zip, migration-warning, pod1-to-pod2, namespace-notification, ai-code-warning, official-sap-structure, widget-action-util-folders, extension-json-placement, module-path-resolution, no-namespace-folder-creation, generate-in-cwd-root, production-sap-patterns, jsdoc-patterns, private-fields-encapsulation, object-freeze-enums, design-mode-patterns, contenthandler-patterns, subscription-patterns, delegate-patterns, copy-paste-templates, spreading-decision-rules, import-validation, modelpath-validation, placementtype-import, context-not-model-import, plural-modelpath-constants, pre-generation-checklist, sapdm-api-reference, rest-api-integration, api-specs, sfc-api, order-api, material-api, bom-api, datacollection-api, quality-api, inventory-api, process-manufacturing-api, oauth2-authentication, api-best-practices, advanced-production-patterns, modern-javascript-private-fields, static-propertyid-enum, static-field-enum, custom-toolbar-pattern, complex-cell-types, dynamic-button-enabling, authorization-checks, contenthandler-dialog-forms, custom-dialog-extension, formatter-utility-class, uom-handling-pattern, data-delegate-pattern, custom-field-extensibility, warning-dialog-pattern, enterprise-patterns, tablewidget-advanced, form-validation-patterns, api-posting-workflow, expression-binding, custom-widget-events, async-popover-pattern, contextual-no-data-messages, programmatic-table-selection, exclude-properties, navcontainer-master-detail, binding-context-rules, growingjsonmodel-pagination, poddialog-extension-pattern, multi-model-forms, real-time-validation, error-retry-pattern, dynamic-columns, production-form-patterns]
 compatibility:
   environment: SAP Business Technology Platform (BTP) with SAP Digital Manufacturing
   requirements:
@@ -434,27 +434,38 @@ mycompany.zip
 
 ---
 
-## 🚨 CRITICAL: Two More Fatal Mistakes to Avoid
+## 🚨 CRITICAL: Binding Syntax Rules
 
-### Mistake #1: NEVER Use Binding Syntax in WidgetProperty!
+### Where Bindings Work vs. Don't Work
 
+| Context | Binding Syntax `"{path}"` | Example |
+|---------|--------------------------|---------|
+| ❌ WidgetProperty displayName/description | **NOT ALLOWED** | Use `this.getI18nText("key")` |
+| ✅ getDefaultConfig() property values | **ALLOWED** | `headerText: "{i18n>title}"` OK |
+| ✅ Control properties in _createView() | **ALLOWED** | `text: "{fieldName}"` OK |
+| ✅ Expression binding everywhere | **ALLOWED** | `visible: "{= ${type} === 'TEXT' }"` |
+
+**Example - WidgetProperty (NO bindings):**
 ```javascript
-// ❌ WRONG - Causes type conflicts and binding errors!
 new WidgetProperty({
-    displayName: "{i18n>property.myProp}",  // ❌ NO BINDINGS HERE!
-    description: "{i18n>property.myProp.desc}",
-    propertyEditor: new StringPropertyEditor(this, "myProp", "value")
-})
-
-// ✅ CORRECT - Use method call for i18n
-new WidgetProperty({
-    displayName: this._getI18nText("property.myProp"),  // ✅ Method call
-    description: this._getI18nText("property.myProp.desc"),
-    propertyEditor: new StringPropertyEditor(this, "myProp")  // No 3rd param!
+    displayName: this.getI18nText("property.myProp"),  // ✅ Method call
+    propertyEditor: new StringPropertyEditor(this, "myProp")
 })
 ```
 
-### Mistake #2: When to Spread Parent Properties in getDefaultConfig()
+**Example - getDefaultConfig (bindings OK):**
+```javascript
+static getDefaultConfig() {
+    return {
+        properties: {
+            ...super.getDefaultConfig().properties,
+            headerText: `{i18n>title} ({${ModelPath.Items}/length})`  // ✅ OK here!
+        }
+    };
+}
+```
+
+### Fatal Mistake #2: When to Spread Parent Properties in getDefaultConfig()
 
 **CRITICAL DECISION**: Whether to spread parent properties depends on your **base class**!
 
@@ -515,6 +526,19 @@ class MyTableWidget extends TableWidget {
 - See also: [references/production-patterns-sap.md](references/production-patterns-sap.md) for real SAP production patterns
 
 **See**: [references/common-mistakes.md](references/common-mistakes.md) for all mistakes with detailed fixes.
+
+### ⚠️ Critical: Always Unsubscribe in onExit()
+
+If you subscribe to PodContext events in `onInit()`, you **MUST** unsubscribe in `onExit()`:
+
+```javascript
+onExit() {
+    super.onExit();
+    PodContext.unsubscribe(ModelPath.Something, this._onSomethingChange, this);
+}
+```
+
+**Missing onExit() causes memory leaks!** See [Common Mistake #14](references/common-mistakes.md#mistake-14-missing-onexit-unsubscribe) for complete pattern.
 
 ---
 
@@ -648,6 +672,39 @@ class YourWidget extends Widget {
 
 ---
 
+## 🎯 Advanced Production Patterns
+
+For enterprise-grade POD plugins, see the comprehensive guide with 13 production patterns from real SAP code:
+
+📖 **[Advanced Production Patterns Reference](references/advanced-patterns.md)** - Complete guide including:
+
+1. **Modern JavaScript Private Fields (#)** - ES2022 syntax for encapsulation
+2. **Static PropertyId Enum** - Object.freeze() with type safety
+3. **Static Field Enum** - Table column identifiers
+4. **Custom Toolbar** - Override _createToolbar() for TableWidget
+5. **Complex Cell Types** - Composite bindings, button columns
+6. **Authorization Checks** - User/workcenter permission validation
+7. **ContentHandler + Dialog** - Forms with validation and API posting
+8. **Custom Dialog Extension** - Extend sap.m.Dialog directly
+9. **Formatter Utility Classes** - Reusable static formatters
+10. **UOM Handling** - Fetch, cache, Select control patterns
+11. **Data Delegates** - Shared business logic coordination
+12. **Custom Field Extensibility** - Configurable fields with validation
+13. **Warning Dialogs** - MessageBox with custom actions
+
+**Quick Pattern Selection:**
+- Need private state? → **Pattern #1** (Private Fields)
+- Building TableWidget? → **Patterns #2-5** (Enums, Toolbar, Cells)
+- Need authorization? → **Pattern #6** (Authorization Checks)
+- Complex form? → **Pattern #7** (ContentHandler)
+- Need dialog? → **Pattern #8** (Custom Dialog)
+- Reusable formatting? → **Pattern #9** (Formatter Class)
+- Multi-widget data? → **Pattern #11** (Data Delegates)
+
+📖 **Also see**: [references/production-patterns-sap.md](references/production-patterns-sap.md) for complete SAP production pattern documentation with JSDoc, error handling, and more.
+
+---
+
 ## POD 2.0 Architecture Overview
 
 ### Key Characteristics
@@ -725,6 +782,28 @@ PodContext.unsubscribe(ModelPath.FilterResources, this._onResourceChanged, this)
 ```
 
 **Critical Rule**: Callback signature is `(newValue, path)` NOT `(path, newValue)`!
+
+### PodContext Direct Getter Methods (No Subscription Needed)
+
+For one-time reads, use direct getters instead of ModelPath subscription:
+
+```javascript
+// ✅ Direct getters - use for immediate access
+const sPlant = PodContext.getPlant();
+const aSelectedOps = PodContext.getSelectedOperationActivities();
+const aWorklistItems = PodContext.getSelectedWorkListItems();
+const oResource = PodContext.getCurrentResource();
+
+// ❌ Don't subscribe if you only need the value once
+// Use subscribe() only when you need to react to changes
+```
+
+**When to use:**
+- ✅ One-time read during onInit() or button press
+- ✅ Building request objects
+- ❌ Don't use if you need to react to changes (use subscribe instead)
+
+See [PodContext Direct Getters API](references/pod2-api-reference.md#podcontext-direct-getters) for complete list.
 
 📖 **Full Reference**: See [references/pod2-api-reference.md](references/pod2-api-reference.md) for complete PodContext API.
 
@@ -1208,56 +1287,36 @@ Your plugin uses the following namespace:
 
 ## Reference Documentation
 
-This skill includes comprehensive reference files:
+This skill includes comprehensive reference files in the `references/` directory:
 
-### POD 2.0 Framework Documentation
-- **[references/pod2-api-reference.md](references/pod2-api-reference.md)** - Complete POD 2.0 framework API (PodContext, ModelPath, Widget classes, i18n, subscriptions)
-- **[references/widget-patterns.md](references/widget-patterns.md)** - Complete patterns for ControlWidget, LayoutWidget, TableWidget, ContentHandler
-- **[references/common-mistakes.md](references/common-mistakes.md)** - All 16 common mistakes with detailed fixes
-- **[references/namespace-update.md](references/namespace-update.md)** - Import path changes and updates
+### 📚 Core Framework Documentation
+- **[pod2-api-reference.md](references/pod2-api-reference.md)** - Complete POD 2.0 framework API (PodContext, ModelPath, Widget classes, subscriptions)
+- **[widget-patterns.md](references/widget-patterns.md)** - Patterns for ControlWidget, LayoutWidget, TableWidget, ContentHandler
+- **[advanced-patterns.md](references/advanced-patterns.md)** - 13 enterprise-grade production patterns from real SAP code
+- **[production-patterns-sap.md](references/production-patterns-sap.md)** - JSDoc, error handling, delegates from SAP production widgets
+- **[common-mistakes.md](references/common-mistakes.md)** - All common mistakes with detailed fixes
+- **[namespace-update.md](references/namespace-update.md)** - Import path changes and updates
+- **[glossary.md](references/glossary.md)** - Key terms and definitions
 
-### SAP Digital Manufacturing API Documentation
-- **[references/sapdm-api-reference.md](references/sapdm-api-reference.md)** - Complete SAP DM REST API reference (70+ APIs for SFC, orders, materials, data collection, quality, inventory, and more)
-- **[references/api-specs/](references/api-specs/)** - Full OpenAPI/Swagger specifications for all 70 SAP DM APIs
+### 🔌 SAP Digital Manufacturing API
+- **[sapdm-api-reference.md](references/sapdm-api-reference.md)** - Complete SAP DM REST API reference (70+ APIs)
+- **[api-specs/](references/api-specs/)** - Full OpenAPI/Swagger specifications for all SAP DM APIs
 
-### Additional Resources
-- **[references/glossary.md](references/glossary.md)** - Key terms and definitions
+### 📖 Additional Resources
 - **[CHANGELOG.md](CHANGELOG.md)** - Version history and updates
 
-📖 **Read these files** for detailed API documentation, examples, and troubleshooting.
-
-### Quick API Reference Guide
-
-When building POD widgets that need to call SAP DM APIs:
-
-1. **Find the API**: Check [references/sapdm-api-reference.md](references/sapdm-api-reference.md) for the API category (Production, Material, Quality, etc.)
-2. **Get detailed spec**: Open the corresponding JSON file in [references/api-specs/](references/api-specs/)
-3. **Authentication**: All APIs use OAuth 2.0 - get token from `PodContext.getContext().token`
-4. **Base URL**: Get from `PodContext.getContext().serviceRegistry.getApiUrl("service")`
-5. **Error handling**: Always wrap API calls in try/catch and show user-friendly error messages
-
-**Example API Call from Widget:**
-```javascript
-async _fetchSfcDetails(sSfc) {
-    const oContext = PodContext.getContext();
-    const sBaseUrl = oContext.serviceRegistry.getApiUrl("sfc");
-    
-    const oResponse = await fetch(`${sBaseUrl}/sfcs?plant=${oContext.plant}&sfc=${sSfc}`, {
-        headers: {
-            "Authorization": `Bearer ${oContext.token}`,
-            "Content-Type": "application/json"
-        }
-    });
-    
-    return await oResponse.json();
-}
-```
+**Quick Links:**
+- New to POD? → [glossary.md](references/glossary.md)
+- Widget implementation? → [widget-patterns.md](references/widget-patterns.md)
+- Enterprise patterns? → [advanced-patterns.md](references/advanced-patterns.md)
+- Common errors? → [common-mistakes.md](references/common-mistakes.md)
+- API integration? → [sapdm-api-reference.md](references/sapdm-api-reference.md)
 
 ---
 
 ## Key Terms Glossary
 
-**Essential terms you'll encounter:**
+**Essential terms** (complete list in [references/glossary.md](references/glossary.md)):
 
 - **POD**: Production Operator Dashboard
 - **Widget**: Custom UI component for POD
@@ -1268,8 +1327,6 @@ async _fetchSfcDetails(sSfc) {
 - **TableWidget**: Widget for displaying tabular data
 - **RestClient**: Client for custom/external API calls
 - **ApiClient**: Client for SAP DM public operations
-
-📖 **Complete Glossary**: See [references/glossary.md](references/glossary.md) for all terms and definitions.
 
 ---
 

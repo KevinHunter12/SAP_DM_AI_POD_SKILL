@@ -1142,6 +1142,281 @@ POD plugins are **completely different** - they're dynamically loaded extensions
 
 ---
 
+## Mistake #14: Missing onExit() Unsubscribe - Memory Leak! ❌
+
+### The Problem
+
+PodContext subscriptions must be cleaned up in `onExit()`. Failure to unsubscribe causes memory leaks.
+
+### ❌ WRONG - Memory leak
+
+```javascript
+async onInit() {
+    await super.onInit();
+    if (PodContext.isRunMode()) {
+        // Subscribing to PodContext events
+        PodContext.subscribe(
+            ModelPath.SelectedOperationActivities,
+            this._onSelectionChange,
+            this
+        );
+    }
+}
+// ❌ Missing onExit()! Subscription persists after plugin destroyed
+```
+
+**What happens:**
+1. User opens plugin → subscription registered
+2. User closes plugin → widget destroyed BUT subscription still active
+3. Context changes → callback fires on destroyed widget → errors
+4. Memory leak accumulates with each open/close cycle
+
+### ✅ CORRECT - Always unsubscribe
+
+```javascript
+async onInit() {
+    await super.onInit();
+    if (PodContext.isRunMode()) {
+        PodContext.subscribe(
+            ModelPath.SelectedOperationActivities,
+            this._onSelectionChange,
+            this
+        );
+    }
+}
+
+onExit() {
+    super.onExit();
+    if (PodContext.isRunMode()) {
+        // MUST unsubscribe from ALL subscriptions
+        PodContext.unsubscribe(
+            ModelPath.SelectedOperationActivities,
+            this._onSelectionChange,
+            this
+        );
+    }
+    
+    // Clean up private fields
+    this.#oLog = null;
+    this.#oModel = null;
+}
+```
+
+### Why This Matters
+
+**Production impact:**
+- Memory leaks accumulate as users open/close plugins repeatedly
+- Callbacks fire on destroyed widgets → runtime errors
+- Production systems degrade over time
+- Hard to debug - symptoms appear hours after deployment
+
+**Real scenario:**
+```
+User workflow: Open plugin → Close → Open → Close (10x per day)
+After 1 week: 50 orphaned subscriptions
+Result: Browser slowdown, errors, crashes
+```
+
+### Complete Cleanup Checklist
+
+When implementing `onExit()`, ensure you:
+
+✅ Unsubscribe from ALL PodContext subscriptions  
+✅ Call `super.onExit()` first  
+✅ Nullify private fields (`#oLog`, `#oModel`, etc.)  
+✅ Clear intervals/timeouts if used  
+✅ Destroy any manual event listeners  
+✅ Clean up file upload controls  
+✅ Abort pending async operations if possible  
+
+### Multiple Subscriptions Example
+
+```javascript
+class MyWidget extends ControlWidget {
+    #oLog = Logger.getLogger("my.widget");
+    #oModel = new JSONModel({});
+    #iTimerId = null;
+
+    async onInit() {
+        await super.onInit();
+        
+        if (PodContext.isRunMode()) {
+            // Multiple subscriptions
+            PodContext.subscribe(
+                ModelPath.SelectedOperationActivities,
+                this._onOperationsChange,
+                this
+            );
+            
+            PodContext.subscribe(
+                ModelPath.CurrentResource,
+                this._onResourceChange,
+                this
+            );
+            
+            // Timer for polling
+            this.#iTimerId = setInterval(() => {
+                this._pollStatus();
+            }, 5000);
+        }
+    }
+
+    onExit() {
+        super.onExit();
+        
+        if (PodContext.isRunMode()) {
+            // Unsubscribe ALL subscriptions
+            PodContext.unsubscribe(
+                ModelPath.SelectedOperationActivities,
+                this._onOperationsChange,
+                this
+            );
+            
+            PodContext.unsubscribe(
+                ModelPath.CurrentResource,
+                this._onResourceChange,
+                this
+            );
+        }
+        
+        // Clear timer
+        if (this.#iTimerId) {
+            clearInterval(this.#iTimerId);
+            this.#iTimerId = null;
+        }
+        
+        // Clean up private fields
+        this.#oLog = null;
+        this.#oModel = null;
+    }
+}
+```
+
+### TableWidget Special Case
+
+TableWidget has built-in subscription management for table data, but **custom subscriptions still need manual cleanup**:
+
+```javascript
+class MyTableWidget extends TableWidget {
+    #oLog = Logger.getLogger("my.table");
+
+    async onInit() {
+        await super.onInit();
+        
+        if (PodContext.isRunMode()) {
+            // TableWidget manages its own table subscriptions
+            // But custom subscriptions need cleanup!
+            PodContext.subscribe(
+                ModelPath.CurrentWorkCenter,
+                this._onWorkCenterChange,
+                this
+            );
+        }
+    }
+
+    onExit() {
+        super.onExit(); // ✅ Cleans up TableWidget's internal subscriptions
+        
+        if (PodContext.isRunMode()) {
+            // ✅ Clean up YOUR custom subscriptions
+            PodContext.unsubscribe(
+                ModelPath.CurrentWorkCenter,
+                this._onWorkCenterChange,
+                this
+            );
+        }
+        
+        this.#oLog = null;
+    }
+}
+```
+
+### Common Patterns
+
+**Pattern 1: Guard with isRunMode()**
+```javascript
+onExit() {
+    super.onExit();
+    
+    // ✅ BEST PRACTICE: Same guard as onInit()
+    if (PodContext.isRunMode()) {
+        PodContext.unsubscribe(/* ... */);
+    }
+    
+    // Always clean up fields (no guard needed)
+    this.#oLog = null;
+    this.#oModel = null;
+}
+```
+
+**Pattern 2: Defensive unsubscribe**
+```javascript
+onExit() {
+    super.onExit();
+    
+    // ✅ Unsubscribe even if not sure it was subscribed
+    // (PodContext.unsubscribe() is safe to call multiple times)
+    if (PodContext.isRunMode()) {
+        PodContext.unsubscribe(
+            ModelPath.SelectedOperationActivities,
+            this._onSelectionChange,
+            this
+        );
+    }
+}
+```
+
+### How to Verify
+
+**1. Check every subscribe has matching unsubscribe**
+```bash
+# Quick check in your widget file
+grep -n "PodContext.subscribe" MyWidget.js
+grep -n "PodContext.unsubscribe" MyWidget.js
+# Should have same count!
+```
+
+**2. Ensure onExit() exists**
+```javascript
+// Every widget with subscribe() MUST have onExit()
+async onInit() {
+    PodContext.subscribe(/* ... */);
+}
+
+onExit() { // ← MUST exist!
+    super.onExit();
+    PodContext.unsubscribe(/* ... */);
+}
+```
+
+**3. Test memory leaks**
+```
+1. Open browser dev tools → Memory tab
+2. Take heap snapshot
+3. Open plugin → Close plugin → Repeat 10x
+4. Take another heap snapshot
+5. Compare: Check for retained widget instances
+```
+
+### Prevention Checklist
+
+Before submitting widget code:
+
+- [ ] Every `PodContext.subscribe()` has matching `unsubscribe()`
+- [ ] `onExit()` method exists and calls `super.onExit()`
+- [ ] All private fields nullified in `onExit()`
+- [ ] Timers/intervals cleared in `onExit()`
+- [ ] Same `isRunMode()` guard in both `onInit()` and `onExit()`
+- [ ] Tested: Open → Close → Open → Close (no errors)
+
+### See Also
+
+- [Widget Lifecycle](../SKILL.md#widget-lifecycle) - Complete lifecycle documentation
+- [PodContext API](pod2-api-reference.md#podcontext) - subscribe/unsubscribe documentation
+- [TableWidget Pattern](widget-patterns.md#tablewidget) - Complete TableWidget with onExit()
+
+---
+
 ## Navigation
 
 📖 **Back to main skill**: [SKILL.md](../SKILL.md)
@@ -1149,3 +1424,223 @@ POD plugins are **completely different** - they're dynamically loaded extensions
 **Other references**:
 - [Widget Patterns](widget-patterns.md) - Complete code patterns
 - [Glossary](glossary.md) - Key terms & definitions
+
+---
+
+## Mistake #15: Not Destroying Dynamic Dialogs/Popovers
+
+**Problem**: Memory leaks from undestroyed dialogs
+
+```javascript
+// ❌ WRONG
+const oDialog = new Dialog({ /* ... */ });
+oDialog.open();  // Never destroyed!
+
+// ✅ CORRECT
+const oDialog = new Dialog({
+    afterClose: () => { oDialog.destroy(); }
+});
+oDialog.open();
+```
+
+---
+
+## Mistake #16: Generic No-Data Text
+
+**Problem**: "No data" doesn't explain WHY
+
+**Fix**: Update based on PodContext state
+
+```javascript
+if (!PodContext.getFilterResources()?.length) {
+    oTable.setNoDataText(this.getI18nText("error.noResource"));
+}
+```
+
+---
+
+## Mistake #17: Formatter Instead of Expression Binding
+
+**Problem**: Unnecessary complexity for simple conditional
+
+```javascript
+// ❌ WRONG - Overkill
+_formatVisible(s) { return s === 'TEXT'; }
+visible: { formatter: this._formatVisible }
+
+// ✅ CORRECT
+visible: "{= ${type} === 'TEXT' }"
+```
+
+---
+
+## Mistake #18: Not Incrementing Page in GrowingJSONModel ⭐⭐⭐⭐⭐
+
+**Problem**: Using GrowingJSONModel but always fetching page 0
+
+**Fix**: Increment page counter
+
+```javascript
+// ❌ WRONG - Always fetches page 0!
+async _fetchPostings() {
+    const oResponse = await API.get({ page: 0, size: 20 });
+    return oResponse;
+}
+
+// ✅ CORRECT - Increments page
+#iPage = 0;
+
+async _fetchPostings() {
+    const iPage = this.#iPage++;  // Increment!
+    const oResponse = await API.get({ page: iPage, size: 20 });
+    return [oResponse.items, oResponse.totalCount];
+}
+```
+
+**Why Critical:** Essential for pagination to work - without incrementing, same page loads repeatedly.
+
+**See also:** [widget-patterns.md - GrowingJSONModel](widget-patterns.md#tablewidget-with-growingjsonmodel-pagination-pattern)
+
+---
+
+## Mistake #19: Not Destroying Dialogs in afterClose ⭐⭐⭐⭐⭐
+
+**Problem**: Dialog remains in memory after closing, causing memory leaks
+
+**Fix**: Always destroy in afterClose
+
+```javascript
+// ❌ WRONG - Memory leak!
+new PodDialog({
+    title: "My Dialog",
+    afterClose: () => {
+        // Dialog still exists in memory!
+    }
+});
+
+// ✅ CORRECT - Destroys dialog
+new PodDialog({
+    title: "My Dialog",
+    afterClose: () => this.destroy()  // Clean up!
+});
+```
+
+**Why Critical:** Every dialog instance without `destroy()` leaks memory. In long-running POD sessions, this accumulates.
+
+**See also:** [form-patterns.md#poddialog-extension](form-patterns.md#poddialog-extension)
+
+---
+
+## Mistake #20: Column/Cell Index Mismatch ⭐⭐⭐⭐
+
+**Problem**: Dynamic columns added at different indices than cells
+
+**Fix**: Use same index for both
+
+```javascript
+// ❌ WRONG - Indices don't match!
+aColumns.push(customColumn);      // Added at end
+aCells.splice(2, 0, customCell);  // Inserted at index 2 - MISMATCH!
+
+// ✅ CORRECT - Same index
+const iIdx = aColumns.length - 1;
+aColumns.splice(iIdx, 0, customColumn);
+aCells.splice(iIdx, 0, customCell);  // Same index!
+```
+
+**Why Critical:** Mismatched indices cause cells to appear in wrong columns, breaking table layout.
+
+**See also:** [advanced-patterns.md#14-dynamic-column-creation-pattern](advanced-patterns.md#14-dynamic-column-creation-pattern)
+
+---
+
+## Mistake #21: Not Checking for Business Errors in Success Response ⭐⭐⭐⭐⭐
+
+**Problem**: SAP APIs return HTTP 200 but include error flag in response
+
+**Fix**: Always check `oLineItem.error` even in success response
+
+```javascript
+// ❌ WRONG - Misses business errors
+try {
+    const oResponse = await API.post(payload);
+    MessageToast.show("Success!"); // But oResponse.lineItems[0].error might be true!
+} catch (oError) {
+    MessageToast.show("Error");
+}
+
+// ✅ CORRECT - Checks business errors
+try {
+    const oResponse = await API.post(payload);
+    
+    // Check for business error in success response
+    if (oResponse.lineItems[0].error) {
+        MessageHistory.showError(oResponse.lineItems[0].errorMessage);
+        return;
+    }
+    
+    MessageToast.show("Success!");
+} catch (oError) {
+    MessageHistory.showError(oError.message);
+}
+```
+
+**Why Critical:** SAP DM APIs often return HTTP 200 with `error: true` flag for business validation failures.
+
+**See also:** [advanced-patterns.md#15-error-handling--retry-pattern](advanced-patterns.md#15-error-handling--retry-pattern)
+
+---
+
+## Mistake #22: Parsing CustomFieldData Without Try-Catch ⭐⭐⭐⭐
+
+**Problem**: JSON.parse() throws if data is malformed, crashing the widget
+
+**Fix**: Always wrap in try-catch
+
+```javascript
+// ❌ WRONG - Throws if invalid JSON
+const aFields = JSON.parse(oItem.customFieldData);
+const oField = aFields.find(f => f.id === fieldId);
+return oField.value;
+
+// ✅ CORRECT - Safe parsing
+try {
+    const aFields = JSON.parse(oItem.customFieldData);
+    const oField = aFields.find(f => f.id === fieldId);
+    return oField?.value || "";
+} catch (oError) {
+    this.#oLog.error("Failed to parse custom field data", oError);
+    return "";
+}
+```
+
+**Why Critical:** Production data can be corrupted or malformed. Always parse defensively.
+
+**See also:** [advanced-patterns.md#12-custom-field-extensibility](advanced-patterns.md#12-custom-field-extensibility)
+
+---
+
+## Summary: Critical Production Patterns
+
+**Top 5 Most Critical Mistakes:**
+
+1. **#21** - Not checking business errors in success response (causes silent failures)
+2. **#19** - Not destroying dialogs (memory leaks)
+3. **#18** - Not incrementing page counter (pagination breaks)
+4. **#14** - Missing onExit() unsubscribe (memory leaks)
+5. **#11** - Models created in onInit() instead of _createView() (binding fails)
+
+**Prevention Checklist:**
+
+✅ Always check `oLineItem.error` even on HTTP 200  
+✅ Always `destroy()` dialogs in `afterClose`  
+✅ Always increment page counter with GrowingJSONModel  
+✅ Always unsubscribe in `onExit()`  
+✅ Always create models in `_createView()` before bindings  
+✅ Always wrap JSON.parse() in try-catch  
+✅ Always use same index for columns and cells  
+
+**See also:**
+- [form-patterns.md](form-patterns.md) - Complete production patterns
+- [advanced-patterns.md](advanced-patterns.md) - 15 enterprise patterns
+- [widget-patterns.md](widget-patterns.md) - TableWidget, GrowingJSONModel
