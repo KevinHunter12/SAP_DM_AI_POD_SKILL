@@ -4,6 +4,600 @@ Detailed patterns for ControlWidget, LayoutWidget, TableWidget, and ContentHandl
 
 ---
 
+## POD 2.0 Custom Controls (CustomText, CustomVBox, CustomHBox)
+
+POD 2.0 provides custom controls that extend standard SAPUI5 controls with additional styling properties for design-time configuration.
+
+### When to Use Custom Controls
+
+✅ **Use Custom controls when:**
+- Widget needs configurable text/background colors
+- Widget exposes font styling as properties (fontColor, fontSize, fontFamily)
+- Widget needs consistent POD 2.0 styling patterns
+- Properties need to update controls dynamically via setPropertyValue()
+
+❌ **Use standard controls when:**
+- Simple static display without styling customization
+- No styling configuration needed in POD Designer
+- Using sap.m.List or sap.m.Table (no custom versions exist)
+
+### Available Custom Controls
+
+**CustomText** - Extends sap.m.Text with styling:
+- `backgroundColor` - Background color (hex or CSS color)
+- `fontColor` - Text color
+- `fontFamily` - Font family (e.g., "Arial", "72")
+- `fontSize` - Font size (e.g., "1rem", "14px")
+- `fontWeight` - Font weight (e.g., "Normal", "Bold")
+
+**CustomHBox / CustomVBox** - Layout containers with:
+- `gap` - CSS gap value (e.g., "5px", "1rem")
+- `alignItems` - Flex alignment
+- All standard HBox/VBox properties
+
+### Basic Usage Pattern
+
+```javascript
+import CustomText from "sap/dm/dme/pod2/control/CustomText";
+import CustomVBox from "sap/dm/dme/pod2/control/CustomVBox";
+import CustomHBox from "sap/dm/dme/pod2/control/CustomHBox";
+
+class StyledWidget extends Widget {
+    PropertyId = Object.freeze({
+        BackgroundColor: "backgroundColor",
+        FontColor: "fontColor",
+        FontSize: "fontSize"
+    });
+    
+    #oText;
+    
+    static getDefaultConfig() {
+        return {
+            properties: {
+                backgroundColor: "#FFFFFF",
+                fontColor: "#000000",
+                fontSize: "1rem",
+                text: "Styled Text"
+            }
+        };
+    }
+    
+    _createView() {
+        const oConfig = this.getConfig();
+        
+        this.#oText = new CustomText(oConfig.id + "-text", {
+            text: oConfig.properties.text,
+            backgroundColor: oConfig.properties.backgroundColor,
+            fontColor: oConfig.properties.fontColor,
+            fontSize: oConfig.properties.fontSize
+        });
+        
+        return new CustomVBox(oConfig.id, {
+            gap: "10px",
+            items: [this.#oText]
+        });
+    }
+    
+    // Update properties dynamically
+    setPropertyValue(sName, vValue) {
+        switch (sName) {
+            case this.PropertyId.BackgroundColor:
+                if (this.#oText) this.#oText.setBackgroundColor(vValue);
+                break;
+            case this.PropertyId.FontColor:
+                if (this.#oText) this.#oText.setFontColor(vValue);
+                break;
+            case this.PropertyId.FontSize:
+                if (this.#oText) this.#oText.setFontSize(vValue);
+                break;
+        }
+        super.setPropertyValue(sName, vValue);
+    }
+}
+```
+
+### Complete Styled Widget Example
+
+```javascript
+sap.ui.define([
+    "sap/dm/dme/pod2/widget/Widget",
+    "sap/dm/dme/pod2/control/CustomText",
+    "sap/dm/dme/pod2/control/CustomVBox",
+    "sap/dm/dme/pod2/propertyeditor/ColorPropertyEditor",
+    "sap/dm/dme/pod2/propertyeditor/StringPropertyEditor",
+    "sap/dm/dme/pod2/propertyeditor/PropertyCategory",
+    "sap/dm/dme/pod2/widget/metadata/WidgetProperty"
+], (Widget, CustomText, CustomVBox, ColorPropertyEditor, 
+    StringPropertyEditor, PropertyCategory, WidgetProperty) => {
+    "use strict";
+    
+    class StyledDisplayWidget extends Widget {
+        static getDisplayName() { return "Styled Display"; }
+        static getIcon() { return "sap-icon://palette"; }
+        
+        PropertyId = Object.freeze({
+            Text: "text",
+            BackgroundColor: "backgroundColor",
+            FontColor: "fontColor",
+            FontSize: "fontSize",
+            FontFamily: "fontFamily",
+            FontWeight: "fontWeight"
+        });
+        
+        #oText;
+        
+        static getDefaultConfig() {
+            return {
+                properties: {
+                    text: "Display Text",
+                    backgroundColor: "#F5F5F5",
+                    fontColor: "#333333",
+                    fontSize: "1.2rem",
+                    fontFamily: "72",
+                    fontWeight: "Normal"
+                }
+            };
+        }
+        
+        _createView() {
+            const oConfig = this.getConfig();
+            if (!oConfig || !oConfig.id) {
+                return new CustomVBox({ 
+                    items: [new Text({ text: "Config error" })] 
+                });
+            }
+            
+            this.#oText = new CustomText(oConfig.id + "-text", {
+                text: oConfig.properties.text,
+                backgroundColor: oConfig.properties.backgroundColor,
+                fontColor: oConfig.properties.fontColor,
+                fontSize: oConfig.properties.fontSize,
+                fontFamily: oConfig.properties.fontFamily,
+                fontWeight: oConfig.properties.fontWeight
+            });
+            
+            return new CustomVBox(oConfig.id, {
+                gap: "10px",
+                items: [this.#oText]
+            });
+        }
+        
+        getProperties() {
+            return [
+                new WidgetProperty({
+                    displayName: "Text",
+                    category: PropertyCategory.General,
+                    propertyEditor: new StringPropertyEditor(this, this.PropertyId.Text)
+                }),
+                new WidgetProperty({
+                    displayName: "Background Color",
+                    category: PropertyCategory.Appearance,
+                    propertyEditor: new ColorPropertyEditor(this, this.PropertyId.BackgroundColor)
+                }),
+                new WidgetProperty({
+                    displayName: "Font Color",
+                    category: PropertyCategory.Appearance,
+                    propertyEditor: new ColorPropertyEditor(this, this.PropertyId.FontColor)
+                }),
+                new WidgetProperty({
+                    displayName: "Font Size",
+                    category: PropertyCategory.Appearance,
+                    propertyEditor: new StringPropertyEditor(this, this.PropertyId.FontSize)
+                })
+            ];
+        }
+        
+        setPropertyValue(sName, vValue) {
+            if (!this.#oText) return;
+            
+            switch (sName) {
+                case this.PropertyId.Text:
+                    this.#oText.setText(vValue);
+                    break;
+                case this.PropertyId.BackgroundColor:
+                    this.#oText.setBackgroundColor(vValue);
+                    break;
+                case this.PropertyId.FontColor:
+                    this.#oText.setFontColor(vValue);
+                    break;
+                case this.PropertyId.FontSize:
+                    this.#oText.setFontSize(vValue);
+                    break;
+                case this.PropertyId.FontFamily:
+                    this.#oText.setFontFamily(vValue);
+                    break;
+                case this.PropertyId.FontWeight:
+                    this.#oText.setFontWeight(vValue);
+                    break;
+            }
+            
+            super.setPropertyValue(sName, vValue);
+        }
+        
+        onExit() {
+            super.onExit();
+            this.#oText = null;
+        }
+    }
+    
+    return StyledDisplayWidget;
+});
+```
+
+### Custom Controls vs Standard Controls
+
+| Feature | CustomText | sap.m.Text |
+|---------|------------|------------|
+| Basic text display | ✅ | ✅ |
+| backgroundColor property | ✅ | ❌ |
+| fontColor property | ✅ | ❌ (wrappingType only) |
+| fontSize property | ✅ | ❌ |
+| fontFamily property | ✅ | ❌ |
+| fontWeight property | ✅ | ❌ |
+| Design-time styling | ✅ | ❌ |
+
+**Key Difference:** Custom controls expose styling as properties that can be configured in POD Designer, while standard controls require CSS classes.
+
+---
+
+## Timer and Interval Management Pattern 🚨 CRITICAL
+
+When using `setInterval` or `setTimeout` in widgets, **proper cleanup is mandatory** to prevent memory leaks.
+
+### Complete Timer Pattern
+
+```javascript
+class TimerWidget extends Widget {
+    #nIntervalId;
+    #nStartTime;
+    #nElapsed = 0;
+    #oDisplay;
+    
+    _createView() {
+        const oConfig = this.getConfig();
+        if (!oConfig || !oConfig.id) {
+            return new VBox({ 
+                items: [new Text({ text: "Config error" })] 
+            });
+        }
+        
+        this.#oDisplay = new Text({ text: "00:00:00" });
+        
+        const oButton = new Button({
+            text: "Start",
+            press: () => this._onToggle()
+        });
+        
+        return new VBox(oConfig.id, {
+            items: [this.#oDisplay, oButton]
+        });
+    }
+    
+    _onToggle() {
+        if (this._isRunning()) {
+            this._stopTimer();
+        } else {
+            this._startTimer();
+        }
+    }
+    
+    _startTimer() {
+        // 1. Guard: Prevent multiple intervals
+        if (this._isRunning()) {
+            return;
+        }
+        
+        this.#nStartTime = Date.now();
+        
+        // 2. Start interval with error handling
+        this.#nIntervalId = setInterval(() => {
+            try {
+                this._updateDisplay();
+            } catch (oError) {
+                console.error("Timer update error:", oError);
+                this._stopTimer();  // Stop on error
+            }
+        }, 1000);
+    }
+    
+    _stopTimer() {
+        if (!this._isRunning()) {
+            return;
+        }
+        
+        // 3. CRITICAL: Clear interval
+        clearInterval(this.#nIntervalId);
+        this.#nIntervalId = undefined;
+        
+        // Update elapsed time
+        this.#nElapsed += Date.now() - this.#nStartTime;
+        this.#nStartTime = undefined;
+    }
+    
+    _isRunning() {
+        return this.#nIntervalId !== undefined;
+    }
+    
+    _updateDisplay() {
+        const nTotal = this.#nElapsed + (Date.now() - this.#nStartTime);
+        const nSeconds = Math.floor(nTotal / 1000);
+        const nMinutes = Math.floor(nSeconds / 60);
+        const nHours = Math.floor(nMinutes / 60);
+        
+        // Use modulo for correct display
+        const sTime = `${nHours.toString().padStart(2, "0")}:${(nMinutes % 60).toString().padStart(2, "0")}:${(nSeconds % 60).toString().padStart(2, "0")}`;
+        this.#oDisplay.setText(sTime);
+    }
+    
+    // 4. CRITICAL: Clean up in onExit()
+    onExit() {
+        super.onExit();
+        
+        // Stop timer if running
+        if (this._isRunning()) {
+            this._stopTimer();
+        }
+        
+        // Clear references
+        this.#oDisplay = null;
+        this.#nIntervalId = null;
+        this.#nStartTime = null;
+    }
+}
+```
+
+### Timer Management Critical Rules
+
+✅ **ALWAYS:**
+1. Store interval ID in private field (`#nIntervalId`)
+2. Clear interval in `onExit()` method
+3. Guard against multiple intervals with `_isRunning()` check
+4. Handle errors inside interval callback
+5. Set interval ID to `undefined` after clearing
+
+❌ **NEVER:**
+1. Forget to clear interval in `onExit()` → **Memory leak**
+2. Allow multiple intervals to run → **Multiple timers**
+3. Skip error handling in callback → **Uncaught exceptions**
+
+### Time Formatting Bug Fix
+
+**❌ WRONG** - Common mistake from production code:
+```javascript
+_formatTime(nTime) {
+    const nSeconds = Math.floor(nTime / 1000);
+    const nMinutes = Math.floor(nSeconds / 60);
+    const nHours = Math.floor(nMinutes / 60);
+    
+    // BUG: Shows total minutes, not minutes within hour
+    return `${nHours}:${nMinutes}:${nSeconds}`;  // Shows 1:75:135
+}
+```
+
+**✅ CORRECT** - Use modulo for remainders:
+```javascript
+_formatTime(nTime) {
+    const nSeconds = Math.floor(nTime / 1000);
+    const nMinutes = Math.floor(nSeconds / 60);
+    const nHours = Math.floor(nMinutes / 60);
+    
+    // CORRECT: Use modulo for display values
+    return `${nHours.toString().padStart(2, "0")}:${(nMinutes % 60).toString().padStart(2, "0")}:${(nSeconds % 60).toString().padStart(2, "0")}`;
+}
+```
+
+---
+
+## setPropertyValue() Override Pattern for Live Updates
+
+When widget properties need to update controls live (without re-rendering), override `setPropertyValue()`.
+
+### When to Override setPropertyValue
+
+✅ **Override when:**
+- Properties control visual appearance (colors, sizes, visibility)
+- Properties control content (text, icons, values)
+- Want live updates in POD Designer without refresh
+- Properties affect control state (enabled/disabled)
+
+❌ **Don't override when:**
+- Property only affects data fetching (handle in `onInit`)
+- Property only used in API calls (no UI update needed)
+- Complete re-render is acceptable
+
+### Complete setPropertyValue Pattern
+
+```javascript
+class ConfigurableWidget extends Widget {
+    // 1. Define PropertyId enum
+    PropertyId = Object.freeze({
+        HeaderText: "headerText",
+        ShowIcon: "showIcon",
+        IconColor: "iconColor",
+        BackgroundColor: "backgroundColor"
+    });
+    
+    // 2. Store control references
+    #oHeader;
+    #oIcon;
+    #oContainer;
+    
+    static getDefaultConfig() {
+        return {
+            properties: {
+                headerText: "Widget Title",
+                showIcon: true,
+                iconColor: "#007ACC",
+                backgroundColor: "#FFFFFF"
+            }
+        };
+    }
+    
+    _createView() {
+        const oConfig = this.getConfig();
+        
+        this.#oHeader = new Text({
+            text: oConfig.properties.headerText
+        });
+        
+        this.#oIcon = new Icon({
+            src: "sap-icon://settings",
+            color: oConfig.properties.iconColor,
+            visible: oConfig.properties.showIcon
+        });
+        
+        this.#oContainer = new VBox(oConfig.id, {
+            backgroundColor: oConfig.properties.backgroundColor,
+            items: [this.#oHeader, this.#oIcon]
+        });
+        
+        return this.#oContainer;
+    }
+    
+    // 3. Override setPropertyValue
+    /**
+     * Updates property values at design-time and runtime
+     * @override
+     * @param {string} sName Property name
+     * @param {any} vValue Property value
+     */
+    setPropertyValue(sName, vValue) {
+        // Update controls based on property
+        switch (sName) {
+            case this.PropertyId.HeaderText:
+                if (this.#oHeader) {
+                    this.#oHeader.setText(vValue);
+                }
+                break;
+                
+            case this.PropertyId.ShowIcon:
+                if (this.#oIcon) {
+                    this.#oIcon.setVisible(vValue);
+                }
+                break;
+                
+            case this.PropertyId.IconColor:
+                if (this.#oIcon) {
+                    this.#oIcon.setColor(vValue);
+                }
+                break;
+                
+            case this.PropertyId.BackgroundColor:
+                if (this.#oContainer) {
+                    this.#oContainer.setBackgroundColor(vValue);
+                }
+                break;
+        }
+        
+        // CRITICAL: Call parent to persist value
+        super.setPropertyValue(sName, vValue);
+    }
+    
+    // 4. Define properties with editors
+    getProperties() {
+        return [
+            new WidgetProperty({
+                displayName: "Header Text",
+                category: PropertyCategory.General,
+                propertyEditor: new StringPropertyEditor(this, this.PropertyId.HeaderText)
+            }),
+            new WidgetProperty({
+                displayName: "Show Icon",
+                category: PropertyCategory.Appearance,
+                propertyEditor: new BooleanPropertyEditor(this, this.PropertyId.ShowIcon)
+            }),
+            new WidgetProperty({
+                displayName: "Icon Color",
+                category: PropertyCategory.Appearance,
+                propertyEditor: new ColorPropertyEditor(this, this.PropertyId.IconColor)
+            }),
+            new WidgetProperty({
+                displayName: "Background Color",
+                category: PropertyCategory.Appearance,
+                propertyEditor: new ColorPropertyEditor(this, this.PropertyId.BackgroundColor)
+            })
+        ];
+    }
+    
+    onExit() {
+        super.onExit();
+        this.#oHeader = null;
+        this.#oIcon = null;
+        this.#oContainer = null;
+    }
+}
+```
+
+### setPropertyValue Critical Rules
+
+✅ **ALWAYS:**
+1. Check control exists (`if (this.#oControl)`)
+2. Call `super.setPropertyValue(sName, vValue)` to persist value
+3. Use PropertyId enum for property name constants
+4. Store control references as private fields
+5. Handle all properties defined in `getProperties()`
+
+❌ **NEVER:**
+1. Skip null check → Runtime errors if control not created
+2. Forget `super.setPropertyValue()` → Value not persisted
+3. Use string literals → Typos cause silent failures
+
+### Control Reference Storage Pattern
+
+Store references to controls you need to update dynamically.
+
+```javascript
+class DynamicWidget extends Widget {
+    // 1. Declare private fields for controls
+    #oTitle;
+    #oStatusText;
+    #oRefreshButton;
+    
+    _createView() {
+        const oConfig = this.getConfig();
+        
+        // 2. Initialize and store references
+        this.#oTitle = new Text({ text: "Widget Title" });
+        this.#oStatusText = new Text({ text: "Ready" });
+        this.#oRefreshButton = new Button({
+            text: "Refresh",
+            press: () => this._onRefresh()
+        });
+        
+        // 3. Return view with control references
+        return new VBox(oConfig.id, {
+            items: [this.#oTitle, this.#oStatusText, this.#oRefreshButton]
+        });
+    }
+    
+    // 4. Update controls dynamically
+    _onRefresh() {
+        this.#oStatusText.setText("Loading...");
+        this.#oRefreshButton.setEnabled(false);
+        
+        // ... fetch data ...
+        
+        this.#oStatusText.setText("Updated");
+        this.#oRefreshButton.setEnabled(true);
+    }
+    
+    // 5. Clean up in onExit
+    onExit() {
+        super.onExit();
+        this.#oTitle = null;
+        this.#oStatusText = null;
+        this.#oRefreshButton = null;
+    }
+}
+```
+
+**Why This Matters:**
+- Enables efficient updates without re-rendering
+- Clear ownership and lifecycle
+- Better memory management
+
+---
+
 ## ControlWidget Pattern (For Single Controls)
 
 ControlWidget wraps single SAPUI5 controls. This is the most common pattern for simple widgets.

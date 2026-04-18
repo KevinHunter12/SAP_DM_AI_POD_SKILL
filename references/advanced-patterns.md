@@ -1421,9 +1421,155 @@ _extractError(oError) {
 
 ---
 
+---
+
+## 16. JSDoc @extensible Markers Pattern
+
+**Pattern**: Mark methods designed to be overridden by subclasses or extensions using `@extensible` JSDoc tag.
+
+### Why Use @extensible
+
+In enterprise environments, widgets may be subclassed or extended. The `@extensible` marker:
+- Documents extension points for developers
+- Indicates SAP-approved override methods
+- Guides developers on safe customization points
+- Follows SAP framework conventions
+
+### Pattern
+
+```javascript
+class BaseWidget extends Widget {
+    /**
+     * Gets the display name for the widget
+     * @override
+     * @extensible
+     * @returns {string}
+     */
+    static getDisplayName() {
+        return "Base Widget";
+    }
+    
+    /**
+     * Gets the icon for the widget
+     * @override
+     * @extensible
+     * @returns {string}
+     */
+    static getIcon() {
+        return "sap-icon://widgets";
+    }
+    
+    /**
+     * Formats a value for display
+     * @extensible
+     * @param {number} nValue The value to format
+     * @returns {string} The formatted value
+     */
+    _formatValue(nValue) {
+        return nValue.toString();
+    }
+    
+    /**
+     * Internal helper - NOT extensible
+     * @private
+     * @param {object} oData Data object
+     * @returns {boolean}
+     */
+    _validateData(oData) {
+        // Private implementation
+        return oData !== null;
+    }
+}
+```
+
+### Usage Example: Subclass
+
+```javascript
+class CustomTimerWidget extends BaseWidget {
+    /**
+     * @override
+     * @extensible
+     */
+    static getDisplayName() {
+        return "Custom Timer";
+    }
+    
+    /**
+     * Custom formatting for time values
+     * @override
+     * @extensible
+     */
+    _formatValue(nValue) {
+        // Custom HH:MM:SS format
+        const nHours = Math.floor(nValue / 3600);
+        const nMinutes = Math.floor((nValue % 3600) / 60);
+        const nSeconds = nValue % 60;
+        
+        return `${nHours}:${nMinutes.toString().padStart(2, "0")}:${nSeconds.toString().padStart(2, "0")}`;
+    }
+}
+```
+
+### @extensible Guidelines
+
+**Mark these as @extensible:**
+- ✅ Static metadata methods (`getDisplayName`, `getIcon`, `getCategory`)
+- ✅ Static config methods (`getDefaultConfig`)
+- ✅ Formatting/transformation methods
+- ✅ Validation methods that subclasses may customize
+- ✅ Hook methods (`_beforeLoad`, `_afterLoad`, etc.)
+
+**Don't mark these:**
+- ❌ Private implementation details (use `@private`)
+- ❌ Framework lifecycle methods (`onInit`, `onExit`) - use `@override` only
+- ❌ Final methods that should never be changed
+
+### Documentation Pattern
+
+```javascript
+/**
+ * Brief description of what the method does
+ * 
+ * @override (if overriding parent)
+ * @extensible (if designed for extension)
+ * @param {type} paramName Description
+ * @returns {type} Description
+ */
+```
+
+**Production Example:**
+```javascript
+class StopWatchWidget extends Widget {
+    /**
+     * @override
+     * @extensible
+     * @returns {string}
+     */
+    static getIcon() {
+        return "sap-icon://fob-watch";
+    }
+    
+    /**
+     * Formats time value in milliseconds to HH:MM:SS
+     * @extensible
+     * @param {number} nTime The time in milliseconds
+     * @returns {string} The formatted time
+     */
+    _formatTime(nTime) {
+        const nSeconds = Math.floor(nTime / 1000);
+        const nMinutes = Math.floor(nSeconds / 60);
+        const nHours = Math.floor(nMinutes / 60);
+        
+        return `${nHours.toString().padStart(2, "0")}:${(nMinutes % 60).toString().padStart(2, "0")}:${(nSeconds % 60).toString().padStart(2, "0")}`;
+    }
+}
+```
+
+---
+
 ## Summary
 
-These 15 patterns represent **enterprise-grade POD 2.0 development** based on real SAP production code:
+These 16 patterns represent **enterprise-grade POD 2.0 development** based on real SAP production code:
 
 **Core Patterns (1-5):**
 - Private fields, static enums, field identifiers, custom toolbars, complex cells
@@ -1431,12 +1577,12 @@ These 15 patterns represent **enterprise-grade POD 2.0 development** based on re
 **UI Patterns (6-10):**
 - Authorization, ContentHandler, dialogs, formatters, UOM handling
 
-**Advanced Patterns (11-15):**
-- Data delegates, custom fields, warnings, dynamic columns, error handling
+**Advanced Patterns (11-16):**
+- Data delegates, custom fields, warnings, dynamic columns, error handling, @extensible markers
 
 **Key Takeaway:** These patterns are found in 90%+ of production POD plugins. Master them for enterprise-ready widgets.
 
 **See also:**
 - [form-patterns.md](form-patterns.md) - Complete ContentHandler, PodDialog, forms, validation
-- [widget-patterns.md](widget-patterns.md) - TableWidget, ControlWidget, LayoutWidget
+- [widget-patterns.md](widget-patterns.md) - TableWidget, ControlWidget, LayoutWidget, Custom Controls, Timer patterns
 - [production-patterns-sap.md](production-patterns-sap.md) - JSDoc, error handling, delegates
