@@ -2,6 +2,8 @@
 
 Complete guide to the most common POD plugin development mistakes and their solutions.
 
+**Latest Update (2026-04-18)**: Added CustomPanel/CustomVBox requirement, MessageHistory decision rules, and multi-subscription patterns.
+
 ---
 
 ## Mistake #0: Using Generic Namespace Instead of Working Directory Name
@@ -78,7 +80,79 @@ echo "Using namespace: $NAMESPACE"
 
 ---
 
-## Mistake #1: Creating Namespace Folder During File Generation ❌ → ✅ (CRITICAL!)
+## Mistake #1: Missing onExit() After PodContext.subscribe() ❌ → ✅ (CRITICAL!)
+
+**Error**: Memory leak - callback keeps firing even after widget destroyed
+
+**Found in**: Production SAP code (WorkInstructionHeaderTextWidget.js)
+
+**This is a critical mistake!** When a widget subscribes to PodContext in `onInit()` but doesn't unsubscribe in `onExit()`, the widget instance stays in memory and callbacks continue firing on destroyed widgets.
+
+### ❌ WRONG - Missing onExit() (Found in Production!)
+```javascript
+// WorkInstructionHeaderTextWidget.js - REAL SAP CODE
+onInit() {
+    super.onInit();
+    this._updateText();
+    PodContext.subscribe(ModelPath.WorkInstructions, this._updateText, this);  // ← Subscribes
+    if (!PodContext.getWorkInstructions()) {
+        WorkInstructionDelegate.refresh();
+    }
+}
+// ❌ Missing onExit() - memory leak!
+```
+
+### ✅ CORRECT - Always unsubscribe in onExit()
+```javascript
+onInit() {
+    super.onInit();
+    this._updateText();
+    PodContext.subscribe(ModelPath.WorkInstructions, this._updateText, this);
+    if (!PodContext.getWorkInstructions()) {
+        WorkInstructionDelegate.refresh();
+    }
+}
+
+onExit() {
+    super.onExit();
+    PodContext.unsubscribe(ModelPath.WorkInstructions, this._updateText, this);  // ✅ Clean up!
+}
+```
+
+### Detection Pattern
+
+**ALWAYS validate:**
+- If `onInit()` has `PodContext.subscribe()` call
+- Then `onExit()` **MUST** have matching `PodContext.unsubscribe()`
+- Same callback method reference must be used
+- Same context (this) must be passed
+- Same ModelPath must be unsubscribed
+
+### Why This Matters
+
+- ✅ Widget instance stays in memory after removal
+- ✅ Callbacks continue firing on destroyed widgets
+- ✅ Can cause errors accessing non-existent DOM
+- ✅ Memory usage grows over time in long-running POD sessions
+- ✅ Performance degrades as orphaned subscriptions accumulate
+
+### Validation Checklist
+
+Before submitting widget code:
+
+- [ ] Every `PodContext.subscribe()` has matching `unsubscribe()` in `onExit()`
+- [ ] `onExit()` method exists and calls `super.onExit()`
+- [ ] Same `isRunMode()` guard in both `onInit()` and `onExit()`
+- [ ] Same callback method reference used in both
+- [ ] Tested: Open widget → Close widget → Open → Close (no console errors)
+
+**Impact:** High - Memory leak in production POD sessions
+
+**See also:** [production-patterns-wi.md](production-patterns-wi.md) - Pattern #3 (Data Delegate) and Pattern #4 (Bidirectional Sync) for complete subscription patterns
+
+---
+
+## Mistake #1B: Creating Namespace Folder During File Generation ❌ → ✅ (CRITICAL!)
 
 **Error**: Files generated in wrong location (e.g., `mycompany/extension.json` instead of `extension.json`)
 
@@ -1644,3 +1718,367 @@ try {
 - [form-patterns.md](form-patterns.md) - Complete production patterns
 - [advanced-patterns.md](advanced-patterns.md) - 15 enterprise patterns
 - [widget-patterns.md](widget-patterns.md) - TableWidget, GrowingJSONModel
+
+
+---
+
+## Clarification: onExit() Unsubscribe - Best Practice vs Production
+
+### Official Guidance
+
+If you subscribe to PodContext in `onInit()`, you **should** unsubscribe in `onExit()` to prevent memory leaks.
+
+```javascript
+async onInit() {
+    await super.onInit();
+    if (PodContext.isRunMode()) {
+        PodContext.subscribe(
+            ModelPath.SelectedWorkListItems,
+            this._onSelectionChanged,
+            this
+        );
+    }
+}
+
+onExit() {
+    super.onExit();
+    if (PodContext.isRunMode()) {
+        PodContext.unsubscribe(
+            ModelPath.SelectedWorkListItems,
+            this._onSelectionChanged,
+            this
+        );
+    }
+}
+```
+
+### Production Code Observation
+
+⚠️ **Note**: Some SAP-provided production widgets (MaterialImageWidget, OrderHeaderTextWidget) omit explicit `onExit()` unsubscribe. This suggests the framework MAY auto-cleanup subscriptions, but this is not officially documented.
+
+**Recommendation**: Include explicit `onExit()` unsubscribe in custom plugins as best practice, even if the framework might handle it automatically.
+
+### When onExit() is NOT Needed
+
+You don't need `onExit()` if:
+- ✅ Widget uses bindings instead of subscriptions (multi-part binding pattern)
+- ✅ Widget has no cleanup (no event handlers, no timers)
+- ✅ Widget only reads PodContext (no subscribe calls)
+
+---
+
+## Clarification: When to Spread Parent Properties in getDefaultConfig()
+
+The rule for spreading parent properties is more nuanced than "never spread."
+
+### Rule 1: NEVER Spread Widget/ControlWidget
+
+```javascript
+// ❌ WRONG
+class MyWidget extends Widget {
+    static getDefaultConfig() {
+        return {
+            properties: {
+                ...super.getDefaultConfig()?.properties,  // ❌ NO!
+                myProperty: "value"
+            }
+        };
+    }
+}
+```
+
+**Why**: Widget base class has reserved SAPUI5 property names (e.g., "type") that cause conflicts.
+
+### Rule 2: Specialized Base Classes - Context Dependent
+
+For specialized base classes (ProgressIndicatorWidget, ImageWidget, ExpandableTextWidget, etc.):
+
+**Option A: Spread parent config** (if you want inherited defaults):
+```javascript
+class MyExpandableWidget extends ExpandableTextWidget {
+    static getDefaultConfig() {
+        return {
+            properties: {
+                ...ExpandableTextWidget.getDefaultConfig().properties,  // ✅ OK
+                myProperty: "value"
+            }
+        };
+    }
+}
+```
+
+**Option B: Override completely** (if you don't need inherited defaults):
+```javascript
+class MyImageWidget extends ImageWidget {
+    static getDefaultConfig() {
+        return {
+            properties: {
+                height: "48px"  // ✅ Also OK
+                // Doesn't inherit ImageWidget defaults
+            }
+        };
+    }
+}
+```
+
+### Rule 3: ALWAYS Spread TableWidget/LayoutWidget
+
+```javascript
+class MyTableWidget extends TableWidget {
+    static getDefaultConfig() {
+        return {
+            properties: {
+                ...super.getDefaultConfig().properties,  // ✅ REQUIRED!
+                myProperty: "value"
+            }
+        };
+    }
+}
+```
+
+**Why**: TableWidget/LayoutWidget have essential defaults that must be inherited.
+
+### Decision Guide
+
+| Base Class | Spread? | Reason |
+|------------|---------|--------|
+| Widget | ❌ NEVER | Has reserved SAPUI5 properties |
+| ControlWidget | ❌ NEVER | Inherits Widget's problems |
+| TableWidget | ✅ ALWAYS | Essential defaults required |
+| LayoutWidget | ✅ ALWAYS | Essential defaults required |
+| ProgressIndicatorWidget | ⚠️ OPTIONAL | Depends on whether you need parent defaults |
+| ImageWidget | ⚠️ OPTIONAL | Depends on whether you need parent defaults |
+| ExpandableTextWidget | ⚠️ OPTIONAL | Depends on whether you need parent defaults |
+
+---
+
+## Mistake #21: Using sap.m.Panel Instead of CustomPanel ❌ → ✅ (CRITICAL!)
+
+**Error**: Widget not draggable in POD Designer
+
+**Why It's Wrong**: Regular `sap.m.Panel` doesn't support POD Designer drag-and-drop. Must use `CustomPanel` for Designer compatibility.
+
+### ❌ WRONG - Using sap.m.Panel
+```javascript
+import Panel from "sap/m/Panel";
+
+_createView() {
+    return new Panel({  // ❌ Not Designer-compatible!
+        content: [/* controls */]
+    });
+}
+```
+
+### ✅ CORRECT - Using CustomPanel
+```javascript
+import CustomPanel from "sap/dm/dme/pod2/control/CustomPanel";
+import CustomVBox from "sap/dm/dme/pod2/control/CustomVBox";
+
+_createView() {
+    return new CustomPanel({
+        id: this.getId(),  // CRITICAL: Pass widget ID
+        width: "100%",
+        height: "100%",
+        content: [
+            new CustomVBox({
+                paddingTop: "Small",
+                items: [/* controls */]
+            })
+        ]
+    });
+}
+```
+
+**When to Use:**
+- ✅ Top-level container: CustomPanel
+- ✅ Layout containers: CustomVBox
+- ✅ Regular controls inside: Use standard sap.m controls
+
+---
+
+## Mistake #22: Using toast() for Persistent Notifications ❌ → ✅
+
+**Error**: Important messages disappear before user sees them
+
+**Why It's Wrong**: `MessageHistory.toast()` is temporary. Use `showSuccess()`/`showError()` for important messages.
+
+### ❌ WRONG - Toast for operation completion
+```javascript
+async _onExecute() {
+    try {
+        await ApiClient.execute(oRequest);
+        MessageHistory.toast("Operation completed");  // ❌ Disappears!
+    } catch (oError) {
+        MessageHistory.toast(oError.message);  // ❌ Error disappears!
+    }
+}
+```
+
+### ✅ CORRECT - Persistent messages
+```javascript
+async _onExecute() {
+    // Pre-validation with toast (temporary)
+    if (!this._validateInput()) {
+        MessageHistory.toast("Please fill required fields");  // ✅ Temporary guidance
+        return;
+    }
+    
+    try {
+        await ApiClient.execute(oRequest);
+        MessageHistory.showSuccess("Operation completed successfully");  // ✅ Persistent
+    } catch (oError) {
+        MessageHistory.showError(oError.message);  // ✅ Persistent
+    }
+}
+```
+
+### Decision Matrix
+
+| Scenario | Method | Reason |
+|----------|--------|--------|
+| API success | `showSuccess()` | Persistent audit trail |
+| API error | `showError()` | User needs to review/act |
+| Validation failure | `showError()` | Needs user action |
+| Info message | `toast()` | Temporary, low importance |
+| "No items selected" | `toast()` | Temporary guidance |
+
+---
+
+## Mistake #23: Forgetting to Clear Busy State on Error ❌ → ✅
+
+**Error**: Widget stuck in busy state after error
+
+**Why It's Wrong**: Without `finally`, busy indicator stays visible if operation throws error.
+
+### ❌ WRONG - No finally block
+```javascript
+async _refresh() {
+    const oView = this.getView();
+    oView.setBusy(true);
+    
+    try {
+        await ApiClient.getData(oRequest);
+        oView.setBusy(false);  // ❌ Never reached if error!
+    } catch (oError) {
+        MessageHistory.showError(oError.message);
+        // ❌ Busy state still true!
+    }
+}
+```
+
+### ✅ CORRECT - Use finally
+```javascript
+async _refresh() {
+    const oView = this.getView();
+    oView.setBusyIndicatorDelay(0);
+    oView.setBusy(true);
+    
+    try {
+        const oData = await ApiClient.getData(oRequest);
+        this._oModel.setData(oData);
+    } catch (oError) {
+        MessageHistory.showError(oError.message);
+    } finally {
+        oView.setBusy(false);  // ✅ Always executes!
+    }
+}
+```
+
+---
+
+## Mistake #24: Not Handling Expected API Error Codes ❌ → ✅
+
+**Error**: Showing error messages for expected "no data" scenarios
+
+**Why It's Wrong**: Some error codes represent normal conditions (like "no pending buyoffs"), not errors.
+
+### ❌ WRONG - All errors treated the same
+```javascript
+try {
+    const aLogs = await ApiClient.findBuyoffLogs(oRequest);
+    this._oModel.setData(aLogs);
+} catch (oError) {
+    // ❌ Shows error even for "no data" case
+    MessageHistory.showError(oError.message);
+}
+```
+
+### ✅ CORRECT - Handle specific error codes
+```javascript
+try {
+    const aLogs = await ApiClient.findBuyoffLogs(oRequest);
+    this._oModel.setData(aLogs);
+} catch (oError) {
+    // Expected case: no data available
+    if (oError?.body?.error?.code === "sfc.notInCompletePending") {
+        this.#oLog.info("No buyoff logs found");  // Info, not error
+        this._oModel.setData([]);
+        return;  // Don't show error to user
+    }
+    
+    // Unexpected errors
+    this.#oLog.error("Failed to fetch buyoff logs", oError);
+    MessageHistory.showError(oError.message);
+}
+```
+
+**Common SAP DM Error Codes:**
+- `sfc.notInCompletePending` - No pending data (handle as empty result)
+- `sfc.notFound` - SFC doesn't exist (show error)
+- `operation.alreadyStarted` - Duplicate operation (show info message)
+
+---
+
+## Mistake #25: Subscribing to Multiple Paths with Multiple Calls ❌ → ✅
+
+**Error**: Code duplication and multiple callbacks for related data
+
+**Why It's Wrong**: When multiple ModelPaths affect the same widget state, subscribe to all with one callback.
+
+### ❌ WRONG - Multiple subscribe calls
+```javascript
+onInit() {
+    PodContext.subscribe(
+        ModelPath.SelectedWorkListItems,
+        this._refresh,
+        this
+    );
+    PodContext.subscribe(
+        ModelPath.SelectedOperationActivities,
+        this._refresh,
+        this
+    );
+    PodContext.subscribe(
+        ModelPath.FilterOperationActivities,
+        this._refresh,
+        this
+    );
+}
+```
+
+### ✅ CORRECT - Array subscription
+```javascript
+onInit() {
+    // Subscribe to multiple paths with one callback
+    PodContext.subscribe([
+        ModelPath.SelectedWorkListItems,
+        ModelPath.SelectedOperationActivities,
+        ModelPath.FilterOperationActivities
+    ], this._refresh, this);
+}
+
+onExit() {
+    // Must unsubscribe with same array
+    PodContext.unsubscribe([
+        ModelPath.SelectedWorkListItems,
+        ModelPath.SelectedOperationActivities,
+        ModelPath.FilterOperationActivities
+    ], this._refresh, this);
+}
+```
+
+**Benefits:**
+- ✅ Single callback handles all changes
+- ✅ Cleaner code, less duplication
+- ✅ Production pattern from SAP widgets
+

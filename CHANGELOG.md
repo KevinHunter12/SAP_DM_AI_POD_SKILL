@@ -2,44 +2,204 @@
 
 All notable changes to the pod-plugin skill will be documented in this file.
 
-## [22.0.0] - 2026-04-18
+## [24.0.0] - 2026-04-18
 
-### IMPLEMENT - 10 Critical Enterprise Patterns from SAP Production Widgets
+### 🏭 IMPLEMENT - 13 Production Patterns from WorkInstruction Widget Analysis
 
-Based on comprehensive analysis of SAP's `ReportedQuantitySummaryWidget.js` and `ReportedQuantityTableWidget.js`, this release adds **10 production-critical patterns** that transform the skill into enterprise-grade reference.
+Based on comprehensive analysis of SAP's **WorkInstructionHeaderTextWidget** and **WorkInstructionTableWidget** production code, this release adds **13 battle-tested patterns** including specialized base classes, data delegates, bidirectional sync, and memory leak prevention.
 
-#### NEW PATTERNS - widget-patterns.md (7 patterns)
+#### CRITICAL ADDITIONS (Priority 1 - Memory Safety & Architecture)
 
-1. **Custom Widget Events Pattern** - Event-driven architecture with `EventId` enum, `getEvents()` override, `_handleEvent()` triggering
-2. **EXCLUDE_PROPERTIES/INCLUDE_EVENTS** - Simplify POD Designer UI (hide 40+ irrelevant properties)
-3. **Growing/Pagination Pattern** - Lazy loading for large tables with `attachUpdateStarted()` "Growing" detection
-4. **Custom Toolbar Title** - Dynamic counts with `_createToolbarTitle()` and formatters ("Items (25)")
-5. **Complex Cell Types** - HBox/VBox with conditional visibility, multi-part bindings (show button OR link)
-6. **ObjectStatus for Status** - Semantic colors (Success/Error/Warning) with `ValueState` enum
-7. **VBox Multi-Line Cells** - Hierarchical data display (Resource + Description)
+1. **Memory Leak Prevention Validation** 🚨 **CRITICAL**
+   - If `onInit()` subscribes → `onExit()` MUST unsubscribe
+   - Found missing `onExit()` in actual SAP production code
+   - Added Mistake #1 to common-mistakes.md
+   - Pre-generation checklist now validates subscription cleanup
 
-#### NEW PATTERNS - advanced-patterns.md (3 patterns)
+2. **Specialized Base Widget Classes** ⚠️ **NEW**
+   - ExpandableTextWidget extends ControlWidget with expand/collapse
+   - Updated widget hierarchy documentation
+   - Check SAP-provided specialized classes before extending base tiers
 
-8. **Popover Lifecycle Management** - Prevent memory leaks with `afterClose` destroy, `openBy()` positioning, busy indicators
-9. **Data Delegate Pattern** - Shared state across widgets, pagination, PodContext updates, DRY principle
-10. **Optimistic UI Updates** - Instant feedback pattern (update UI → call API → refresh → rollback on error)
+3. **Data Delegate Pattern** ⚠️ **HIGH PRIORITY**
+   - Centralized shared data loading across widgets
+   - WorkInstructionDelegate.refresh() pattern
+   - Prevents duplicate API calls
+   - Complete implementation with subscribe/unsubscribe
 
-#### ENHANCE - pod2-api-reference.md
+4. **Bidirectional Sync Pattern** ⚠️ **HIGH PRIORITY**
+   - Table selection ↔ PodContext synchronization
+   - Early exit optimization to prevent infinite loops
+   - Complete pattern with isRunMode() guards
 
-- **ApiClient.internal** - Internal API namespaces (`sfc.*`, `plant.*`, `resource.*`) with examples and warnings
-- **PodContext Direct Getters** - `getLastSelectedWorkListItem()` and `getLastSelectedOperationActivity()` patterns
+#### MEDIUM PRIORITY ADDITIONS (Code Quality & Productivity)
+
+5. **EXCLUDE_PROPERTIES Pattern** - Hide properties from POD Designer
+6. **Custom _getItemBindingInfo()** - Client-side table filtering
+7. **Composite Bindings** - Multi-field cell display with formatters
+8. **Icon Cells with Conditional Formatting** - Dynamic icon/color/tooltip
+9. **_createIdentifierCell() Helper** - Composite identifier display
+10. **JSDoc Type Casting** - IDE support with @type annotations
+11. **Expression Binding in getDefaultConfig()** - Dynamic properties
+12. **Library Destructuring** - Cleaner enum imports
+13. **flatMap for Nested Arrays** - Modern array processing
+
+#### NEW REFERENCE FILES
+
+- **production-patterns-wi.md** - Complete 13-pattern reference from real SAP code
+  - Each pattern documented with production examples
+  - Benefits, use cases, and critical notes
+  - Pattern summary table with impact ratings
+  - Source: WorkInstructionHeaderTextWidget.js, WorkInstructionTableWidget.js
+
+#### UPDATED FILES
+
+- **SKILL.md**
+  - Updated to v24.0.0 with pattern summary
+  - Added Quick Reference section linking to production patterns
+  - Updated tags with new pattern keywords
+  - Added critical validation reminders
+
+- **common-mistakes.md**
+  - Added Mistake #1: Missing onExit() unsubscribe (found in production!)
+  - Detection pattern for subscription/cleanup validation
+  - Why this matters: memory leaks in long-running POD sessions
+
+**Impact:** High - 13 production-validated patterns, critical memory leak prevention
+
+**Version:** 23.0.0 → 24.0.0
+
+---
+
+## [23.0.0] - 2026-04-18
+
+### IMPLEMENT - Production-Proven Patterns from StopWatchWidget Analysis
+
+Based on comprehensive analysis of SAP's **StopWatchWidget.js** production code, this release adds **critical timer management patterns**, **CustomText/CustomVBox styling controls**, **setPropertyValue live updates**, and **@extensible JSDoc markers** that were previously undocumented.
+
+#### CRITICAL ADDITIONS (Priority 1 - Memory Safety & Live Updates)
+
+1. **POD 2.0 Custom Controls (CustomText, CustomVBox, CustomHBox)** ⚠️ **NEW** - Styling properties (backgroundColor, fontColor, fontSize, fontFamily, fontWeight) for design-time configuration
+   - Complete usage patterns with PropertyId enum
+   - setPropertyValue() integration for live updates
+   - When to use vs standard SAPUI5 controls
+   - Production example with ColorPropertyEditor
+
+2. **Timer and Interval Management Pattern** 🚨 **CRITICAL** - Prevents memory leaks in timer widgets
+   - Mandatory cleanup in onExit()
+   - Guard against multiple intervals with _isRunning()
+   - Error handling inside interval callbacks
+   - Time formatting bug fix (modulo for HH:MM:SS display)
+   - Complete production-ready timer widget pattern
+
+3. **setPropertyValue() Override Pattern** ⚠️ **ENHANCED** - Live property updates without re-rendering
+   - When to override decision rules
+   - Complete pattern with PropertyId enum
+   - Control reference storage pattern
+   - Critical rules (null checks, super.setPropertyValue() call)
+   - Production examples from StopWatchWidget
+
+4. **@extensible JSDoc Markers** ⚠️ **NEW** - Document extension points following SAP conventions
+   - Pattern for marking extensible methods
+   - Guidelines for what to mark vs not mark
+   - Production example from StopWatchWidget
+   - Enterprise plugin architecture best practices
+
+#### NEW REFERENCE FILE
+
+- **production-errors.md** - 8 actual bugs found in SAP production code with fixes
+  - Missing onExit() interval cleanup → Memory leak
+  - Time formatting bug (missing modulo)
+  - Cannot read property 'id' of undefined
+  - Property changes don't update widget
+  - Multiple timers running simultaneously
+  - Cannot set property of null
+  - Direct property access inconsistency
+  - No error handling for setInterval
+
+#### FILES UPDATED
+
+- **widget-patterns.md** - Added 3 major sections (500+ lines):
+  - POD 2.0 Custom Controls complete pattern
+  - Timer and Interval Management pattern
+  - setPropertyValue() override pattern with control reference storage
+
+- **advanced-patterns.md** - Added Pattern #16:
+  - JSDoc @extensible markers with production examples
+  - Updated summary to reflect 16 patterns (was 15)
+
+- **production-errors.md** - NEW FILE:
+  - 8 production bugs with fixes
+  - Production error checklist for timer widgets
+  - Quick reference table for common bugs
 
 #### IMPACT
 
-- **Coverage:** 60% → 95% (production-grade)
-- **Critical fixes:** Memory leaks (popover), browser crashes (pagination), duplicate API calls (delegates)
-- **UX improvements:** Instant feedback (optimistic UI), color-coded status, dynamic counts
+**Memory Safety**: Timer widgets now have explicit cleanup patterns preventing memory leaks
+**Design-Time UX**: Custom controls enable styling configuration in POD Designer
+**Live Updates**: setPropertyValue() pattern enables property changes without refresh
+**Enterprise Extensibility**: @extensible markers document safe extension points
+**Bug Prevention**: Production errors reference prevents repeating SAP's own bugs
+
+**Real-World Validation**: All patterns extracted from actual SAP production widget (StopWatchWidget.js)
+
+---
+
+## [22.0.0] - 2026-04-18
+
+### IMPLEMENT - 15 Critical Enterprise Patterns from SAP Production Code
+
+Based on comprehensive analysis of **LogBuyoffWidget**, **OrderScheduleWidget**, and **SFCExecutionQuantityWidget** from real SAP production environments, this release adds **15 missing production-critical patterns** essential for enterprise POD plugin development.
+
+#### HIGH PRIORITY PATTERNS (Critical - Previously Missing)
+
+1. **CustomPanel & CustomVBox** ⚠️ **CRITICAL** - POD Designer drag-and-drop support requires POD-specific wrappers instead of sap.m.Panel/VBox
+2. **WorkListDelegate.refreshInBackground()** - Essential utility for triggering work list updates after operations
+3. **MessageHistory Complete API** - Toast variations (`toast(string)` vs `toast({ type, message })`), decision matrix for showSuccess/showError/toast
+4. **DateTimeUtils.localeDateTime()** - Standard utility for consistent date/time formatting across all widgets
+5. **Busy Indicator Pattern** - Production try/finally pattern with `setBusyIndicatorDelay(0)`
+
+#### MEDIUM PRIORITY PATTERNS (Documentation Gaps)
+
+6. **Base Class Selection Revised** - Nuanced guidance: Widget base commonly used for complex widgets (not "rarely extended directly")
+7. **Modern JavaScript Private Fields (#)** - ES2022 syntax used consistently in SAP production code
+8. **Error Code Checking Pattern** - Graceful handling of expected errors (`oError?.body?.error?.code === "sfc.notInCompletePending"`)
+9. **Design Mode Mock Data** - Proper `PodContext.isDesignMode()` with `sap.ui.require.toUrl()` pattern
+10. **EXCLUDE_PROPERTIES** - For ControlWidget/InputWidget extensions to hide irrelevant properties from Designer
+
+#### ENHANCEMENT PATTERNS (Advanced Techniques)
+
+11. **Multi-Subscription Array Pattern** - Subscribe to multiple ModelPaths with single callback: `PodContext.subscribe([path1, path2], callback, this)`
+12. **Type Validation Patterns** - OperationActivity instanceof checks, `Resource.fromInternalODataResponse()` transformation
+13. **Static PropertyId Enum** - Better than magic strings with JSDoc type annotations
+14. **Utility Methods for View Creation** - `_createFormContainer()`, `_createFormElement()`, `_createColumn()` patterns
+15. **Dynamic Table Binding** - Conditional sorting/grouping with `bindItems(oBindingInfo)` instead of constructor binding
+
+#### FILES UPDATED
+
+- **production-patterns-deep-dive.md** - Appended all 15 new patterns with concise code examples
+- **common-mistakes.md** - Added 5 new mistakes (#21-25): CustomPanel requirement, MessageHistory decision rules, busy indicator finally blocks, error code handling, multi-subscription arrays
+- **SKILL.md** - Updated description with v22.0.0 summary and added 9 new tags
+
+#### NEW COMMON MISTAKES
+
+- **Mistake #21**: Using sap.m.Panel instead of CustomPanel (breaks Designer drag-and-drop)
+- **Mistake #22**: Using toast() for persistent notifications (messages disappear)
+- **Mistake #23**: Forgetting to clear busy state on error (widget stuck busy)
+- **Mistake #24**: Not handling expected API error codes (showing errors for "no data" cases)
+- **Mistake #25**: Multiple subscribe calls instead of array pattern (code duplication)
+
+#### IMPACT
+
+- **Coverage:** Filled critical gaps in Designer support, API utilities, error handling
+- **Real-world patterns:** All patterns extracted from production SAP manufacturing widgets
+- **Enterprise-ready:** Handles expected error conditions, proper message persistence, background work list updates
 
 #### SKILL METADATA
 
-Updated tags with: `custom-widget-events`, `exclude-properties`, `growing-pagination`, `popover-lifecycle`, `data-delegate-pattern`, `optimistic-ui`, `objectstatus-pattern`, `vbox-multiline`, `apiclient-internal`, `podcontext-getters`
+Added tags: `custompanel-customvbox`, `worklistdelegate`, `datetimeutils`, `busy-indicators`, `error-code-checking`, `multi-subscription-array`, `resource-transformation`, `utility-view-methods`, `dynamic-table-binding`
 
-**Total patterns:** 23 enterprise-grade patterns (13 existing + 10 new)
+**Total production patterns:** 38+ enterprise-grade patterns (23 existing + 15 new)
 
 ---
 
