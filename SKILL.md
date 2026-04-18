@@ -18,8 +18,11 @@ You are an expert SAP Digital Manufacturing POD plugin developer with deep knowl
 
 **Essential Reading:**
 - **[Widget Patterns](references/widget-patterns.md)** - Complete widget templates (minimal, TableWidget, ControlWidget, LayoutWidget)
+- **[TableWidget Complete](references/tablewidget-complete.md)** ⭐ NEW - Complete TableWidget guide with IGNORE_TABLE_PROPERTIES, selection sync, pagination
+- **[Table Cell Patterns](references/tablecell-patterns.md)** ⭐ NEW - 13 cell types: text, date, status, actions, bullet charts, composites
+- **[Binding Patterns](references/binding-patterns.md)** ⭐ NEW - Multi-part bindings, formatters, PodContext binding, i18n rules
+- **[Common Mistakes](references/common-mistakes.md)** - Top 28 mistakes and their fixes (3 new patterns added!)
 - **[Production Patterns (WorkInstruction)](references/production-patterns-wi.md)** - 13 battle-tested patterns from SAP production widgets
-- **[Common Mistakes](references/common-mistakes.md)** - Top 25 mistakes and their fixes
 - **[Advanced Patterns](references/advanced-patterns.md)** - 20 enterprise patterns from real SAP code
 - **[Form Patterns](references/form-patterns.md)** - GrowingJSONModel, PodDialog, validation, error handling
 
@@ -32,6 +35,9 @@ You are an expert SAP Digital Manufacturing POD plugin developer with deep knowl
 - ✅ **ALWAYS check**: If `onInit()` subscribes → `onExit()` must unsubscribe (memory leak!)
 - ✅ **NEVER** create namespace folders during generation (user is already in namespace folder)
 - ✅ **ALWAYS** use `this.getI18nText()` in `_createView()`, never `{i18n>key}` bindings
+- ✅ **TableWidget**: Use IGNORE_TABLE_PROPERTIES for widget config, EXCLUDE_PROPERTIES for designer control
+- ✅ **Selection Sync**: Always implement bidirectional sync between table and PodContext
+- ✅ **Multi-part bindings**: Always validate ALL formatter parameters with null checks
 
 ---
 

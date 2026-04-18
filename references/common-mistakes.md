@@ -2082,3 +2082,398 @@ onExit() {
 - ✅ Cleaner code, less duplication
 - ✅ Production pattern from SAP widgets
 
+---
+
+## Mistake #26: Using Wrong Property Exclusion Pattern
+
+**Error**: Using EXCLUDE_PROPERTIES when you need IGNORE_TABLE_PROPERTIES or vice versa
+
+**Found in**: Production POD 2.0 worklist widgets
+
+### Understanding the Three Patterns
+
+| Pattern | Type | Purpose | Use When |
+|---------|------|---------|----------|
+| EXCLUDE_PROPERTIES | static | Hide from POD Designer | Blacklist properties from property panel |
+| INCLUDE_PROPERTIES | static | Show in POD Designer | Whitelist properties for property panel |
+| IGNORE_TABLE_PROPERTIES | instance | Skip in table constructor | Properties used by widget but not sap.m.Table |
+
+### ❌ WRONG - Excluding property that table needs
+
+```javascript
+class MyTableWidget extends TableWidget {
+    static EXCLUDE_PROPERTIES = [
+        "pageSize",  // ❌ Wrong! Widget still uses it internally
+        "printButtonVisible"  // ❌ Wrong! Not a table property at all
+    ];
+}
+```
+
+**Problems**:
+- If table constructor needs `pageSize`, excluding it breaks functionality
+- If property is widget-specific (not table-specific), wrong pattern used
+
+### ✅ CORRECT - Use right pattern for each property
+
+```javascript
+class OrderListTableWidget extends TableWidget {
+    // Exclude from POD Designer property panel (user can't configure)
+    static EXCLUDE_PROPERTIES = [
+        ...TableWidget.EXCLUDE_PROPERTIES,
+        "growing",           // ✅ Table property, hide from designer
+        "growingThreshold"   // ✅ Table property, hide from designer
+    ];
+    
+    // Don't pass to sap.m.Table constructor (widget-specific config)
+    IGNORE_TABLE_PROPERTIES = [
+        "pageSize",          // ✅ Widget uses it, but not for table constructor
+        "printButtonVisible",  // ✅ Widget property, not table property
+        "printConfigOrder",  // ✅ Custom config, not table property
+        "printConfigLabel"   // ✅ Custom config, not table property
+    ];
+}
+```
+
+### Decision Tree
+
+```
+Is the property a standard sap.m.Table property?
+├─ YES: Is it for user configuration?
+│  ├─ YES: Don't exclude it
+│  └─ NO: Use EXCLUDE_PROPERTIES (hide from designer)
+└─ NO: Is it widget-specific configuration?
+   └─ YES: Use IGNORE_TABLE_PROPERTIES (skip in constructor)
+```
+
+### Example Scenarios
+
+**Scenario 1: Page Size**
+- Property Purpose: Widget uses for pagination logic
+- Not a sap.m.Table constructor property
+- Solution: `IGNORE_TABLE_PROPERTIES`
+
+**Scenario 2: Growing Table Settings**
+- Property Purpose: sap.m.Table constructor properties
+- Don't want user to configure (programmatic control)
+- Solution: `EXCLUDE_PROPERTIES`
+
+**Scenario 3: Print Button Config**
+- Property Purpose: Widget toolbar configuration
+- Has nothing to do with table
+- Solution: `IGNORE_TABLE_PROPERTIES`
+
+### ✅ CORRECT - Complete Example
+
+```javascript
+class ProductionTableWidget extends TableWidget {
+    // Whitelist approach (tight control)
+    static INCLUDE_PROPERTIES = [
+        "alternateRowColors",
+        "backgroundDesign",
+        "inset",
+        "visible",
+        "width"
+    ];
+    
+    // Widget-specific properties (not for table constructor)
+    IGNORE_TABLE_PROPERTIES = [
+        "pageSize",
+        "refreshInterval",
+        "showToolbar",
+        "customActions"
+    ];
+}
+```
+
+### Prevention:
+1. Understand property purpose
+2. Check if property belongs to sap.m.Table API
+3. Use EXCLUDE/INCLUDE for designer control
+4. Use IGNORE_TABLE_PROPERTIES for widget-specific config
+5. Never mix approaches without understanding
+
+---
+
+## Mistake #27: Missing Selection Synchronization with PodContext
+
+**Error**: Table selections not synced with PodContext selections
+
+**Found in**: Production POD 2.0 worklist table widgets
+
+### ❌ WRONG - No bidirectional sync
+
+```javascript
+class MyTableWidget extends TableWidget {
+    async onInit() {
+        // Only subscribe, but don't sync table to PodContext
+        PodContext.subscribe(ModelPath.SelectedWorkListItems, () => {
+            // Missing: _syncSelectionsWithPodContext()
+        }, this);
+    }
+    
+    _onSelectionChange(oEvent) {
+        // Only update PodContext, no sync logic
+        const aSelected = this.getTable().getSelectedContexts()
+            .map(ctx => ctx.getObject());
+        PodContext.setSelectedWorkListItems(aSelected);  // ❌ Loses existing selections!
+    }
+}
+```
+
+**Problems**:
+- External selection changes don't reflect in table
+- Multi-select scenarios break
+- Selection order not preserved
+- User loses selections when clicking
+
+### ✅ CORRECT - Complete bidirectional sync
+
+```javascript
+class OrderListTableWidget extends TableWidget {
+    async onInit() {
+        // Subscribe to external selection changes
+        PodContext.subscribe(ModelPath.SelectedWorkListItems, () => {
+            this._syncSelectionsWithPodContext();  // ✅ Sync table to match PodContext
+        }, this);
+        
+        // Initial sync
+        this._syncSelectionsWithPodContext();  // ✅ Critical!
+    }
+    
+    /**
+     * Sync table selections to match PodContext (external → table)
+     */
+    _syncSelectionsWithPodContext() {
+        const oTable = this.getTable();
+        const aSelectedWorkListItems = PodContext.getSelectedWorkListItems();
+        const aSelectedIdentifiers = Array.isArray(aSelectedWorkListItems) ?
+            aSelectedWorkListItems.map((oWorkListItem) => oWorkListItem.getIdentifier()) :
+            [];
+
+        oTable.getItems().forEach((oListItem) => {
+            const oWorkListItem = oListItem.getBindingContext().getObject();
+            oListItem.setSelected(aSelectedIdentifiers.includes(oWorkListItem.getIdentifier()));
+        });
+    }
+    
+    /**
+     * Handle user selection in table (table → external)
+     */
+    _onSelectionChange(oEvent) {
+        const aCurrentPodContextSelection = PodContext.getSelectedWorkListItems() || [];
+        const aCurrentTableSelection = this.getTable().getSelectedContexts()
+            .map((oContext) => oContext.getObject());
+
+        const aNewSelection = [];
+        const oSelectedIdentifiers = new Set(
+            aCurrentTableSelection.map((oItem) => oItem.getIdentifier())
+        );
+        
+        // Preserve existing selections that are still selected
+        for (const oWorkListItem of aCurrentPodContextSelection) {
+            if (oSelectedIdentifiers.has(oWorkListItem.getIdentifier())) {
+                aNewSelection.push(oWorkListItem);
+            }
+        }
+
+        // Add newly selected items
+        if (oEvent.getParameter("selected")) {
+            const aModifiedListItems = oEvent.getParameter("listItems")
+                .map((oListItem) => oListItem.getBindingContext().getObject());
+            aNewSelection.push(...aModifiedListItems);
+        }
+
+        PodContext.setSelectedWorkListItems(aNewSelection);
+    }
+    
+    /**
+     * Handle item press without losing multi-selection
+     */
+    _onItemPress(oEvent) {
+        const oListItem = oEvent.getParameter("listItem");
+        const oPressedWorkListItem = oListItem.getBindingContext().getObject();
+
+        // Keep other selections, move clicked item to end (most recent)
+        const aSelectedWorkListItems = PodContext.getSelectedWorkListItems() ?? [];
+        const sSelectedIdentifier = oPressedWorkListItem.getIdentifier();
+        const aNewSelections = [];
+
+        for (const oSelectedWorkListItem of aSelectedWorkListItems) {
+            if (oSelectedWorkListItem.getIdentifier() !== sSelectedIdentifier) {
+                aNewSelections.push(oSelectedWorkListItem);
+            }
+        }
+        aNewSelections.push(oPressedWorkListItem);
+        PodContext.setSelectedWorkListItems(aNewSelections);
+    }
+    
+    onExit() {
+        super.onExit();
+        
+        // Critical: Unsubscribe
+        PodContext.unsubscribe(
+            ModelPath.SelectedWorkListItems,
+            this._syncSelectionsWithPodContext,
+            this
+        );
+    }
+}
+```
+
+### Key Points:
+1. **Bidirectional**: PodContext → table AND table → PodContext
+2. **Initial sync**: Call `_syncSelectionsWithPodContext()` in `onInit()`
+3. **Preserve selections**: Don't discard existing selections on change
+4. **Item press**: Special handling to keep multi-select
+5. **Use Set**: Efficient identifier lookup
+6. **Always unsubscribe**: Prevent memory leaks
+
+### Prevention:
+1. Always implement `_syncSelectionsWithPodContext()`
+2. Subscribe AND call sync in `onInit()`
+3. Preserve existing selections in `_onSelectionChange()`
+4. Handle `_onItemPress()` separately from selection change
+5. Use identifiers (not object references) for comparison
+6. Test multi-select scenarios
+
+---
+
+## Mistake #28: Multi-Part Bindings Without Defensive Checks
+
+**Error**: Formatters crash on null/undefined values in multi-part bindings
+
+**Found in**: Production POD 2.0 date range and composite cells
+
+### ❌ WRONG - No null checks
+
+```javascript
+_createPlannedDateRangeCell() {
+    return new Text({
+        text: {
+            parts: [
+                { path: "orderPlannedStartDate" },
+                { path: "orderPlannedCompleteDate" }
+            ],
+            formatter: (oStartDate, oEndDate) => {
+                // ❌ Crashes if dates are null/undefined!
+                return `${DateTimeUtils.localeDate(oStartDate)} – ${DateTimeUtils.localeDate(oEndDate)}`;
+            }
+        }
+    });
+}
+```
+
+**Problems**:
+- Crashes when data is incomplete
+- Shows "undefined – undefined"
+- Poor user experience
+- Production runtime errors
+
+### ✅ CORRECT - Always validate parameters
+
+```javascript
+_createPlannedDateRangeCell() {
+    return new Text({
+        text: {
+            parts: [
+                { path: "orderPlannedStartDate" },
+                { path: "orderPlannedCompleteDate" }
+            ],
+            formatter: (oStartDate, oEndDate) => {
+                // ✅ CRITICAL: Defensive null checking
+                if (!oStartDate || !oEndDate) {
+                    return "";  // Return empty string, not error
+                }
+                return `${DateTimeUtils.localeDate(oStartDate)} – ${DateTimeUtils.localeDate(oEndDate)}`;
+            }
+        }
+    });
+}
+```
+
+### More Examples
+
+**Quantity with UOM**:
+```javascript
+// ❌ WRONG
+formatter: (fQty, sUom) => {
+    return `${fQty} ${sUom}`;  // ❌ Shows "undefined undefined"
+}
+
+// ✅ CORRECT
+formatter: (fQty, sUom) => {
+    if (fQty == null) return "";  // ✅ Handle null/undefined
+    return `${fQty} ${sUom || ""}`.trim();  // ✅ Handle missing UOM
+}
+```
+
+**Material with Description**:
+```javascript
+// ❌ WRONG
+formatter: (sMaterial, sDesc) => {
+    return `${sMaterial} - ${sDesc}`;  // ❌ Shows "undefined - undefined"
+}
+
+// ✅ CORRECT
+formatter: (sMaterial, sDesc) => {
+    if (!sMaterial) return "";  // ✅ No material, no display
+    return sMaterial ? `${sMaterial} - ${sDesc || ""}` : "";  // ✅ Handle missing description
+}
+```
+
+**Status with Error Message**:
+```javascript
+// ❌ WRONG
+formatter: (sStatus, sError) => {
+    if (sStatus === "ERROR") {
+        return sError;  // ❌ Might be undefined!
+    }
+    return StatusFormatter.getStatusText(sStatus);
+}
+
+// ✅ CORRECT
+formatter: (sStatus, sError) => {
+    if (sStatus === "ERROR") {
+        return sError || this.getI18nText("unknownError");  // ✅ Fallback
+    }
+    return StatusFormatter.getStatusText(sStatus);
+}
+```
+
+### Defensive Formatter Checklist
+
+```javascript
+formatter: (param1, param2, param3) => {
+    // 1. Check for null/undefined
+    if (param1 == null) return "";
+    
+    // 2. Provide fallbacks for optional params
+    const sValue2 = param2 || "default";
+    
+    // 3. Validate before complex operations
+    if (!Array.isArray(param3) || param3.length === 0) {
+        return "";
+    }
+    
+    // 4. Use optional chaining for objects
+    const sName = param1?.name || "";
+    
+    // 5. Return empty string (not null/undefined)
+    return result || "";
+}
+```
+
+### Rule of Thumb:
+- **ALWAYS** validate ALL formatter parameters
+- Return empty string `""` instead of null/undefined
+- Use `||` for fallback values
+- Use `?.` for optional chaining
+- Test with incomplete data
+
+### Prevention:
+1. Add null checks at start of every formatter
+2. Return empty string for invalid data
+3. Use optional chaining for nested properties
+4. Provide sensible defaults
+5. Test with incomplete/missing data
+
