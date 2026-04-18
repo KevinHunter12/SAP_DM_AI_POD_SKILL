@@ -169,6 +169,107 @@ class StatusIconWidget extends IconWidget {
 
 ---
 
+## EXCLUDE_PROPERTIES - Hiding Properties from POD Designer
+
+Use `static EXCLUDE_PROPERTIES` to prevent certain properties from appearing in POD Designer's property panel. This is a production pattern used extensively in SAP-provided widgets.
+
+### Common Use Cases
+
+1. **Programmatically controlled properties** - Don't expose in designer
+2. **Base class properties** - Inherit parent's exclusions
+3. **Derived/computed properties** - Set by widget logic, not user
+
+### Pattern
+
+```javascript
+class MyProgressWidget extends ProgressIndicatorWidget {
+    // These properties are set by widget logic, not user configuration
+    static EXCLUDE_PROPERTIES = [ "percentValue", "displayValue" ];
+    
+    onInit() {
+        super.onInit();
+        // Widget sets these programmatically
+        this.getView().setPercentValue(75);
+        this.getView().setDisplayValue("75 / 100");
+    }
+}
+```
+
+### Inheriting Parent Exclusions
+
+When extending a specialized base class, spread parent exclusions:
+
+```javascript
+class MyImageWidget extends ImageWidget {
+    // Inherit parent exclusions + add your own
+    static EXCLUDE_PROPERTIES = [ 
+        ...ImageWidget.EXCLUDE_PROPERTIES,  // Inherit
+        "src",                               // Add your exclusions
+        "alt"
+    ];
+}
+```
+
+### Production SAP Examples
+
+**GoodsReceiptQuantityProgressWidget.js**:
+```javascript
+class GoodsReceiptQuantityProgressWidget extends ProgressIndicatorWidget {
+    static EXCLUDE_PROPERTIES = [ "percentValue", "displayValue" ];
+}
+```
+
+**MaterialImageWidget.js**:
+```javascript
+class MaterialImageWidget extends ImageWidget {
+    static EXCLUDE_PROPERTIES = [ ...ImageWidget.EXCLUDE_PROPERTIES, "src", "alt" ];
+}
+```
+
+**OrderHeaderTextWidget.js**:
+```javascript
+class OrderHeaderTextWidget extends ExpandableTextWidget {
+    static EXCLUDE_PROPERTIES = [ ...ExpandableTextWidget.EXCLUDE_PROPERTIES, "text" ];
+}
+```
+
+### Why Exclude Properties?
+
+| Property | Why Exclude | Alternative |
+|----------|-------------|-------------|
+| `text` | Set by API response | Expose `apiEndpoint` config instead |
+| `src` | Computed from data | Expose `imageField` binding config |
+| `percentValue` | Calculated value | Expose `targetField`, `actualField` configs |
+| `enabled` | Authorization-based | Set programmatically in `onInit()` |
+
+### Example: Exclude vs Expose
+
+```javascript
+class DataDisplayWidget extends TextWidget {
+    // Don't expose "text" - it comes from API
+    static EXCLUDE_PROPERTIES = ["text"];
+    
+    getProperties() {
+        return [
+            // Instead, expose configuration for WHERE to get text
+            new WidgetProperty({
+                displayName: "API Endpoint",
+                propertyEditor: new StringPropertyEditor(this, "apiEndpoint")
+            })
+        ];
+    }
+    
+    async onInit() {
+        await super.onInit();
+        // Text is set programmatically
+        const sText = await this._fetchData();
+        this.getView().setText(sText);
+    }
+}
+```
+
+---
+
 ## LayoutWidget Pattern (For Containers)
 
 LayoutWidget wraps layout containers that hold other widgets.
@@ -2194,6 +2295,258 @@ async _pollAsyncResult(sExecutionId, iMaxAttempts = 30) {
 - Data Collection API: `api-specs/sapdme_datacollection.json` - Parameter logging
 - Quality Inspection API: `api-specs/sapdme_qualityinspection.json` - Quality checks
 - Inventory API: `api-specs/sapdme_inventory.json` - Inventory management
+
+---
+
+---
+
+## Custom Widget Events Pattern
+
+Widgets can define and trigger custom events for widget-to-widget communication. Other widgets subscribe to these events.
+
+### EventId Enum Pattern
+
+```javascript
+class ReportedQuantitySummaryWidget extends TableWidget {
+    // Define event IDs as frozen enum
+    static EventId = Object.freeze({
+        ReportQuantity: "reportQuantity",
+        StatusChange: "statusChange"
+    });
+    
+    // Override getEvents() to declare custom events
+    getEvents() {
+        return [
+            new WidgetEvent({
+                id: ReportedQuantitySummaryWidget.EventId.ReportQuantity,
+                displayName: this.getI18nText("events.reportQuantity"),
+                description: this.getI18nText("events.reportQuantity.description")
+            }),
+            ...super.getEvents()
+        ];
+    }
+    
+    // Trigger the event
+    _onReportQuantityButtonPress(oEvent) {
+        const oData = { sfc: "SFC001", quantity: 100 };
+        this._handleEvent(ReportedQuantitySummaryWidget.EventId.ReportQuantity, oEvent, oData);
+    }
+}
+```
+
+**Usage:** Event-driven architecture for multi-widget dashboards. Widgets can communicate without tight coupling.
+
+---
+
+## EXCLUDE_PROPERTIES and INCLUDE_EVENTS Pattern
+
+Control which TableWidget properties appear in POD Designer configuration panel.
+
+```javascript
+class ReportedQuantitySummaryWidget extends TableWidget {
+    // Hide these properties from configuration UI
+    static EXCLUDE_PROPERTIES = [
+        "alternateRowColors",
+        "fixedLayout",
+        "growing",
+        "growingDirection",
+        "growingScrollToLoad",
+        "growingThreshold",
+        "mode",
+        "multiSelectMode",
+        "noDataText",
+        "rememberSelections",
+        "showNoData"
+    ];
+    
+    // Only show these events (hide all others)
+    static INCLUDE_EVENTS = ["selectionChange"];
+}
+```
+
+**Usage:** Simplify configuration UI by hiding irrelevant inherited properties. Production widgets expose only 5-10 properties instead of 50+.
+
+---
+
+## Growing/Pagination Pattern for TableWidget
+
+Implement lazy loading with "load more" functionality for large datasets.
+
+```javascript
+class ReportedQuantityTableWidget extends TableWidget {
+    _createTable(oConfig, mSettings = {}) {
+        return super._createTable(oConfig, {
+            growing: true,
+            growingScrollToLoad: true,
+            growingThreshold: 20,
+            headerToolbar: this._createToolbar(),
+            ...mSettings
+        });
+    }
+    
+    async onInit() {
+        await super.onInit();
+        
+        if (PodContext.isRunMode()) {
+            const oTable = this.getTable();
+            
+            // Detect when user scrolls to load more
+            oTable.attachUpdateStarted(async (oEvent) => {
+                if (oEvent.getParameter("reason") === "Growing") {
+                    await this._fetchNextPage();
+                }
+            });
+        }
+    }
+    
+    async _fetchNextPage() {
+        // Fetch next page from API or delegate
+        const oData = await ApiClient.custom.get("/data?page=" + this._iPage++);
+        // Update model with new data
+    }
+}
+```
+
+**Usage:** Critical for manufacturing tables with hundreds/thousands of rows. Loading all at once crashes browsers.
+
+---
+
+## Custom Toolbar Title Pattern
+
+Override `_createToolbarTitle()` to show dynamic counts and formatted titles.
+
+```javascript
+class ReportedQuantityTableWidget extends TableWidget {
+    _createToolbarTitle() {
+        return new Title({
+            text: {
+                path: ModelPath.ReportedQuantityCount,
+                formatter: (iCount) => {
+                    return this.getI18nText("table.title", iCount || 0);
+                }
+            }
+        });
+    }
+}
+```
+
+**i18n.properties:**
+```properties
+table.title=Reported Quantities ({0})
+```
+
+**Usage:** Show dynamic row counts in table header. Users need to see "Items (25)" not just "Items".
+
+---
+
+## Complex Cell Types with Conditional Visibility
+
+Create table cells with multiple controls and conditional visibility.
+
+```javascript
+class ReportedQuantityTableWidget extends TableWidget {
+    _createReasonCodeCell(oColumnConfig) {
+        return new HBox({
+            items: [
+                // Show link if reason codes exist
+                new Link({
+                    text: {
+                        path: "reasonCodes",
+                        formatter: (aReasonCodes) => aReasonCodes?.at(-1) || ""
+                    },
+                    visible: {
+                        path: "reasonCodes",
+                        formatter: (aReasonCodes) => Array.isArray(aReasonCodes) && aReasonCodes.length > 0
+                    },
+                    press: (oEvent) => this._onReasonCodeLinkPress(oEvent)
+                }),
+                // Show button if no reason code assigned
+                new Button({
+                    type: ButtonType.Ghost,
+                    text: this.getI18nText("assignReasonCode.button"),
+                    visible: {
+                        parts: ["scrapActivityLogId", "reasonCodes", "status"],
+                        formatter: (sScrapId, aReasonCodes, sStatus) => {
+                            return sScrapId !== null && 
+                                   !Array.isArray(aReasonCodes) &&
+                                   sStatus !== "CANCELLED_IN_DM";
+                        }
+                    },
+                    press: (oEvent) => this._onAssignReasonCodePress(oEvent)
+                })
+            ]
+        });
+    }
+}
+```
+
+**Usage:** Conditional UI showing different controls based on row data. Common in manufacturing (show button OR link, not both).
+
+---
+
+## ObjectStatus for Status Display
+
+Use ObjectStatus for status fields with semantic colors (Success/Error/Warning).
+
+```javascript
+_createStatusCell(oColumnConfig) {
+    return new ObjectStatus({
+        text: {
+            path: "status",
+            formatter: (sStatus) => {
+                switch (sStatus) {
+                    case "SENT_TO_S4":
+                    case "POSTED_IN_DM":
+                        return this.getI18nText("status.posted");
+                    case "CANCELLED_IN_DM":
+                        return this.getI18nText("status.cancelled");
+                    default:
+                        return "";
+                }
+            }
+        },
+        state: {
+            path: "status",
+            formatter: (sStatus) => {
+                if (sStatus === "CANCELLED_IN_DM") {
+                    return ValueState.Error;
+                }
+                return ValueState.Success;
+            }
+        }
+    });
+}
+```
+
+**Import:** `import ObjectStatus from "sap/m/ObjectStatus";`  
+**Import:** `import ValueState from "sap/ui/core/ValueState";`
+
+**Usage:** Status columns with color coding are standard SAP pattern. Mandatory for manufacturing tables.
+
+---
+
+## VBox Cell Pattern for Multi-Line Display
+
+Use VBox in table cells to show multiple lines of related data.
+
+```javascript
+_createCell(oColumnConfig) {
+    switch (oColumnConfig.field) {
+        case "resource":
+            return new VBox({
+                items: [
+                    new Text({ text: "{resource}" }),
+                    new Text({ 
+                        text: "{resourceDescription}",
+                        class: "sapUiTinyMarginTop"
+                    }).addStyleClass("sapUiContentPadding")
+                ]
+            });
+    }
+}
+```
+
+**Usage:** Manufacturing data is hierarchical (Resource + Description, SFC + Operation). VBox shows context without horizontal scrolling.
 
 ---
 

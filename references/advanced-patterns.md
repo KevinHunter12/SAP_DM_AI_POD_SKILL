@@ -847,6 +847,284 @@ oNav.addPage(oMaster).addPage(oDetail);
 | Custom Toolbar | Adding action buttons, filtering, or summary info to tables |
 | Complex Cells | Displaying composite data, buttons, or custom formatting in tables |
 | Authorization checks | Enabling/disabling actions based on user permissions |
+
+---
+
+## 21. Popover Pattern with Lifecycle Management
+
+Create and manage popovers with proper cleanup to avoid memory leaks.
+
+```javascript
+import Popover from "sap/m/Popover";
+import PlacementType from "sap/m/PlacementType";
+import Button from "sap/m/Button";
+import ButtonType from "sap/m/ButtonType";
+import Toolbar from "sap/m/Toolbar";
+import ToolbarSpacer from "sap/m/ToolbarSpacer";
+
+class ReportedQuantityTableWidget extends TableWidget {
+    #oReasonCodePopover = null;
+    #oSelectedListItem = null;
+    
+    _createReasonCodePopover() {
+        const oPopover = new Popover({
+            busyIndicatorDelay: 0,
+            showHeader: false,
+            placement: PlacementType.HorizontalPreferredRight,
+            footer: new Toolbar({
+                content: [
+                    new ToolbarSpacer(),
+                    new Button({
+                        text: this.getI18nText("changeReasonCode.button"),
+                        type: ButtonType.Transparent,
+                        press: (oEvent) => this._onChangeReasonCodeButtonPress(oEvent)
+                    })
+                ]
+            }),
+            afterClose: () => {
+                // CRITICAL: Destroy popover after close to prevent memory leaks
+                this.#oReasonCodePopover.destroy();
+                this.#oReasonCodePopover = null;
+                this.#oSelectedListItem = null;
+            }
+        });
+        
+        oPopover.addStyleClass("sapUiContentPadding");
+        return oPopover;
+    }
+    
+    async _onReasonCodeLinkPress(oEvent) {
+        const oLink = oEvent.getSource();
+        const oListItem = oLink.getParent().getParent(); // HBox -> ColumnListItem
+        
+        // Reuse pattern: close if same item clicked
+        if (oListItem === this.#oSelectedListItem) {
+            if (this.#oReasonCodePopover) {
+                this.#oReasonCodePopover.close();
+            }
+            return;
+        }
+        
+        this.#oSelectedListItem = oListItem;
+        
+        if (!this.#oReasonCodePopover) {
+            this.#oReasonCodePopover = this._createReasonCodePopover();
+        }
+        
+        this.#oReasonCodePopover.setBusy(true);
+        this.#oReasonCodePopover.openBy(oLink);
+        
+        // Load data asynchronously
+        try {
+            const oBindingContext = oListItem.getBindingContext();
+            const sReasonCode = oBindingContext.getProperty("reasonCode");
+            const oData = await ApiClient.internal.plant.getReasonCodeDetails(sReasonCode);
+            
+            this.#oReasonCodePopover.removeAllContent();
+            this.#oReasonCodePopover.addContent(new Text({ text: oData.description }));
+        } catch (error) {
+            console.error("Failed to load reason code details:", error);
+        } finally {
+            this.#oReasonCodePopover.setBusy(false);
+        }
+    }
+}
+```
+
+**Key Points:**
+- Private field for popover reference
+- `afterClose` handler with `destroy()` call
+- `openBy()` for positioning
+- Busy indicator while loading
+- Reuse detection (close if same item clicked)
+
+---
+
+## 22. Data Delegate Pattern for Shared State
+
+Use delegate classes to manage shared data across multiple widgets (DRY principle).
+
+```javascript
+// util/QuantityConfirmationDelegate.js
+sap.ui.define([
+    "sap/dm/dme/pod2/context/PodContext",
+    "sap/dm/dme/pod2/context/ModelPath"
+], (PodContext, ModelPath) => {
+    "use strict";
+    
+    /**
+     * Delegate for managing quantity confirmation data shared across widgets
+     */
+    class QuantityConfirmationDelegate {
+        static #iCurrentPage = 0;
+        static #iTotalPages = 0;
+        
+        /**
+         * Refresh all quantity confirmation data
+         * @param {Object} options - Refresh options
+         * @param {boolean} options.force - Force refresh even if cached
+         */
+        static async refresh(options = {}) {
+            this.#iCurrentPage = 0;
+            
+            PodContext.set(ModelPath.ReportedQuantityLoading, true);
+            
+            try {
+                const oWorkListItem = PodContext.getLastSelectedWorkListItem();
+                const oOperationActivity = PodContext.getLastSelectedOperationActivity();
+                
+                const oResponse = await ApiClient.internal.sfc.getReportedQuantities({
+                    plant: PodContext.getPlant(),
+                    order: oWorkListItem.order,
+                    sfc: oWorkListItem.sfc,
+                    operation: oOperationActivity.operationActivity,
+                    page: 0,
+                    size: 20
+                });
+                
+                PodContext.set(ModelPath.ReportedQuantityItems, oResponse.content);
+                PodContext.set(ModelPath.ReportedQuantityCount, oResponse.totalElements);
+                this.#iTotalPages = oResponse.totalPages;
+                
+            } catch (error) {
+                console.error("Failed to refresh quantity data:", error);
+                PodContext.set(ModelPath.ReportedQuantityItems, []);
+                PodContext.set(ModelPath.ReportedQuantityCount, 0);
+            } finally {
+                PodContext.set(ModelPath.ReportedQuantityLoading, false);
+            }
+        }
+        
+        /**
+         * Fetch next page of data
+         */
+        static async fetchNextPage() {
+            if (this.#iCurrentPage >= this.#iTotalPages - 1) {
+                return; // No more pages
+            }
+            
+            this.#iCurrentPage++;
+            
+            try {
+                const oWorkListItem = PodContext.getLastSelectedWorkListItem();
+                const oOperationActivity = PodContext.getLastSelectedOperationActivity();
+                
+                const oResponse = await ApiClient.internal.sfc.getReportedQuantities({
+                    plant: PodContext.getPlant(),
+                    order: oWorkListItem.order,
+                    sfc: oWorkListItem.sfc,
+                    operation: oOperationActivity.operationActivity,
+                    page: this.#iCurrentPage,
+                    size: 20
+                });
+                
+                // Append to existing items
+                const aCurrentItems = PodContext.get(ModelPath.ReportedQuantityItems);
+                PodContext.set(ModelPath.ReportedQuantityItems, [...aCurrentItems, ...oResponse.content]);
+                
+            } catch (error) {
+                console.error("Failed to fetch next page:", error);
+            }
+        }
+    }
+    
+    return QuantityConfirmationDelegate;
+});
+
+// Usage in widget:
+import QuantityConfirmationDelegate from "custom/pod2/util/QuantityConfirmationDelegate";
+
+class ReportedQuantityTableWidget extends TableWidget {
+    async onInit() {
+        await super.onInit();
+        
+        // Delegate manages data fetching and PodContext updates
+        await QuantityConfirmationDelegate.refresh();
+        
+        if (PodContext.isRunMode()) {
+            const oTable = this.getTable();
+            
+            oTable.attachUpdateStarted(async (oEvent) => {
+                if (oEvent.getParameter("reason") === "Growing") {
+                    // Delegate handles pagination
+                    await QuantityConfirmationDelegate.fetchNextPage();
+                }
+            });
+        }
+    }
+    
+    _onChangeReasonCodeButtonPress(oEvent) {
+        // ... make changes ...
+        
+        // Refresh data through delegate (updates all subscribed widgets)
+        QuantityConfirmationDelegate.refresh({ force: true });
+    }
+}
+```
+
+**Key Points:**
+- Shared data management across widgets
+- Static methods for easy access
+- PodContext updates (all widgets react)
+- Pagination handling
+- Cache and state management
+
+---
+
+## 23. Optimistic UI Update Pattern
+
+Update UI immediately, then call API. Rollback on error.
+
+```javascript
+async _onChangeReasonCodeButtonPress(oEvent) {
+    const oListItem = this.#oSelectedListItem;
+    const oBindingContext = oListItem.getBindingContext();
+    
+    // Prompt user for reason code
+    const oReasonCodeDialog = new ScrapReasonCodeDialog(
+        oBindingContext.getProperty("resource")
+    );
+    const oReasonCode = await oReasonCodeDialog.show();
+    
+    if (!oReasonCode) {
+        return;  // User cancelled
+    }
+    
+    // OPTIMISTIC UPDATE: Update UI first (instant feedback)
+    const oModel = oBindingContext.getModel();
+    const sPath = oBindingContext.getPath();
+    const sOriginalValue = oModel.getProperty(`${sPath}/reasonCodes`);
+    oModel.setProperty(`${sPath}/reasonCodes`, [oReasonCode.id]);
+    
+    // Then call API (async)
+    try {
+        const sScrapActivityLogId = oBindingContext.getProperty("scrapActivityLogId");
+        await ApiClient.internal.sfc.updateReportedScrapReasonCode(
+            sScrapActivityLogId,
+            oReasonCode
+        );
+        
+        // Refresh to get authoritative data
+        QuantityConfirmationDelegate.refresh({ force: true });
+        
+        MessageToast.show(this.getI18nText("message.reasonCodeUpdated"));
+        
+    } catch (error) {
+        // ROLLBACK: Restore original value on error
+        oModel.setProperty(`${sPath}/reasonCodes`, sOriginalValue);
+        console.error("Failed to update reason code:", error);
+        MessageBox.error(this.getI18nText("error.reasonCodeUpdateFailed"));
+    }
+}
+```
+
+**Key Points:**
+- Update UI first (instant feedback)
+- Call API asynchronously
+- Store original value for rollback
+- Refresh after success (authoritative data)
+- Rollback on error
+- UX benefit: instant vs. spinner
 | ContentHandler + Dialog | Complex forms with validation and API posting |
 | Custom Dialog | Reusable dialog components (view-only data, confirmations) |
 | Formatter class | Reusable formatting logic across multiple widgets |

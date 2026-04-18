@@ -2476,7 +2476,60 @@ async onButtonPress() {
 }
 ```
 
-**Example 4: Combined with subscription**
+**Example 4: Production Pattern - Subscribe + Getter**
+
+This is the pattern used by SAP production widgets (MaterialImageWidget, OrderHeaderTextWidget):
+
+```javascript
+async onInit() {
+    await super.onInit();
+    
+    // Subscribe to trigger callback on changes
+    PodContext.subscribe(
+        ModelPath.SelectedWorkListItems,  // Array path
+        this._onSelectionChanged,
+        this
+    );
+    
+    // Initial load
+    await this._onSelectionChanged();
+}
+
+async _onSelectionChanged() {
+    // Use getter for convenience (returns single item)
+    const oItem = PodContext.getLastSelectedWorkListItem();
+    
+    if (!oItem) {
+        this.#oLog.error("No item selected");
+        return;
+    }
+    
+    // Process single item
+    await this._processItem(oItem);
+}
+```
+
+**Why This Pattern?**
+
+Using the getter is cleaner when you only care about the last selected item:
+
+```javascript
+// ❌ With parameter - more code
+_onSelectionChanged(aItems) {
+    if (!aItems || aItems.length === 0) return;
+    const oItem = aItems[aItems.length - 1];
+    // ...
+}
+
+// ✅ With getter - cleaner
+_onSelectionChanged() {
+    const oItem = PodContext.getLastSelectedWorkListItem();
+    if (!oItem) return;
+    // ...
+}
+```
+
+**Example 5: Combined with subscription**
 ```javascript
 async onInit() {
     await super.onInit();
@@ -2543,24 +2596,56 @@ if (!aSelectedOps || aSelectedOps.length === 0) {
 
 ---
 
-## ApiClient.internal - Undocumented Internal APIs
+## ApiClient.internal - Internal SAP DM APIs
 
-⚠️ **Warning:** `ApiClient.internal` contains APIs not in official documentation. Use with caution.
+⚠️ **Warning:** `ApiClient.internal` contains internal SAP Digital Manufacturing APIs used by SAP-provided widgets. These APIs are not in public documentation and may change between releases.
+
+### When to Use Internal APIs
+
+- ✅ Extending SAP-provided widgets
+- ✅ Prototyping and development
+- ✅ Features not available in public APIs
+- ❌ Production custom plugins (prefer public APIs)
+- ❌ Long-term maintenance solutions
+
+### Production SAP Widget Examples
+
+**Material Image** (from MaterialImageWidget.js):
+```javascript
+import ApiClient from "sap/dm/dme/pod2/api/ApiClient";
+
+// Get material file attachment
+const oAttachment = await ApiClient.internal.product.getMaterialDefaultFileAttachment(
+    PodContext.getPlant(),
+    oWorkListItem.material,
+    oWorkListItem.materialVersion
+);
+
+// Get download URL
+const sUrl = ApiClient.internal.product.getFileDownloadUrl(oAttachment.fileId);
+```
+
+**Order Header Text** (from OrderHeaderTextWidget.js):
+```javascript
+// Get order header text
+const sText = await ApiClient.internal.demand.getOrderHeaderText(sOrderId);
+```
 
 ### Common Internal Endpoints
 
 ```javascript
+// Product/Material APIs
+ApiClient.internal.product.getMaterialDefaultFileAttachment(sPlant, sMaterial, sVersion);
+ApiClient.internal.product.getFileDownloadUrl(sFileId);
+
+// Demand/Order APIs
+ApiClient.internal.demand.getOrderHeaderText(sOrderId);
+
 // Assembly operations
 const aComponents = await ApiClient.internal.assembly.getComponents({
     plant: "PLANT_1001",
     sfcs: ["SFC-001", "SFC-002"],
     operations: ["OP-10", "OP-20"]
-});
-
-// Order details
-const oOrder = await ApiClient.internal.order.getOrderDetails({
-    plant: "PLANT_1001",
-    orderId: "ORDER-001"
 });
 
 // SFC details (extended)
@@ -2699,30 +2784,91 @@ async _fetch() {
 
 ---
 
-### MessageHistory
+### MessageHistory - User Notifications
 
 **Import:** `sap/dm/dme/pod2/context/MessageHistory`
 
-**Methods:**
-- `MessageHistory.toast({ message, type })` - Toast notification
-- `MessageHistory.showError(sMessage)` - Error dialog
+POD 2.0 provides `MessageHistory` for user notifications. Use the correct method based on message importance.
+
+#### Method 1: push() - Persistent Messages
+
+Use for **important** messages that users should review:
+
+```javascript
+MessageHistory.push({
+    message: this.getI18nText("error.criticalFailure"),
+    type: MessageHistory.Error
+});
+```
+
+**Characteristics:**
+- ✅ Appears in message popover (bell icon)
+- ✅ Persists until user dismisses
+- ✅ User can review message history
+- ✅ **Use for:** Errors, validation failures, important info
+
+**Production Example** (MaterialImageWidget.js):
+```javascript
+MessageHistory.push({
+    message: this.getI18nText("MaterialImageWidget.error.imageMetadataFailed"),
+    type: MessageHistory.Error
+});
+```
+
+#### Method 2: toast() - Transient Messages
+
+Use for **minor** informational messages:
+
+```javascript
+MessageHistory.toast({
+    message: this.getI18nText("info.dataSaved"),
+    type: MessageHistory.Success
+});
+```
+
+**Characteristics:**
+- ✅ Appears as brief toast notification
+- ✅ Auto-dismisses after ~3 seconds
+- ❌ Not added to message history
+- ✅ **Use for:** Success confirmations, minor info
+
+**Production Example** (OrderHeaderTextWidget.js):
+```javascript
+MessageHistory.toast({
+    message: this.getI18nText("OrderHeaderTextWidget.error.requestFailed"),
+    type: MessageHistory.Error
+});
+```
+
+#### Message Types
+
+```javascript
+MessageHistory.Error        // Red - failures, errors
+MessageHistory.Warning      // Orange - warnings, cautions
+MessageHistory.Success      // Green - success confirmations
+MessageHistory.Information  // Blue - informational
+```
+
+#### Usage Decision Tree
+
+```
+Is this an error or validation failure?
+├─ Yes → push() with Error type
+└─ No
+   └─ Does user need to review later?
+      ├─ Yes → push() with appropriate type
+      └─ No → toast() with appropriate type
+```
+
+#### Additional Methods
+
+- `MessageHistory.showError(sMessage)` - Error dialog (modal)
 - `MessageHistory.showWarning(sMessage, { actions, onClose })` - Warning with actions
 - `MessageHistory.dismissMessage(oMessage)` - Close message
 
-**Types:** `MessageHistory.Success`, `MessageHistory.Error`, `MessageHistory.Warning`
-
-**Examples:**
+**Example with Actions:**
 ```javascript
-// Success toast
-MessageHistory.toast({ 
-    message: "Posted successfully", 
-    type: MessageHistory.Success 
-});
-
-// Error dialog
-MessageHistory.showError("Failed to post goods receipt");
-
-// Warning with actions (retry pattern)
+// Warning with retry pattern
 const oMessage = MessageHistory.showWarning("Quantity exceeds tolerance. Continue?", {
     actions: [MessageBox.Action.YES, MessageBox.Action.NO],
     onClose: (sAction) => {
@@ -2818,6 +2964,193 @@ class MyWidget extends Widget {
 ```
 
 **See also:** [SKILL.md i18n section](../SKILL.md#step-3-add-i18n-support-optional-but-recommended)
+
+---
+
+## ApiClient.internal - Internal SAP DM APIs
+
+### Overview
+
+`ApiClient.internal` provides access to internal SAP Digital Manufacturing APIs not documented in public API reference. These APIs power SAP's own widgets.
+
+**⚠️ Warning:** Internal APIs may change between versions without notice. Use with caution and test thoroughly after upgrades.
+
+### Common Internal API Namespaces
+
+```javascript
+import ApiClient from "sap/dm/dme/pod2/context/ApiClient";
+
+// SFC internal APIs
+await ApiClient.internal.sfc.getReportedQuantitySummary(sOrder, sSfc, sOperation);
+await ApiClient.internal.sfc.getReportedQuantities(oRequest);
+await ApiClient.internal.sfc.updateReportedScrapReasonCode(sActivityLogId, oReasonCode);
+
+// Plant internal APIs
+await ApiClient.internal.plant.getReasonCodeObject(sPlant, sReasonCode);
+await ApiClient.internal.plant.getReasonCodeDetails(sReasonCode);
+
+// Resource internal APIs
+await ApiClient.internal.resource.getResourceDetails(sResource);
+
+// Operation internal APIs
+await ApiClient.internal.operation.getOperationData(sOperation);
+```
+
+### Example: Reported Quantity Summary
+
+```javascript
+const oSummaryData = await ApiClient.internal.sfc.getReportedQuantitySummary(
+    oWorkListItem.order,      // Order number
+    oWorkListItem.sfc,        // SFC/Batch ID
+    oOperationActivity.operationActivity  // Phase/Operation
+);
+
+// Response structure (example):
+// {
+//     totalYieldQuantity: { value: 100, unitOfMeasure: { uom: "EA" } },
+//     totalScrapQuantity: { value: 5, unitOfMeasure: { uom: "EA" } }
+// }
+```
+
+### When to Use Internal APIs
+
+**Use when:**
+- Public APIs don't provide needed functionality
+- Replicating behavior from SAP standard widgets
+- Need data structures matching SAP's own implementation
+
+**Don't use when:**
+- Public API exists for the same purpose
+- Building production-critical features (risk of breakage)
+- Can achieve same result with public APIs
+
+### Error Handling
+
+```javascript
+try {
+    const oData = await ApiClient.internal.sfc.someInternalMethod(oRequest);
+    // Use data
+} catch (error) {
+    console.error("Internal API call failed:", error);
+    // Fallback to public API or show error
+}
+```
+
+---
+
+## PodContext Direct Getters
+
+### getLastSelectedWorkListItem()
+
+Get currently selected work list item without subscription.
+
+```javascript
+const oWorkListItem = PodContext.getLastSelectedWorkListItem();
+
+// Returns:
+// {
+//     order: "ORD-001",
+//     sfc: "SFC-001",
+//     material: "MAT-001",
+//     quantity: 100,
+//     operation: "OPER-10",
+//     resource: "RES-001"
+//     // ... other fields
+// }
+
+// Use in subscriptions:
+this.subscribe(ModelPath.ReportedQuantityItems, async () => {
+    const oWorkListItem = PodContext.getLastSelectedWorkListItem();
+    const oData = await ApiClient.internal.sfc.getSomeData(
+        oWorkListItem.order,
+        oWorkListItem.sfc
+    );
+}, this);
+```
+
+### getLastSelectedOperationActivity()
+
+Get currently selected operation activity without subscription.
+
+```javascript
+const oOperationActivity = PodContext.getLastSelectedOperationActivity();
+
+// Returns:
+// {
+//     operationActivity: "OPER-10,1",
+//     operation: "OPER-10",
+//     stepId: "1",
+//     // ... other fields
+// }
+
+// Use in subscriptions:
+this.subscribe(ModelPath.ReportedQuantityItems, async () => {
+    const oWorkListItem = PodContext.getLastSelectedWorkListItem();
+    const oOperationActivity = PodContext.getLastSelectedOperationActivity();
+    
+    const oData = await ApiClient.internal.sfc.getReportedQuantitySummary(
+        oWorkListItem.order,
+        oWorkListItem.sfc,
+        oOperationActivity.operationActivity
+    );
+}, this);
+```
+
+### When to Use Direct Getters
+
+**Use `getLastSelected*()` when:**
+- You need current selection in a subscription callback
+- Don't need to track selection changes (just current value)
+- Building simple queries or API calls
+
+**Use subscriptions when:**
+- Need to react to selection changes
+- Want to track selection history
+- Building reactive UI
+
+### Example: Combined Usage
+
+```javascript
+class MyWidget extends Widget {
+    async onInit() {
+        await super.onInit();
+        
+        // Subscribe to custom model path
+        this.subscribe(ModelPath.ReportedQuantityItems, async () => {
+            // Use direct getters inside subscription
+            const oWorkListItem = PodContext.getLastSelectedWorkListItem();
+            const oOperationActivity = PodContext.getLastSelectedOperationActivity();
+            
+            if (!oWorkListItem || !oOperationActivity) {
+                return;  // No selection
+            }
+            
+            const oData = await ApiClient.internal.sfc.getReportedQuantitySummary(
+                oWorkListItem.order,
+                oWorkListItem.sfc,
+                oOperationActivity.operationActivity
+            );
+            
+            this.#oModel.setData([oData]);
+        }, this);
+    }
+}
+```
+
+### Defensive Coding
+
+Always check for null/undefined:
+
+```javascript
+const oWorkListItem = PodContext.getLastSelectedWorkListItem();
+if (!oWorkListItem) {
+    console.warn("No work list item selected");
+    return;
+}
+
+const sOrder = oWorkListItem.order;
+const sSfc = oWorkListItem.sfc;
+```
 
 ---
 
