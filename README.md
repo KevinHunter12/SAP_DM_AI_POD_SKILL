@@ -12,6 +12,57 @@ This skill transforms Claude into an expert SAP Digital Manufacturing POD plugin
 - Real-world patterns from production SAP code
 - Complete scaffolding for `ControlWidget`, `LayoutWidget`, `TableWidget`, and `ContentHandler`
 
+## How to Use This Skill
+
+### Quick Start
+
+Once installed, Claude automatically applies this skill when you mention POD-related topics. No special commands needed!
+
+**Try these prompts:**
+```
+Create a POD 2.0 ControlWidget that shows the current resource name
+```
+```
+Build a TableWidget with GrowingJSONModel pagination
+```
+```
+How do I subscribe to work list selection changes?
+```
+
+### Pattern Discovery
+
+**Explore complete patterns:**
+- [Common Mistakes](references/common-mistakes.md) - 28 critical mistakes with fixes
+- [Widget Patterns](references/widget-patterns.md) - Complete ControlWidget, TableWidget, LayoutWidget examples
+- [Advanced Patterns](references/advanced-patterns.md) - 16 enterprise patterns from production SAP code
+
+**Quick reference:**
+- [PATTERN-INDEX.md](references/PATTERN-INDEX.md) - Quick pattern lookup by use case
+- [POD 2.0 API Reference](references/pod2-api-reference.md) - Complete API documentation
+- [Glossary](references/glossary.md) - Key terms and definitions
+
+### Development Workflow
+
+1. **Generate Plugin**
+   ```
+   Generate a POD 2.0 TableWidget for displaying SFC work list
+   ```
+
+2. **Add Features**
+   ```
+   Add a refresh button and pagination to the table
+   ```
+
+3. **Validate**
+   ```
+   Check my widget for common mistakes
+   ```
+
+4. **Deploy**
+   ```
+   Show me how to package this for deployment
+   ```
+
 ## Installation
 
 ### Step 1: Locate your Claude skills directory

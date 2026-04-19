@@ -1028,35 +1028,24 @@ static resolveBinding(vBinding, oControl?): any
 Common model paths for use with PodContext.subscribe() and PodContext.get():
 
 ```javascript
-ModelPath.FilterResources           // Selected resources
-ModelPath.FilterWorkCenters          // Selected work centers
-ModelPath.FilterMaterials            // Selected materials
-ModelPath.FilterOperationActivities  // Selected operation activities
-ModelPath.FilterInputType            // Filter input type
+// Filter Paths
+ModelPath.FilterResources, ModelPath.FilterWorkCenters, ModelPath.FilterMaterials
+ModelPath.FilterOperationActivities, ModelPath.FilterInputType
 
-ModelPath.SelectedWorkListItems      // Selected work list items
-ModelPath.WorkListItems              // All work list items
-ModelPath.WorkListCount              // Work list count
-ModelPath.WorkListLoading            // Loading state
-ModelPath.WorkListPageSize           // Page size
-ModelPath.WorkListSorting            // Sorting configuration
-ModelPath.WorkListType               // Work list type
+// Work List Paths (note: plural for arrays!)
+ModelPath.SelectedWorkListItems, ModelPath.WorkListItems, ModelPath.WorkListCount
+ModelPath.WorkListLoading, ModelPath.WorkListPageSize, ModelPath.WorkListSorting, ModelPath.WorkListType
 
-ModelPath.OperationActivities        // Operation activities
-ModelPath.SelectedOperationActivities // Selected activities
+// Operation & Activity Paths
+ModelPath.OperationActivities, ModelPath.SelectedOperationActivities
 
-ModelPath.DataCollectionGroups       // Data collection groups
-ModelPath.DataCollectionSelectedGroup // Selected DC group
-ModelPath.DataCollectionLog          // DC log entries
+// Data Collection Paths
+ModelPath.DataCollectionGroups, ModelPath.DataCollectionSelectedGroup, ModelPath.DataCollectionLog
 
-ModelPath.GoodsReceiptSummary        // Goods receipt summary
-ModelPath.GoodsReceiptLineItems      // GR line items
-
-ModelPath.ActivitySummaries          // Activity summaries
-ModelPath.ReportedQuantityItems      // Reported quantities
-ModelPath.WorkInstructions           // Work instructions
-ModelPath.SelectedWorkInstruction    // Selected instruction
-ModelPath.ExecutionSFCQuantity       // SFC quantity
+// Other Domain Paths
+ModelPath.GoodsReceiptSummary, ModelPath.GoodsReceiptLineItems
+ModelPath.ActivitySummaries, ModelPath.ReportedQuantityItems
+ModelPath.WorkInstructions, ModelPath.SelectedWorkInstruction, ModelPath.ExecutionSFCQuantity
 ```
 
 ---
@@ -1647,27 +1636,6 @@ getServiceUrl(): string
 makeKeyPredicate(sPath, oPredicateMap): void
 ```
 
-### Usage Example
-
-```javascript
-import { ODataV4Client } from "sap/dm/dme/pod2/api/ODataClient";
-
-const oClient = new ODataV4Client("/odata/v4/MaterialService");
-
-// Get page of materials
-const [aMaterials, iCount] = await oClient.getPage("Materials", {
-    $filter: "plant eq 'PLANT1000'",
-    $select: "material,description",
-    $top: 20,
-    $skip: 0
-});
-
-// Get all materials (handles pagination automatically)
-const allMaterials = await oClient.getAllPages("Materials", {
-    $filter: "plant eq 'PLANT1000'"
-});
-```
-
 ---
 
 ## PUBLIC API CLIENTS
@@ -1872,115 +1840,6 @@ ApiClient.processorder      // Process orders
 ApiClient.mdo               // MDO objects
 ApiClient.ebr               // Electronic batch records
 ApiClient.internal          // Internal APIs
-```
-
----
-
-## LOGGER
-
-**Class:** `sap.dm.dme.pod2.Logger`
-
-### Get Logger Instance
-
-```javascript
-/**
- * Get logger for component
- * @param {string} sComponent - Component name
- * @returns {Logger}
- * @static
- */
-const logger = sap.dm.dme.pod2.Logger.getLogger("MyComponent");
-```
-
-### Log Levels
-
-```javascript
-Logger.Level = {
-    TRACE: 5,
-    DEBUG: 4,
-    INFO: 3,
-    WARN: 2,
-    ERROR: 1,
-    FATAL: 0
-}
-
-Logger.LevelNames = {
-    5: "TRACE",
-    4: "DEBUG",
-    3: "INFO",
-    2: "WARN",
-    1: "ERROR",
-    0: "FATAL"
-}
-```
-
-### Logging Methods
-
-```javascript
-/**
- * Trace level logging (most verbose)
- * @param {string} sMessage - Message
- * @param {...any} [aArgs] - Additional arguments
- */
-logger.trace(sMessage, ...aArgs?)
-
-/**
- * Debug level logging
- * @param {string} sMessage - Message
- * @param {...any} [aArgs] - Additional arguments
- */
-logger.debug(sMessage, ...aArgs?)
-
-/**
- * Info level logging
- * @param {string} sMessage - Message
- * @param {...any} [aArgs] - Additional arguments
- */
-logger.info(sMessage, ...aArgs?)
-
-/**
- * Warning level logging
- * @param {string} sMessage - Message
- * @param {...any} [aArgs] - Additional arguments
- */
-logger.warn(sMessage, ...aArgs?)
-
-/**
- * Error level logging
- * @param {string} sMessage - Message
- * @param {...any} [aArgs] - Additional arguments
- */
-logger.error(sMessage, ...aArgs?)
-
-/**
- * Fatal level logging (most severe)
- * @param {string} sMessage - Message
- * @param {...any} [aArgs] - Additional arguments
- */
-logger.fatal(sMessage, ...aArgs?)
-```
-
-### Usage Example
-
-```javascript
-import Logger from "sap/dm/dme/pod2/Logger";
-
-class MyWidget extends Widget {
-    constructor() {
-        this._logger = Logger.getLogger("MyWidget");
-    }
-
-    _someMethod() {
-        this._logger.debug("Method called");
-
-        try {
-            // Do something
-            this._logger.info("Operation successful");
-        } catch (oError) {
-            this._logger.error("Operation failed", oError);
-        }
-    }
-}
 ```
 
 ---
@@ -2480,267 +2339,6 @@ async onButtonPress() {
 
 This is the pattern used by SAP production widgets (MaterialImageWidget, OrderHeaderTextWidget):
 
-```javascript
-async onInit() {
-    await super.onInit();
-    
-    // Subscribe to trigger callback on changes
-    PodContext.subscribe(
-        ModelPath.SelectedWorkListItems,  // Array path
-        this._onSelectionChanged,
-        this
-    );
-    
-    // Initial load
-    await this._onSelectionChanged();
-}
-
-async _onSelectionChanged() {
-    // Use getter for convenience (returns single item)
-    const oItem = PodContext.getLastSelectedWorkListItem();
-    
-    if (!oItem) {
-        this.#oLog.error("No item selected");
-        return;
-    }
-    
-    // Process single item
-    await this._processItem(oItem);
-}
-```
-
-**Why This Pattern?**
-
-Using the getter is cleaner when you only care about the last selected item:
-
-```javascript
-// ❌ With parameter - more code
-_onSelectionChanged(aItems) {
-    if (!aItems || aItems.length === 0) return;
-    const oItem = aItems[aItems.length - 1];
-    // ...
-}
-
-// ✅ With getter - cleaner
-_onSelectionChanged() {
-    const oItem = PodContext.getLastSelectedWorkListItem();
-    if (!oItem) return;
-    // ...
-}
-```
-
-**Example 5: Combined with subscription**
-```javascript
-async onInit() {
-    await super.onInit();
-    
-    // Direct getter for initial load
-    const sPlant = PodContext.getPlant();
-    this._fetchData(sPlant);
-    
-    // Subscribe for changes
-    PodContext.subscribe(
-        ModelPath.SelectedOperationActivities,
-        this._onOperationsChange,
-        this
-    );
-}
-
-_onOperationsChange(aOperations, sPath) {
-    // Direct getter in callback for related data
-    const sPlant = PodContext.getPlant();
-    this._fetchData(sPlant, aOperations);
-}
-```
-
-### Comparison: Direct vs Subscription
-
-```javascript
-// Overkill - don't subscribe for one-time read
-async onInit() {
-    await super.onInit();
-    PodContext.subscribe(ModelPath.Plant, (sPlant) => {
-        this.#oModel.setProperty("/plant", sPlant);
-    }, this);
-}
-
-// Correct - direct getter for one-time read
-async onInit() {
-    await super.onInit();
-    const sPlant = PodContext.getPlant();
-    this.#oModel.setProperty("/plant", sPlant);
-}
-
-// Correct - subscription when reacting to changes
-async onInit() {
-    await super.onInit();
-    PodContext.subscribe(
-        ModelPath.SelectedOperationActivities,
-        this._refreshData,
-        this
-    );
-}
-```
-
-### Null Safety
-
-All getters can return null/undefined/empty arrays. Always check:
-
-```javascript
-const aSelectedOps = PodContext.getSelectedOperationActivities();
-if (!aSelectedOps || aSelectedOps.length === 0) {
-    // Handle no selection
-    return;
-}
-```
-
----
-
-## ApiClient.internal - Internal SAP DM APIs
-
-⚠️ **Warning:** `ApiClient.internal` contains internal SAP Digital Manufacturing APIs used by SAP-provided widgets. These APIs are not in public documentation and may change between releases.
-
-### When to Use Internal APIs
-
-- ✅ Extending SAP-provided widgets
-- ✅ Prototyping and development
-- ✅ Features not available in public APIs
-- ❌ Production custom plugins (prefer public APIs)
-- ❌ Long-term maintenance solutions
-
-### Production SAP Widget Examples
-
-**Material Image** (from MaterialImageWidget.js):
-```javascript
-import ApiClient from "sap/dm/dme/pod2/api/ApiClient";
-
-// Get material file attachment
-const oAttachment = await ApiClient.internal.product.getMaterialDefaultFileAttachment(
-    PodContext.getPlant(),
-    oWorkListItem.material,
-    oWorkListItem.materialVersion
-);
-
-// Get download URL
-const sUrl = ApiClient.internal.product.getFileDownloadUrl(oAttachment.fileId);
-```
-
-**Order Header Text** (from OrderHeaderTextWidget.js):
-```javascript
-// Get order header text
-const sText = await ApiClient.internal.demand.getOrderHeaderText(sOrderId);
-```
-
-### Common Internal Endpoints
-
-```javascript
-// Product/Material APIs
-ApiClient.internal.product.getMaterialDefaultFileAttachment(sPlant, sMaterial, sVersion);
-ApiClient.internal.product.getFileDownloadUrl(sFileId);
-
-// Demand/Order APIs
-ApiClient.internal.demand.getOrderHeaderText(sOrderId);
-
-// Assembly operations
-const aComponents = await ApiClient.internal.assembly.getComponents({
-    plant: "PLANT_1001",
-    sfcs: ["SFC-001", "SFC-002"],
-    operations: ["OP-10", "OP-20"]
-});
-
-// SFC details (extended)
-const oSfcDetails = await ApiClient.internal.sfc.getSfcDetails({
-    plant: "PLANT_1001",
-    sfc: "SFC-001"
-});
-```
-
-### Usage Pattern with Error Handling
-
-```javascript
-async _fetchInternalData() {
-    try {
-        this.setBusy(true);
-        
-        const oRequest = {
-            plant: PodContext.getPlant(),
-            sfcs: this._getSelectedSfcs()
-        };
-
-        // Internal API call
-        const aData = await ApiClient.internal.assembly.getComponents(oRequest);
-        
-        this._getModel().setProperty("/data", aData);
-        this.#oLog.info(`Fetched ${aData.length} items from internal API`);
-        
-    } catch (oError) {
-        this.#oLog.error("Internal API call failed", oError);
-        
-        // More detailed error handling for internal APIs
-        if (oError.status === 404) {
-            MessageBox.information("No data found");
-        } else if (oError.status === 403) {
-            MessageBox.error("Access denied. Check authorization.");
-        } else {
-            MessageBox.error(`API Error: ${oError.message}`);
-        }
-    } finally {
-        this.setBusy(false);
-    }
-}
-```
-
-### Best Practices for Internal APIs
-
-1. **Always add error handling** - Internal APIs less stable than public
-2. **Log all calls** - Helps debugging when APIs change
-3. **Defensive coding** - Check response structure
-4. **Document usage** - Comment why you're using internal API
-5. **Monitor for deprecation** - Internal APIs can change without notice
-
-### Migration Strategy
-
-If an internal API is later added to public docs:
-
-```javascript
-// Old internal API
-const aData = await ApiClient.internal.assembly.getComponents(oRequest);
-
-// After migration to public API (hypothetical)
-const aData = await ApiClient.assembly.getComponents(oRequest);
-
-// Keep error handling, just change the path
-```
-
-### When to Use Internal APIs
-
-✅ **Use when:**
-- Required data not available via public APIs
-- POD plugin requires specific assembly/order data
-- Approved by SAP support/documentation team
-
-❌ **Avoid when:**
-- Public API exists for same data
-- Building long-term production code
-- No fallback strategy if API changes
-
-### Request/Response Logging
-
-```javascript
-async _callInternalApi(oRequest) {
-    this.#oLog.debug("Internal API request", oRequest);
-    
-    const oResponse = await ApiClient.internal.someEndpoint(oRequest);
-    
-    this.#oLog.debug("Internal API response", {
-        recordCount: oResponse?.length || 0,
-        responseKeys: Object.keys(oResponse || {})
-    });
-    
-    return oResponse;
-}
-```
-
 ---
 
 ---
@@ -2788,151 +2386,28 @@ async _fetch() {
 
 **Import:** `sap/dm/dme/pod2/context/MessageHistory`
 
-POD 2.0 provides `MessageHistory` for user notifications. Use the correct method based on message importance.
-
-#### Method 1: push() - Persistent Messages
-
-Use for **important** messages that users should review:
-
 ```javascript
+// Persistent messages (in message popover)
 MessageHistory.push({
     message: this.getI18nText("error.criticalFailure"),
     type: MessageHistory.Error
 });
-```
 
-**Characteristics:**
-- ✅ Appears in message popover (bell icon)
-- ✅ Persists until user dismisses
-- ✅ User can review message history
-- ✅ **Use for:** Errors, validation failures, important info
-
-**Production Example** (MaterialImageWidget.js):
-```javascript
-MessageHistory.push({
-    message: this.getI18nText("MaterialImageWidget.error.imageMetadataFailed"),
-    type: MessageHistory.Error
-});
-```
-
-#### Method 2: toast() - Transient Messages
-
-Use for **minor** informational messages:
-
-```javascript
+// Transient toast messages (auto-dismiss)
 MessageHistory.toast({
     message: this.getI18nText("info.dataSaved"),
     type: MessageHistory.Success
 });
-```
 
-**Characteristics:**
-- ✅ Appears as brief toast notification
-- ✅ Auto-dismisses after ~3 seconds
-- ❌ Not added to message history
-- ✅ **Use for:** Success confirmations, minor info
-
-**Production Example** (OrderHeaderTextWidget.js):
-```javascript
-MessageHistory.toast({
-    message: this.getI18nText("OrderHeaderTextWidget.error.requestFailed"),
-    type: MessageHistory.Error
-});
-```
-
-#### Message Types
-
-```javascript
+// Message types
 MessageHistory.Error        // Red - failures, errors
 MessageHistory.Warning      // Orange - warnings, cautions
 MessageHistory.Success      // Green - success confirmations
 MessageHistory.Information  // Blue - informational
 ```
 
-#### Usage Decision Tree
-
-```
-Is this an error or validation failure?
-├─ Yes → push() with Error type
-└─ No
-   └─ Does user need to review later?
-      ├─ Yes → push() with appropriate type
-      └─ No → toast() with appropriate type
-```
-
-#### Additional Methods
-
-- `MessageHistory.showError(sMessage)` - Error dialog (modal)
-- `MessageHistory.showWarning(sMessage, { actions, onClose })` - Warning with actions
-- `MessageHistory.dismissMessage(oMessage)` - Close message
-
-**Example with Actions:**
-```javascript
-// Warning with retry pattern
-const oMessage = MessageHistory.showWarning("Quantity exceeds tolerance. Continue?", {
-    actions: [MessageBox.Action.YES, MessageBox.Action.NO],
-    onClose: (sAction) => {
-        if (sAction === MessageBox.Action.YES) {
-            this._retryPost();
-        }
-        MessageHistory.dismissMessage(oMessage);
-    }
-});
-```
-
----
-
-### Logger
-
-**Import:** `sap/dm/dme/pod2/Logger`
-
-**Usage:**
-```javascript
-import Logger from "sap/dm/dme/pod2/Logger";
-
-class MyWidget extends Widget {
-    #oLog = Logger.getLogger("my.namespace.MyWidget");
-    
-    _someMethod() {
-        this.#oLog.info("Method called");
-        this.#oLog.error("Failed to fetch data", oError);
-        this.#oLog.debug("Debug info", { param: value });
-    }
-}
-```
-
-**Methods:**
-- `Logger.getLogger(sName)` - Get logger instance
-- `logger.info(sMessage, ...args)` - Info level
-- `logger.error(sMessage, oError)` - Error level
-- `logger.debug(sMessage, ...args)` - Debug level
-- `logger.warn(sMessage, ...args)` - Warning level
-
----
-
-### ValidationUtils (Production Pattern)
-
-**Import:** `sap/dm/dme/pod2/utils/ValidationUtils` (if available)
-
-**Usage (from SAP production code):**
-```javascript
-import ValidationUtils from "sap/dm/dme/pod2/utils/ValidationUtils";
-
-_onQuantityChange(oEvent) {
-    const oSource = oEvent.getSource();
-    try {
-        ValidationUtils.validateQuantity(oSource.getValue());
-        oSource.setValueState(ValueState.None);
-        this.#bIsQuantityValid = true;
-    } catch (oException) {
-        oSource.setValueState(ValueState.Error);
-        oSource.setValueStateText(oException.message);
-        this.#bIsQuantityValid = false;
-    }
-}
-```
-
-**Note:** Check if available in your SAP DM version. If not, implement custom validation.
+**Use `push()` for:** Errors, validation failures, important info that users should review.
+**Use `toast()` for:** Success confirmations, minor transient info.
 
 ---
 
@@ -2973,7 +2448,7 @@ class MyWidget extends Widget {
 
 `ApiClient.internal` provides access to internal SAP Digital Manufacturing APIs not documented in public API reference. These APIs power SAP's own widgets.
 
-**⚠️ Warning:** Internal APIs may change between versions without notice. Use with caution and test thoroughly after upgrades.
+**Warning:** Internal APIs may change between versions without notice. Use with caution and test thoroughly after upgrades.
 
 ### Common Internal API Namespaces
 
@@ -2983,58 +2458,19 @@ import ApiClient from "sap/dm/dme/pod2/context/ApiClient";
 // SFC internal APIs
 await ApiClient.internal.sfc.getReportedQuantitySummary(sOrder, sSfc, sOperation);
 await ApiClient.internal.sfc.getReportedQuantities(oRequest);
-await ApiClient.internal.sfc.updateReportedScrapReasonCode(sActivityLogId, oReasonCode);
+await ApiClient.internal.sfc.getSfcDetails({ plant, sfc });
 
-// Plant internal APIs
+// Plant/Resource/Operation internal APIs
 await ApiClient.internal.plant.getReasonCodeObject(sPlant, sReasonCode);
-await ApiClient.internal.plant.getReasonCodeDetails(sReasonCode);
-
-// Resource internal APIs
 await ApiClient.internal.resource.getResourceDetails(sResource);
-
-// Operation internal APIs
 await ApiClient.internal.operation.getOperationData(sOperation);
-```
-
-### Example: Reported Quantity Summary
-
-```javascript
-const oSummaryData = await ApiClient.internal.sfc.getReportedQuantitySummary(
-    oWorkListItem.order,      // Order number
-    oWorkListItem.sfc,        // SFC/Batch ID
-    oOperationActivity.operationActivity  // Phase/Operation
-);
-
-// Response structure (example):
-// {
-//     totalYieldQuantity: { value: 100, unitOfMeasure: { uom: "EA" } },
-//     totalScrapQuantity: { value: 5, unitOfMeasure: { uom: "EA" } }
-// }
 ```
 
 ### When to Use Internal APIs
 
-**Use when:**
-- Public APIs don't provide needed functionality
-- Replicating behavior from SAP standard widgets
-- Need data structures matching SAP's own implementation
+**Use when:** Public APIs don't provide needed functionality, or replicating behavior from SAP standard widgets.
 
-**Don't use when:**
-- Public API exists for the same purpose
-- Building production-critical features (risk of breakage)
-- Can achieve same result with public APIs
-
-### Error Handling
-
-```javascript
-try {
-    const oData = await ApiClient.internal.sfc.someInternalMethod(oRequest);
-    // Use data
-} catch (error) {
-    console.error("Internal API call failed:", error);
-    // Fallback to public API or show error
-}
-```
+**Avoid when:** Public API exists for the same purpose, or building long-term production-critical features.
 
 ---
 
@@ -3046,110 +2482,25 @@ Get currently selected work list item without subscription.
 
 ```javascript
 const oWorkListItem = PodContext.getLastSelectedWorkListItem();
+// Returns: { order, sfc, material, quantity, operation, resource, ... }
 
-// Returns:
-// {
-//     order: "ORD-001",
-//     sfc: "SFC-001",
-//     material: "MAT-001",
-//     quantity: 100,
-//     operation: "OPER-10",
-//     resource: "RES-001"
-//     // ... other fields
-// }
-
-// Use in subscriptions:
-this.subscribe(ModelPath.ReportedQuantityItems, async () => {
-    const oWorkListItem = PodContext.getLastSelectedWorkListItem();
-    const oData = await ApiClient.internal.sfc.getSomeData(
-        oWorkListItem.order,
-        oWorkListItem.sfc
-    );
-}, this);
-```
-
-### getLastSelectedOperationActivity()
-
-Get currently selected operation activity without subscription.
-
-```javascript
 const oOperationActivity = PodContext.getLastSelectedOperationActivity();
+// Returns: { operationActivity, operation, stepId, ... }
 
-// Returns:
-// {
-//     operationActivity: "OPER-10,1",
-//     operation: "OPER-10",
-//     stepId: "1",
-//     // ... other fields
-// }
-
-// Use in subscriptions:
+// Use in subscriptions for current values:
 this.subscribe(ModelPath.ReportedQuantityItems, async () => {
     const oWorkListItem = PodContext.getLastSelectedWorkListItem();
     const oOperationActivity = PodContext.getLastSelectedOperationActivity();
+    
+    if (!oWorkListItem || !oOperationActivity) return;
     
     const oData = await ApiClient.internal.sfc.getReportedQuantitySummary(
         oWorkListItem.order,
         oWorkListItem.sfc,
         oOperationActivity.operationActivity
     );
+    this.#oModel.setData([oData]);
 }, this);
-```
-
-### When to Use Direct Getters
-
-**Use `getLastSelected*()` when:**
-- You need current selection in a subscription callback
-- Don't need to track selection changes (just current value)
-- Building simple queries or API calls
-
-**Use subscriptions when:**
-- Need to react to selection changes
-- Want to track selection history
-- Building reactive UI
-
-### Example: Combined Usage
-
-```javascript
-class MyWidget extends Widget {
-    async onInit() {
-        await super.onInit();
-        
-        // Subscribe to custom model path
-        this.subscribe(ModelPath.ReportedQuantityItems, async () => {
-            // Use direct getters inside subscription
-            const oWorkListItem = PodContext.getLastSelectedWorkListItem();
-            const oOperationActivity = PodContext.getLastSelectedOperationActivity();
-            
-            if (!oWorkListItem || !oOperationActivity) {
-                return;  // No selection
-            }
-            
-            const oData = await ApiClient.internal.sfc.getReportedQuantitySummary(
-                oWorkListItem.order,
-                oWorkListItem.sfc,
-                oOperationActivity.operationActivity
-            );
-            
-            this.#oModel.setData([oData]);
-        }, this);
-    }
-}
-```
-
-### Defensive Coding
-
-Always check for null/undefined:
-
-```javascript
-const oWorkListItem = PodContext.getLastSelectedWorkListItem();
-if (!oWorkListItem) {
-    console.warn("No work list item selected");
-    return;
-}
-
-const sOrder = oWorkListItem.order;
-const sSfc = oWorkListItem.sfc;
 ```
 
 ---

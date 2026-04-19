@@ -1,12 +1,63 @@
 # Common Mistakes and Fixes
 
-Complete guide to the most common POD plugin development mistakes and their solutions.
+Quick reference guide to POD plugin development pitfalls organized by category.
 
-**Latest Update (2026-04-18)**: Added CustomPanel/CustomVBox requirement, MessageHistory decision rules, and multi-subscription patterns.
+**Latest Update (2026-04-18)**: Consolidated 28 mistakes, removed duplicates, grouped by category.
 
 ---
 
-## Mistake #0: Using Generic Namespace Instead of Working Directory Name
+## Category Index
+
+**🚀 Setup & File Generation (Mistakes #0-#2)**
+- [#0: Generic Namespace](#mistake-0-generic-namespace-instead-of-working-directory-name)
+- [#1: Creating Namespace Folders](#mistake-1-creating-namespace-folders-during-generation)
+- [#2: Wrong extension.json Structure](#mistake-2-invalid-extensionjson-structure)
+
+**💾 Lifecycle & Memory (Mistakes #3-#5)**
+- [#3: Missing onExit() Cleanup](#mistake-3-missing-onexit-after-podcontextsubscribe)
+- [#4: Not Destroying Dialogs](#mistake-4-not-destroying-dialogs-in-afterclose)
+- [#5: Model Initialization Timing](#mistake-5-model-not-initialized-before-createview)
+
+**📦 Imports & Dependencies (Mistakes #6-#9)**
+- [#6: Wrong PodContext Import](#mistake-6-wrong-podcontext-import-path)
+- [#7: Wrong PlacementType Import](#mistake-7-wrong-placementtype-import)
+- [#8: Wrong ModelPath Constants](#mistake-8-wrong-modelpath-constants)
+- [#9: Third-Party Libraries](#mistake-9-third-party-library-loading-fails)
+
+**🎨 UI & Bindings (Mistakes #10-#13)**
+- [#10: Binding in WidgetProperty](#mistake-10-using-binding-syntax-in-widgetproperty-metadata)
+- [#11: Missing i18n ResourceBundle](#mistake-11-assuming-getresourcebundle-exists-on-widget)
+- [#12: Using "class" Instead of styleClass](#mistake-12-using-class-instead-of-styleclass)
+- [#13: Expression Binding vs Formatter](#mistake-13-formatter-instead-of-expression-binding)
+
+**⚙️ Configuration (Mistakes #14-#17)**
+- [#14: Default Value in PropertyEditor](#mistake-14-passing-default-value-to-stringpropertyeditor)
+- [#15: Spreading Parent Properties](#mistake-15-spreading-parent-properties-in-getdefaultconfig)
+- [#16: Wrong Property Exclusion Pattern](#mistake-16-using-wrong-property-exclusion-pattern)
+- [#17: Missing View ID](#mistake-17-missing-view-id-in-createview)
+
+**🔄 Data & State (Mistakes #18-#22)**
+- [#18: Callback Parameter Order](#mistake-18-wrong-callback-parameter-order)
+- [#19: No Defensive Type Checking](#mistake-19-no-defensive-type-checking)
+- [#20: Multi-Part Binding Null Checks](#mistake-20-multi-part-bindings-without-defensive-checks)
+- [#21: Selection Sync](#mistake-21-missing-selection-synchronization-with-podcontext)
+- [#22: Multiple PodContext Subscriptions](#mistake-22-subscribing-to-multiple-paths-with-multiple-calls)
+
+**📊 TableWidget Specific (Mistakes #23-#25)**
+- [#23: Column/Cell Index Mismatch](#mistake-23-columncell-index-mismatch)
+- [#24: GrowingJSONModel Page Increment](#mistake-24-not-incrementing-page-in-growingjsonmodel)
+- [#25: CustomPanel Requirement](#mistake-25-using-sapm panel-instead-of-custompanel)
+
+**🚨 Error Handling (Mistakes #26-#28)**
+- [#26: Business Errors in Success Response](#mistake-26-not-checking-for-business-errors-in-success-response)
+- [#27: CustomFieldData Parsing](#mistake-27-parsing-customfielddata-without-try-catch)
+- [#28: Error State Management](#mistake-28-forgetting-to-clear-busy-state-on-error)
+
+---
+
+## 🚀 Setup & File Generation
+
+## Mistake #0: Generic Namespace Instead of Working Directory Name
 
 **Error**: Module path doesn't match actual folder structure, causing "file not found" errors on upload
 
@@ -80,221 +131,64 @@ echo "Using namespace: $NAMESPACE"
 
 ---
 
-## Mistake #1: Missing onExit() After PodContext.subscribe() ❌ → ✅ (CRITICAL!)
+## Mistake #1: Missing onExit() After PodContext.subscribe()
 
-**Error**: Memory leak - callback keeps firing even after widget destroyed
+**Error**: Memory leak - callback keeps firing after widget destroyed
 
-**Found in**: Production SAP code (WorkInstructionHeaderTextWidget.js)
+| Issue | Solution |
+|-------|----------|
+| Subscribe without unsubscribe | Add matching `unsubscribe()` in `onExit()` |
+| Callback fires on destroyed widget | Use same callback reference in both methods |
+| Memory grows over time | Always implement cleanup lifecycle |
 
-**This is a critical mistake!** When a widget subscribes to PodContext in `onInit()` but doesn't unsubscribe in `onExit()`, the widget instance stays in memory and callbacks continue firing on destroyed widgets.
+**Why**: Subscriptions persist after widget destruction, causing memory leaks in long-running POD sessions.
 
-### ❌ WRONG - Missing onExit() (Found in Production!)
 ```javascript
-// WorkInstructionHeaderTextWidget.js - REAL SAP CODE
+// ❌ WRONG
 onInit() {
-    super.onInit();
-    this._updateText();
-    PodContext.subscribe(ModelPath.WorkInstructions, this._updateText, this);  // ← Subscribes
-    if (!PodContext.getWorkInstructions()) {
-        WorkInstructionDelegate.refresh();
-    }
-}
-// ❌ Missing onExit() - memory leak!
-```
-
-### ✅ CORRECT - Always unsubscribe in onExit()
-```javascript
-onInit() {
-    super.onInit();
-    this._updateText();
     PodContext.subscribe(ModelPath.WorkInstructions, this._updateText, this);
-    if (!PodContext.getWorkInstructions()) {
-        WorkInstructionDelegate.refresh();
-    }
 }
+// Missing onExit()!
 
+// ✅ CORRECT
+onInit() {
+    PodContext.subscribe(ModelPath.WorkInstructions, this._updateText, this);
+}
 onExit() {
     super.onExit();
-    PodContext.unsubscribe(ModelPath.WorkInstructions, this._updateText, this);  // ✅ Clean up!
+    PodContext.unsubscribe(ModelPath.WorkInstructions, this._updateText, this);
 }
 ```
-
-### Detection Pattern
-
-**ALWAYS validate:**
-- If `onInit()` has `PodContext.subscribe()` call
-- Then `onExit()` **MUST** have matching `PodContext.unsubscribe()`
-- Same callback method reference must be used
-- Same context (this) must be passed
-- Same ModelPath must be unsubscribed
-
-### Why This Matters
-
-- ✅ Widget instance stays in memory after removal
-- ✅ Callbacks continue firing on destroyed widgets
-- ✅ Can cause errors accessing non-existent DOM
-- ✅ Memory usage grows over time in long-running POD sessions
-- ✅ Performance degrades as orphaned subscriptions accumulate
-
-### Validation Checklist
-
-Before submitting widget code:
-
-- [ ] Every `PodContext.subscribe()` has matching `unsubscribe()` in `onExit()`
-- [ ] `onExit()` method exists and calls `super.onExit()`
-- [ ] Same `isRunMode()` guard in both `onInit()` and `onExit()`
-- [ ] Same callback method reference used in both
-- [ ] Tested: Open widget → Close widget → Open → Close (no console errors)
-
-**Impact:** High - Memory leak in production POD sessions
-
-**See also:** [production-patterns-wi.md](production-patterns-wi.md) - Pattern #3 (Data Delegate) and Pattern #4 (Bidirectional Sync) for complete subscription patterns
 
 ---
 
-## Mistake #1B: Creating Namespace Folder During File Generation ❌ → ✅ (CRITICAL!)
+## Mistake #1B: Creating Namespace Folders During Generation
 
-**Error**: Files generated in wrong location (e.g., `mycompany/extension.json` instead of `extension.json`)
+**Error**: Files in wrong location (`mycompany/extension.json` instead of root)
 
-**This is the #1 mistake when generating plugins!** The user is already IN their namespace folder (their working directory IS the namespace folder). Creating additional nested namespace folders breaks file paths and deployment.
+**Rule**: Working directory IS the namespace. Never create nested namespace folders.
 
-### ❌ WRONG - Creating namespace folders during generation:
-```
-# If user is in: /home/user/myproject/
-# DON'T create nested structure:
-myproject/
-└── myproject/                    # ❌ WRONG! Don't create this!
-    ├── extension.json
-    └── widget/MyWidget.js
+| Wrong | Correct |
+|-------|---------|
+| `Write("mycompany/extension.json")` | `Write("extension.json")` |
+| `myproject/myproject/extension.json` | `myproject/extension.json` |
 
-# Or even worse:
-myproject/
-└── custom/                       # ❌ WRONG!
-    └── pod2/                     # ❌ WRONG!
-        └── myproject/            # ❌ WRONG!
-            ├── extension.json
-            └── widget/MyWidget.js
-```
-
-### ✅ CORRECT - Generate files in working directory root:
-```
-# User is in: /home/user/myproject/
-# Generate directly at root:
-myproject/                        # ← User is already here (cwd)
-├── extension.json                # ← Generate at root
-├── widget/                       # ← Subfolder
-│   └── MyWidget.js
-├── action/
-│   └── MyAction.js
-└── util/
-    └── Helper.js
-```
-
-### Why This Happens:
-- Documentation shows namespace folders for **illustration** (how the final zip looks)
-- Developer incorrectly assumes they need to **create** those folders
-- But the user's working directory **IS** already the namespace folder
-- Creating nested folders breaks module path resolution
-
-### How to Fix:
-**When using Write tool:**
-```javascript
-// ❌ WRONG - Don't prepend namespace folder to paths!
-Write("mycompany/extension.json", content)
-Write("mycompany/widget/MyWidget.js", content)
-Write("custom/pod2/acme/extension.json", content)
-
-// ✅ CORRECT - Write to working directory root!
-Write("extension.json", content)
-Write("widget/MyWidget.js", content) 
-Write("action/MyAction.js", content)
-```
-
-**Understanding the Context:**
-1. User is already in their namespace folder (e.g., `/home/user/mycompany`)
-2. Current working directory IS the namespace folder
-3. Files should be generated relative to current directory
-4. For deployment, user will `cd ..` and zip the entire folder
-
-### Impact:
-- **100% failure rate** when namespace folders are created
-- Files are in wrong location
-- Module paths don't match extension.json
-- Deployment zip has incorrect structure
-- Extension Center upload fails with "Missing file" errors
-
-### Prevention:
-- ✅ Always write files to current directory root: `extension.json`
-- ✅ Create subfolders relative to root: `widget/`, `action/`, `util/`
-- ❌ Never create namespace folders like `mycompany/`, `custom/pod2/`, `acme/`
-- ❌ Never nest the namespace folder name in file paths
-
-### Remember:
-**The namespace folder concept is for documentation only!** When generating files, assume the working directory IS the namespace folder. Write files at the root level, not in nested namespace subfolders.
+**Why**: User is already IN the namespace folder. Creating nested folders breaks module resolution.
 
 ---
 
-## Mistake #2: Using Binding Syntax in WidgetProperty Metadata ❌ → ✅
+## Mistake #2: Binding Syntax in WidgetProperty Metadata
 
-**Error**: `"/production/process/execute" is of type string, expected sap.m.InputType for property "type"`
+**Error**: Type mismatch when using `{i18n>key}` in property definitions
 
-This error occurs when using i18n binding syntax in `WidgetProperty` displayName or description fields.
+**Rule**: Use `getI18nText()` method, NOT binding syntax `{i18n>key}` in WidgetProperty.
 
-```javascript
-// ❌ WRONG - Binding syntax NOT supported in WidgetProperty!
-getProperties() {
-    return [
-        new WidgetProperty({
-            displayName: "{i18n>property.myProp}",  // 💥 Causes binding confusion!
-            description: "{i18n>property.myProp.description}",
-            category: "Main",
-            propertyEditor: new StringPropertyEditor(this, "myProp", "defaultValue")
-        })
-    ];
-}
+| Wrong | Correct |
+|-------|---------|
+| `displayName: "{i18n>prop.name}"` | `displayName: this.getI18nText("prop.name")` |
+| Binding in metadata definition | Method call for i18n text |
 
-// ✅ CORRECT - Use getI18nText() method (Official SAP pattern)
-getProperties() {
-    return [
-        new WidgetProperty({
-            displayName: this._getI18nText("property.myProp"),  // ✅ Method call
-            description: this._getI18nText("property.myProp.description"),
-            category: "Main",
-            propertyEditor: new StringPropertyEditor(this, "myProp")  // No default value!
-        })
-    ];
-}
-
-// Helper method (Widget base class provides this, or create your own)
-_getI18nText(sKey, aParams) {
-    try {
-        const oResourceBundle = this.getView()?.getModel("i18n")?.getResourceBundle();
-        if (oResourceBundle) {
-            return oResourceBundle.getText(sKey, aParams);
-        }
-    } catch (oError) {
-        this.#oLog.warn(`Failed to get i18n text for key: ${sKey}`, oError);
-    }
-    return sKey;  // Fallback to key
-}
-```
-
-**Why this happens**: 
-1. Binding syntax `"{i18n>property.apiEndpoint}"` contains the word "property"
-2. POD 2.0 property editor framework parses this string looking for property references
-3. The parser finds `"property.apiEndpoint"` and tries to resolve it as a path
-4. This creates incorrect bindings that assign your property value to the wrong control property (like `type`)
-5. The `CustomInput` control's `type` property expects `InputType` enum, but gets a string instead
-
-**Critical Rule**: `WidgetProperty` is a **metadata definition class**, NOT part of SAPUI5 binding context!
-- ✅ Use bindings in: SAPUI5 controls (in `_createView()`), XML views
-- ❌ DON'T use bindings in: `WidgetProperty` constructor, metadata definitions
-
-**Official SAP Documentation Note:**
-> "The getProperties example above uses a hard coded display name and description in English. To enable support in other languages, the widget should **use the getI18nText method** provided by the Widget base class to get a translated string."
-
-**Source**: SAP Help Portal - "Add Widget Properties"  
-https://help.sap.com/docs/help/95abdf318cec40bb84bc487fdaa03691/8dbdab1343184bf19ed36cf26f6aaf08.html
+**Why**: WidgetProperty is metadata, not UI5 binding context. Binding syntax causes parser confusion.
 
 ---
 

@@ -22,7 +22,7 @@ You are an expert SAP Digital Manufacturing POD plugin developer with deep knowl
 - **[Table Cell Patterns](references/tablecell-patterns.md)** ⭐ NEW - 13 cell types: text, date, status, actions, bullet charts, composites
 - **[Binding Patterns](references/binding-patterns.md)** ⭐ NEW - Multi-part bindings, formatters, PodContext binding, i18n rules
 - **[Common Mistakes](references/common-mistakes.md)** - Top 28 mistakes and their fixes (3 new patterns added!)
-- **[Production Patterns (WorkInstruction)](references/production-patterns-wi.md)** - 13 battle-tested patterns from SAP production widgets
+- **[Production Patterns Unified](references/production-patterns-unified.md)** - 35 battle-tested patterns from SAP production widgets (consolidated)
 - **[Advanced Patterns](references/advanced-patterns.md)** - 20 enterprise patterns from real SAP code
 - **[Form Patterns](references/form-patterns.md)** - GrowingJSONModel, PodDialog, validation, error handling
 
@@ -44,224 +44,56 @@ You are an expert SAP Digital Manufacturing POD plugin developer with deep knowl
 
 ## 🚨 CRITICAL: File Generation - NO Namespace Folder Creation!
 
-**IMPORTANT**: When creating or generating plugin files:
-
-### ❌ NEVER DO THIS:
-```
-Don't create nested namespace folders like:
-- custom/pod2/sfcdetails/
-- sfcdetails/
-- mycompany/
-- acme/
-```
-
-### ✅ ALWAYS DO THIS:
-```
-Generate files directly in the working directory root:
-- extension.json        (in current directory)
-- widget/              (subfolder in current directory)
-- action/              (subfolder in current directory)
-- util/                (subfolder in current directory)
-```
-
-### Why?
-- **The user is already IN their namespace folder** (their working directory IS the namespace folder)
-- Creating additional nested folders causes incorrect file paths
-- Module resolution will fail if files are in unexpected locations
-- The working directory will become the zip content, so everything should be at the root level
-
-### Example:
-If user's working directory is `/home/user/myproject`, generate:
-```
-/home/user/myproject/
-├── extension.json          # ← Root of working directory
-├── widget/
-│   └── MyWidget.js
-├── action/
-│   └── MyAction.js
-└── util/
-    └── Helper.js
-```
-
-**NOT**:
-```
-/home/user/myproject/
-└── myproject/              # ← ❌ Don't create this!
-    ├── extension.json
-    └── widget/MyWidget.js
-```
-
-### File Path Convention:
-When using Write tool, paths should be:
-- `extension.json` (not `mycompany/extension.json`)
-- `widget/MyWidget.js` (not `mycompany/widget/MyWidget.js`)
-- `action/MyAction.js` (not `mycompany/action/MyAction.js`)
-
-**The namespace folder concept is for documentation only** - showing users how their final zip structure looks. During file generation, assume the current working directory IS that namespace folder.
+**IMPORTANT**: When creating files:
+- ✅ Generate files directly in working directory root: `extension.json`, `widget/MyWidget.js`
+- ❌ Never create nested namespace folders: `mycompany/extension.json`
+- The user is already IN their namespace folder (cwd IS namespace folder)
 
 ---
 
 ## 🚨 STEP 0: ALWAYS Ask for Namespace First!
 
-**BEFORE generating ANY files, you MUST ask the user for their namespace.**
+**BEFORE generating files, MUST ask user for namespace** (e.g., `custom/pod2/myproject`).
 
-### Why Namespace Must Be Provided by User
+**Why**: Namespace is hierarchical prefix that can have multiple levels. Working directory basename only gives last part.
 
-The namespace is a **hierarchical prefix** that can contain multiple levels (e.g., `custom/pod2/myproject`, `acme/manufacturing/sfctracker`). The working directory basename only gives the last part (e.g., "myproject"), not the full namespace hierarchy.
+### Workflow
+1. Ask: `"What namespace? (e.g., custom/pod2/<basename>)"`
+2. Suggest: `custom/pod2/$(basename $(pwd))`
+3. Use exact namespace in modulePath, convert slashes→dots for type field
 
-**CRITICAL**: The namespace is NOT the same as the folder basename!
-
-### Step-by-Step Workflow
-
-1. **Ask the user for their namespace:**
-   ```
-   "What namespace would you like to use for this plugin? 
-   (e.g., custom/pod2/myproject, or acme/manufacturing)"
-   ```
-
-2. **Provide a helpful default suggestion:**
-   ```bash
-   BASENAME=$(basename $(pwd))
-   # Suggest: custom/pod2/$BASENAME
-   ```
-   Example: If user is in folder "sfctracker", suggest "custom/pod2/sfctracker"
-
-3. **Use the exact namespace provided:**
-   - In `extension.json` modulePath: `<user-namespace>/widget/MyWidget`
-   - In `extension.json` type: Replace slashes with dots: `<namespace-with-dots>.widget.MyWidget`
-
-### Example Workflow
-
-```bash
-# User is in directory: /home/user/newproject
-$ basename $(pwd)
-newproject
-
-# Assistant asks: "What namespace? (e.g., custom/pod2/newproject)"
-# User responds: "custom/pod2/newproject"
-
-# extension.json must use:
-"modulePath": "custom/pod2/newproject/widget/MyWidget"
-"type": "custom.pod2.newproject.widget.MyWidget"
-```
-
-### Converting Namespace: Slashes to Dots
-
-For the `type` field in extension.json, convert slashes to dots:
+### Converting Namespace
 - Namespace: `custom/pod2/myproject` → Type: `custom.pod2.myproject.widget.MyWidget`
-- Namespace: `acme/manufacturing` → Type: `acme.manufacturing.widget.MyWidget`
 
-### ❌ Common Mistakes to Avoid
-
-1. **❌ Using only basename:** `myproject` instead of `custom/pod2/myproject`
-2. **❌ Not asking user:** Assuming namespace from folder name
-3. **❌ Wrong type syntax:** Using slashes instead of dots in type field
-4. **❌ Generic placeholders:** Using hardcoded examples like "mycompany"
-
-### ✅ Correct Approach
-
-1. Ask user for full hierarchical namespace
-2. Suggest `custom/pod2/<basename>` as default
-3. Use exact namespace in modulePath
-4. Convert slashes to dots for type field
-5. Remind user to use same namespace during upload
+**See**: [Working Example](#working-example) for complete real-world success case
 
 ---
 
-## 📚 WORKING EXAMPLE - Real World Success Case
+## 📚 WORKING EXAMPLE - Real World Success
 
-This example shows the EXACT structure that works in production:
+**Setup**: Working directory: `C:\VSCodeProjects\pod2plugins\three`
+**Namespace**: `custom/pod2/three` (user-provided during upload)
 
-### Setup
-- **Working directory**: `C:\VSCodeProjects\pod2plugins\three`
-- **User-provided namespace** (during upload): `custom/pod2/three`
-- **Plugin name**: animationblending
-
-### Files Generated
-
-**extension.json** (at working directory root):
+**extension.json**:
 ```json
 {
   "widgets": [{
     "modulePath": "custom/pod2/three/plugins/animationblending",
     "type": "custom.pod2.three.plugins.animationblending"
-  }],
-  "actions": []
+  }]
 }
 ```
 
-**plugins/animationblending.js** (in plugins subfolder):
-```javascript
-sap.ui.define([
-    "sap/dm/dme/pod2/widget/Widget",
-    // ... other imports
-], (Widget, ...) => {
-    "use strict";
-    class AnimationBlending extends Widget {
-        // ... implementation
-    }
-    return AnimationBlending;
-});
-```
-
-### Zip Structure Created
-
-```bash
-# Command used (from parent directory):
-cd "C:\VSCodeProjects\pod2plugins"
-zip -r three.zip three/
-
-# OR from inside the "three" directory:
-cd "C:\VSCodeProjects\pod2plugins\three"
-zip -r ../three.zip extension.json plugins/
-```
-
-**Zip contents** (three.zip):
+**Zip structure** (three.zip):
 ```
 three.zip
-├── extension.json              # ✅ At root of zip
-└── plugins/                    # ✅ At root of zip
-    └── animationblending.js
+├── extension.json              # ✅ At root
+└── plugins/animationblending.js
 ```
 
-**❌ NOT like this** (this would fail):
-```
-three.zip
-└── custom/                     # ❌ Wrong! No namespace folders in zip
-    └── pod2/
-        └── three/
-            ├── extension.json
-            └── plugins/
-```
+**Upload**: Enter namespace `custom/pod2/three` → Success!
 
-### Upload Process
-
-1. Open SAP DM Extension Center
-2. Click "Upload Extension"
-3. **Enter namespace**: `custom/pod2/three` ← EXACT text entered by user
-4. Select file: `three.zip`
-5. Upload ✅ Success!
-
-### Key Takeaways
-
-1. **Namespace is hierarchical**: `custom/pod2/three` (not just "three")
-2. **modulePath starts with namespace**: `custom/pod2/three/plugins/animationblending`
-3. **type uses dots**: `custom.pod2.three.plugins.animationblending` (slashes → dots)
-4. **Zip has NO namespace folder**: extension.json at root, plugins/ at root
-5. **Working directory IS the namespace folder**: Don't create nested folders during development
-6. **User enters same namespace during upload**: `custom/pod2/three`
-
-### Error Prevention
-
-**Upload WILL FAIL if:**
-- ❌ extension.json references `custom/pod2/three/...` but user enters namespace `three`
-- ❌ Zip contains `three/extension.json` instead of `extension.json` at root
-- ❌ modulePath doesn't start with the exact namespace
-
-**Upload WILL SUCCEED when:**
-- ✅ extension.json modulePath: `custom/pod2/three/plugins/animationblending`
-- ✅ User enters namespace: `custom/pod2/three` (matches exactly)
-- ✅ Zip structure: extension.json at root, no namespace wrapper folder
+**Key**: Namespace in extension.json MUST match upload namespace exactly.
 
 ---
 
@@ -472,111 +304,46 @@ mycompany.zip
 
 ---
 
-## 🚨 CRITICAL: Binding Syntax Rules
+## 🚨 CRITICAL: Core POD 2.0 Rules
 
-### Where Bindings Work vs. Don't Work
+### 1. Binding Syntax - Where It Works vs. Doesn't
+| Context | Binding `"{path}"` | Example |
+|---------|-------------------|---------|
+| ❌ WidgetProperty displayName/description | NOT ALLOWED | Use `this.getI18nText("key")` |
+| ✅ getDefaultConfig() property values | ALLOWED | `headerText: "{i18n>title}"` |
+| ✅ Control properties in _createView() | ALLOWED | `text: "{fieldName}"` |
+| ✅ Expression binding | ALLOWED | `visible: "{= ${type} === 'TEXT' }"` |
 
-| Context | Binding Syntax `"{path}"` | Example |
-|---------|--------------------------|---------|
-| ❌ WidgetProperty displayName/description | **NOT ALLOWED** | Use `this.getI18nText("key")` |
-| ✅ getDefaultConfig() property values | **ALLOWED** | `headerText: "{i18n>title}"` OK |
-| ✅ Control properties in _createView() | **ALLOWED** | `text: "{fieldName}"` OK |
-| ✅ Expression binding everywhere | **ALLOWED** | `visible: "{= ${type} === 'TEXT' }"` |
+### 2. Parent Property Spreading in getDefaultConfig()
+| Base Class | Spread? | Why |
+|------------|---------|-----|
+| Widget | ❌ NO | Reserved SAPUI5 properties cause conflicts |
+| ControlWidget | ❌ NO | Inherits Widget problems |
+| TableWidget | ✅ YES | Essential defaults required |
+| LayoutWidget | ✅ YES | Essential defaults required |
 
-**Example - WidgetProperty (NO bindings):**
+### 3. i18n Implementation (Framework-Driven)
 ```javascript
-new WidgetProperty({
-    displayName: this.getI18nText("property.myProp"),  // ✅ Method call
-    propertyEditor: new StringPropertyEditor(this, "myProp")
-})
-```
+import I18nResourceModel from "sap/dm/dme/pod2/model/I18nResourceModel";
 
-**Example - getDefaultConfig (bindings OK):**
-```javascript
-static getDefaultConfig() {
-    return {
-        properties: {
-            ...super.getDefaultConfig().properties,
-            headerText: `{i18n>title} ({${ModelPath.Items}/length})`  // ✅ OK here!
-        }
-    };
-}
-```
-
-### Fatal Mistake #2: When to Spread Parent Properties in getDefaultConfig()
-
-**CRITICAL DECISION**: Whether to spread parent properties depends on your **base class**!
-
-#### ❌ DON'T Spread for Widget Base Class
-
-```javascript
-// ❌ WRONG - For direct Widget extensions, don't spread!
-class MyWidget extends Widget {
-    static getDefaultConfig() {
-        return {
-            properties: {
-                ...super.getDefaultConfig()?.properties,  // ❌ NO! Widget base has "type"
-                myProperty: "value"
-            }
-        };
+class YourWidget extends Widget {
+    static #oI18nModel = new I18nResourceModel({
+        bundleName: "your.namespace.i18n.i18n"  // Dots, not slashes!
+    });
+    
+    static getI18nModel() { return this.#oI18nModel; }
+    
+    _createView() {
+        return new Button({
+            text: this.getI18nText("key")  // ✅ Method call, not binding!
+        });
     }
 }
 ```
 
-**Why**: Widget base class properties include reserved SAPUI5 names like `"type"` that cause conflicts.
+**CRITICAL**: ALWAYS use `this.getI18nText()` in `_createView()`, NEVER `"{i18n>key}"` bindings.
 
-#### ✅ DO Spread for TableWidget/LayoutWidget
-
-```javascript
-// ✅ CORRECT - For TableWidget/LayoutWidget, DO spread!
-class MyTableWidget extends TableWidget {
-    static getDefaultConfig() {
-        return {
-            properties: {
-                ...super.getDefaultConfig().properties,  // ✅ YES! Inherit parent config
-                showNoData: true,
-                mode: ListMode.SingleSelectMaster,
-                myCustomProperty: "value"
-            }
-        };
-    }
-}
-```
-
-**Why**: TableWidget and LayoutWidget have safe defaults that should be inherited. This is the **official SAP production pattern**.
-
-#### Decision Rule:
-
-| Base Class | Spread Parent? | Reason |
-|------------|---------------|---------|
-| `Widget` | ❌ NO | Contains reserved SAPUI5 property names |
-| `ControlWidget` | ❌ NO | Inherits Widget's problematic properties |
-| `LayoutWidget` | ✅ YES | Safe defaults, production SAP pattern |
-| `TableWidget` | ✅ YES | Safe defaults, production SAP pattern |
-
-**Common Error Message (when spreading Widget base):**
-```
-"[value] is of type string, expected sap.m.InputType for property "type"
-```
-
-**Official SAP Pattern Sources:**
-- SAP Production Code: ActivityConfirmationTableWidget, SelectResourceWidget
-- See also: [references/production-patterns-sap.md](references/production-patterns-sap.md) for real SAP production patterns
-
-**See**: [references/common-mistakes.md](references/common-mistakes.md) for all mistakes with detailed fixes.
-
-### ⚠️ Critical: Always Unsubscribe in onExit()
-
-If you subscribe to PodContext events in `onInit()`, you **MUST** unsubscribe in `onExit()`:
-
-```javascript
-onExit() {
-    super.onExit();
-    PodContext.unsubscribe(ModelPath.Something, this._onSomethingChange, this);
-}
-```
-
-**Missing onExit() causes memory leaks!** See [Common Mistake #14](references/common-mistakes.md#mistake-14-missing-onexit-unsubscribe) for complete pattern.
+**See**: [Common Mistakes](references/common-mistakes.md) for all errors with fixes.
 
 ---
 
@@ -739,7 +506,7 @@ For enterprise-grade POD plugins, see the comprehensive guide with 13 production
 - Reusable formatting? → **Pattern #9** (Formatter Class)
 - Multi-widget data? → **Pattern #11** (Data Delegates)
 
-📖 **Also see**: [references/production-patterns-sap.md](references/production-patterns-sap.md) for complete SAP production pattern documentation with JSDoc, error handling, and more.
+📖 **Also see**: [references/production-patterns-unified.md](references/production-patterns-unified.md) for complete SAP production pattern documentation with JSDoc, error handling, and more.
 
 ---
 
@@ -1332,7 +1099,7 @@ This skill includes comprehensive reference files in the `references/` directory
 - **[delegate-architecture.md](references/delegate-architecture.md)** ⭐ NEW v25.0.0 - 8 official POD 2.0 delegates with complete patterns (static class structure, WebSocket notifications, request management, pagination, selection management, error handling)
 - **[widget-patterns.md](references/widget-patterns.md)** - Patterns for ControlWidget, LayoutWidget, TableWidget, ContentHandler
 - **[advanced-patterns.md](references/advanced-patterns.md)** - 13 enterprise-grade production patterns from real SAP code
-- **[production-patterns-sap.md](references/production-patterns-sap.md)** - JSDoc, error handling, delegates from SAP production widgets
+- **[production-patterns-unified.md](references/production-patterns-unified.md)** - 35 consolidated patterns from SAP production widgets (lifecycle, subscriptions, delegates, caching, error handling)
 - **[common-mistakes.md](references/common-mistakes.md)** - All common mistakes with detailed fixes
 - **[namespace-update.md](references/namespace-update.md)** - Import path changes and updates
 - **[glossary.md](references/glossary.md)** - Key terms and definitions
