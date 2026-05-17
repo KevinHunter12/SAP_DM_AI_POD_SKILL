@@ -2012,7 +2012,7 @@ POD widgets can call any of the 70+ SAP Digital Manufacturing REST APIs for prod
 ### API Reference
 
 📖 **Complete API Reference**: [references/sapdm-api-reference.md](sapdm-api-reference.md)  
-📖 **API Specifications**: [references/api-specs/](api-specs/)
+📖 **API Specifications**: [SAP API Business Hub](https://api.sap.com/package/SAPDigitalManufacturingCloud/rest)
 
 ### Authentication & Base URL Pattern
 

@@ -1,8 +1,8 @@
 # SAP Digital Manufacturing API Reference
 
-**Version**: 1.0.0  
-**Last Updated**: 2026-04-17  
-**API Specs Location**: [references/api-specs/](api-specs/)
+**Version**: 1.1.0  
+**Last Updated**: 2026-05-17  
+**API Documentation**: [SAP API Business Hub](https://api.sap.com/package/SAPDigitalManufacturingCloud)
 
 This document provides a comprehensive reference to all SAP Digital Manufacturing REST APIs available for POD plugin integration.
 
@@ -888,66 +888,31 @@ Response includes:
 
 ---
 
-## API Spec Files Reference
+## SAP API Business Hub Reference
 
-All 70 API specification files are available in [references/api-specs/](api-specs/):
+All SAP Digital Manufacturing API specifications are available on the SAP API Business Hub:
 
-- Activity Confirmation: `sapdme_activityConfirmation.json`
-- Assembly: `sapdme_assembly.json`
-- Asset Model: `sapdme_asset_model.json`
-- Batch: `sapdme_batch.json`, `sapdme_batch_v2.json`
-- BOM: `sapdme_bom.json`
-- Classification: `sapdme_classification.json`
-- Data Collection: `sapdme_datacollection.json`
-- Data Fields: `sapdme_datafields.json`
-- Data Type: `sapdme_datatype.json`
-- EBR: `sapdme_ebr.json`
-- Integration Message: `sapdme_integrationMessage.json`
-- Inventory: `sapdme_inventory.json`, `sapdme_inventory_v2.json`
-- Labor: `sapdme_labor.json`
-- Last Indicator: `sapdme_lastindicator.json`
-- Logistics: `sapdme_logistics.json`
-- Material: `sapdme_material.json`
-- Material Group: `sapdme_materialgroup.json`
-- Nonconformance: `sapdme_nonconformance.json`
-- Nonconformance Code: `sapdme_nonconformancecode.json`
-- Nonconformance Group: `sapdme_nonconformancegroup.json`
-- Notification: `sapdme_notification.json`
-- Numbering: `sapdme_numbering.json`, `sapdme_numbering_identifier_config.json`
-- OEE: `sapdme_oee.json`, `sapdme_oee_resourcereasoncode.json`
-- Operation: `sapdme_operation.json`, `sapdme_operationactivity.json`
-- Order: `sapdme_order.json`, `sapdme_order_v2.json`
-- Packing Unit: `sapdme_packingunit.json`
-- Plant: `sapdme_plant.json`
-- Plant Certification: `sapdme_plant_certification.json`
-- Plant Resource v2: `sapdme_plant_resource_v2.json`
-- Plant Work Center: `sapdme_plant_workcenter_v2.json`, `sapdme_plant_workcenter_v3 (1).json`
-- POD: `sapdme_pod.json`
-- Process Manufacturing: `sapdme_process_manufacturing.json`
-- Process Lot: `sapdme_processlot.json`, `sapdme_processlot_v2.json`
-- Process Order: `sapdme_processorder.json`, `sapdme_processorder_v2.json`
-- Production v2: `sapdme_production_v2.json`
-- Quality Inspection: `sapdme_qualityinspection.json`, `sapdme_qualityinspection_v2.json`
-- Quantity Confirmation: `sapdme_quantityConfirmation.json`
-- Recipe: `sapdme_recipe.json`
-- REO: `sapdme_reo.json`
-- Resource Type: `sapdme_resourcetype.json`
-- Routing: `sapdme_routing.json`
-- Setpoint v3: `sapdme_setpoint_v3.json`
-- SFC: `sapdme_sfc.json`, `sapdme_sfc_v2.json`
-- Shift: `sapdme_shift.json`
-- Staging: `sapdme_staging.json`, `sapdme_staging_v2.json`
-- Standard Rate: `sapdme_standardrate.json`
-- Standard Value: `sapdme_standardvalue.json`
-- Time Tracking: `sapdme_timetracking.json`
-- Tool: `sapdme_tool.json`, `sapdme_tool_v2.json`
-- UOM: `sapdme_uom.json`
-- User: `sapdme_user.json`
-- WIP: `sapdme_wip.json`
-- Work Instruction: `sapdme_workinstruction.json`, `sapdme_workinstruction_file.json`
-- Document v2: `sapfnd_document_v2.json`
-- Print: `sapfnd_print.json`
-- Printer: `sapfnd_printer.json`
+### REST APIs
+**URL**: [https://api.sap.com/package/SAPDigitalManufacturingCloud/rest](https://api.sap.com/package/SAPDigitalManufacturingCloud/rest)
+
+| Category | APIs |
+|----------|------|
+| **Production** | SFC, Order, Operation, Activity Confirmation, Quantity Confirmation |
+| **Material** | Material, BOM, Routing, Batch, Inventory |
+| **Quality** | Data Collection, Quality Inspection, Nonconformance, EBR |
+| **Process Mfg** | Process Order, Process Lot, Recipe, Setpoint |
+| **Configuration** | Plant, Resource, Work Center, Shift, Tool, User |
+| **Integration** | Document, Print, Work Instruction, Notification |
+
+### OData v4 APIs
+**URL**: [https://api.sap.com/package/SAPDigitalManufacturingCloud/odatav4](https://api.sap.com/package/SAPDigitalManufacturingCloud/odatav4)
+
+### Benefits of SAP API Hub
+- Always up-to-date specifications
+- Interactive API testing ("Try Out")
+- Sandbox environment available
+- Download OpenAPI/Swagger specs on demand
+- Authentication documentation included
 
 ---
 

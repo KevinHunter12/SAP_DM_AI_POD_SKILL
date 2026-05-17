@@ -300,4 +300,4 @@ Compress-Archive -Path mycompany -DestinationPath mycompany.zip
 - [Production Patterns](production-patterns-unified.md) - 35 patterns from SAP production code
 - [Advanced Patterns](advanced-patterns.md) - Complex scenarios and optimizations
 - [POD 2.0 API Reference](pod2-api-reference.md) - Framework API documentation
-- [DM API Specs](api-specs/) - SAP Digital Manufacturing API specifications
+- [SAP API Business Hub](https://api.sap.com/package/SAPDigitalManufacturingCloud) - SAP Digital Manufacturing API specifications
