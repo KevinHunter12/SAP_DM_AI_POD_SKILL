@@ -2,7 +2,7 @@
 
 Quick reference guide to POD plugin development pitfalls organized by category.
 
-**Latest Update (2026-04-18)**: Consolidated 28 mistakes, removed duplicates, grouped by category.
+**Latest Update (2026-05-08)**: Added comprehensive view ID and base class guidance to Mistake #6.
 
 ---
 
@@ -19,10 +19,10 @@ Quick reference guide to POD plugin development pitfalls organized by category.
 - [#5: Model Initialization Timing](#mistake-5-model-not-initialized-before-createview)
 
 **📦 Imports & Dependencies (Mistakes #6-#9)**
-- [#6: Wrong PodContext Import](#mistake-6-wrong-podcontext-import-path)
-- [#7: Wrong PlacementType Import](#mistake-7-wrong-placementtype-import)
-- [#8: Wrong ModelPath Constants](#mistake-8-wrong-modelpath-constants)
-- [#9: Third-Party Libraries](#mistake-9-third-party-library-loading-fails)
+- [#6: View ID Mismatch / Wrong Base Class](#mistake-6-view-id-mismatch-in-_createview) ⭐ CRITICAL
+- [#7: No Defensive Type Checking](#mistake-7-no-defensive-type-checking)
+- [#8: Wrong PlacementType Import](#mistake-8-wrong-placementtype-import)
+- [#9: Wrong ModelPath Constants](#mistake-9-wrong-modelpath-constants)
 
 **🎨 UI & Bindings (Mistakes #10-#13)**
 - [#10: Binding in WidgetProperty](#mistake-10-using-binding-syntax-in-widgetproperty-metadata)
@@ -282,36 +282,157 @@ PodContext.subscribe(ModelPath.FilterResources, (aResources, sPath) => {
 
 ---
 
-## Mistake #6: Missing View ID in _createView() ❌ → ✅
+## Mistake #6: View ID Mismatch in _createView() ❌ → ✅
 
-**Error**: `"getView method returned a view with a different ID than configuration"`
+**Error**: `"CustomWorklist's getView method returned a view with a different ID than configuration"`
+
+This is one of the **most common and confusing errors** in POD 2.0 development. It occurs when:
+1. The root control returned from `_createView()` has a different ID than `oConfig.id`
+2. Using `LayoutWidget` base class incorrectly
+3. Adding suffixes to the root control ID
+
+### Cause 1: Missing or Wrong Root Control ID
 
 ```javascript
-// ❌ WRONG - No ID passed to view
+// ❌ WRONG - No ID passed to root control
 _createView() {
     return new VBox({
         items: [new Text({ text: "Hello" })]
     });
 }
 
-// ✅ CORRECT - Pass oConfig.id as FIRST parameter
+// ❌ WRONG - ID with suffix
 _createView() {
     const oConfig = this.getConfig();
+    return new VBox(oConfig.id + "-mainLayout", {  // ❌ Suffix breaks it!
+        items: [new Text({ text: "Hello" })]
+    });
+}
 
-    if (!oConfig || !oConfig.id) {
-        return new VBox({
-            items: [new Text({ text: "Configuration error" })]
-        });
-    }
-
-    // Pass ID as first parameter (UI5 constructor pattern)
-    return new VBox(oConfig.id, {
+// ✅ CORRECT - Pass oConfig.id EXACTLY as first parameter
+_createView() {
+    const oConfig = this.getConfig();
+    return new VBox(oConfig.id, {  // ✅ Exact ID!
         items: [new Text({ text: "Hello" })]
     });
 }
 ```
 
-**Why this happens**: POD 2.0 requires the view ID to match the widget configuration ID for proper lifecycle management.
+### Cause 2: Using LayoutWidget Incorrectly
+
+**CRITICAL**: `LayoutWidget` and `ControlWidget` have special view wrapping logic. For complex custom layouts, **use base `Widget` class instead**.
+
+```javascript
+// ❌ WRONG - LayoutWidget with complex custom view
+import LayoutWidget from "sap/dm/dme/pod2/widget/LayoutWidget";
+
+class CustomWorklist extends LayoutWidget {
+    _createView() {
+        const oConfig = this.getConfig();
+        // LayoutWidget wraps your view, causing ID mismatch!
+        return new FixFlex(oConfig.id, { ... });  // 💥 Will fail!
+    }
+}
+
+// ✅ CORRECT - Use base Widget class for complex layouts
+import Widget from "sap/dm/dme/pod2/widget/Widget";
+
+class CustomWorklist extends Widget {
+    _createView() {
+        const oConfig = this.getConfig();
+        // Widget doesn't wrap - your ID is used directly
+        return new Panel(oConfig.id, {
+            content: [new FixFlex({ ... })]  // Inner controls can have suffixed IDs
+        });
+    }
+}
+```
+
+### When to Use Each Base Class
+
+| Base Class | Use When | Root Control |
+|------------|----------|--------------|
+| `Widget` | Complex custom layouts, multiple containers | Any control with `oConfig.id` |
+| `ControlWidget` | Single SAPUI5 control (Button, Input, etc.) | The control passed to `super()` |
+| `LayoutWidget` | Standard layout containers (VBox, HBox, Panel) | The control passed to `super()` |
+| `TableWidget` | Data tables with rows/columns | Table (handled by base class) |
+
+### Complete Working Pattern (from Production Code)
+
+```javascript
+sap.ui.define([
+    "sap/dm/dme/pod2/widget/Widget",
+    "sap/dm/dme/pod2/model/I18nResourceModel",  // ← POD 2.0 i18n model
+    "sap/m/Panel",
+    "sap/m/VBox"
+], (Widget, I18nResourceModel, Panel, VBox) => {
+    "use strict";
+
+    // Static i18n model OUTSIDE class (important!)
+    let oI18nModel = null;
+
+    class MyComplexWidget extends Widget {
+
+        static getI18nModel() {
+            if (!oI18nModel) {
+                oI18nModel = new I18nResourceModel({
+                    bundleName: "my.namespace.i18n.i18n"
+                });
+            }
+            return oI18nModel;
+        }
+
+        static getDisplayName() { return "My Complex Widget"; }
+        static getIcon() { return "sap-icon://grid"; }
+        static getCategory() { return "Custom"; }  // ✅ Use "Custom" for custom plugins (appears in "Custom" folder in POD Designer)
+
+        // NO spreading of parent properties!
+        static getDefaultConfig() {
+            return {
+                properties: {
+                    myProperty: "default"
+                }
+            };
+        }
+
+        _createView() {
+            const oConfig = this.getConfig();
+
+            if (!oConfig || !oConfig.id) {
+                return new Panel({
+                    content: [new sap.m.Text({ text: "Config error" })]
+                });
+            }
+
+            // Create complex inner layout (can use suffixed IDs)
+            const oInnerLayout = new VBox(oConfig.id + "-inner", {
+                items: [ /* your controls */ ]
+            });
+
+            // Root control MUST have exact oConfig.id
+            return new Panel(oConfig.id, {
+                width: "100%",
+                height: "100%",
+                expandable: false,
+                expanded: true,
+                backgroundDesign: "Transparent",
+                content: [oInnerLayout]
+            });
+        }
+    }
+
+    return MyComplexWidget;
+});
+```
+
+### Key Rules to Remember:
+
+1. **Root control ID** = `oConfig.id` exactly (no suffix!)
+2. **Inner controls** can have suffixed IDs: `oConfig.id + "-inner"`
+3. **Use base `Widget`** for complex custom layouts
+4. **Use `ControlWidget`/`LayoutWidget`** only for simple wrappers
+5. **Use `I18nResourceModel`** (from `sap/dm/dme/pod2/model/I18nResourceModel`) with static getter pattern
+6. **Never spread** parent class default config properties
 
 ---
 
@@ -1495,7 +1616,7 @@ new PodDialog({
 
 **Why Critical:** Every dialog instance without `destroy()` leaks memory. In long-running POD sessions, this accumulates.
 
-**See also:** [form-patterns.md#poddialog-extension](form-patterns.md#poddialog-extension)
+**See also:** [form-dialog-patterns.md](form-dialog-patterns.md)
 
 ---
 
@@ -1609,7 +1730,7 @@ try {
 ✅ Always use same index for columns and cells  
 
 **See also:**
-- [form-patterns.md](form-patterns.md) - Complete production patterns
+- [form-dialog-patterns.md](form-dialog-patterns.md) - Complete production patterns
 - [advanced-patterns.md](advanced-patterns.md) - 15 enterprise patterns
 - [widget-patterns.md](widget-patterns.md) - TableWidget, GrowingJSONModel
 
@@ -2370,4 +2491,12 @@ formatter: (param1, param2, param3) => {
 3. Use optional chaining for nested properties
 4. Provide sensible defaults
 5. Test with incomplete/missing data
+
+---
+
+**See Also**:
+- [widget-patterns.md](widget-patterns.md) - Complete widget templates
+- [advanced-patterns.md](advanced-patterns.md) - Complex patterns
+- [binding-patterns.md](binding-patterns.md) - Data binding techniques
+- [form-dialog-patterns.md](form-dialog-patterns.md) - Form validation patterns
 

@@ -291,6 +291,13 @@ Compress-Archive -Path mycompany -DestinationPath mycompany.zip
 
 📖 **Back to main skill**: [SKILL.md](../SKILL.md)
 
-**Other references**:
-- [Common Mistakes](common-mistakes.md) - All 11 mistakes with fixes
-- [Widget Patterns](widget-patterns.md) - Complete code patterns
+**Reference Files**:
+- [Common Mistakes](common-mistakes.md) - All 28 categorized mistakes with fixes
+- [Widget Patterns](widget-patterns.md) - Complete widget code patterns
+- [TableWidget Complete](tablewidget-complete.md) - Full TableWidget implementation guide
+- [Table Cell Patterns](tablecell-patterns.md) - Column and cell creation patterns
+- [Binding Patterns](binding-patterns.md) - Data binding and formatter patterns
+- [Production Patterns](production-patterns-unified.md) - 35 patterns from SAP production code
+- [Advanced Patterns](advanced-patterns.md) - Complex scenarios and optimizations
+- [POD 2.0 API Reference](pod2-api-reference.md) - Framework API documentation
+- [DM API Specs](api-specs/) - SAP Digital Manufacturing API specifications

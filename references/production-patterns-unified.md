@@ -2159,3 +2159,11 @@ Before deploying any widget, verify:
 - Added cross-references and decision tables
 - Maintained all code examples and production references
 - Enhanced with validation checklist and usage guidelines
+
+---
+
+**See Also**:
+- [advanced-patterns.md](advanced-patterns.md) - Complex UI patterns
+- [common-mistakes.md](common-mistakes.md) - 28 mistakes with fixes
+- [widget-patterns.md](widget-patterns.md) - Widget templates
+- [delegate-architecture.md](delegate-architecture.md) - Delegate patterns

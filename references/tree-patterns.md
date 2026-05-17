@@ -246,4 +246,4 @@ async open() {
 
 ---
 
-**See**: [form-patterns.md](form-patterns.md#token-input), [dialog-patterns.md](dialog-patterns.md), [cache-patterns.md](cache-patterns.md)
+**See**: [form-dialog-patterns.md](form-dialog-patterns.md), [advanced-patterns.md](advanced-patterns.md)

@@ -855,6 +855,133 @@ class CustomTimerWidget extends BaseWidget {
 
 ---
 
+## 12. Static Cache Pattern ⭐⭐⭐⭐⭐
+
+Static class with cached data shared across widget instances, preventing redundant API calls.
+
+### When to Use
+- Large datasets used by multiple widgets (UOMs, resources, reason codes)
+- Data that doesn't change frequently
+- Expensive API calls (hierarchy data, configuration)
+- Master data (plants, work centers)
+- Real-time transactional data (avoid caching)
+- User-specific data that varies per context (avoid caching)
+
+### Production Example
+
+```javascript
+import ApiClient from "sap/dm/dme/pod2/api/ApiClient";
+import PodContext from "sap/dm/dme/pod2/context/PodContext";
+import MessageBox from "sap/m/MessageBox";
+
+class ResourceHierarchyCache {
+    static #aCachedData = null;
+    
+    static async getResourceHierarchy() {
+        if (this.#aCachedData) {
+            return Promise.resolve(this.#aCachedData);
+        }
+        return await this._loadResourceHierarchy();
+    }
+    
+    static async _loadResourceHierarchy() {
+        try {
+            const sPlant = PodContext.getPlant();
+            const aWorkCenters = PodContext.getFilterWorkCenters();
+            const sWorkCenter = aWorkCenters?.[0]?.workCenter || null;
+            
+            const oData = await ApiClient.internal.plant
+                .getResourceHierarchyData(sPlant, sWorkCenter);
+            
+            const oHierarchyData = this._prepareWorkcenterData(oData);
+            this.#aCachedData = oHierarchyData;
+            
+            return oHierarchyData;
+        } catch (oError) {
+            MessageBox.error(
+                PodContext.getI18nText("error.resourceHierarchyFailed", oError.message)
+            );
+            throw oError;
+        }
+    }
+    
+    static _prepareWorkcenterData(oWorkCenterData) {
+        const aFinalData = [];
+        
+        if (oWorkCenterData.oeeHierarchyNodes?.length > 0) {
+            const aTransformed = this._transformHierarchy(oWorkCenterData.oeeHierarchyNodes);
+            aFinalData.push(...aTransformed);
+            
+            const oResourceSet = this._getUniqueResources(aFinalData);
+            const aMembers = this._transformMembers(oWorkCenterData.members);
+            aFinalData.push(...aMembers.filter(o => !oResourceSet.has(o.resourceName)));
+        } else if (oWorkCenterData.members?.length > 0) {
+            aFinalData.push(...this._transformMembers(oWorkCenterData.members));
+        }
+        
+        return aFinalData;
+    }
+    
+    static clearCache() {
+        this.#aCachedData = null;
+    }
+}
+
+// USAGE FROM WIDGET:
+class MyWidget extends Widget {
+    async _loadResourceHierarchy() {
+        const oData = await ResourceHierarchyCache.getResourceHierarchy();
+        this.#oModel.setProperty("/resourceHierarchy", oData);
+    }
+}
+```
+
+### Cache Invalidation Strategies
+
+```javascript
+// 1. No Invalidation (Simplest)
+static #aCachedData = null; // Cache lasts for session lifetime
+
+// 2. Manual Invalidation
+static clearCache() {
+    this.#aCachedData = null;
+}
+await ApiClient.internal.plant.updateResource(...);
+ResourceHierarchyCache.clearCache();
+
+// 3. Time-Based Expiration
+static #aCachedData = null;
+static #cacheTimestamp = null;
+static #CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
+static async getResourceHierarchy() {
+    const now = Date.now();
+    if (this.#aCachedData && this.#cacheTimestamp && 
+        (now - this.#cacheTimestamp) < this.#CACHE_TTL) {
+        return Promise.resolve(this.#aCachedData);
+    }
+    return await this._loadResourceHierarchy();
+}
+
+// 4. PodContext Subscription
+static init() {
+    PodContext.subscribe(
+        ModelPath.FilterWorkCenters,
+        () => this.clearCache(),
+        this
+    );
+}
+```
+
+### Best Practices
+- Use static private field for cached data
+- Single-flight pattern (prevent concurrent loads)
+- Transform data once, cache transformed result
+- Provide clearCache() method for manual invalidation
+- Handle errors gracefully (don't cache errors)
+
+---
+
 ## Cross-References
 
 **For core patterns, see [production-patterns-unified.md](production-patterns-unified.md):**
@@ -899,3 +1026,11 @@ class CustomTimerWidget extends BaseWidget {
 - Unique patterns kept: 11
 
 **Consolidation Date**: 2026-04-19
+
+---
+
+**See Also**:
+- [production-patterns-unified.md](production-patterns-unified.md) - Core foundation patterns
+- [common-mistakes.md](common-mistakes.md) - 28 mistakes with fixes
+- [widget-patterns.md](widget-patterns.md) - Widget templates
+- [form-dialog-patterns.md](form-dialog-patterns.md) - Form and dialog patterns

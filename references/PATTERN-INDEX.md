@@ -4,6 +4,60 @@ Quick reference index organized by widget type, use case, technical pattern, and
 
 ---
 
+## Quick Links
+
+| Need | Go To |
+|------|-------|
+| **New to POD 2.0?** | [Getting Started](#i-need-to) |
+| **Building a table?** | [TableWidget Patterns](#tablewidget-patterns) |
+| **Something not working?** | [Common Mistakes](common-mistakes.md) |
+| **Memory leak?** | [Mistake #3: Missing onExit()](common-mistakes.md#mistake-3) |
+| **POD Designer shows wrong properties?** | [Mistake #16](common-mistakes.md#mistake-16) |
+| **Migrate from POD 1.0?** | [Migration Guide](#migration-from-pod-10) |
+
+---
+
+## FAQ
+
+**Q: How do I create a simple widget?**  
+→ [ControlWidget Pattern](widget-patterns.md) ⭐
+
+**Q: My widget is leaking memory!**  
+→ [Mistake #3: Missing onExit()](common-mistakes.md#mistake-3) - ensure `onExit()` calls `PodContext.unsubscribe()`
+
+**Q: POD Designer doesn't show my properties!**  
+→ Check [EXCLUDE_PROPERTIES](production-patterns-unified.md#10-exclude_properties-pattern) isn't hiding them
+
+**Q: How do I call SAP DM APIs?**  
+→ Use [ApiClient](pod2-api-reference.md#public-api-clients) - see [sapdm-api-reference.md](sapdm-api-reference.md) for 70+ APIs
+
+**Q: How do I react to worklist selection changes?**  
+→ [PodContext.subscribe()](pod2-api-reference.md#subscription-methods) with `ModelPath.SelectedWorkListItems`
+
+---
+
+## Migration from POD 1.0
+
+**Recommendation**: RE-ARCHITECT, don't directly convert.
+
+POD 1.0 (XML views, controllers) and POD 2.0 (ES6 classes, programmatic views) are fundamentally different:
+
+| POD 1.0 | POD 2.0 |
+|---------|---------|
+| XML Views | `_createView()` returns controls |
+| Controller methods | Class methods |
+| `this.getView().getModel()` | `this._getModel()` |
+| `Component.js` | `extension.json` |
+| `manifest.json` | Widget metadata static methods |
+
+**Migration approach:**
+1. Extract business logic from POD 1.0 controllers
+2. Create new POD 2.0 widget using [widget-patterns.md](widget-patterns.md)
+3. Adapt business logic to POD 2.0 patterns
+4. Use [delegates](delegate-architecture.md) instead of custom data fetching
+
+---
+
 ## By Widget Type
 
 ### ControlWidget Patterns
@@ -35,7 +89,7 @@ Quick reference index organized by widget type, use case, technical pattern, and
 |---------|------|------------|-------------|
 | Dialog + Form | advanced-patterns.md | ⭐⭐⭐⭐⭐ | Complex form with validation |
 | Custom Dialog | advanced-patterns.md | ⭐⭐⭐⭐ | Extend sap.m.Dialog directly |
-| Form Validation | form-patterns.md | ⭐⭐⭐⭐⭐ | Real-time validation patterns |
+| Form Validation | form-dialog-patterns.md | ⭐⭐⭐⭐⭐ | Real-time validation patterns |
 
 ---
 
@@ -48,9 +102,9 @@ Quick reference index organized by widget type, use case, technical pattern, and
 - [No-Data Messages](advanced-patterns.md#17-contextual-no-data-messages) - Context-aware messages
 
 ### Data Input & Forms
-- [Form Patterns](form-patterns.md) - Complete form guide
+- [Form Patterns](form-dialog-patterns.md) - Complete form guide
 - [ContentHandler](advanced-patterns.md#7-contenthandler-with-dialog-and-form) - Dialog forms
-- [Validation](form-patterns.md#validation-patterns) - Real-time validation
+- [Validation](form-dialog-patterns.md#complex-form-validation) - Real-time validation
 - [Custom Fields](advanced-patterns.md#12-custom-field-extensibility-pattern) - Extensible fields
 
 ### API Integration
@@ -125,7 +179,7 @@ Quick reference index organized by widget type, use case, technical pattern, and
 - [ContentHandler + Forms](advanced-patterns.md#7-contenthandler-with-dialog-and-form)
 - [Error Handling](advanced-patterns.md#15-error-handling--retry-pattern)
 - [Selection Sync](common-mistakes.md#mistake-27)
-- [Complete Form Patterns](form-patterns.md)
+- [Complete Form Patterns](form-dialog-patterns.md)
 
 ---
 
@@ -182,7 +236,7 @@ Specific to TableWidget:
 **Paginate data** → [Growing Table](widget-patterns.md#tablewidget-with-growingjsonmodel-pagination-pattern) ⭐⭐⭐⭐
 **Custom table columns** → [Dynamic Columns](advanced-patterns.md#14-dynamic-column-creation-pattern) ⭐⭐⭐⭐
 
-**Validate input** → [Form Validation](form-patterns.md#validation-patterns) ⭐⭐⭐⭐⭐
+**Validate input** → [Form Validation](form-dialog-patterns.md#complex-form-validation) ⭐⭐⭐⭐⭐
 **Handle errors** → [Error Handling](advanced-patterns.md#15-error-handling--retry-pattern) ⭐⭐⭐⭐⭐
 **Share data** → [Data Delegates](advanced-patterns.md#11-data-delegate-pattern) ⭐⭐⭐⭐
 **Show warnings** → [Warning Dialog](advanced-patterns.md#13-warning-dialog-pattern) ⭐⭐⭐
@@ -199,7 +253,7 @@ Specific to TableWidget:
 
 ### Form + Validation + API
 1. Start with [ContentHandler](advanced-patterns.md#7-contenthandler-with-dialog-and-form)
-2. Add [Form Validation](form-patterns.md#validation-patterns)
+2. Add [Form Validation](form-dialog-patterns.md#complex-form-validation)
 3. Implement [Error Handling](advanced-patterns.md#15-error-handling--retry-pattern)
 4. Add [Custom Fields](advanced-patterns.md#12-custom-field-extensibility-pattern) if needed
 
@@ -221,7 +275,7 @@ Specific to TableWidget:
 | binding-patterns.md | Bindings & formatters | 6 binding patterns |
 | advanced-patterns.md | Enterprise patterns | 23 production patterns |
 | production-patterns-unified.md | SAP patterns | 35 battle-tested patterns |
-| form-patterns.md | Forms & validation | 5 form patterns |
+| form-dialog-patterns.md | Forms, dialogs & validation | 8 patterns |
 | common-mistakes.md | Error prevention | 28 mistakes + fixes |
 | delegate-architecture.md | Delegates | 8 official delegates |
 

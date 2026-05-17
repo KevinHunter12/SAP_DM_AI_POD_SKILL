@@ -703,6 +703,24 @@ try {
 - Duplicate item filtering
 - Conditional labored operators fetch based on widget config
 
+**Public Methods:**
+```javascript
+// Main refresh - clears data, shows busy indicator
+static async refresh(oOptions = {})
+
+// Background refresh - no clearing, no busy indicator  
+static async refreshInBackground(oOptions = {})
+
+// Pagination - fetch next page and append
+static async fetchNextPage()
+
+// Selective refresh - only if list contains specific SFCs
+static async refreshIfContainsSfc(aSfcs)
+
+// Get last filter used
+static getLatestFilter()
+```
+
 **Work List Types:**
 ```javascript
 import WorkListType from "sap/dm/dme/pod2/enumeration/WorkListType";
@@ -728,6 +746,15 @@ switch (oWorkListFilter.workListType) {
 - Sorting by stepId
 - MIN_REFRESH_INTERVAL throttling
 
+**Public Methods:**
+```javascript
+// Main refresh
+static async refresh(oOptions = {})
+
+// Auto-select first incomplete operation activity
+static selectNextOperationActivity()
+```
+
 ### WorkInstructionDelegate
 
 **Features:**
@@ -746,12 +773,27 @@ switch (oWorkListFilter.workListType) {
 - Subscribe to both SelectedWorkListItems and SelectedOperationActivities
 - `fetchNextPage()` for infinite scrolling
 
+**Public Methods:**
+```javascript
+// Main refresh
+static async refresh(oOptions = {})
+
+// Pagination - fetch next page
+static async fetchNextPage()
+```
+
 ### ActivityConfirmationDelegate
 
 **Features:**
 - Simple request deduplication
 - Sorting by sequence and activityId
 - Subscribe to SelectedOperationActivities with `force: true, clear: true`
+
+**Public Methods:**
+```javascript
+// Main refresh - NOTE: actual method name is refreshActivitySummaries
+static async refreshActivitySummaries(oOptions = {})
+```
 
 ### QualityInspectionDelegate
 
@@ -760,12 +802,27 @@ switch (oWorkListFilter.workListType) {
 - Manual refresh via options
 - Sets multiple PodContext properties (InspectionPoints, FieldCombinations, IsEnablePoint)
 
+**Public Methods:**
+```javascript
+// Main refresh
+static async refresh(oOptions = {})
+
+// Fetch JSON data from URL
+static async fetchData(sJSONUrl)
+```
+
 ### GoodsReceiptDelegate
 
 **Features:**
 - Single API call returns both summary and line items
 - Updates two PodContext properties
 - Subscribes only to SelectedWorkListItems
+
+**Public Methods:**
+```javascript
+// Main refresh - fetches summary and line items
+static async refreshSummary()
+```
 
 ---
 
@@ -930,3 +987,10 @@ import WorkListType from "sap/dm/dme/pod2/enumeration/WorkListType";
 5. **Design Mode:** Preview data enables plugin development without backend
 6. **Type Safety:** All API responses converted to typed objects
 7. **Error Resilience:** Proper error handling and graceful degradation
+
+---
+
+**See Also**:
+- [production-patterns-unified.md](production-patterns-unified.md) - Foundation patterns
+- [widget-patterns.md](widget-patterns.md) - Widget templates with subscription patterns
+- [pod2-api-reference.md](pod2-api-reference.md) - Complete API reference

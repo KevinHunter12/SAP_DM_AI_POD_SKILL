@@ -284,7 +284,7 @@ async onInit() {
 
 **Required Import**:
 ```javascript
-import WorkListDelegate from "sap/dm/dme/pod2/delegate/WorkListDelegate";
+import WorkListDelegate from "sap/dm/dme/pod2/context/data/WorkListDelegate";
 ```
 
 **Key Points**:
@@ -553,7 +553,7 @@ sap.ui.define([
     "sap/dm/dme/pod2/widget/core/TableWidget",
     "sap/dm/dme/pod2/context/PodContext",
     "sap/dm/dme/pod2/context/ModelPath",
-    "sap/dm/dme/pod2/delegate/WorkListDelegate",
+    "sap/dm/dme/pod2/context/data/WorkListDelegate",
     "sap/dm/dme/pod2/formatter/StatusFormatter",
     "sap/dm/dme/pod2/DateTimeUtils",
     "sap/m/HBox",

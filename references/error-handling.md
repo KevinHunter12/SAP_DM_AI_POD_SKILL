@@ -142,4 +142,4 @@ async _deleteDowntimes(oDeleteRequest) {
 
 ---
 
-**See**: [form-patterns.md](form-patterns.md#validation), [dialog-patterns.md](dialog-patterns.md), [advanced-patterns.md](advanced-patterns.md)
+**See**: [form-dialog-patterns.md](form-dialog-patterns.md), [advanced-patterns.md](advanced-patterns.md)
