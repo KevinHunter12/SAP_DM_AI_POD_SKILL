@@ -1,7 +1,7 @@
 ---
 name: pod-plugin
 description: "Create SAP Digital Manufacturing POD 2.0 plugins. Trigger when users mention: POD plugins, POD widgets, POD 2.0, SAP DM customization, TableWidget, ControlWidget, LayoutWidget, PodContext, extension.json, work center plugins. Expert in ES6 class-based POD 2.0 development. CRITICAL: Never creates webapp/ folder. Files generated at working directory root."
-version: 30.3.0
+version: 30.4.0
 author: Claude
 tags: [sap, digital-manufacturing, pod, plugin, pod2, widget-architecture, production-patterns, delegate-patterns, no-webapp-folder, memory-leak-prevention, api-payload-verification]
 compatibility:
@@ -29,6 +29,7 @@ Expert guide for SAP Digital Manufacturing POD 2.0 plugin development.
 - [tablewidget-complete.md](references/tablewidget-complete.md) - For TableWidget only
 - [tablecell-patterns.md](references/tablecell-patterns.md) - For custom table cells
 - [delegate-architecture.md](references/delegate-architecture.md) - For delegate usage
+- [notification-patterns.md](references/notification-patterns.md) - WebSocket subscriptions, `PodNotificationWebSocket`, `ManagedSubscription`, `Filter` (fluent filter API), `SubscriptionContext`
 - [error-handling.md](references/error-handling.md) - Error decision matrix
 - [pod2-api-reference.md](references/pod2-api-reference.md) - PodContext, ModelPath API (comprehensive)
 - [podcontext-api-reference.md](references/podcontext-api-reference.md) - ⭐ PodContext deep reference (source-derived): all getters/setters, subscribe/unsubscribe, custom paths, WorkListItem/OperationActivity object shapes, common mistakes
@@ -217,6 +218,10 @@ if (oOp && oWL) {
 - `PodContext.getLastSelectedOperationActivity()` - Get selected **operation** (if OperationActivity widget exists)
 - `PodContext.getLastSelectedWorkListItem()` - Get selected **SFC** (if WorkList widget exists)
 - `PodContext.getFilterResources()` - Get filtered **resources** (array, always available)
+- `PodContext.getFilterSfcs()` - Get filter bar **SFC** values (`string[]`)
+- `PodContext.getFilterProcessLot()` - Get filter bar **process lot** value (`string`) — use in process-industry PODs
+- `PodContext.getIndustryType()` - Returns `"DISCRETE"` or `"PROCESS"` — use to branch on industry type
+- `PodContext.getWhenAvailable(path)` - Returns a **Promise** that resolves when a model path becomes non-null — use during init to avoid race conditions
 
 **❌ Common Mistakes:**
 ```javascript
@@ -383,6 +388,8 @@ onExit() {
     super.onExit();
 }
 ```
+
+For **WebSocket / real-time** subscriptions use `PodNotificationWebSocket` or `ManagedSubscription` (not PodContext). Build subscription scope with the `Filter` class fluent API (`.equals()`, `.and()`, `.equalsAny()`, etc.). See [notification-patterns.md](references/notification-patterns.md) for the full pattern including `Filter`, `ManagedSubscription.destroy()`, and `SubscriptionContext.unsubscribe()`.
 
 See [Mistake #3](references/common-mistakes.md#mistake-3) for complete patterns.
 

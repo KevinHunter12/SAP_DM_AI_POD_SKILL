@@ -186,6 +186,75 @@ class ResourceStatusWidget extends Widget {
 
 ---
 
+## Filter Class
+
+**Source:** `sap/dm/dme/pod2/notification/Filter`
+
+Use `Filter` to scope a `PodNotificationWebSocket` or `ManagedSubscription` to specific field values. Filters are built with a fluent API.
+
+```javascript
+import Filter from "sap/dm/dme/pod2/notification/Filter";
+```
+
+### Comparison Methods (return `Filter` instance for chaining)
+
+```javascript
+Filter.equals("fieldName", "value")          // field === value
+Filter.notEquals("fieldName", "value")       // field !== value
+Filter.greaterThan("fieldName", value)       // field > value
+Filter.lessThan("fieldName", value)          // field < value
+Filter.equalsAny("fieldName", ["a", "b"])    // field is one of these values
+Filter.notEqualsAll("fieldName", ["a", "b"]) // field is none of these values
+```
+
+### Logical Combinators (return `Filter` instance for chaining)
+
+```javascript
+filter.and(anotherFilter)   // both must match
+filter.or(anotherFilter)    // either must match
+```
+
+### Example — Scoped Resource Subscription
+
+```javascript
+import Filter from "sap/dm/dme/pod2/notification/Filter";
+
+getFilter: () => {
+    const aResources = PodContext.getFilterResources();
+    if (!aResources?.length) return null;  // no resource selected — don't subscribe
+
+    // Only receive events for the currently selected resource
+    return Filter.equals("resource", aResources[0].resource);
+}
+```
+
+### Example — Combined Filter
+
+```javascript
+// Receive events for plant 1010 where status is ACTIVE or IN_QUEUE
+const oFilter = Filter.equals("plant", "1010")
+    .and(Filter.equalsAny("status", ["ACTIVE", "IN_QUEUE"]));
+```
+
+---
+
+## SubscriptionContext
+
+The object returned by `PodNotificationWebSocket.subscribe()`. Store it as a private field and call `.unsubscribe()` in `onExit()`.
+
+```javascript
+// returned from PodNotificationWebSocket.subscribe(...)
+this.#oSubscriptionContext = PodNotificationWebSocket.subscribe({ ... });
+
+// In onExit():
+this.#oSubscriptionContext?.unsubscribe();
+this.#oSubscriptionContext = null;
+```
+
+`ManagedSubscription` manages its own `SubscriptionContext` internally — you never call `.unsubscribe()` on one directly; call `managedSub.destroy()` instead.
+
+---
+
 ## Key Differences
 
 | | PodNotificationWebSocket | ManagedSubscription |
@@ -194,6 +263,7 @@ class ResourceStatusWidget extends Widget {
 | Lifecycle | Manual subscribe/unsubscribe | Auto-manages via `update()` |
 | Cleanup | Call `context.unsubscribe()` | Call `destroy()` |
 | Constructor | N/A (static) | Calls `update()` automatically |
+| Filter | Pass `Filter` instance in options | Return `Filter` from `getFilter()` |
 
 ---
 
