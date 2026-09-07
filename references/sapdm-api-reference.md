@@ -119,17 +119,22 @@ https://api.us10.dmc.cloud.sap/material/v1
 | POST | `/sfcs/quantity` | Update SFC quantity |
 | GET | `/sfcs` | Get SFC details |
 
-**Common Request Pattern:**
+**Common Request Pattern (ApiClient.sfc.sfcStart):**
 ```json
 {
   "plant": "PLANT_1",
-  "sfcs": [
-    { "sfc": "SFC001" }
-  ],
-  "operationActivity": "OPER_1,1",
-  "resource": "RESOURCE_1"
+  "sfcs": ["SFC001"],
+  "operation": "OPER_1,1",
+  "resource": "RESOURCE_1",
+  "autoAssembleEnabled": true
 }
 ```
+
+**Note**: 
+- The `sfcs` property is an **array of strings**, not an array of objects
+- Use `operation` (not `operationActivity`) - ApiClient differs from REST API
+- `plant` IS required (use `PodContext.getPlant()`)
+- `autoAssembleEnabled` defaults to true
 
 ---
 

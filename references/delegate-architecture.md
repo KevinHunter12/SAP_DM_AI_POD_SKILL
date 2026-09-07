@@ -717,6 +717,10 @@ static async fetchNextPage()
 // Selective refresh - only if list contains specific SFCs
 static async refreshIfContainsSfc(aSfcs)
 
+// Refresh only specific stale SFCs — does NOT clear non-matching items
+// vSfcs: string | Array<string>
+static async refreshStaleSfcs(vSfcs)
+
 // Get last filter used
 static getLatestFilter()
 ```
@@ -764,6 +768,19 @@ static selectNextOperationActivity()
 - Filter non-HEADER_TEXT work instructions
 - Preserve previous selection if still valid
 - Subscribe to multiple ModelPaths (SelectedWorkListItems, SelectedOperationActivities, FilterResources)
+
+**Public Methods:**
+```javascript
+// Manual initialization — called automatically on first refresh if not yet initialized
+static async init()
+
+// Main refresh — fetches work instructions, shows loading state
+static async refresh(oOptions = {})
+
+// Load work instruction elements on-demand for a specific instruction
+// Returns array of WorkInstructionElement
+static async loadWorkInstructionElements(sWorkInstructionId)
+```
 
 ### QuantityConfirmationDelegate
 

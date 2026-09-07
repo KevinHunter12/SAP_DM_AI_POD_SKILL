@@ -429,10 +429,38 @@ getI18nText(sKey, ...aArgs?): string
 
 ```javascript
 /**
- * REQUIRED - Get widget category for POD Designer
+ * REQUIRED - Get widget category for POD Designer palette
  * @returns {string}
  */
 static getCategory(): string
+
+/**
+ * Get display name shown in POD Designer
+ * @returns {string}
+ */
+static getDisplayName(): string
+
+/**
+ * Get description shown as tooltip/subtitle in POD Designer
+ * @returns {string}
+ */
+static getDescription(): string
+
+/**
+ * Get URL for help documentation link in POD Designer.
+ * If returned, a help icon link is shown next to the widget.
+ * @returns {string | null}
+ */
+static getHelpUrl(): string | null
+
+/**
+ * Shorthand for providing a type-specific i18n model.
+ * Return either a bundle name string, or a settings object.
+ * The framework creates an I18nResourceModel from this automatically.
+ * Prefer this over getI18nModel() for simpler setups.
+ * @returns {string | $I18nResourceModelSettings}
+ */
+static getI18nModelSettings(): string | object
 
 /**
  * Get default widget configuration
@@ -440,6 +468,13 @@ static getCategory(): string
  * @returns {DefaultWidgetConfig}
  */
 static getDefaultConfig(sId): DefaultWidgetConfig
+
+/**
+ * Get path to optional CSS stylesheet for this widget.
+ * The framework loads this stylesheet before the widget is rendered.
+ * @returns {string | null}  e.g. "namespace/widget/MyWidget.css"
+ */
+static getStyleSheet(): string | null
 
 /**
  * Generate unique widget ID
@@ -457,6 +492,48 @@ static _generateWidgetId(sWidgetType): string
  * @private
  */
 static _generateWidgetIds(sWidgetType, iCount): Array<string>
+```
+
+#### getStyleSheet() Example
+
+```javascript
+class MyWidget extends Widget {
+    static getStyleSheet() {
+        // Framework loads this CSS before rendering
+        return "custom/pod2/myproject/widget/MyWidget.css";
+    }
+}
+```
+
+#### getHelpUrl() Example
+
+```javascript
+class MyWidget extends Widget {
+    static getHelpUrl() {
+        return "https://help.sap.com/docs/my-docs-page";
+    }
+}
+```
+
+#### getI18nModelSettings() Shorthand
+
+```javascript
+class MyWidget extends Widget {
+    // Shorthand: return bundle name string
+    static getI18nModelSettings() {
+        return "custom.pod2.myproject.i18n.i18n";
+    }
+
+    // OR: return settings object
+    static getI18nModelSettings() {
+        return {
+            bundleName: "custom.pod2.myproject.i18n.i18n",
+            // additional I18nResourceModel settings...
+        };
+    }
+    // NOTE: Either method works — use getI18nModel() for I18nResourceModel instance access,
+    // use getI18nModelSettings() for a simpler one-liner declaration.
+}
 ```
 
 ---
@@ -581,19 +658,45 @@ _getModel(): sap.ui.model.Model
 static get(sModelPath): any
 
 /**
- * Wait for data to become available
+ * Wait for a model path value to become defined (not undefined).
+ * Returns a Promise that resolves immediately if the value is already set,
+ * or waits until it is set. Useful in onInit() when another widget may
+ * not have populated data yet.
  * @param {string} sModelPath - Model path
  * @returns {Promise<any>}
  */
 static getWhenAvailable(sModelPath): Promise<any>
 
 /**
- * Set context value
+ * Set context value (custom properties only)
  * @param {string} sModelPath - Model path
  * @param {any} vValue - Value to set
  * @returns {boolean}
  */
 static set(sModelPath, vValue): boolean
+
+/**
+ * Resolve a binding expression or object
+ * @param {any} vBinding - Binding expression or binding info object
+ * @param {sap.ui.core.Control} [oControl] - Optional context control
+ * @returns {any} Resolved value
+ */
+static resolveBinding(vBinding, oControl?): any
+```
+
+#### getWhenAvailable() Example
+
+```javascript
+// Use when a required delegate value may not be loaded yet at onInit() time
+async onInit() {
+    await super.onInit();
+
+    if (PodContext.isRunMode()) {
+        // Wait for worklist to be populated before acting
+        const aItems = await PodContext.getWhenAvailable(ModelPath.WorkListItems);
+        this._updateDisplay(aItems);
+    }
+}
 ```
 
 ### Subscription Management
@@ -799,10 +902,10 @@ static setDataCollectionLog(aDataCollectionLog): void
 
 ```javascript
 /**
- * Get SFC filter
- * @returns {string}
+ * Get SFC filter values (from worklist filter bar)
+ * @returns {Array<string>}
  */
-static getFilterSFC(): string
+static getFilterSfcs(): Array<string>
 
 /**
  * Get filter input type
@@ -833,6 +936,18 @@ static getFilterMaterials(): Array<Material>
  * @returns {Array<OperationActivityMaster>}
  */
 static getFilterOperationActivities(): Array<OperationActivityMaster>
+
+/**
+ * Set SFC filter values
+ * @param {Array<string>} aSfcs
+ */
+static setFilterSfcs(aSfcs): void
+
+/**
+ * Set process lot filter
+ * @param {string} sProcessLot
+ */
+static setFilterProcessLot(sProcessLot): void
 
 /**
  * Set filter input type
@@ -869,12 +984,6 @@ static setFilterOperationActivities(aOperationActivities): void
 
 ```javascript
 /**
- * Get badged-in user
- * @returns {BadgedInUser}
- */
-static getBadgedInUser(): BadgedInUser
-
-/**
  * Get current user ID
  * @returns {string}
  */
@@ -887,28 +996,22 @@ static getUserId(): string
 static getPlant(): string
 
 /**
- * Get plant time zone
+ * Get plant time zone (IANA timezone string, e.g. "America/Chicago")
  * @returns {string}
  */
 static getPlantTimeZone(): string
 
 /**
- * Get POD ID
+ * Get current POD ID
  * @returns {string}
  */
 static getPodId(): string
 
 /**
- * Get industry type
+ * Get industry type ("DISCRETE" or "PROCESS")
  * @returns {string}
  */
 static getIndustryType(): string
-
-/**
- * Set badged-in user
- * @param {BadgedInUser} oBadgedInUser - User object
- */
-static setBadgedInUser(oBadgedInUser): void
 
 /**
  * Check if in design mode
@@ -933,6 +1036,12 @@ static isDiscreteIndustry(): boolean
  * @returns {boolean}
  */
 static isProcessIndustry(): boolean
+
+/**
+ * Get POD runtime object (navigation, widget access, etc.)
+ * @returns {PodRuntime}
+ */
+static getPodRuntime(): PodRuntime
 ```
 
 ### I18n & Models
@@ -975,16 +1084,22 @@ static getGoodsReceiptSummary(): GoodsReceiptSummary
 static getGoodsReceiptLineItems(): Array<GoodsReceiptLineItem>
 
 /**
- * Get activity summaries
- * @returns {ActivitySummaries}
+ * Get activity confirmation summary list
+ * @returns {Array<ActivityConfirmationSummary>}
  */
-static getActivitySummaries(): ActivitySummaries
+static getActivityConfirmationSummaryList(): Array<ActivityConfirmationSummary>
 
 /**
  * Get reported quantity items
  * @returns {Array<ReportedQuantity>}
  */
 static getReportedQuantityItems(): Array<ReportedQuantity>
+
+/**
+ * Get reported quantity count
+ * @returns {number}
+ */
+static getReportedQuantityCount(): number
 
 /**
  * Get work instructions
@@ -999,24 +1114,47 @@ static getWorkInstructions(): Array<WorkInstruction>
 static getSelectedWorkInstruction(): WorkInstruction
 
 /**
- * Get execution SFC quantity
+ * Get execution SFC quantity (quantity set for start/complete actions)
  * @returns {number}
  */
 static getExecutionSFCQuantity(): number
 
 /**
- * Get POD runtime
- * @returns {PodRuntime}
+ * Get signature history for a signature widget
+ * @param {string} sSignatureWidgetId - Widget ID
+ * @returns {Array<Signature>}
  */
-static getPodRuntime(): PodRuntime
+static getSignatureHistory(sSignatureWidgetId): Array<Signature>
 
 /**
- * Resolve data binding
- * @param {any} vBinding - Binding expression
- * @param {sap.ui.core.Control} [oControl] - Control context
- * @returns {any}
+ * Set execution SFC quantity (used by quantity widgets before SFC actions)
+ * @param {number} iQuantity
  */
-static resolveBinding(vBinding, oControl?): any
+static setExecutionSFCQuantity(iQuantity): void
+
+/**
+ * Set selected work instruction
+ * @param {WorkInstruction} oWorkInstruction
+ */
+static setSelectedWorkInstruction(oWorkInstruction): void
+
+/**
+ * Set activity confirmation summary list
+ * @param {Array} oActivityConfirmationSummaryList
+ */
+static setActivityConfirmationSummaryList(oActivityConfirmationSummaryList): void
+
+/**
+ * Set reported quantity count
+ * @param {number} iCount
+ */
+static setReportedQuantityCount(iCount): void
+
+/**
+ * Set reported quantity items
+ * @param {Array} aItems
+ */
+static setReportedQuantityItems(aItems): void
 ```
 
 ---
@@ -1029,23 +1167,52 @@ Common model paths for use with PodContext.subscribe() and PodContext.get():
 
 ```javascript
 // Filter Paths
-ModelPath.FilterResources, ModelPath.FilterWorkCenters, ModelPath.FilterMaterials
-ModelPath.FilterOperationActivities, ModelPath.FilterInputType
+ModelPath.FilterResources
+ModelPath.FilterWorkCenters
+ModelPath.FilterMaterials
+ModelPath.FilterOperationActivities
+ModelPath.FilterSfcs          // Array<string> — SFC filter bar values
+ModelPath.FilterInputType
 
 // Work List Paths (note: plural for arrays!)
-ModelPath.SelectedWorkListItems, ModelPath.WorkListItems, ModelPath.WorkListCount
-ModelPath.WorkListLoading, ModelPath.WorkListPageSize, ModelPath.WorkListSorting, ModelPath.WorkListType
+ModelPath.SelectedWorkListItems   // Array — the selected items
+ModelPath.WorkListItems           // Array — all visible items
+ModelPath.WorkListCount           // number — total count
+ModelPath.WorkListLoading         // boolean
+ModelPath.WorkListPageSize        // number
+ModelPath.WorkListSorting         // Array<Sorting>
+ModelPath.WorkListType            // WorkListType enum
 
 // Operation & Activity Paths
-ModelPath.OperationActivities, ModelPath.SelectedOperationActivities
+ModelPath.OperationActivities
+ModelPath.SelectedOperationActivities
+ModelPath.OperationActivitiesLoading   // boolean
+
+// Work Instructions
+ModelPath.WorkInstructions
+ModelPath.SelectedWorkInstruction
+ModelPath.WorkInstructionsLoading      // boolean
+
+// Reported Quantities
+ModelPath.ReportedQuantityItems
+ModelPath.ReportedQuantityCount        // number
+ModelPath.ReportedQuantityLoading      // boolean
+
+// Activity Confirmation
+ModelPath.ActivityConfirmationSummaryList
+
+// Goods Receipt
+ModelPath.GoodsReceiptSummary
+ModelPath.GoodsReceiptLineItems
 
 // Data Collection Paths
-ModelPath.DataCollectionGroups, ModelPath.DataCollectionSelectedGroup, ModelPath.DataCollectionLog
+ModelPath.DataCollectionGroups
+ModelPath.DataCollectionSelectedGroup
+ModelPath.DataCollectionLog
 
-// Other Domain Paths
-ModelPath.GoodsReceiptSummary, ModelPath.GoodsReceiptLineItems
-ModelPath.ActivitySummaries, ModelPath.ReportedQuantityItems
-ModelPath.WorkInstructions, ModelPath.SelectedWorkInstruction, ModelPath.ExecutionSFCQuantity
+// Other
+ModelPath.ExecutionSFCQuantity    // number — set by quantity widgets
+ModelPath.PodId                   // string — current POD ID
 ```
 
 ---
@@ -1063,6 +1230,20 @@ ModelPath.WorkInstructions, ModelPath.SelectedWorkInstruction, ModelPath.Executi
  * @returns {void | Promise<void>}
  */
 execute(oActionContext): void | Promise<void>
+
+/**
+ * OPTIONAL lifecycle hook — called before the FIRST execute() in a sequence.
+ * All actions in the sequence are initialized (onInit called) in order and
+ * AWAITED before any action's execute() is called.
+ * @returns {void | Promise<void>}
+ */
+onInit?(): void | Promise<void>
+
+/**
+ * OPTIONAL lifecycle hook — called after ALL actions in the sequence have executed.
+ * @returns {void | Promise<void>}
+ */
+onExit?(): void | Promise<void>
 
 /**
  * Get action ID
@@ -1109,7 +1290,24 @@ getPodRuntime(): PodRuntime
  * @returns {string}
  */
 getI18nText(sKey, ...aArgs?): string
+
+/**
+ * STATIC — Return property name(s) that hold references to widget IDs.
+ * When a referenced widget is renamed in POD Designer, the action's
+ * property value will be automatically updated to match.
+ * @returns {string | Array<string> | undefined}
+ */
+static getWidgetReferenceProperties(): string | Array<string> | undefined
 ```
+
+### Action Lifecycle Sequence
+
+When multiple actions are assigned to a widget event, they run as a sequence:
+
+1. `onInit()` called on **all** actions in order (awaited sequentially)
+2. `execute()` called on each action in order
+   - Any action can call `oActionContext.abort()` to skip remaining actions
+3. `onExit()` called on **all** actions after the sequence completes
 
 ### Action Context
 
@@ -1121,15 +1319,47 @@ widget: Widget         // Widget that triggered action
 event: Event          // UI event that triggered action
 
 /**
- * Abort action execution
+ * Abort — skip all subsequent actions in the sequence
  */
 abort(): void
 
 /**
- * Check if action was aborted
+ * Check if a previous action in the sequence called abort()
+ * IMPORTANT: Call this at the start of execute() to respect abort requests
  * @returns {boolean}
  */
 isAborted(): boolean
+```
+
+### Correct Action Pattern with Abort Handling
+
+```javascript
+class MyAction extends Action {
+    async onInit() {
+        // Setup code that runs before execute() — e.g. validate prerequisites
+        const oItem = PodContext.getLastSelectedWorkListItem();
+        if (!oItem) {
+            this._abortReason = "No item selected";
+        }
+    }
+
+    async execute(oActionContext) {
+        // ALWAYS check isAborted() first to respect prior action decisions
+        if (oActionContext.isAborted()) {
+            return;
+        }
+
+        // Abort if our own init found a problem
+        if (this._abortReason) {
+            MessageHistory.showError(this._abortReason);
+            oActionContext.abort();
+            return;
+        }
+
+        // Actual logic
+        await ApiClient.sfc.sfcStart({ ... });
+    }
+}
 ```
 
 ---
@@ -1422,12 +1652,42 @@ new sap.dm.dme.pod2.propertyeditor.BooleanPropertyEditor(
 For dropdown selection.
 
 ```javascript
-new sap.dm.dme.pod2.propertyeditor.SelectPropertyEditor(
-    oPropertyAccessor,  // Property accessor
-    sPropertyId,        // Property ID
-    vItems?,            // Optional items array or binding
-    sDefaultKey?        // Optional default key
+new SelectPropertyEditor(
+    oPropertyAccessor,  // Property accessor (pass `this`)
+    sPropertyId,        // Property ID string (e.g. "myProp")
+    vItems?,            // Plain object: { key: "Display Text", key2: "Text 2" }
+                        // OR array of strings (each used as both key and text)
+                        // NOT Item instances, NOT [{ key, text }] arrays
+    sDefaultKey?        // Key to select by default if no value already saved
 )
+```
+
+**CRITICAL: `vItems` must be a plain `{ key: "text" }` object.**
+
+```javascript
+// ✅ CORRECT — plain object, keys are option keys, values are display text
+getProperties() {
+    return [
+        new WidgetProperty({
+            displayName: this.getI18nText("property.layout"),
+            category: "Main",
+            propertyEditor: new SelectPropertyEditor(this, "layout", {
+                layout1: this.getI18nText("layout.option1"),
+                layout2: this.getI18nText("layout.option2"),
+                layout3: this.getI18nText("layout.option3")
+            }, "layout1")
+        })
+    ];
+}
+
+// ✅ ALSO CORRECT — array of strings (key === text)
+new SelectPropertyEditor(this, "size", ["small", "medium", "large"], "medium")
+
+// ❌ WRONG — array of objects: shows "[object Object]"
+new SelectPropertyEditor(this, "layout", [{ key: "layout1", text: "Layout 1" }])
+
+// ❌ WRONG — Item instances: shows "Element sap.ui.core.Item#__item79"
+new SelectPropertyEditor(this, "layout", [new Item({ key: "layout1", text: "Layout 1" })])
 ```
 
 #### EnumPropertyEditor
@@ -1833,13 +2093,15 @@ await ApiClient.bom.getBoms(oRequest, oOptions?)
 ### Other Available APIs
 
 ```javascript
-ApiClient.inventory          // Inventory operations
-ApiClient.uom               // Unit of measure
-ApiClient.workinstruction   // Work instructions
-ApiClient.processorder      // Process orders
-ApiClient.mdo               // MDO objects
-ApiClient.ebr               // Electronic batch records
-ApiClient.internal          // Internal APIs
+ApiClient.alert          // Alert APIs
+ApiClient.inventory      // Inventory operations
+ApiClient.uom            // Unit of measure
+ApiClient.user           // User APIs
+ApiClient.workinstruction // Work instructions
+ApiClient.processorder   // Process orders
+ApiClient.execution      // Execution APIs
+ApiClient.mdo            // Master data object APIs
+ApiClient.internal       // Internal APIs (SAP widgets only — may change without notice)
 ```
 
 ---
@@ -1854,14 +2116,14 @@ ApiClient.internal          // Internal APIs
 
 ```javascript
 /**
- * Get current date/time
+ * Get current date/time in plant timezone
  * @returns {Date | UI5Date}
  * @static
  */
 DateTimeUtils.now(): Date
 
 /**
- * Get start of day (00:00:00)
+ * Get start of day (00:00:00.000) in plant timezone
  * @param {Date} [oDate] - Date (defaults to today)
  * @returns {Date | UI5Date}
  * @static
@@ -1869,7 +2131,7 @@ DateTimeUtils.now(): Date
 DateTimeUtils.startOfDay(oDate?): Date
 
 /**
- * Get end of day (23:59:59)
+ * Get end of day (23:59:59.999) in plant timezone
  * @param {Date} [oDate] - Date (defaults to today)
  * @returns {Date | UI5Date}
  * @static
@@ -1877,40 +2139,12 @@ DateTimeUtils.startOfDay(oDate?): Date
 DateTimeUtils.endOfDay(oDate?): Date
 
 /**
- * Parse OData date string
+ * Parse OData date string "/Date(timestamp)/"
  * @param {string} sDate - OData date string
- * @returns {Date | UI5Date | null}
+ * @returns {Date | UI5Date | null} null if parsing fails
  * @static
  */
 DateTimeUtils.fromODataDateString(sDate): Date | null
-```
-
-### Formatting Methods
-
-```javascript
-/**
- * Format as locale date
- * @param {any} vValue - Date value
- * @returns {string}
- * @static
- */
-DateTimeUtils.localeDate(vValue): string
-
-/**
- * Format as locale time
- * @param {any} vValue - Time value
- * @returns {string}
- * @static
- */
-DateTimeUtils.localeTime(vValue): string
-
-/**
- * Format as locale date and time
- * @param {any} vValue - DateTime value
- * @returns {string}
- * @static
- */
-DateTimeUtils.localeDateTime(vValue): string
 ```
 
 ### Usage Example
@@ -1918,18 +2152,24 @@ DateTimeUtils.localeDateTime(vValue): string
 ```javascript
 import DateTimeUtils from "sap/dm/dme/pod2/DateTimeUtils";
 
-// Get current time
+// Get current time in plant timezone
 const now = DateTimeUtils.now();
 
-// Get start/end of day
+// Get start/end of today in plant timezone
 const startOfDay = DateTimeUtils.startOfDay();
 const endOfDay = DateTimeUtils.endOfDay();
 
-// Format for display
-const formattedDate = DateTimeUtils.localeDate(now);
-const formattedTime = DateTimeUtils.localeTime(now);
-const formattedDateTime = DateTimeUtils.localeDateTime(now);
+// For a specific date
+const startOfSpecificDay = DateTimeUtils.startOfDay(someDate);
+
+// Parse OData date from API response
+const oDate = DateTimeUtils.fromODataDateString("/Date(1623668012060)/");
+if (oDate) {
+    // Valid date
+}
 ```
+
+> **Note:** `DateTimeUtils` does NOT have `localeDate()`, `localeTime()`, or `localeDateTime()` methods. For locale-formatted display, use SAPUI5's `DateFormat` directly or bind dates to UI5 controls with format options.
 
 ---
 
@@ -1994,6 +2234,163 @@ WidgetRegistry.isCore(oWidgetClass): boolean
  * @static
  */
 WidgetRegistry.isCustom(oWidgetClass): boolean
+```
+
+---
+
+## PODRUNTIME
+
+**Class:** `sap.dm.dme.pod2.runtime.PodRuntime`
+
+Access via `PodContext.getPodRuntime()` or `this.getPodRuntime()` inside any widget or action.
+
+### Navigation
+
+```javascript
+/**
+ * Navigate to a page by ID. Protected against nested navigation.
+ * @param {string} sPageId - Page ID as configured in POD Designer
+ * @returns {Promise<void>}
+ */
+async navigateToPage(sPageId): Promise<void>
+
+/**
+ * Navigate back to the previous page.
+ * @returns {Promise<void>}
+ */
+async navigateBack(): Promise<void>
+
+/**
+ * Navigate to a widget by ID (handles page navigation and tab switching).
+ * @param {string} sWidgetId - Widget ID
+ * @returns {Promise<void>}
+ */
+async navigateToWidget(sWidgetId): Promise<void>
+
+/**
+ * Navigate to a widget by type string. Only navigates if exact match found.
+ * @param {string} sWidgetType - Widget type (e.g., "sap.dm.dme.pod2.widget.WorkListTableWidget")
+ * @returns {Promise<void>}
+ */
+async navigateToWidgetByType(sWidgetType): Promise<void>
+
+/**
+ * Open a dialog widget by ID.
+ * @param {string} sDialogId - Dialog widget ID
+ * @returns {Promise<void>}
+ */
+async showDialog(sDialogId): Promise<void>
+```
+
+### Widget Access
+
+```javascript
+/**
+ * Get a widget instance by its ID
+ * @param {string} sId - Widget ID
+ * @returns {Widget}
+ */
+getWidget(sId): Widget
+
+/**
+ * Get the Widget for a given SAPUI5 control
+ * @param {sap.ui.core.Element} oView - The SAPUI5 control
+ * @returns {Widget}
+ */
+getWidgetForView(oView): Widget
+
+/**
+ * Get Widgets for an array of SAPUI5 controls (order matches input)
+ * @param {Array<sap.ui.core.Element>} aViews
+ * @returns {Array<Widget>}
+ */
+getWidgetsForViews(aViews): Array<Widget>
+
+/**
+ * Execute callback for each instantiated widget across all pages/dialogs
+ * @param {Function} fnCallback - (oWidget: Widget) => void
+ */
+forEachWidget(fnCallback): void
+
+/**
+ * Find a widget config matching a predicate. Stops at first match.
+ * @param {Function} fnCompare - (oWidgetConfig: WidgetConfig) => boolean
+ * @returns {WidgetConfig}
+ */
+findWidgetConfig(fnCompare): WidgetConfig
+
+/**
+ * Execute callback for each widget configuration (regardless of instantiation)
+ * @param {Function} fnCallback - (oWidgetConfig: WidgetConfig) => void
+ */
+forEachWidgetConfig(fnCallback): void
+
+/**
+ * Execute callback for each action configuration
+ * @param {Function} fnCallback - (oActionConfig, { widgetConfig, event }) => void
+ */
+forEachActionConfig(fnCallback): void
+```
+
+### Page / View Access
+
+```javascript
+/**
+ * Get the current page control
+ * @returns {sap.ui.core.Control}
+ */
+getCurrentPage(): sap.ui.core.Control
+
+/**
+ * Get the current page widget
+ * @returns {PageWidget}
+ */
+getCurrentPageWidget(): PageWidget
+
+/**
+ * Get the main app view
+ * @returns {sap.m.App}
+ */
+getView(): sap.m.App
+
+/**
+ * Get the full POD configuration object
+ * @returns {PodConfig}
+ */
+getPodConfig(): PodConfig
+```
+
+### Usage Examples
+
+```javascript
+// Programmatic navigation from a button press
+async _onNavigateToDetailPage() {
+    const oRuntime = PodContext.getPodRuntime();
+    await oRuntime.navigateToPage("detailPage");
+}
+
+// Open a dialog programmatically
+async _onOpenDialog() {
+    const oRuntime = this.getPodRuntime();
+    await oRuntime.showDialog("myCustomDialog");
+}
+
+// Find another widget and call a method on it
+_onRefreshOtherWidget() {
+    const oRuntime = this.getPodRuntime();
+    const oOtherWidget = oRuntime.getWidget("workListTable");
+    if (oOtherWidget && typeof oOtherWidget.refresh === "function") {
+        oOtherWidget.refresh();
+    }
+}
+
+// Find a widget config by type
+_findWorkListConfig() {
+    const oRuntime = this.getPodRuntime();
+    return oRuntime.findWidgetConfig(oConfig =>
+        oConfig.type === "sap.dm.dme.pod2.widget.WorkListTableWidget"
+    );
+}
 ```
 
 ---
@@ -2217,6 +2614,313 @@ class MyWidget extends Widget {
 
 ---
 
+## DATA TYPES
+
+### Type Hierarchy
+
+```
+BaseWorkListItem
+  └── WorkListItem      (discrete industry, SFC-based)
+  └── OrderWorkListItem (process industry, order-based)
+
+BaseOperationWorkItem
+  └── OperationActivity (discrete industry)
+  └── Phase             (process industry)
+```
+
+---
+
+### BaseWorkListItem
+
+**Class:** `sap.dm.dme.pod2.context.type.BaseWorkListItem`
+
+Base type for all work list rows. Methods are defined here; properties on subclasses.
+
+```javascript
+/**
+ * Get unique identifier (SFC or order number depending on subtype)
+ * @returns {string}
+ */
+getIdentifier(): string
+
+/**
+ * Validate the item. Throws Error if required fields missing.
+ */
+validate(): void
+```
+
+**Common Properties** (on both WorkListItem and OrderWorkListItem):
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `sfc` | `string` | SFC number |
+| `material` | `string` | Material number |
+| `materialDescription` | `string` | |
+| `materialVersion` | `string` | |
+| `routing` | `string` | |
+| `routingVersion` | `string` | |
+| `order` | `string` | Shop/process order number |
+| `sfcStatusCode` | `SFCStatusCode` | |
+| `sfcStatusDescription` | `string` | |
+| `sfcQuantity` | `number` | |
+| `operationActivity` | `string` | Current/last operation |
+| `workCenter` | `string` | |
+| `customFields` | `Object.<string, string>` | Custom data — **OBJECT, not array!** |
+
+---
+
+### WorkListItem (Discrete Industry)
+
+**Class:** `sap.dm.dme.pod2.context.type.WorkListItem`
+
+Extends `BaseWorkListItem`. Full properties:
+
+| Property | Type |
+|----------|------|
+| `sfcBatchNumber` | `string` |
+| `orderBatchNumber` | `string` |
+| `sfcQuantityInQueue` | `number` |
+| `sfcQuantityInWork` | `number` |
+| `sfcQuantityCompletePending` | `number` |
+| `sfcCompletePending` | `boolean` |
+| `sfcStartDate` | `UI5Date` |
+| `sfcDateQueued` | `UI5Date` |
+| `sfcDueDate` | `UI5Date` |
+| `orderPlannedStartDate` | `UI5Date` |
+| `orderScheduledStartDate` | `UI5Date` |
+| `orderScheduledCompletionDate` | `UI5Date` |
+| `operationActivityDescription` | `string` |
+| `operationActivityGroup` | `string` |
+| `stepId` | `string` |
+| `resource` | `string` |
+| `priority` | `string` |
+| `processLot` | `string` |
+| `customer` | `string` |
+| `customerOrder` | `string` |
+| `rmaNumber` | `string` |
+| `materialGroup` | `string` |
+
+---
+
+### OrderWorkListItem (Process Industry)
+
+**Class:** `sap.dm.dme.pod2.context.type.OrderWorkListItem`
+
+Extends `BaseWorkListItem`. Additional properties for process industry:
+
+| Property | Type |
+|----------|------|
+| `orderExecutionStatus` | `ExecutionStatus` |
+| `orderReleaseStatus` | `ReleaseStatus` |
+| `orderQuantityPlanned` | `number` |
+| `orderQuantityCompleted` | `number` |
+| `orderQuantityPlannedInProductionUom` | `number` |
+| `sfcQuantityInProductionUom` | `number` |
+| `sfcQuantityCompleted` | `number` |
+| `baseCommercialUom` | `string` |
+| `productionCommercialUom` | `string` |
+| `erpAutoGRStatus` | `boolean` |
+| `coAndByProductsIndicator` | `string` |
+| `bom` | `string` |
+| `bomType` | `string` |
+| `bomVersion` | `string` |
+
+---
+
+### BaseOperationWorkItem
+
+**Class:** `sap.dm.dme.pod2.context.type.BaseOperationWorkItem`
+
+Base for OperationActivity and Phase.
+
+```javascript
+isActive(): boolean    // True if status is In Queue or In Work
+isComplete(): boolean  // True if statusComplete = true
+isInQueue(): boolean   // True if statusInQueue = true
+```
+
+**Common Properties:**
+
+| Property | Type |
+|----------|------|
+| `operationActivity` | `string` |
+| `operationActivityGroup` | `string` |
+| `stepId` | `string` |
+| `workCenter` | `string` |
+| `resource` | `string` (often null — use `getFilterResources()`) |
+| `quantity` | `number` |
+| `quantityComplete` | `number` |
+| `quantityInQueue` | `number` |
+| `quantityInWork` | `number` |
+| `scheduleStartDate` | `UI5Date` |
+| `scheduleEndDate` | `UI5Date` |
+| `statusNew` | `boolean` |
+| `statusBypassed` | `boolean` |
+| `statusInQueue` | `boolean` |
+| `statusInWork` | `boolean` |
+| `statusComplete` | `boolean` |
+| `statusCompletePending` | `boolean` |
+
+---
+
+### OperationActivity (Discrete Industry)
+
+**Class:** `sap.dm.dme.pod2.context.type.OperationActivity`
+
+Extends `BaseOperationWorkItem`. Additional properties:
+
+| Property | Type |
+|----------|------|
+| `sfc` | `string` |
+| `material` | `string` |
+| `routing` | `string` |
+| `routingVersion` | `string` |
+| `previouslyStarted` | `boolean` |
+| `priority` | `string` |
+| `quantityReject` | `number` |
+| `quantityCompletePending` | `number` |
+| `dueDate` | `UI5Date` |
+| `plannedStartDate` | `UI5Date` |
+| `plannedEndDate` | `UI5Date` |
+| `opSplitId` | `number` |
+| `splitQuantity` | `number` |
+| `laboredOperators` | `Array<string>` |
+
+---
+
+### Phase (Process Industry)
+
+**Class:** `sap.dm.dme.pod2.context.type.Phase`
+
+Extends `BaseOperationWorkItem`. Additional properties for phases:
+
+| Property | Type |
+|----------|------|
+| `description` | `string` |
+| `actualStartDate` | `UI5Date` |
+| `actualEndDate` | `UI5Date` |
+| `userAuthorizedForWorkCenter` | `boolean` |
+
+---
+
+### Sfc
+
+**Class:** `sap.dm.dme.pod2.context.type.Sfc`
+
+Simple SFC data type (different from WorkListItem — this is the SFC object itself):
+
+| Property | Type |
+|----------|------|
+| `sfc` | `string` |
+| `status` | `SfcStatus` (enum) |
+| `quantity` | `number` |
+| `order` | `string` |
+| `material` | `string` |
+| `materialVersion` | `string` |
+| `createdAtDate` | `UI5Date` |
+
+---
+
+### ReportedQuantity
+
+**Class:** `sap.dm.dme.pod2.context.type.ReportedQuantity`
+
+Access via `PodContext.getReportedQuantityItems()`.
+
+| Property | Type |
+|----------|------|
+| `yieldQuantity` | `number` |
+| `yieldUnitOfMeasure` | `UnitOfMeasure` |
+| `yieldActivityLogId` | `string` |
+| `scrapQuantity` | `number` |
+| `scrapUnitOfMeasure` | `UnitOfMeasure` |
+| `scrapActivityLogId` | `string` |
+| `scrapReasonCode` | `string` |
+| `scrapReasonCodes` | `Array<string>` |
+| `scrapReasonCodeDescription` | `string` |
+| `resource` | `string` |
+| `resourceDescription` | `string` |
+| `userId` | `string` |
+| `status` | `string` |
+| `postingDate` | `UI5Date` |
+| `createdDate` | `UI5Date` |
+
+---
+
+### Resource
+
+**Class:** `sap.dm.dme.pod2.context.type.Resource`
+
+| Property | Type |
+|----------|------|
+| `plant` | `string` |
+| `resource` | `string` |
+| `description` | `string` |
+| `status` | (enum) |
+| `workCenter` | `string` |
+| `efficiency` | `number` |
+| `sfcLimit` | `number` |
+| `resourceTypes` | (array) |
+| `processResource` | `boolean` |
+| `customValues` | `Object.<string, string>` |
+
+---
+
+### WorkCenter
+
+**Class:** `sap.dm.dme.pod2.context.type.WorkCenter`
+
+| Property | Type |
+|----------|------|
+| `plant` | `string` |
+| `workCenter` | `string` |
+| `description` | `string` |
+| `status` | `"ENABLED"` |
+| `maxPeople` | `number` |
+| `minPeople` | `number` |
+| `isErp` | `boolean` |
+| `customValues` | `Object.<string, string>` |
+
+---
+
+### Material
+
+**Class:** `sap.dm.dme.pod2.context.type.Material`
+
+| Property | Type |
+|----------|------|
+| `material` | `string` |
+| `version` | `string` |
+| `currentVersion` | `boolean` |
+| `description` | `string` |
+| `materialType` | (enum) |
+| `status` | (enum) |
+| `unitOfMeasure` | `string` |
+| `lotSize` | `number` |
+| `erpBackflushing` | `boolean` |
+| `customValues` | `Object.<string, string>` |
+
+---
+
+### Plant
+
+**Class:** `sap.dm.dme.pod2.context.type.Plant`
+
+Available via `ApiClient` queries; `industryType` determines discrete vs. process.
+
+| Property | Type |
+|----------|------|
+| `plant` | `string` |
+| `description` | `string` |
+| `timeZone` | `string` (IANA) |
+| `industryType` | `"DISCRETE"` or `"PROCESS"` |
+| `integrationMode` | `string` |
+| `erpDestination` | `string` |
+| `erpLanguage` | `string` |
+| `isLocal` | `boolean` |
+
+---
+
 ## NOTES
 
 1. **All PodContext methods are static** - Call directly on the class, not on instances
@@ -2254,63 +2958,13 @@ Direct getters provide one-time access to context without subscription.
 | Button click handlers | Data refresh on selection |
 | Validation checks | Live filtering/updates |
 
-### Complete Direct Getter API
-
-```javascript
-// Plant context
-const sPlant = PodContext.getPlant();
-// Returns: "PLANT_1001" (string)
-
-// Selected operations
-const aSelectedOps = PodContext.getSelectedOperationActivities();
-// Returns: [{ sfc: "...", operationActivity: "...", ... }] (array)
-
-// Selected worklist items
-const aWorklistItems = PodContext.getSelectedWorkListItems();
-// Returns: [{ sfc: "...", operation: "...", ... }] (array)
-
-// Current resource
-const oResource = PodContext.getCurrentResource();
-// Returns: { resource: "...", resourceType: "...", ... } (object)
-
-// Current user
-const sUser = PodContext.getUser();
-// Returns: "USER123" (string)
-
-// Current work center
-const sWorkCenter = PodContext.getWorkCenter();
-// Returns: "WC-001" (string)
-
-// Operation list
-const aOperations = PodContext.getOperations();
-// Returns: [{ operation: "...", version: "...", ... }] (array)
-
-// Material list
-const aMaterials = PodContext.getMaterials();
-// Returns: [{ material: "...", version: "...", ... }] (array)
-```
-
 ### Usage Examples
 
-**Example 1: One-time read in onInit()**
-```javascript
-async onInit() {
-    await super.onInit();
-    
-    // Direct getter - only need plant once
-    const sPlant = PodContext.getPlant();
-    this.#oModel.setProperty("/plant", sPlant);
-}
-```
-
-**Example 2: Building request objects**
+**Example 1: Building request objects**
 ```javascript
 _getRequest() {
-    // Direct getters for request data
     const aSelectedOps = PodContext.getSelectedOperationActivities();
-    if (!aSelectedOps || aSelectedOps.length === 0) {
-        return null;
-    }
+    if (!aSelectedOps || aSelectedOps.length === 0) return null;
 
     return {
         plant: PodContext.getPlant(),
@@ -2320,24 +2974,340 @@ _getRequest() {
 }
 ```
 
-**Example 3: Button handler**
+**Example 2: Production Pattern - Subscribe + initial getter call**
+
+This is the pattern used by SAP production widgets (MaterialImageWidget, OrderHeaderTextWidget):
+
 ```javascript
-async onButtonPress() {
-    // Direct getter in event handler
-    const aSelectedOps = PodContext.getSelectedOperationActivities();
-    
-    if (aSelectedOps.length === 0) {
-        MessageBox.warning("Please select at least one operation");
-        return;
+async onInit() {
+    await super.onInit();
+    PodContext.subscribe(
+        ModelPath.SelectedWorkListItems,
+        this._onSelectionChanged,
+        this
+    );
+    this._onSelectionChanged(PodContext.getSelectedWorkListItems());
+}
+
+_onSelectionChanged(aItems) {
+    if (aItems && aItems.length > 0) {
+        this._loadData(aItems[0]);
     }
-    
-    await this._processOperations(aSelectedOps);
 }
 ```
 
-**Example 4: Production Pattern - Subscribe + Getter**
+---
 
-This is the pattern used by SAP production widgets (MaterialImageWidget, OrderHeaderTextWidget):
+### ⭐ CRITICAL: Getting Selected Operation, Resource, and Worklist Data
+
+**This is the most common pattern in POD 2.0 plugins. Used by 90% of official SAP widgets.**
+
+**⚠️ IMPORTANT: Plugins must be ADAPTIVE to work in different POD configurations!**
+
+Some PODs have OperationActivity widgets, some only have WorkList widgets, some have both. Your plugin must detect which widgets are available and adapt accordingly.
+
+#### Adaptive Pattern (REQUIRED - Works in All POD Configurations)
+
+```javascript
+// ✅ CORRECT - Adaptive pattern that handles all POD configurations
+async _onButtonPress() {
+    // Get filtered resources (available in all configurations)
+    const aFilterResources = PodContext.getFilterResources();
+    const sResource = aFilterResources?.[0]?.resource || null;
+
+    // Try to get from both widget types
+    const oLastSelectedOperation = PodContext.getLastSelectedOperationActivity();
+    const oLastSelectedWorkListItem = PodContext.getLastSelectedWorkListItem();
+
+    let sSfc, sOperation, sWorkCenter, sStepId;
+
+    if (oLastSelectedOperation && oLastSelectedWorkListItem) {
+        // Pattern 1: POD has BOTH OperationActivity widget AND WorkList widget
+        // This is the most common configuration in production PODs
+        sSfc = oLastSelectedWorkListItem.sfc;
+        sOperation = oLastSelectedOperation.operationActivity;
+        sWorkCenter = oLastSelectedOperation.workCenter;
+        sStepId = oLastSelectedOperation.stepId;
+
+        this.#oLog.info("Using OperationActivity + WorkList pattern");
+
+    } else if (oLastSelectedWorkListItem) {
+        // Pattern 2: POD has ONLY WorkList widget (no OperationActivity widget)
+        // Get operation data from worklist item
+        sSfc = oLastSelectedWorkListItem.sfc;
+        sOperation = oLastSelectedWorkListItem.operationActivity;
+        sWorkCenter = oLastSelectedWorkListItem.workCenter;
+        sStepId = oLastSelectedWorkListItem.stepId;
+
+        this.#oLog.info("Using WorkList-only pattern");
+
+    } else {
+        // Pattern 3: Fallback to array if getLastSelected* returns null
+        const aSelectedItems = PodContext.getSelectedWorkListItems();
+
+        if (Array.isArray(aSelectedItems) && aSelectedItems.length > 0) {
+            const oWorkListItem = aSelectedItems[0];
+            sSfc = oWorkListItem.sfc;
+            sOperation = oWorkListItem.operationActivity;
+            sWorkCenter = oWorkListItem.workCenter;
+            sStepId = oWorkListItem.stepId;
+
+            this.#oLog.info("Using WorkList array fallback pattern");
+        } else {
+            MessageHistory.showError(this.getI18nText("error.noSelection"));
+            this.#oLog.error("No worklist item or operation selected");
+            return;
+        }
+    }
+
+    // Validate required data
+    if (!sSfc || !sOperation) {
+        MessageHistory.showError(this.getI18nText("error.invalidSelection"));
+        this.#oLog.error("Missing SFC or Operation", { sSfc, sOperation });
+        return;
+    }
+
+    // Build API request with required fields
+    const oRequest = {
+        plant: PodContext.getPlant(),
+        sfc: sSfc,
+        operation: sOperation,
+        startDateTime: new Date().toISOString()
+    };
+
+    // Add optional fields if available
+    if (sResource) {
+        oRequest.resource = sResource;
+    }
+    if (sWorkCenter) {
+        oRequest.workCenter = sWorkCenter;
+    }
+    if (sStepId) {
+        oRequest.stepId = sStepId;
+    }
+
+    // Call API
+    await ApiClient.sfc.sfcStart(oRequest);
+}
+```
+
+#### POD Configuration Matrix
+
+| POD Configuration | Widgets Present | getLastSelectedOperationActivity() | getLastSelectedWorkListItem() | Pattern to Use |
+|-------------------|-----------------|-----------------------------------|-------------------------------|----------------|
+| **OperationActivity + WorkList** | Both | ✅ Returns data | ✅ Returns data | Use operation from OperationActivity, SFC from WorkList |
+| **WorkList Only** | WorkList | ❌ Returns null | ✅ Returns data | Use everything from WorkList |
+| **OperationActivity Only** | OperationActivity | ✅ Returns data | ❌ Returns null | Use everything from OperationActivity array |
+| **Neither** | Other widgets | ❌ Returns null | ❌ Returns null | Fall back to array getters |
+
+#### Why Adaptive Patterns Are Required
+
+**Non-adaptive plugins will fail in certain POD configurations:**
+
+```javascript
+// ❌ BAD - Only works if POD has OperationActivity widget
+async _onButtonPress() {
+    const oOp = PodContext.getLastSelectedOperationActivity();
+    
+    if (!oOp) {
+        MessageHistory.showError("No operation selected");
+        return;  // 💥 FAILS in WorkList-only PODs!
+    }
+    
+    const sOperation = oOp.operationActivity;
+    // ...
+}
+
+// ✅ GOOD - Works in any POD configuration
+async _onButtonPress() {
+    const oOp = PodContext.getLastSelectedOperationActivity();
+    const oWL = PodContext.getLastSelectedWorkListItem();
+
+    let sOperation, sSfc;
+
+    if (oOp && oWL) {
+        // Both widgets present - prefer OperationActivity for operation
+        sOperation = oOp.operationActivity;
+        sSfc = oWL.sfc;
+    } else if (oWL) {
+        // WorkList only - use it for both
+        sOperation = oWL.operationActivity;
+        sSfc = oWL.sfc;
+    } else if (oOp) {
+        // OperationActivity only
+        sOperation = oOp.operationActivity;
+        sSfc = oOp.sfc;
+    } else {
+        MessageHistory.showError("No selection");
+        return;
+    }
+    // ...
+}
+```
+
+#### Real-World POD Configurations
+
+**Configuration 1: Standard Production POD**
+```
+Widgets: OperationActivity Table + WorkList + Resource Filter
+Result: 
+  - getLastSelectedOperationActivity() ✅ Returns data
+  - getLastSelectedWorkListItem() ✅ Returns data
+  - getFilterResources() ✅ Returns array
+```
+
+**Configuration 2: Simple Execution POD**
+```
+Widgets: WorkList Only
+Result:
+  - getLastSelectedOperationActivity() ❌ Returns null
+  - getLastSelectedWorkListItem() ✅ Returns data
+  - getFilterResources() ⚠️ Returns empty array
+```
+
+**Configuration 3: Phase-Based POD**
+```
+Widgets: OperationActivity Table (phases) Only
+Result:
+  - getLastSelectedOperationActivity() ✅ Returns data
+  - getLastSelectedWorkListItem() ❌ Returns null
+  - getFilterResources() ✅ Returns array
+```
+
+#### Key Getters for Operation/SFC Data
+
+| Method | Returns | Use Case |
+|--------|---------|----------|
+| `getLastSelectedOperationActivity()` | Single `OperationActivity` object | Get **operation** for current action |
+| `getLastSelectedWorkListItem()` | Single `WorkListItem` object | Get **SFC** for current action |
+| `getFilterResources()` | Array of `Resource` objects | Get currently filtered **resources** |
+| `getSelectedOperationActivities()` | Array of `OperationActivity` objects | Multi-select operations |
+| `getSelectedWorkListItems()` | Array of `WorkListItem` objects | Multi-select SFCs |
+
+#### OperationActivity Object Structure
+
+```javascript
+{
+    sfc: "SFC_12345",
+    operationActivity: "OP10-ASSEMBLY",  // ← Use this for operation!
+    operationActivityDescription: "Assembly Operation",
+    workCenter: "WC-001",
+    stepId: "10",
+    resource: null,  // Often null - use getFilterResources() instead
+    statusComplete: false,
+    statusInWork: true
+}
+```
+
+#### WorkListItem Object Structure
+
+```javascript
+{
+    sfc: "SFC_12345",               // ← Use this for SFC!
+    material: "MATERIAL1",
+    order: "SHOP_ORDER_001",
+    workCenter: "WC-001",
+    operationActivity: "OP10-ASSEMBLY",
+    sfcStatusCode: "402",
+    sfcStatusDescription: "In Queue",
+    sfcQuantity: 10
+}
+```
+
+#### Resource Object Structure
+
+```javascript
+{
+    resource: "RESOURCE_001",       // ← Use this for resource!
+    resourceType: "EQUIPMENT",
+    description: "Assembly Station 1"
+}
+```
+
+#### ❌ Common Mistakes
+
+```javascript
+// ❌ WRONG - Using worklist item for operation
+const oWorkListItem = PodContext.getLastSelectedWorkListItem();
+const sOperation = oWorkListItem.operationActivity;  // This may be stale!
+
+// ✅ CORRECT - Use OperationActivity for operation
+const oOperation = PodContext.getLastSelectedOperationActivity();
+const sOperation = oOperation.operationActivity;
+
+// ❌ WRONG - Using operation object for resource
+const oOperation = PodContext.getLastSelectedOperationActivity();
+const sResource = oOperation.resource;  // Often null!
+
+// ✅ CORRECT - Use getFilterResources() for resource
+const aResources = PodContext.getFilterResources();
+const sResource = aResources?.[0]?.resource || null;
+
+// ❌ WRONG - Using getResource() (doesn't exist!)
+const sResource = PodContext.getResource();  // TypeError!
+
+// ✅ CORRECT - Use getFilterResources() array
+const aResources = PodContext.getFilterResources();
+const sResource = aResources?.[0]?.resource;
+```
+
+#### Real-World Examples from SAP Official Plugins
+
+**Activity Confirmation Plugin:**
+```javascript
+// From: ActivityConfirmationTableWidget.js
+const oLastSelectedOperation = PodContext.getLastSelectedOperationActivity();
+const oLastSelectedWorkListItem = PodContext.getLastSelectedWorkListItem();
+
+let sWorkCenter = oLastSelectedOperation.workCenter;
+if (!sWorkCenter && oLastSelectedWorkListItem instanceof WorkListItem) {
+    sWorkCenter = oLastSelectedWorkListItem.workCenter;
+}
+
+const oRequest = {
+    shopOrder: oLastSelectedWorkListItem.order,
+    batchId: oLastSelectedWorkListItem.sfc,
+    operationActivity: oLastSelectedOperation.operationActivity,
+    workCenter: sWorkCenter,
+    stepId: oLastSelectedOperation.stepId
+};
+```
+
+**Quantity Confirmation Plugin:**
+```javascript
+// From: QuantityConfirmationDelegate.js
+const oOperationActivityItem = PodContext.getLastSelectedOperationActivity();
+const oWorkListItem = PodContext.getLastSelectedWorkListItem();
+
+const oRequest = {
+    shopOrder: oWorkListItem.order,
+    batchId: oWorkListItem.sfc,
+    phase: oOperationActivityItem.operationActivity
+};
+```
+
+**Downtime Widget:**
+```javascript
+// From: DowntimeWidget.js
+const sWorkCenter = PodContext.getFilterWorkCenters()[0].workCenter;
+const sResource = PodContext.getFilterResources()?.[0]?.resource || "";
+
+const oRequest = {
+    workcenter: sWorkCenter,
+    resource: sResource
+};
+```
+
+#### When to Use Each Getter
+
+| Scenario | Use |
+|----------|-----|
+| Starting an SFC | `getLastSelectedOperationActivity()` + `getLastSelectedWorkListItem()` + `getFilterResources()` |
+| Reporting quantity | `getLastSelectedOperationActivity()` + `getLastSelectedWorkListItem()` |
+| Loading SFC details | `getLastSelectedWorkListItem()` |
+| Enabling/disabling button based on selection | Subscribe to `ModelPath.SelectedWorkListItems` or `ModelPath.SelectedOperationActivities` |
+| Getting current resource for filtering | `getFilterResources()?.[0]?.resource` |
+| Multi-select operations | `getSelectedOperationActivities()` + `getSelectedWorkListItems()` |
 
 ---
 
@@ -2438,7 +3408,31 @@ class MyWidget extends Widget {
 }
 ```
 
-**See also:** [SKILL.md i18n section](../SKILL.md#step-3-add-i18n-support-optional-but-recommended)
+#### I18nResourceModel.getText()
+
+```javascript
+// Direct access to translation string (synchronous)
+const sText = oI18nModel.getText("key");
+const sWithArgs = oI18nModel.getText("key", [arg1, arg2]);
+```
+
+#### I18nResourceModel.enhanceForProcessIndustry()
+
+For process industry PODs, SAP DM uses different terminology (e.g. "Phase" instead of "Operation"). This method enhances the model with overrides from a process-industry-specific bundle.
+
+```javascript
+// Call in onInit() AFTER the model is created, ONLY if process industry relevant
+async onInit() {
+    await super.onInit();
+    if (PodContext.isProcessIndustry()) {
+        await MyWidget.#oI18nModel.enhanceForProcessIndustry(
+            "custom.company.project.i18n.i18n"  // Usually same bundle name
+        );
+    }
+}
+```
+
+> Note: This only applies if the plant's `industryType` is `"PROCESS"`. For discrete-only plugins this is not needed.
 
 ---
 

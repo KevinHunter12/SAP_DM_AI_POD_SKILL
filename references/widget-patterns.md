@@ -641,6 +641,9 @@ sap.ui.define([
 
         // Static configuration arrays (optional but recommended)
         static BINDABLE_PROPERTIES = ["text", "enabled", "visible"];
+        // ⚠️ NOTE: BINDABLE_PROPERTIES only works for ControlWidget subclasses (auto-generated properties).
+        // For Widget subclasses with manual getProperties(), use BindBooleanPropertyEditor /
+        // BindStringPropertyEditor directly instead. See common-mistakes.md Mistake #43.
         static INCLUDE_EVENTS = ["press"];
         static EXCLUDE_PROPERTIES = ["somePropertyToHide"];
         static PROPERTY_CATEGORY_OVERRIDE = {

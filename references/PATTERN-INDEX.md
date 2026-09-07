@@ -28,11 +28,20 @@ Quick reference index organized by widget type, use case, technical pattern, and
 **Q: POD Designer doesn't show my properties!**  
 → Check [EXCLUDE_PROPERTIES](production-patterns-unified.md#10-exclude_properties-pattern) isn't hiding them
 
+**Q: How do I react to backend events in real time?**  
+→ [notification-patterns.md](notification-patterns.md) - PodNotificationWebSocket and ManagedSubscription
+
+**Q: How do I navigate to another page or open a dialog programmatically?**  
+→ [PodRuntime](pod2-api-reference.md#podruntime) - `navigateToPage()`, `showDialog()`
+
+**Q: How do I wait for data that might not be loaded yet?**  
+→ `PodContext.getWhenAvailable(ModelPath.WorkListItems)` - see [pod2-api-reference.md](pod2-api-reference.md#core-data-access)
+
 **Q: How do I call SAP DM APIs?**  
 → Use [ApiClient](pod2-api-reference.md#public-api-clients) - see [sapdm-api-reference.md](sapdm-api-reference.md) for 70+ APIs
 
 **Q: How do I react to worklist selection changes?**  
-→ [PodContext.subscribe()](pod2-api-reference.md#subscription-methods) with `ModelPath.SelectedWorkListItems`
+→ [PodContext.subscribe()](pod2-api-reference.md#subscription-management) with `ModelPath.SelectedWorkListItems`
 
 ---
 
@@ -117,6 +126,8 @@ POD 1.0 (XML views, controllers) and POD 2.0 (ES6 classes, programmatic views) a
 - [Selection Sync](common-mistakes.md#mistake-27) - Table↔PodContext sync
 - [Data Delegates](advanced-patterns.md#11-data-delegate-pattern) - Shared state
 - [Optimistic UI](advanced-patterns.md#23-optimistic-ui-update-pattern) - Instant feedback
+- [Real-Time Notifications](notification-patterns.md) - WebSocket events (SFC status, resource changes)
+- [PodRuntime Navigation](pod2-api-reference.md#podruntime) - Programmatic page/dialog navigation
 
 ### User Interaction
 - [Button Actions](widget-patterns.md#controlwidget) - Button press handlers
