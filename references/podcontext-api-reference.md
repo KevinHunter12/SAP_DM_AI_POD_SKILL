@@ -28,9 +28,11 @@ Always check mode before subscribing or fetching data. Design mode has mock data
 ```javascript
 PodContext.isRunMode()     // true in the live POD player
 PodContext.isDesignMode()  // true in POD Designer
-PodContext.isEdge()        // true on edge deployments
-PodContext.isCloud()       // true on cloud deployments
+PodContext.isEdge()        // true on edge deployments (reads from runtime properties at init)
+PodContext.isCloud()       // true when NOT edge (i.e. standard cloud/BTP deployment)
 ```
+
+**Note**: `isDesignMode()` is simply `Boolean(#oPodDesigner)` — the designer reference is truthy only when running inside the POD Designer. `isRunMode()` is `!isDesignMode()`.
 
 ---
 
@@ -92,19 +94,20 @@ const sResource = aRes?.[0]?.resource || null; // ALWAYS use getFilterResources(
 ### WorkList
 
 ```javascript
-PodContext.getWorkListItems()     // → WorkListItem[]  (all loaded items)
+PodContext.getWorkListItems()     // → BaseWorkListItem[]  (all loaded items)
 PodContext.getWorkListCount()     // → number
 PodContext.getWorkListLoading()   // → boolean
 PodContext.getWorkListPageSize()  // → number
 PodContext.getWorkListSorting()   // → Sorting[]
 PodContext.getWorkListType()      // → WorkListType enum
+PodContext.clearWorkList()        // resets items=[], count=0, loading=false
 ```
 
 ### Operation Activities
 
 ```javascript
 PodContext.getOperationActivities()        // → BaseOperationWorkItem[]
-PodContext.getOperationActivitiesLoading() // → boolean
+PodContext.getOperationActivitiesLoading() // → boolean (no direct getter — read via PodContext.get(ModelPath.OperationActivitiesLoading))
 ```
 
 ### Reported Quantities
@@ -118,19 +121,36 @@ PodContext.getReportedQuantityLoading() // → boolean
 ### Work Instructions
 
 ```javascript
-PodContext.getWorkInstructions()        // → WorkInstruction[]
-PodContext.getWorkInstructionsLoading() // → boolean
+PodContext.getWorkInstructions()          // → WorkInstruction[]
+PodContext.getWorkInstructionsLoading()   // → boolean
+PodContext.getSelectedWorkInstruction()   // → WorkInstruction
+PodContext.setSelectedWorkInstruction(o)  // sets selected work instruction
+```
+
+### Activity Confirmation
+
+```javascript
+PodContext.getActivityConfirmationSummaryList()              // → ActivityConfirmationSummary[]
+PodContext.setActivityConfirmationSummaryList(aList)
+```
+
+### Execution
+
+```javascript
+PodContext.getExecutionSFCQuantity()       // → number|undefined  (quantity for start/complete)
+PodContext.setExecutionSFCQuantity(iQty)   // pass null to clear
 ```
 
 ### Miscellaneous
 
 ```javascript
 PodContext.getMessageHistory()              // → UserMessage[]
-PodContext.getExecutionSFCQuantity()        // → number
-PodContext.getSelectedWorkInstruction()     // → WorkInstruction
-PodContext.getSignatureHistory(sWidgetId)   // → Signature[]
-PodContext.isFeatureFlagEnabled(sFlag)      // → boolean
-PodContext.getExecutionApiVersion()         // → ExecutionApiVersion
+PodContext.setMessageHistory(aMessages)     // auto-sorted descending by timestamp
+PodContext.getSignatureHistory(sWidgetId)   // → Signature[]  (path: /signature/history/<widgetId>)
+PodContext.isFeatureFlagEnabled(sFlag)      // → boolean  (internal feature flags from backend)
+PodContext.getExecutionApiVersion()         // → ExecutionApiVersion  (internal, not in model)
+PodContext.getUserId()                      // → string  (read-only, no setter)
+PodContext.getTenantId()                    // → string  (read-only, no setter)
 ```
 
 ---
@@ -332,40 +352,64 @@ Import separately:
 import ModelPath from "sap/dm/dme/pod2/context/ModelPath";
 ```
 
-**ALL constants are PLURAL** for array paths:
+**ALL constants are PLURAL** for array paths. The table below shows exact path strings from source — use these when subscribing with `PodContext.subscribe()` or when reading via `PodContext.get()`.
 
-| Constant | Path | Type |
-|----------|------|------|
-| `ModelPath.SelectedWorkListItems` | `/workList/selectedItems` | `WorkListItem[]` |
-| `ModelPath.LastSelectedWorkListItem` | `/workList/lastSelected` | `WorkListItem \| null` |
-| `ModelPath.SelectedOperationActivities` | `/execution/operationActivities/selected` | `OperationActivity[]` |
-| `ModelPath.LastSelectedOperationActivity` | auto-computed | `OperationActivity \| null` |
-| `ModelPath.FilterResources` | `/filter/resources` | `Resource[]` |
-| `ModelPath.FilterWorkCenters` | `/filter/workCenters` | `WorkCenter[]` |
+| Constant | Actual Path String | Type |
+|----------|--------------------|------|
+| `ModelPath.ActivityConfirmationSummaryList` | `/activityConfirmation/summaries/list` | `ActivityConfirmationSummary[]` |
+| `ModelPath.ExecutionSFCQuantity` | `/execution/sfcQuantity` | `number` |
+| `ModelPath.FilterInputType` | `/filter/inputType` | `WorkListFilterInputType` |
 | `ModelPath.FilterMaterials` | `/filter/materials` | `Material[]` |
 | `ModelPath.FilterOperationActivities` | `/filter/operationActivities` | `OperationActivityMaster[]` |
-| `ModelPath.FilterSfcs` | `/filter/sfcs` | `string[]` |
 | `ModelPath.FilterProcessLot` | `/filter/processLot` | `string` |
-| `ModelPath.WorkListItems` | `/workList/items` | `WorkListItem[]` |
+| `ModelPath.FilterResources` | `/filter/resources` | `Resource[]` |
+| `ModelPath.FilterSfcs` | `/filter/sfcs` | `string[]` |
+| `ModelPath.FilterWorkCenters` | `/filter/workCenters` | `WorkCenter[]` |
+| `ModelPath.InspectionCharacteristics` | `/qualityInspection/inspectionCharacteristics` | see QI delegate |
+| `ModelPath.InspectionCharacteristicsResults` | `/qualityInspection/inspectionCharacteristicsResults` | see QI delegate |
+| `ModelPath.InspectionFieldCombinations` | `/qualityInspection/fieldCombinations` | see QI delegate |
+| `ModelPath.InspectionPointLot` | `/qualityInspection/inspectionPointLot` | see QI delegate |
+| `ModelPath.InspectionPoints` | `/qualityInspection/inspectionPoints` | see QI delegate |
+| `ModelPath.IsEnablePoint` | `/qualityInspection/isEnablePoint` | `boolean` |
+| `ModelPath.LastSelectedOperationActivity` | `/execution/operationActivity/lastSelected` | `BaseOperationWorkItem \| null` |
+| `ModelPath.LastSelectedWorkListItem` | `/workList/lastSelected` | `BaseWorkListItem \| null` |
+| `ModelPath.MessageHistory` | `/messageHistory` | `UserMessage[]` |
+| `ModelPath.OperationActivities` | `/execution/operationActivity/list` | `BaseOperationWorkItem[]` |
+| `ModelPath.OperationActivitiesLoading` | `/execution/operationActivity/loading` | `boolean` |
+| `ModelPath.Plant` | `/plant` | `Plant` |
+| `ModelPath.Pod` | `/pod` | `Pod` |
+| `ModelPath.ReportedQuantityCount` | `/quantityConfirmation/count` | `number` |
+| `ModelPath.ReportedQuantityItems` | `/quantityConfirmation/list` | `ReportedQuantity[]` |
+| `ModelPath.ReportedQuantityLoading` | `/quantityConfirmation/loading` | `boolean` |
+| `ModelPath.SelectedOperationActivities` | `/execution/operationActivity/selected` | `BaseOperationWorkItem[]` |
+| `ModelPath.SelectedWorkInstruction` | `/workInstruction/selected` | `WorkInstruction` |
+| `ModelPath.SelectedWorkListItems` | `/workList/selected` | `BaseWorkListItem[]` |
+| `ModelPath.TenantId` | `/tenant/tenantId` | `string` |
+| `ModelPath.UserId` | `/user/id` | `string` |
+| `ModelPath.UserLanguage` | `/user/language` | `string` |
+| `ModelPath.WorkInstructions` | `/workInstruction/list` | `WorkInstruction[]` |
+| `ModelPath.WorkInstructionsLoading` | `/workInstruction/loading` | `boolean` |
 | `ModelPath.WorkListCount` | `/workList/count` | `number` |
+| `ModelPath.WorkListItems` | `/workList/list` | `BaseWorkListItem[]` |
 | `ModelPath.WorkListLoading` | `/workList/loading` | `boolean` |
 | `ModelPath.WorkListPageSize` | `/workList/pageSize` | `number` |
 | `ModelPath.WorkListSorting` | `/workList/sorting` | `Sorting[]` |
-| `ModelPath.Plant` | `/plant` | `Plant` |
-| `ModelPath.Pod` | `/pod` | `Pod` |
-| `ModelPath.UserId` | `/userId` | `string` |
-| `ModelPath.TenantId` | `/tenantId` | `string` |
-| `ModelPath.UserLanguage` | `/userLanguage` | `string` |
-| `ModelPath.MessageHistory` | `/messageHistory` | `UserMessage[]` |
-| `ModelPath.ReportedQuantityItems` | `/reportedQuantity/items` | `ReportedQuantity[]` |
-| `ModelPath.ReportedQuantityCount` | `/reportedQuantity/count` | `number` |
-| `ModelPath.ReportedQuantityLoading` | `/reportedQuantity/loading` | `boolean` |
-| `ModelPath.OperationActivities` | `/execution/operationActivities/items` | `BaseOperationWorkItem[]` |
-| `ModelPath.OperationActivitiesLoading` | `/execution/operationActivities/loading` | `boolean` |
-| `ModelPath.WorkInstructions` | `/workInstructions/items` | `WorkInstruction[]` |
-| `ModelPath.WorkInstructionsLoading` | `/workInstructions/loading` | `boolean` |
-| `ModelPath.ExecutionSFCQuantity` | `/execution/sfcQuantity` | `number` |
-| `ModelPath.ActivityConfirmationSummaryList` | `/activityConfirmation/summaryList` | `ActivityConfirmationSummary[]` |
+| `ModelPath.WorkListType` | `/workList/type` | `WorkListType` |
+
+**⚠️ Common path mistakes** (the paths below are WRONG — do not use them):
+
+| ❌ Wrong path | ✅ Correct path |
+|---|---|
+| `/workList/selectedItems` | `/workList/selected` |
+| `/workList/items` | `/workList/list` |
+| `/execution/operationActivities/selected` | `/execution/operationActivity/selected` |
+| `/execution/operationActivities/items` | `/execution/operationActivity/list` |
+| `/reportedQuantity/items` | `/quantityConfirmation/list` |
+| `/workInstructions/items` | `/workInstruction/list` |
+| `/userId` | `/user/id` |
+| `/tenantId` | `/tenant/tenantId` |
+| `/userLanguage` | `/user/language` |
+| `/activityConfirmation/summaryList` | `/activityConfirmation/summaries/list` |
 
 ---
 
@@ -406,6 +450,18 @@ PodContext.set(ModelPath.FilterResources, aResources);
 
 // CORRECT
 PodContext.setFilterResources(aResources);
+```
+
+### ❌ Calling setters that don't exist (read-only paths)
+```javascript
+// WRONG — no public setter exists for these paths
+PodContext.set(ModelPath.UserId, "someUser");    // UserId is read-only
+PodContext.set(ModelPath.TenantId, "t1");        // TenantId is read-only
+PodContext.set(ModelPath.Plant, oPlant);         // Plant is read-only (set internally from backend)
+
+// CORRECT — use the getter only, value is populated during PodContext.init()
+const sUser = PodContext.getUserId();
+const sPlant = PodContext.getPlant();
 ```
 
 ### ❌ Treating customFields as an array
@@ -450,5 +506,5 @@ async onInit() {
 
 ---
 
-**Source**: `sap/dm/dme/pod2/context/PodContext.js` (SAP Digital Manufacturing POD 2.0)  
-**Last Updated**: 2026-09-07
+**Source**: `sap/dm/dme/pod2/context/PodContext.js` + `sap/dm/dme/pod2/context/ModelPath.js` (SAP Digital Manufacturing POD 2.0)  
+**Last Updated**: 2026-09-07 — ModelPath string values verified against source; Quality Inspection paths added; read-only path mistakes added
