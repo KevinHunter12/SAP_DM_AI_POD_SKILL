@@ -524,6 +524,8 @@ See [Mistake #3](references/common-mistakes.md#mistake-3) for complete patterns.
 - [ ] **Extracts operation from OperationActivity when available**, falls back to WorkListItem when not
 - [ ] **Extracts resource from getFilterResources() array**, not operation object
 - [ ] Root control ID is exactly `oConfig.id` (no suffix)
+- [ ] **Root control is `CustomPanel`** — NOT VBox/HBox/Panel/FlexBox (see Mistake #21)
+- [ ] **If using `sap/ui/core/HTML`**: content with `{` is set via setter or `afterRendering` DOM injection, NOT constructor property bag (see Mistake #32)
 - [ ] `onExit()` exists if `onInit()` subscribes
 - [ ] i18n uses method calls, not bindings
 - [ ] **User-selected languages** confirmed (default: Core 4 languages if not specified)
@@ -662,6 +664,8 @@ Expected format:
 - [ ] Prefers `operationActivity` from OperationActivity object when available, falls back to WorkListItem
 - [ ] Uses `getFilterResources()?.[0]?.resource` for resource data (not operation.resource)
 - [ ] Root control ID is exactly `oConfig.id` (no suffix like `oConfig.id + "-button"`)
+- [ ] **Root control returned from `_createView()` is `CustomPanel`** — if VBox/HBox/Panel is the root, POD Designer will log "not draggable" and the widget cannot be repositioned (Mistake #21)
+- [ ] **If `sap/ui/core/HTML` is used**: HTML/CSS content with `{` characters is NOT passed through the constructor property bag — use `oHtml.setContent(s)` setter or inject via `afterRendering` → `getDomRef().innerHTML` (Mistake #32)
 - [ ] `onExit()` method exists if `onInit()` has PodContext.subscribe() calls
 - [ ] i18n uses `this.getI18nText("key")` not `{i18n>key}` bindings
 - [ ] ModelPath constants are plural (e.g., `SelectedWorkListItems`)

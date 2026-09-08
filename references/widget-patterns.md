@@ -601,7 +601,101 @@ class DynamicWidget extends Widget {
 
 ---
 
-## ControlWidget Pattern (For Single Controls)
+## ⚠️ CRITICAL: CustomPanel as Root + HTML Control Patterns
+
+Two production-validated rules that apply to all custom widgets using the base `Widget` class.
+
+### Rule 1: Root Control Must Always Be CustomPanel
+
+POD Designer's layout engine only recognises `CustomPanel` (and its subclasses) as draggable/resizable. Returning any standard SAPUI5 container as the root produces this console warning and a broken widget:
+
+```
+[WARN] PreviewPanel: Widget returned view with control sap.m.VBox which is not draggable
+```
+
+**Template — always wrap your layout in CustomPanel:**
+
+```javascript
+import CustomPanel from "sap/dm/dme/pod2/control/CustomPanel";
+import VBox from "sap/m/VBox";
+
+_createView() {
+    const oConfig = this.getConfig();
+    if (!oConfig || !oConfig.id) {
+        return new CustomPanel({ width: "100%", height: "100%" });
+    }
+
+    return new CustomPanel(oConfig.id, {   // ← root, carries oConfig.id
+        width: "100%",
+        height: "100%",
+        content: [
+            new VBox({                      // ← inner layout, standard controls OK here
+                width: "100%",
+                height: "100%",
+                justifyContent: "Center",
+                alignItems: "Center",
+                items: [/* your controls */]
+            })
+        ]
+    });
+}
+```
+
+**Summary:**
+| Control | Role | OK as root? |
+|---|---|---|
+| `CustomPanel` | Root | ✅ Always |
+| `sap.m.VBox` / `HBox` | Inner layout | ✅ Inside content only |
+| `sap.m.Panel` | Inner layout | ✅ Inside content only |
+| Any `sap.m.*` leaf | Leaf control | ✅ Anywhere inside |
+
+### Rule 2: sap/ui/core/HTML — Never Pass CSS/HTML Through Constructor
+
+SAPUI5's `ManagedObject` constructor runs every string property value through `BindingParser` looking for `{model>path}` binding expressions. CSS rules contain `{` characters (`@keyframes`, selector blocks, etc.) which crash the parser:
+
+```
+JSTokenizer-dbg.js:60 Uncaught (in promise) SyntaxError: Expected 'a' instead of 'l'
+  at resolveEmbeddedBinding (BindingParser-dbg.js)
+  at _createView ...
+```
+
+**Fix A — Setter (simple HTML without many `{` blocks):**
+
+```javascript
+var oHtml = new HTML(oConfig.id + "-html");  // empty constructor
+oHtml.setSanitizeContent(false);
+oHtml.setContent('<div class="my-box">Hello</div>');  // setter bypasses parser
+```
+
+**Fix B — afterRendering DOM injection (CSS with @keyframes or complex rules):**
+
+```javascript
+var sCurrentText = oConfig.properties.textToDisplay || "";
+
+var oHtml = new HTML(oConfig.id + "-html", {
+    content: "<div></div>",              // safe placeholder, no curly braces
+    afterRendering: function() {
+        var oDom = oHtml.getDomRef();
+        if (oDom) {
+            oDom.innerHTML = buildContent(sCurrentText);  // pure DOM, no UI5 parsing
+        }
+    }
+});
+
+// For live property updates, update sCurrentText and re-inject:
+setPropertyValue(sName, vValue) {
+    if (sName === "textToDisplay") {
+        sCurrentText = vValue || "";
+        var oDom = oHtml.getDomRef();
+        if (oDom) oDom.innerHTML = buildContent(sCurrentText);
+    }
+    super.setPropertyValue(sName, vValue);
+}
+```
+
+Use Fix B whenever the HTML template contains `@keyframes`, many CSS selector blocks, or any content with repeated `{...}` pairs.
+
+---
 
 ControlWidget wraps single SAPUI5 controls. This is the most common pattern for simple widgets.
 

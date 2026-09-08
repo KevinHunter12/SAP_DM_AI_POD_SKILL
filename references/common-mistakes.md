@@ -1862,47 +1862,61 @@ class MyTableWidget extends TableWidget {
 
 ---
 
-## Mistake #21: Using sap.m.Panel Instead of CustomPanel ❌ → ✅ (CRITICAL!)
+## Mistake #21: Non-CustomPanel Root Control — Widget Not Draggable ❌ → ✅ (CRITICAL!)
 
-**Error**: Widget not draggable in POD Designer
+**Severity**: BLOCKING in Designer — widget can be added but cannot be moved or resized.
 
-**Why It's Wrong**: Regular `sap.m.Panel` doesn't support POD Designer drag-and-drop. Must use `CustomPanel` for Designer compatibility.
-
-### ❌ WRONG - Using sap.m.Panel
-```javascript
-import Panel from "sap/m/Panel";
-
-_createView() {
-    return new Panel({  // ❌ Not Designer-compatible!
-        content: [/* controls */]
-    });
-}
+**Symptom** (browser console warning):
+```
+[WARN] sap.dm.dme.pod2.designer.PreviewPanel: Widget custom.my.widget.MyWidget
+returned view with control sap.m.VBox which is not draggable
 ```
 
-### ✅ CORRECT - Using CustomPanel
+The warning appears for **any** standard SAPUI5 layout returned as the root: `sap.m.VBox`, `sap.m.HBox`, `sap.m.Panel`, `sap.m.FlexBox`, etc.
+
+**Root Cause**: POD Designer's `PreviewPanel` inspects the root control's constructor chain. Only `CustomPanel` (and controls derived from it) register as draggable/resizable. Standard SAPUI5 containers have no hook into the Designer's layout engine.
+
+### ❌ WRONG — Any standard layout as root
+
+```javascript
+// All of these produce the "not draggable" warning:
+return new VBox(oConfig.id, { ... });      // ❌ sap.m.VBox
+return new HBox(oConfig.id, { ... });      // ❌ sap.m.HBox
+return new Panel(oConfig.id, { ... });     // ❌ sap.m.Panel
+return new FlexBox(oConfig.id, { ... });   // ❌ sap.m.FlexBox
+```
+
+### ✅ CORRECT — CustomPanel as root, standard layouts inside
+
 ```javascript
 import CustomPanel from "sap/dm/dme/pod2/control/CustomPanel";
-import CustomVBox from "sap/dm/dme/pod2/control/CustomVBox";
+import VBox from "sap/m/VBox";
 
 _createView() {
-    return new CustomPanel({
-        id: this.getId(),  // CRITICAL: Pass widget ID
+    const oConfig = this.getConfig();
+    return new CustomPanel(oConfig.id, {   // ✅ root = CustomPanel with oConfig.id
         width: "100%",
         height: "100%",
         content: [
-            new CustomVBox({
-                paddingTop: "Small",
-                items: [/* controls */]
+            new VBox({                      // ✅ inner layouts can be standard controls
+                width: "100%",
+                height: "100%",
+                justifyContent: "Center",
+                alignItems: "Center",
+                items: [/* your controls */]
             })
         ]
     });
 }
 ```
 
-**When to Use:**
-- ✅ Top-level container: CustomPanel
-- ✅ Layout containers: CustomVBox
-- ✅ Regular controls inside: Use standard sap.m controls
+**Rules:**
+- ✅ Root control (returned from `_createView()`) = **always `CustomPanel`** with `oConfig.id`
+- ✅ Inner layout containers = standard `sap.m.VBox`, `HBox`, etc. are fine
+- ✅ Leaf controls = standard `sap.m.*`, `sap.ui.core.*` etc. are fine
+- ❌ Never return VBox/HBox/Panel/FlexBox as the root from `_createView()`
+
+**Note**: This applies to widgets using the base `Widget` class. `ControlWidget` and `LayoutWidget` subclasses manage the root control internally — this rule applies when you override `_createView()` and return your own root.
 
 ---
 
@@ -3093,13 +3107,47 @@ return new VBox(oConfig.id, {
 });
 ```
 
+### ✅ ALSO CORRECT — Inject via DOM in afterRendering callback
+
+When the HTML contains `@keyframes`, complex CSS selectors, or anything with many `{...}` blocks, the safest approach is to bypass UI5's content pipeline entirely and write directly to the DOM after the control renders:
+
+```javascript
+// 1. Pass a safe placeholder to the constructor — no curly braces
+var oHtml = new HTML(oConfig.id + "-html", {
+    content: "<div></div>",
+    afterRendering: function() {
+        var oDom = oHtml.getDomRef();
+        if (oDom) {
+            oDom.innerHTML = buildMyHtml();  // ✅ Pure DOM — no UI5 parsing at all
+        }
+    }
+});
+
+function buildMyHtml() {
+    return [
+        '<style>',
+        '  @keyframes spin { from { transform: rotateY(0deg); } to { transform: rotateY(360deg); } }',
+        '  .label { animation: spin 4s linear infinite; }',
+        '</style>',
+        '<span class="label">Hello</span>'
+    ].join('\n');
+}
+```
+
+Use this approach when:
+- HTML contains `@keyframes` with multiple `{ ... }` blocks
+- HTML contains many CSS rules with complex selectors
+- You need to update the content dynamically after a property change
+
+For dynamic updates, store the HTML control reference and call `getDomRef().innerHTML = ...` directly — do NOT call `setContent()` again, as that re-renders the control and may trigger binding parsing on the new value.
+
 ### Alternative: Escape Curly Braces
 
 If you must use the constructor pattern, escape every `{` as `\\{` and `}` as `\\}`:
 
 ```javascript
 var sHtml = '<style>.box \\{ font-family: Arial; \\}</style>';
-// Ugly, error-prone, breaks copy-paste of CSS. Prefer the setter approach.
+// Ugly, error-prone, breaks copy-paste of CSS. Prefer the setter or afterRendering approach.
 ```
 
 ### Quick Diagnostic
@@ -3120,13 +3168,14 @@ If you see `JSTokenizer` errors with a stack trace that includes `BindingParser`
 
 ## ⚠️ Embedded HTML/CSS Widget — Combined Gotcha Checklist
 
-When building a POD 2.0 widget that renders raw HTML/CSS via `sap.ui.core.HTML` (e.g. for pixel-perfect mockups, custom visualizations, or third-party HTML embeds), ALL THREE of these gotchas hit at once:
+When building a POD 2.0 widget that renders raw HTML/CSS via `sap.ui.core.HTML` (e.g. for pixel-perfect mockups, custom visualizations, or third-party HTML embeds), ALL FOUR of these gotchas hit at once:
 
 | Gotcha | Mistake # | Symptom | Fix |
 |---|---|---|---|
 | `#` anywhere in `.js` file | #30 | `JSTokenizer: Unexpected '#'` | Use `rgb()` not hex; no private fields |
 | `Widget.extend()` | #31 | `Widget.extend is not a function` | Use ES6 `class extends Widget` |
-| `{` in constructor property | #32 | `JSTokenizer: Unexpected 'r'` (via BindingParser) | Use setters: `oHtml.setContent(sHtml)` |
+| `{` in constructor property | #32 | `JSTokenizer: Unexpected 'r'` (via BindingParser) | Use setters or `afterRendering` DOM injection |
+| Non-CustomPanel root | #21 | `"returned view with control sap.m.VBox which is not draggable"` | Return `new CustomPanel(oConfig.id, {...})` as root |
 
 **Pre-deploy validation for HTML-embedding widgets:**
 
@@ -3138,12 +3187,17 @@ grep -c '#' widget/YourWidget.js   # MUST be 0
 grep -n 'class .* extends Widget' widget/YourWidget.js   # MUST find a match
 grep -n 'Widget.extend' widget/YourWidget.js             # MUST be empty
 
-# 3. Verify setter pattern for HTML content
+# 3. Verify setter pattern for HTML content (OR afterRendering approach)
 grep -n 'new HTML.*content:' widget/YourWidget.js        # MUST be empty (no constructor content)
-grep -n 'setContent' widget/YourWidget.js                # MUST find a match
+#    OR verify the afterRendering pattern is used:
+grep -n 'afterRendering' widget/YourWidget.js            # must find a match if above fails
+
+# 4. Verify CustomPanel as root
+grep -n 'CustomPanel' widget/YourWidget.js               # MUST find a match
+grep -n 'return new VBox\|return new HBox\|return new Panel' widget/YourWidget.js  # MUST be empty
 ```
 
-All three checks must pass before deploying a widget that embeds raw HTML/CSS.
+All four checks must pass before deploying a widget that embeds raw HTML/CSS.
 
 ---
 
