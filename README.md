@@ -1,5 +1,12 @@
 # SAP Digital Manufacturing POD 2.0 Plugin Skill for Claude Code
 
+> ### 🔄 Actively Maintained — Always Check for Updates
+> This skill is regularly updated with new patterns, bug fixes, and corrections verified against the POD 2.0 source codebase. **Before starting a project, pull the latest version** to ensure you have the most accurate reference material.
+> ```bash
+> cd ~/.claude/skills/pod-plugin && git pull
+> ```
+> **Current version:** see `version:` field in `SKILL.md` — latest is always on the `main` branch.
+
 A Claude Code skill that enables AI-assisted development of SAP Digital Manufacturing (SAP DM) POD 2.0 plugins. This skill gives Claude deep, production-verified knowledge of the POD 2.0 widget architecture so it can scaffold complete, working plugins from a single prompt.
 
 > **Please note that this skill is an independent community project and is not an official SAP release. As such, it is provided without warranty, support, or endorsement from SAP.**
