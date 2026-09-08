@@ -793,59 +793,50 @@ All APIs return consistent error responses:
 
 ### Example: Calling API from POD Widget
 
+**Always use `ApiClient` — never assemble URLs or tokens manually.** `ApiClient` handles authentication, URL resolution, and error wrapping internally.
+
 ```javascript
+import ApiClient from "sap/dm/dme/pod2/api/ApiClient";
 import PodContext from "sap/dm/dme/pod2/context/PodContext";
 
 class MyWidget extends Widget {
-    
+
     async _fetchSfcDetails(sSfc) {
-        const oContext = PodContext.getContext();
-        const sPlant = oContext.plant;
-        const sBaseUrl = oContext.serviceRegistry.getApiUrl("sfc");
-        
-        try {
-            const oResponse = await fetch(`${sBaseUrl}/sfcs?plant=${sPlant}&sfc=${sSfc}`, {
-                method: "GET",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${oContext.token}`
-                }
-            });
-            
-            if (!oResponse.ok) {
-                throw new Error(`HTTP ${oResponse.status}: ${oResponse.statusText}`);
-            }
-            
-            return await oResponse.json();
-        } catch (oError) {
-            console.error("Failed to fetch SFC:", oError);
-            throw oError;
-        }
+        const oResponse = await ApiClient.sfc.getSfcDetail({
+            plant: PodContext.getPlant(),
+            sfc: sSfc
+        });
+        return oResponse;
     }
 }
 ```
 
+**❌ DON'T do this inside a POD widget — it bypasses ApiClient and will fail:**
+```javascript
+// WRONG — manual fetch with token/URL assembly does not work in plugin context
+const oContext = PodContext.getContext();
+const sBaseUrl = oContext.serviceRegistry.getApiUrl("sfc");
+await fetch(`${sBaseUrl}/sfcs?plant=...`, {
+    headers: { "Authorization": `Bearer ${oContext.token}` }
+});
+```
+
 ---
 
-### Example: Using jQuery Ajax (SAPUI5 Pattern)
+### Example: Data Collection Logging
 
 ```javascript
-_logDataCollection(oData) {
-    const oContext = PodContext.getContext();
-    const sUrl = `${oContext.serviceRegistry.getApiUrl("datacollection")}/log`;
-    
-    return new Promise((resolve, reject) => {
-        jQuery.ajax({
-            url: sUrl,
-            method: "POST",
-            contentType: "application/json",
-            data: JSON.stringify(oData),
-            headers: {
-                "Authorization": `Bearer ${oContext.token}`
-            },
-            success: (oResponse) => resolve(oResponse),
-            error: (oError) => reject(oError)
-        });
+import ApiClient from "sap/dm/dme/pod2/api/ApiClient";
+import PodContext from "sap/dm/dme/pod2/context/PodContext";
+
+async _logDataCollection(oParams) {
+    await ApiClient.datacollection.logDataCollectionGroup({
+        plant: PodContext.getPlant(),
+        sfc: oParams.sfc,
+        operation: oParams.operation,
+        resource: oParams.resource,
+        dataCollectionGroup: oParams.group,
+        parameters: oParams.parameters
     });
 }
 ```

@@ -2090,6 +2090,141 @@ await ApiClient.assembly.assembleComponent(oRequest, oOptions?)
 await ApiClient.bom.getBoms(oRequest, oOptions?)
 ```
 
+### TimeTracking API
+
+**Client:** `ApiClient.timeTracking`  
+**Source:** `sap/dm/dme/pod2/api/timetracking/TimeTrackingPublicApiClient`
+
+```javascript
+import ApiClient from "sap/dm/dme/pod2/api/ApiClient";
+
+// Clock operators in/out for a shift
+await ApiClient.timeTracking.clockIn(oRequest)
+await ApiClient.timeTracking.clockOut(oRequest)
+
+// Labor tracking (direct labor on/off)
+await ApiClient.timeTracking.laborOn(oRequest)
+await ApiClient.timeTracking.laborOff(oRequest)
+
+// Indirect labor (non-production activities)
+await ApiClient.timeTracking.indirectLaborOn(oRequest)
+await ApiClient.timeTracking.indirectLaborOff(oRequest)
+
+// Production time tracking
+await ApiClient.timeTracking.productionTimeOn(oRequest)
+await ApiClient.timeTracking.productionTimeOff(oRequest)
+
+// Resource usage tracking
+await ApiClient.timeTracking.resourceUsageOn(oRequest)
+await ApiClient.timeTracking.resourceUsageOff(oRequest)
+```
+
+---
+
+### Notable Internal Clients
+
+> **Warning:** Internal APIs power SAP's own widgets and may change without notice between versions. Prefer public APIs where available. Test thoroughly after upgrades.
+
+#### PlantInternalApiClient — Resource, Work Center & Plant Data
+
+The most useful internal client for plugin development. Provides resource and work center lookups not available through the public `ResourcePublicApiClient`.
+
+**Import:** `sap/dm/dme/pod2/api/internal/plant/PlantInternalApiClient`  
+Accessed via `ApiClient.internal.plant` or imported directly.
+
+```javascript
+// Resource lookups
+await ApiClient.internal.plant.getResourceByKey({ plant, resource, version })
+await ApiClient.internal.plant.getResourcesOData({ plant, ...filters })
+await ApiClient.internal.plant.getResourcesForWorkCenters({ plant, workCenters })
+await ApiClient.internal.plant.getResourceHierarchyData({ plant, resource })
+await ApiClient.internal.plant.getDowntimeResourceStatuses({ plant, resources })
+await ApiClient.internal.plant.getResourceStatusesOData({ plant, ...filters })
+
+// Work center lookups
+await ApiClient.internal.plant.getWorkCenterByKey({ plant, workCenter, version })
+await ApiClient.internal.plant.getWorkCentersForUser({ plant, userId })
+await ApiClient.internal.plant.isUserAssignedToWorkCenter({ plant, workCenter, userId })
+
+// Users
+await ApiClient.internal.plant.getUsers({ plant, ...filters })
+await ApiClient.internal.plant.getUsersPage({ plant, page, pageSize })
+await ApiClient.internal.plant.getUsersByIds({ plant, userIds })
+
+// Reason codes (for OEE/downtime)
+await ApiClient.internal.plant.getReasonCodeObject({ plant, reasonCode })
+await ApiClient.internal.plant.getReasonCodeObjectByRef({ plant, ref })
+await ApiClient.internal.plant.getReasonCodeObjectsByTimeElement({ plant, timeElementRef })
+await ApiClient.internal.plant.findAllAssignedReasonCodesToResource({ plant, resource })
+await ApiClient.internal.plant.findAllResourceReasonCodeChildren({ plant, parentRef })
+await ApiClient.internal.plant.findTimeElementsByType({ plant, type })
+
+// Custom fields
+await ApiClient.internal.plant.getCustomFieldDefinitions({ plant, businessObject })
+await ApiClient.internal.plant.getResourceCustomFieldDefinitions({ plant })
+```
+
+#### OeeInternalApiClient — Downtime & Speed Loss
+
+**Import:** `sap/dm/dme/pod2/api/internal/oee/OeeInternalApiClient`
+
+```javascript
+// Downtime management
+await ApiClient.internal.oee.createDowntimes(oRequest)
+await ApiClient.internal.oee.updateDowntime(oRequest)
+await ApiClient.internal.oee.deleteDowntimes(oRequest)
+await ApiClient.internal.oee.splitDowntime(oRequest)
+await ApiClient.internal.oee.getDowntimesForWorkCenter(oRequest)
+
+// Speed loss
+await ApiClient.internal.oee.createTaggedSpeedLoss(oRequest)
+await ApiClient.internal.oee.updateTaggedSpeedLoss(oRequest)
+await ApiClient.internal.oee.deleteTaggedSpeedLoss(oRequest)
+await ApiClient.internal.oee.getTaggedSpeedLoss(oRequest)
+await ApiClient.internal.oee.getSpeedLossSummary(oRequest)
+```
+
+#### SignatureInternalApiClient — Digital Signature / Buyoff
+
+**Import:** `sap/dm/dme/pod2/api/internal/signature/SignatureInternalApiClient`  
+Use `PodContext.getSignatureHistory(sWidgetId)` to read stored signatures.
+
+```javascript
+await ApiClient.internal.signature.sign(oRequest)          // record a digital signature
+await ApiClient.internal.signature.getSignatureLogs(oRequest) // retrieve signature history
+```
+
+#### DemandInternalApiClient — Order Header Text & Custom Fields
+
+**Import:** `sap/dm/dme/pod2/api/internal/demand/DemandInternalApiClient`
+
+```javascript
+await ApiClient.internal.demand.findByPlantAndShopOrder({ plant, shopOrder })
+await ApiClient.internal.demand.getOrderHeaderText({ plant, shopOrder })   // rich text header
+await ApiClient.internal.demand.getCustomFieldDefinitions({ plant })
+```
+
+#### DataScanInternalApiClient — Barcode / Scan Entry
+
+**Import:** `sap/dm/dme/pod2/api/internal/datascan/DataScanInternalApiClient`
+
+```javascript
+await ApiClient.internal.datascan.scanData(oRequest)              // process a scanned value
+await ApiClient.internal.datascan.getDataScanConfig(oRequest)     // scan routing config
+await ApiClient.internal.datascan.getConsumerMappings(oRequest)   // field → consumer map
+```
+
+#### ProcessEngineInternalApiClient — Process Manufacturing Workflows
+
+**Import:** `sap/dm/dme/pod2/api/internal/processengine/ProcessEngineInternalApiClient`
+
+```javascript
+await ApiClient.internal.processengine.start(oRequest)         // start a process engine task
+await ApiClient.internal.processengine.completeTask(oRequest)  // complete a task step
+```
+
+---
+
 ### Other Available APIs
 
 ```javascript
@@ -2100,7 +2235,13 @@ ApiClient.user           // User APIs
 ApiClient.workinstruction // Work instructions
 ApiClient.processorder   // Process orders
 ApiClient.execution      // Execution APIs
-ApiClient.mdo            // Master data object APIs
+ApiClient.mdo            // Master data object APIs (MDO — distinct from standard REST)
+ApiClient.numbering      // SFC/entity number generation
+ApiClient.routing        // Routing lookups
+ApiClient.operationactivity // Operation activity lookups
+ApiClient.datatype       // Custom data types
+ApiClient.datafields     // Custom data field definitions
+ApiClient.timeTracking   // Time tracking (clockIn/Out, laborOn/Off — see above)
 ApiClient.internal       // Internal APIs (SAP widgets only — may change without notice)
 ```
 
