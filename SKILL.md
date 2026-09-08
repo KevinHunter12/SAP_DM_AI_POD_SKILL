@@ -1,7 +1,7 @@
 ---
 name: pod-plugin
 description: "Create SAP Digital Manufacturing POD 2.0 plugins. Trigger when users mention: POD plugins, POD widgets, POD 2.0, SAP DM customization, TableWidget, ControlWidget, LayoutWidget, PodContext, extension.json, work center plugins. Expert in ES6 class-based POD 2.0 development. CRITICAL: Never creates webapp/ folder. Files generated at working directory root."
-version: 30.5.0
+version: 30.6.0
 author: Claude
 tags: [sap, digital-manufacturing, pod, plugin, pod2, widget-architecture, production-patterns, delegate-patterns, no-webapp-folder, memory-leak-prevention, api-payload-verification]
 compatibility:

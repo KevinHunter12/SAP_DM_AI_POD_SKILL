@@ -288,7 +288,7 @@ Specific to TableWidget:
 | production-patterns-unified.md | SAP patterns | 35 battle-tested patterns |
 | form-dialog-patterns.md | Forms, dialogs & validation | 8 patterns |
 | common-mistakes.md | Error prevention | 28 mistakes + fixes |
-| delegate-architecture.md | Delegates | 8 official delegates |
+| delegate-architecture.md | Delegates | 7 official delegates |
 
 ---
 

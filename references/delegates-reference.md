@@ -270,8 +270,9 @@ Unlike other delegates, `QualityInspectionDelegate.refresh()` requires the calle
 
 ## DataCollectionDelegate
 
-**Import:** `sap/dm/dme/pod2/context/data/DataCollectionDelegate`  
-Source file was empty at time of documentation — delegate exists but has no public API documented.
+**Import:** `sap/dm/dme/pod2/context/data/DataCollectionDelegate`
+
+The graph confirms `DataCollectionDelegate.js` exists at `src/sap/dm/dme/pod2/context/data/DataCollectionDelegate.js`. The public API was not documented at the time this reference was written. Before using this delegate, read the source directly or check if methods match the common delegate pattern (`refresh()`, `init()`, auto-subscribe behaviour).
 
 ---
 

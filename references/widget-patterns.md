@@ -30,6 +30,8 @@ POD 2.0 provides custom controls that extend standard SAPUI5 controls with addit
 - `fontSize` - Font size (e.g., "1rem", "14px")
 - `fontWeight` - Font weight (e.g., "Normal", "Bold")
 
+**CustomTextArea** - Extends sap.m.TextArea with the same styling properties as CustomText. Use when you need a multi-line configurable text area.
+
 **CustomHBox / CustomVBox** - Layout containers with:
 - `gap` - CSS gap value (e.g., "5px", "1rem")
 - `alignItems` - Flex alignment
@@ -41,6 +43,7 @@ POD 2.0 provides custom controls that extend standard SAPUI5 controls with addit
 import CustomText from "sap/dm/dme/pod2/control/CustomText";
 import CustomVBox from "sap/dm/dme/pod2/control/CustomVBox";
 import CustomHBox from "sap/dm/dme/pod2/control/CustomHBox";
+import CustomTextArea from "sap/dm/dme/pod2/control/CustomTextArea";
 
 class StyledWidget extends Widget {
     PropertyId = Object.freeze({

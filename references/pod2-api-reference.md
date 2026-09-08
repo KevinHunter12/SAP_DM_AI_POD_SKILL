@@ -31,36 +31,39 @@ This document provides a comprehensive API reference for SAP Digital Manufacturi
 
 ### Control & Enum Imports
 
-**CRITICAL**: Many common SAPUI5 enums are frequently imported from wrong modules. Use these correct paths:
+**CRITICAL**: SAPUI5 enum pseudo-module imports (`"sap/m/ButtonType"`, `"sap/m/PlacementType"`, etc.) are **deprecated** and produce console warnings. Always import from the parent library:
 
 ```javascript
-// ✅ PlacementType (for Popover, Dialog positioning)
+// ❌ WRONG — deprecated pseudo-module imports (cause console warnings)
 import PlacementType from "sap/m/PlacementType";
-// NOT from "sap/ui/core/library"!
-// Values: PlacementType.Auto, PlacementType.Bottom, PlacementType.Top,
-//         PlacementType.Left, PlacementType.Right, etc.
+import ButtonType    from "sap/m/ButtonType";
+import ListMode      from "sap/m/ListMode";
+import MessageType   from "sap/m/MessageType";
+import ValueState    from "sap/ui/core/ValueState";
 
-// ✅ Button Types
-import ButtonType from "sap/m/ButtonType";
-// Values: ButtonType.Default, ButtonType.Accept, ButtonType.Reject,
-//         ButtonType.Emphasized, ButtonType.Transparent, etc.
+// ✅ CORRECT — import library, extract types as vars
+sap.ui.define([
+    "sap/m/library",
+    "sap/ui/core/library"
+], (mobileLibrary, coreLibrary) => {
+    "use strict";
 
-// ✅ List Modes (selection)
-import ListMode from "sap/m/ListMode";
-// Values: ListMode.None, ListMode.SingleSelect, ListMode.MultiSelect,
-//         ListMode.Delete, ListMode.SingleSelectLeft, etc.
-
-// ✅ Message Types
-import MessageType from "sap/m/MessageType";
-// Values: MessageType.Success, MessageType.Error, MessageType.Warning,
-//         MessageType.Information, MessageType.None
-
-// ✅ Value States (input validation)
-import ValueState from "sap/ui/core/ValueState";
-// This one IS in sap/ui/core (exception to the rule)
-// Values: ValueState.None, ValueState.Error, ValueState.Warning,
-//         ValueState.Success, ValueState.Information
+    var PlacementType      = mobileLibrary.PlacementType;
+    var ButtonType         = mobileLibrary.ButtonType;
+    var ListMode           = mobileLibrary.ListMode;
+    var ListSeparators     = mobileLibrary.ListSeparators;
+    var MessageType        = mobileLibrary.MessageType;
+    var FlexAlignItems     = mobileLibrary.FlexAlignItems;
+    var FlexJustifyContent = mobileLibrary.FlexJustifyContent;
+    var FlexWrap           = mobileLibrary.FlexWrap;
+    var ValueState         = coreLibrary.ValueState;   // ValueState IS in core
+    var TextAlign          = coreLibrary.TextAlign;
+    var TextDirection      = coreLibrary.TextDirection;
+    // ... use vars here
+});
 ```
+
+See [sapui5-control-apis.md](sapui5-control-apis.md#deprecated-pseudo-module-imports) for the full replacement table.
 
 ### POD 2.0 Core Imports
 
@@ -80,6 +83,12 @@ import Widget from "sap/dm/dme/pod2/widget/Widget";
 import ControlWidget from "sap/dm/dme/pod2/widget/ControlWidget";
 import LayoutWidget from "sap/dm/dme/pod2/widget/LayoutWidget";
 import TableWidget from "sap/dm/dme/pod2/widget/core/TableWidget";
+
+// ✅ Custom Controls (POD 2.0 styling-aware)
+import CustomText     from "sap/dm/dme/pod2/control/CustomText";
+import CustomTextArea from "sap/dm/dme/pod2/control/CustomTextArea";
+import CustomHBox     from "sap/dm/dme/pod2/control/CustomHBox";
+import CustomVBox     from "sap/dm/dme/pod2/control/CustomVBox";
 
 // ✅ i18n (Framework-driven pattern)
 import I18nResourceModel from "sap/dm/dme/pod2/model/I18nResourceModel";
@@ -2124,12 +2133,14 @@ await ApiClient.timeTracking.resourceUsageOff(oRequest)
 ### Notable Internal Clients
 
 > **Warning:** Internal APIs power SAP's own widgets and may change without notice between versions. Prefer public APIs where available. Test thoroughly after upgrades.
+>
+> **Note on `ApiClient.internal.*` sub-namespaces:** The `ApiClient.internal.plant`, `ApiClient.internal.oee`, etc. paths shown below reflect the logical structure of the internal clients. The exact wiring under `ApiClient.internal` depends on the version of `ApiClient.js`. When in doubt, import the client class directly (import path shown for each) rather than going through `ApiClient.internal`.
 
 #### PlantInternalApiClient — Resource, Work Center & Plant Data
 
 The most useful internal client for plugin development. Provides resource and work center lookups not available through the public `ResourcePublicApiClient`.
 
-**Import:** `sap/dm/dme/pod2/api/internal/plant/PlantInternalApiClient`  
+**Import:** `sap/dm/dme/pod2/api/internal/plant/PlantInternalApiClient`
 Accessed via `ApiClient.internal.plant` or imported directly.
 
 ```javascript

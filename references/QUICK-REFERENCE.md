@@ -153,7 +153,7 @@ const oData = await oResponse.json();
 
 **When to Actually Call APIs:**
 - Starting/completing operations (`ApiClient.sfc.sfcStart`, `sfcComplete`)
-- Posting quantities (`ApiClient.production.reportQuantity`)
+- Posting quantities (`ApiClient.execution.sfcComplete` or `ActivityConfirmationDelegate`)
 - Fetching data NOT in PodContext (e.g., material master, BOM, routing)
 - Triggering backend actions (create NC, serialize, etc.)
 
@@ -545,7 +545,7 @@ import ApiClient from "sap/dm/dme/pod2/api/ApiClient";
 // ✅ CORRECT - Use pre-built methods
 await ApiClient.sfc.sfcStart(oRequest);
 await ApiClient.sfc.sfcComplete(oRequest);
-await ApiClient.production.reportQuantity(oRequest);
+await ApiClient.execution.sfcComplete(oRequest);   // v2 execution path
 await ApiClient.material.getMaterial(oRequest);
 
 // ❌ WRONG - These methods DON'T exist!
@@ -586,7 +586,7 @@ const oData = await oResponse.json();
 | Get current operation | Use `PodContext.getLastSelectedOperationActivity()` | Data already loaded |
 | Get filtered resources | Use `PodContext.getFilterResources()` | Data already loaded |
 | Start/complete SFC | Use `ApiClient.sfc.sfcStart/sfcComplete()` | Action required |
-| Post production quantity | Use `ApiClient.production.reportQuantity()` | Action required |
+| Post production quantity | Use `ApiClient.execution.sfcComplete()` or `ActivityConfirmationDelegate` | Action required |
 | Fetch material master (not in worklist) | Use `ApiClient.material.getMaterial()` | Data not in PodContext |
 | Custom/internal endpoint | Use `fetch()` with manual token | ApiClient doesn't cover it |
 
@@ -597,19 +597,20 @@ const oData = await oResponse.json();
 ## API Client Methods (Not Exhaustive)
 
 ```javascript
-// SFC operations
+// SFC operations (v1 path — sfc/SfcPublicApiClient)
 await ApiClient.sfc.sfcStart(oRequest);
 await ApiClient.sfc.sfcComplete(oRequest);
-await ApiClient.sfc.getSfcDetails(oRequest);  // Rarely needed - worklist has this!
+await ApiClient.sfc.getSfcDetail(oRequest);  // Rarely needed - worklist has this!
 
-// Production operations
-await ApiClient.production.reportQuantity(oRequest);
+// Execution operations (v2 path — execution/ExecutionPublicApiClient)
+await ApiClient.execution.sfcStart(oRequest);
+await ApiClient.execution.sfcComplete(oRequest);
+await ApiClient.execution.sfcSignoff(oRequest);
+await ApiClient.execution.sfcSplit(oRequest);
+await ApiClient.execution.phaseComplete(oRequest);
 
 // Material operations
 await ApiClient.material.getMaterial(oRequest);
-
-// Internal APIs (use with caution)
-await ApiClient.internal.activityconfirmation.getSummaries(oRequest);
 ```
 
 ---

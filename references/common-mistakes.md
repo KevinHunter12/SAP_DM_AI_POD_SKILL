@@ -1949,8 +1949,25 @@ async _onExecute() {
 | API success | `showSuccess()` | Persistent audit trail |
 | API error | `showError()` | User needs to review/act |
 | Validation failure | `showError()` | Needs user action |
-| Info message | `toast()` | Temporary, low importance |
+| Informational message | `showInfo()` | Persistent info, no action needed |
+| Blocking confirmation required | `messageBox()` | Returns Promise — awaitable |
 | "No items selected" | `toast()` | Temporary guidance |
+| Info message | `toast()` | Temporary, low importance |
+
+### Full MessageHistory API
+
+```javascript
+import MessageHistory from "sap/dm/dme/pod2/context/MessageHistory";
+
+MessageHistory.showSuccess(sMsg)    // ✅ persistent success message
+MessageHistory.showError(sMsg)      // ✅ persistent error message
+MessageHistory.showWarning(sMsg)    // ✅ persistent warning message
+MessageHistory.showInfo(sMsg)       // ✅ persistent info message (often overlooked)
+MessageHistory.toast(sMsg)          // ✅ temporary toast (auto-dismisses)
+MessageHistory.push(oMessage)       // ✅ push to message history popover
+MessageHistory.messageBox(oOpts)    // ✅ returns Promise — use for blocking confirmations
+MessageHistory.dismissMessage(sId)  // ✅ programmatically dismiss a message
+```
 
 ---
 
@@ -2593,7 +2610,7 @@ const oWorkListItem = PodContext.getLastSelectedWorkListItem();
 | Get filtered resources | `PodContext.getFilterResources()` | Already loaded |
 | Get filtered work centers | `PodContext.getFilterWorkCenters()` | Already loaded |
 | **Start/Complete SFC** | `ApiClient.sfc.sfcStart/Complete()` | **Action required** |
-| **Post production quantity** | `ApiClient.production.reportQuantity()` | **Action required** |
+| **Post production quantity** | `ApiClient.execution.sfcComplete()` or `ActivityConfirmationDelegate` | **Action required** |
 | **Fetch material master details** | `ApiClient.material.getMaterial()` | **Not in worklist** |
 | **Fetch routing/BOM** | API call | **Not in PodContext** |
 
@@ -2660,7 +2677,7 @@ await ApiClient.request({ method: "GET", url: sUrl });
 // ✅ Use specific methods
 await ApiClient.sfc.sfcStart(oRequest);
 await ApiClient.sfc.sfcComplete(oRequest);
-await ApiClient.production.reportQuantity(oRequest);
+await ApiClient.execution.sfcComplete(oRequest);   // v2 execution path
 
 // ✅ For custom endpoints, use fetch()
 const oContext = PodContext.getContext();
