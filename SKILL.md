@@ -26,6 +26,7 @@ Expert guide for SAP Digital Manufacturing POD 2.0 plugin development.
 
 **Additional References** (read as needed):
 - [QUICK-REFERENCE.md](references/QUICK-REFERENCE.md) - Quick reference card for common patterns
+- [action-patterns.md](references/action-patterns.md) - ⭐ **For Actions**: SfcExecutionAction base class, property editors, execute() patterns, code quality rules, production checklist, testing
 - [tablewidget-complete.md](references/tablewidget-complete.md) - For TableWidget only
 - [tablecell-patterns.md](references/tablecell-patterns.md) - For custom table cells
 - [delegate-architecture.md](references/delegate-architecture.md) - For delegate usage
@@ -89,7 +90,25 @@ See [Mistake #14](references/common-mistakes.md#mistake-14) for full details and
 
 **Even if the user provides detailed requirements in their prompt, you MUST still explicitly ask for these four pieces of information. Do NOT infer or assume plugin name, category, or languages from the user's description.**
 
-### 2. Base Class Selection
+### 2. Component Type Selection
+
+**Widget or Action?**
+
+| Scenario | Component | Why |
+|----------|-----------|-----|
+| User clicks button to trigger SFC start/complete/signoff | **Action** | Stateless execution, no ongoing UI |
+| Display production data, react to selection changes | **Widget** | Stateful, needs lifecycle |
+| Button-triggered operation AND display of results | **Action + Widget** | Action updates context, Widget reacts |
+
+**Action Base Class:**
+
+| Operation Type | Base Class |
+|----------------|-----------|
+| Any SFC operation (start, complete, signoff, split) | `SfcExecutionAction` ⭐ |
+| Phase operations | `PhaseExecutionAction` |
+| Non-SFC custom operations | `Action` |
+
+**Widget Base Class:**
 
 | Need | Base Class | Spread Parent Config? |
 |------|------------|----------------------|
@@ -97,6 +116,8 @@ See [Mistake #14](references/common-mistakes.md#mistake-14) for full details and
 | Container for widgets | `LayoutWidget` | ✅ YES |
 | Data table | `TableWidget` | ✅ YES |
 | Business logic only | `ContentHandler` | N/A |
+
+**See**: [action-patterns.md](references/action-patterns.md) for full Action development guide.
 
 ### 3. Correct Import Paths
 
@@ -456,7 +477,9 @@ See [Mistake #3](references/common-mistakes.md#mistake-3) for complete patterns.
 - Default to "Core languages" if user doesn't specify
 
 ### Step 2: Read Reference Files
-- [ ] Read `references/widget-patterns.md` for the complete widget class template
+- [ ] **Determine component type**: Widget, Action, or both? (see Component Type Selection above)
+- [ ] **IF building an Action**: Read `references/action-patterns.md` for SfcExecutionAction template, property editors, and code quality rules
+- [ ] **IF building a Widget**: Read `references/widget-patterns.md` for the complete widget class template
 - [ ] Read `references/common-mistakes.md` - specifically Mistake #14 for extension.json format
 - [ ] Read `references/PATTERN-INDEX.md` to select the correct pattern
 - [ ] **IF plugin calls SAP DM APIs**: Read `references/sapdm-api-reference.md` to verify correct API payload format
@@ -512,6 +535,78 @@ See [Mistake #3](references/common-mistakes.md#mistake-3) for complete patterns.
 - [ ] **Verified required vs optional fields**
 - [ ] **Example verified**: `sfcs: ["SFC001"]` not `sfcs: [{ sfc: "..." }]`
 - [ ] **Example verified**: `operation` not `operationActivity` (ApiClient differs from REST API)
+
+---
+
+## Code Generation Guidelines (MANDATORY)
+
+Apply these rules to ALL generated code — widgets AND actions.
+
+### Functions Max 20 Lines
+
+Break long methods into focused private helpers. If a method exceeds 20 lines, extract.
+
+### Guard Clauses First
+
+```javascript
+// ✅ GOOD: early exit, happy path at lowest indentation
+async execute() {
+    if (!this.#hasOperation()) return;
+    if (!this.#hasSelection()) return;
+    await this.#performExecution();
+}
+
+// ❌ BAD: nested conditions
+async execute() {
+    if (this.#hasOperation()) {
+        if (this.#hasSelection()) { /* Deep nesting */ }
+    }
+}
+```
+
+### Max 2 Nesting Levels
+
+Use filter/map chains instead of nested loops.
+
+### No Abbreviations
+
+```javascript
+// ✅ GOOD
+const selectedWorkListItems = PodContext.getSelectedWorkListItems();
+
+// ❌ BAD
+const selWlItems = PodContext.getSelectedWorkListItems();
+```
+
+### Private Methods Use `#`
+
+```javascript
+class MyAction extends SfcExecutionAction {
+    #logger = Logger.getLogger("...");
+    async execute() { ... }           // public
+    #validatePreconditions() { ... }  // private
+    #buildRequest() { ... }           // private
+}
+```
+
+### Type Safety
+
+```javascript
+// ✅ GOOD: use unknown + instanceof
+#handleError(error) {
+    if (error instanceof Error) {
+        MessageHistory.showError(error.message);
+    } else {
+        MessageHistory.showError(this.getI18nText("error.unknown"));
+    }
+    throw error;
+}
+// ❌ BAD: error: any
+```
+
+### Separation of Concerns
+
+`execute()` / `onInit()` should be orchestration only — delegate to private helper methods.
 
 ---
 

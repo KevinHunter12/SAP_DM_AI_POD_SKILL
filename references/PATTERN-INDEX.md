@@ -9,6 +9,7 @@ Quick reference index organized by widget type, use case, technical pattern, and
 | Need | Go To |
 |------|-------|
 | **New to POD 2.0?** | [Getting Started](#i-need-to) |
+| **Building an Action (button/execution)?** | [Action Patterns](action-patterns.md) ⭐ |
 | **Building a table?** | [TableWidget Patterns](#tablewidget-patterns) |
 | **Something not working?** | [Common Mistakes](common-mistakes.md) |
 | **Memory leak?** | [Mistake #3: Missing onExit()](common-mistakes.md#mistake-3) |
@@ -21,6 +22,12 @@ Quick reference index organized by widget type, use case, technical pattern, and
 
 **Q: How do I create a simple widget?**  
 → [ControlWidget Pattern](widget-patterns.md) ⭐
+
+**Q: How do I create a button that executes an SFC operation?**  
+→ [Action Patterns](action-patterns.md) ⭐ — extend `SfcExecutionAction`, implement `execute()`
+
+**Q: What's the difference between an Action and a Widget?**  
+→ Actions = stateless execution triggered by buttons. Widgets = stateful display with lifecycle.
 
 **Q: My widget is leaking memory!**  
 → [Mistake #3: Missing onExit()](common-mistakes.md#mistake-3) - ensure `onExit()` calls `PodContext.unsubscribe()`
@@ -68,6 +75,15 @@ POD 1.0 (XML views, controllers) and POD 2.0 (ES6 classes, programmatic views) a
 ---
 
 ## By Widget Type
+
+### Action Patterns (NEW)
+| Pattern | File | Complexity | Description |
+|---------|------|------------|-------------|
+| Basic Action | action-patterns.md | ⭐⭐ | Extends SfcExecutionAction, getProperties() + execute() |
+| Action with Properties | action-patterns.md | ⭐⭐⭐ | Configurable properties (Boolean, String, Integer, Dropdown) |
+| Action with Dialog | action-patterns.md | ⭐⭐⭐ | Confirmation dialog before execution |
+| Action with Partial Success | action-patterns.md | ⭐⭐⭐⭐ | Process response items, separate successes from failures |
+| Action + Widget Combined | action-patterns.md | ⭐⭐⭐⭐ | Action updates context, Widget reacts |
 
 ### ControlWidget Patterns
 | Pattern | File | Complexity | Description |
@@ -237,6 +253,7 @@ Specific to TableWidget:
 
 ### I need to...
 
+**Create an execution action (start/complete/signoff)** → [Action Patterns](action-patterns.md) ⭐⭐
 **Display a single control** → [ControlWidget](widget-patterns.md#controlwidget) ⭐
 **Show a container** → [LayoutWidget](widget-patterns.md#layoutwidget) ⭐⭐
 **Display tabular data** → [TableWidget](widget-patterns.md#tablewidget) ⭐⭐⭐
@@ -280,6 +297,7 @@ Specific to TableWidget:
 
 | File | Focus | Patterns Count |
 |------|-------|----------------|
+| action-patterns.md | Action templates, code quality rules | 3 patterns + production checklist |
 | widget-patterns.md | Widget templates | 8 core patterns |
 | tablewidget-complete.md | Complete TableWidget | 1 comprehensive guide |
 | tablecell-patterns.md | Table cells | 13 cell types |
