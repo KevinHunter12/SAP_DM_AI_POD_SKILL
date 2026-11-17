@@ -1,9 +1,9 @@
 ---
 name: pod-plugin
-description: "Create SAP Digital Manufacturing POD 2.0 plugins. Trigger when users mention: POD plugins, POD widgets, POD 2.0, SAP DM customization, TableWidget, ControlWidget, LayoutWidget, PodContext, extension.json, work center plugins. Expert in ES6 class-based POD 2.0 development. CRITICAL: Never creates webapp/ folder. Files generated at working directory root."
-version: 30.6.0
+description: "Create SAP Digital Manufacturing POD 2.0 plugins. Trigger when users mention: POD plugins, POD widgets, POD 2.0, SAP DM customization, TableWidget, ControlWidget, LayoutWidget, ComponentWidget, IntegrationWidget, PodContext, extension.json, work center plugins, hotkeys in POD, phase actions, SFC actions. Expert in ES6 class-based POD 2.0 development. CRITICAL: Never creates webapp/ folder. Files generated at working directory root."
+version: 30.7.0
 author: Claude
-tags: [sap, digital-manufacturing, pod, plugin, pod2, widget-architecture, production-patterns, delegate-patterns, no-webapp-folder, memory-leak-prevention, api-payload-verification]
+tags: [sap, digital-manufacturing, pod, plugin, pod2, widget-architecture, production-patterns, delegate-patterns, no-webapp-folder, memory-leak-prevention, api-payload-verification, component-widget, integration-widget, hotkey-manager, phase-actions]
 compatibility:
   environment: SAP Business Technology Platform (BTP) with SAP Digital Manufacturing
   requirements:
@@ -105,19 +105,23 @@ See [Mistake #14](references/common-mistakes.md#mistake-14) for full details and
 | Operation Type | Base Class |
 |----------------|-----------|
 | Any SFC operation (start, complete, signoff, split) | `SfcExecutionAction` ⭐ |
-| Phase operations | `PhaseExecutionAction` |
+| Phase start / complete | `Action` (directly — no `PhaseExecutionAction` class exists) |
+| Custom production process | `Action` (directly — see `ProductionProcessAction` pattern) |
 | Non-SFC custom operations | `Action` |
 
 **Widget Base Class:**
 
-| Need | Base Class | Spread Parent Config? |
-|------|------------|----------------------|
-| Single control (button, input) | `ControlWidget` | ❌ NO |
-| Container for widgets | `LayoutWidget` | ✅ YES |
-| Data table | `TableWidget` | ✅ YES |
-| Business logic only | `ContentHandler` | N/A |
+| Need | Base Class | Notes |
+|------|------------|-------|
+| Single control (button, input) | `ControlWidget` | No config spreading |
+| Container for child widgets | `LayoutWidget` | Spread parent config |
+| Data table | `TableWidget` | Spread parent config |
+| SAPUI5 Component.js + manifest.json | `ComponentWidget` | Must implement `static getComponentName()` |
+| Third-party framework (React, Vue, etc.) | `IntegrationWidget` | Must implement `static getEntryPoint()` |
+| Business logic only, no UI | `ContentHandler` | N/A |
 
-**See**: [action-patterns.md](references/action-patterns.md) for full Action development guide.
+**See**: [action-patterns.md](references/action-patterns.md) for Action development guide.  
+**See**: [widget-patterns.md](references/widget-patterns.md) for ComponentWidget and IntegrationWidget patterns.
 
 ### 3. Correct Import Paths
 
