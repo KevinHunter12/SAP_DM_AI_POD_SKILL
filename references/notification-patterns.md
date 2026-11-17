@@ -18,9 +18,42 @@ The notification system provides WebSocket-based pub/sub for real-time events li
 ```javascript
 import PodNotificationWebSocket from "sap/dm/dme/pod2/notification/PodNotificationWebSocket";
 import ManagedSubscription from "sap/dm/dme/pod2/notification/ManagedSubscription";
-// EventType and Filter are sub-namespaces accessed via their full paths
-// Check JSDoc for the exact EventType enum values available in your version
+import EventType from "sap/dm/dme/pod2/notification/EventType";
+import Filter from "sap/dm/dme/pod2/notification/Filter";
 ```
+
+---
+
+## EventType Enum
+
+All values from `sap/dm/dme/pod2/notification/EventType`:
+
+```javascript
+EventType.BACKFLUSH_FAILURE_MSG  // "sap.dsc.dm.Backflushing.FailureMessage.v1"
+EventType.CUSTOM                 // "sap.dsc.dm.GENERIC.MESSAGE.v1"
+EventType.DATA_COLLECTION        // "sap.dsc.dm.Sfc.DataCollected.v3"
+EventType.GOODS_RECEIPT_COMPLETED // "sap.dsc.dm.GoodsReceipt.Completed.v1"
+EventType.GOODS_RECEIPT_REQUESTED // "sap.dsc.dm.GoodsReceipt.Requested.v1"
+EventType.NC_LOG                 // "sap.dsc.dm.NonConformanceIncident.Logged.v2"
+EventType.OPERATION_COMPLETE     // "sap.dsc.dm.Sfc.OperationActivity.Completed.v2"
+EventType.OPERATION_START        // "sap.dsc.dm.Sfc.OperationActivity.Started.v1"
+EventType.PP_ACTION              // "sap.dsc.dm.ProcessEngine.ProcessStateChanged.v1"
+EventType.PP_END                 // "sap.dsc.dm.ProcessEngine.ProcessEnded.v1"
+EventType.PP_START               // "sap.dsc.dm.ProcessEngine.ProcessStarted.v1"
+EventType.RESOURCE_STATUS_CHANGE // "sap.dsc.dm.plant.Resource.Status.Updated.v1"
+EventType.SFC_COMPLETE           // "sap.dsc.dm.Sfc.Completed.v1"
+EventType.SFC_DISPOSITION        // "sap.dsc.dm.Sfc.Dispositioned.v1"
+EventType.SFC_DISPOSITION_V2     // "sap.dsc.dm.Sfc.Dispositioned.v2"
+EventType.SFC_SELECT             // "sap.dsc.dm.Sfc.Selected.v1"
+EventType.SFC_SIGNOFF            // "sap.dsc.dm.Sfc.SignedOff.v2"
+EventType.SFC_START              // "sap.dsc.dm.Sfc.Started.v3"
+EventType.SIGNATURE_CREATED      // "sap.dsc.dm.Signature.Created.v1"
+EventType.TT_START               // "sap.dsc.dm.TimeRecord.Started.v1"
+EventType.TT_STOP                // "sap.dsc.dm.TimeRecord.Stopped.v1"
+EventType.WD_SCALE               // "sap.dsc.dm.WeighDispense.ScaleMessage.v1"
+```
+
+Always use the enum constant (e.g., `EventType.SFC_START`), not the raw string.
 
 ---
 
@@ -299,3 +332,77 @@ _onSfcStatusChanged(oPayload) {
     }
 }
 ```
+
+---
+
+## HotKeyManager
+
+**Class:** `sap.dm.dme.pod2.hotkey.HotKeyManager`  
+**Import:** `sap/dm/dme/pod2/hotkey/HotKeyManager`  
+**All methods static.**
+
+For keyboard shortcuts in POD 2.0 widgets. Automatically suppresses hotkeys when focus is in a text input or textarea.
+
+### API
+
+```javascript
+// Subscribe — register a keyboard shortcut
+HotKeyManager.subscribe(sHotKey, fnCallback, oListener, oOptions?)
+
+// Unsubscribe — remove a specific callback
+HotKeyManager.unsubscribe(sHotKey, fnCallback, oListener)
+
+// Unsubscribe all hotkeys registered by a listener (use in onExit)
+HotKeyManager.unsubscribeAll(oListener)
+```
+
+### Hotkey Format
+
+Modifier order is **enforced**: `Ctrl` → `Shift` → `Alt` → `Meta`
+
+```javascript
+"Ctrl+S"            // Control + S
+"Ctrl+Shift+Alt+Z"  // Control + Shift + Alt + Z  (order matters)
+"F5"                // Function key
+"Enter"             // Enter key
+```
+
+Letters are always uppercase in the string (`"Ctrl+A"` not `"Ctrl+a"`).
+
+### Example
+
+```javascript
+import HotKeyManager from "sap/dm/dme/pod2/hotkey/HotKeyManager";
+
+class MyWidget extends ControlWidget {
+    async onInit() {
+        await super.onInit();
+        if (PodContext.isRunMode()) {
+            HotKeyManager.subscribe("Ctrl+S", this._onSave, this);
+            // Scoped to this widget's view — won't fire if focus is outside
+            HotKeyManager.subscribe("F5", this._onRefresh, this, {
+                scope: this.getView()
+            });
+        }
+    }
+
+    _onSave(oEvent) {
+        // triggered on Ctrl+S
+    }
+
+    _onRefresh(oEvent) {
+        // triggered on F5 when focus is within this widget
+    }
+
+    onExit() {
+        // REQUIRED: clean up all subscriptions to prevent memory leaks
+        HotKeyManager.unsubscribeAll(this);
+        super.onExit();
+    }
+}
+```
+
+### `oOptions.scope`
+
+When `scope` is set to a SAPUI5 element, the hotkey only fires when the keydown event originates from within that element's DOM subtree. If the element is not yet rendered (no DOM ref), the callback is silently skipped — safe to set during `onInit()` before rendering completes.
+

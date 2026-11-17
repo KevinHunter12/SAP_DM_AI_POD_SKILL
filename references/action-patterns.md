@@ -30,13 +30,14 @@ Action (abstract)
 │   ├── SignoffAction
 │   ├── SplitAction
 │   └── RelabelAction
-├── PhaseExecutionAction
-│   ├── StartPhaseAction
-│   └── CompletePhaseAction
+├── StartPhaseAction            # Phase start — extends Action directly (no PhaseExecutionAction base)
+├── CompletePhaseAction         # Phase complete — extends Action directly
 └── [Custom]Action              # Direct extension for non-SFC operations
 ```
 
 **⭐ ALWAYS extend `SfcExecutionAction` for SFC operations**, not the base `Action` class. It provides pre-built helper methods (see below).
+
+> **Note**: There is no `PhaseExecutionAction` base class. `StartPhaseAction` and `CompletePhaseAction` (under `action/phase/`) both extend `Action` directly. Import from `sap/dm/dme/pod2/action/phase/StartPhaseAction` and `sap/dm/dme/pod2/action/phase/CompletePhaseAction`.
 
 ---
 
@@ -314,6 +315,70 @@ new ActionProperty({
     displayName: this.getI18nText("property.mode")
 })
 ```
+
+---
+
+## Phase Actions (StartPhaseAction / CompletePhaseAction)
+
+Phase actions extend `Action` directly — there is no `PhaseExecutionAction` base class.
+
+```javascript
+sap.ui.define([
+    "sap/dm/dme/pod2/action/Action",
+    "sap/dm/dme/pod2/api/ApiClient",
+    "sap/dm/dme/pod2/context/MessageHistory",
+    "sap/dm/dme/pod2/context/PodContext",
+    "sap/dm/dme/pod2/context/data/OperationActivityDelegate"
+], (Action, ApiClient, MessageHistory, PodContext, OperationActivityDelegate) => {
+    "use strict";
+
+    class MyStartPhaseAction extends Action {
+        async execute(oActionContext) {
+            const oPhase = PodContext.getLastSelectedOperationActivity();
+            if (!oPhase) {
+                MessageHistory.showError(this.getI18nText("error.noSelection"));
+                oActionContext.abort();
+                return;
+            }
+
+            // Skip if already in work or complete status
+            if (oPhase.isActive() || oPhase.isComplete()) {
+                return;
+            }
+
+            const oWorkListItem = PodContext.getLastSelectedWorkListItem();
+            const aResources = PodContext.getFilterResources();
+
+            const oRequest = {
+                plant: PodContext.getPlant(),
+                stepDetail: {
+                    stepId: oPhase.stepId,
+                    operationActivity: oPhase.operationActivity
+                },
+                resource: aResources?.[0]?.resource ?? "",
+                userId: PodContext.getUserId(),
+                workCenter: oPhase.workCenter,
+                sfcs: [ oWorkListItem.sfc ]
+            };
+
+            try {
+                await ApiClient.execution.sfcStart(oRequest);
+                OperationActivityDelegate.refresh({ force: true });
+            } catch (oError) {
+                MessageHistory.showError(oError.message);
+            }
+        }
+    }
+
+    return MyStartPhaseAction;
+});
+```
+
+Key differences from `SfcExecutionAction`:
+- No helper methods (`#getSFCs()`, `#getStepDetail()` etc.) — build the request manually
+- Use `PodContext.getLastSelectedOperationActivity()` for phase/step data
+- Call `OperationActivityDelegate.refresh({ force: true })` after success to update the worklist
+- Import: `sap/dm/dme/pod2/action/Action`
 
 ---
 

@@ -1463,6 +1463,110 @@ sap.ui.define([
 
 ---
 
+## ComponentWidget Pattern (SAPUI5 Component.js + manifest.json)
+
+Use when your widget needs a full SAPUI5 Component architecture — i.e., it has its own `Component.js`, `manifest.json`, routing, or component-level models. If you just need a view and controller, use `ControlWidget` or `LayoutWidget` instead.
+
+**Your `Component.js` must extend `sap.dm.dme.pod2.base.Component`** (not `sap.ui.core.UIComponent`).
+
+```javascript
+sap.ui.define([
+    "sap/dm/dme/pod2/widget/ComponentWidget"
+], (ComponentWidget) => {
+    "use strict";
+
+    class MyComponentWidget extends ComponentWidget {
+        /**
+         * REQUIRED: module path to your Component.js, without the trailing "Component" suffix.
+         * Example: if your Component.js is at "acme/myplugin/widget/Component.js",
+         * return "acme.myplugin.widget"
+         */
+        static getComponentName() {
+            return "acme.myplugin.widget";
+        }
+
+        /**
+         * OPTIONAL: pass models from the outer widget into the ComponentContainer.
+         * Use to share an i18n model that was created in the widget file.
+         */
+        static getComponentModels() {
+            return {
+                // i18n: MyComponentWidget.#oI18nModel
+            };
+        }
+    }
+
+    return MyComponentWidget;
+});
+```
+
+The widget automatically creates a `ComponentContainer` wrapping your component, passes `componentData: { widget: this }` so the component can access the widget instance, and wraps everything in a `CustomVBox` for drag-and-drop and dimension configuration.
+
+**Built-in dimension properties** (available without overriding `getProperties()`):
+- `width` (default `"100%"`)
+- `height` (default `"100%"`)
+- `paddingTop`, `paddingBottom`, `paddingBegin`, `paddingEnd` (`MarginSize` enum)
+
+Import: `sap/dm/dme/pod2/widget/ComponentWidget`
+
+---
+
+## IntegrationWidget Pattern (Third-Party UI Frameworks)
+
+Use when embedding a React, Vue, Angular, or other non-SAPUI5 framework inside a POD widget. The framework is mounted into a Shadow DOM element to prevent CSS bleed-through.
+
+```javascript
+sap.ui.define([
+    "sap/dm/dme/pod2/widget/IntegrationWidget"
+], (IntegrationWidget) => {
+    "use strict";
+
+    class MyReactWidget extends IntegrationWidget {
+        /**
+         * REQUIRED: module path to your entrypoint function.
+         * The entrypoint must use sap.ui.define and export a function:
+         *   (oDomRef: HTMLDivElement, oWidget: IntegrationWidget) => void | Promise<void>
+         */
+        static getEntryPoint() {
+            return "acme/myplugin/widget/ReactEntryPoint";
+        }
+    }
+
+    return MyReactWidget;
+});
+```
+
+Your entrypoint file:
+
+```javascript
+// acme/myplugin/widget/ReactEntryPoint.js
+sap.ui.define([], () => {
+    "use strict";
+
+    // oDomRef is a <div> inside a Shadow DOM — mount your framework here
+    // oWidget is the IntegrationWidget instance — access PodContext through it
+    return async function(oDomRef, oWidget) {
+        const ReactDOM = await import("react-dom/client");
+        const root = ReactDOM.createRoot(oDomRef);
+        root.render(/* <YourApp widget={oWidget} /> */);
+    };
+});
+```
+
+**Key facts:**
+- The mount target is a `<div>` inside a Shadow Root — styles don't leak out or in by default
+- To inject a stylesheet into the shadow root, override `static getStyleSheet()` returning a module-relative CSS path
+- `oWidget.ready()` returns a Promise that resolves once the entrypoint function completes
+- The `.js` suffix is stripped from the module path automatically
+
+**Built-in dimension properties** (same as `ComponentWidget`):
+- `width`, `height` (defaults `"100%"`)
+- `paddingTop`, `paddingBottom`, `paddingBegin`, `paddingEnd`
+
+Import: `sap/dm/dme/pod2/widget/IntegrationWidget`
+
+---
+
 ## Widget Categories
 
 Available categories from `WidgetCategory` or as string literals:
