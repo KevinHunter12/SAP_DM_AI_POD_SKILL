@@ -1,7 +1,7 @@
 ---
 name: pod-plugin
-description: "Create SAP Digital Manufacturing POD 2.0 plugins. Trigger when users mention: POD plugins, POD widgets, POD 2.0, SAP DM customization, TableWidget, ControlWidget, LayoutWidget, ComponentWidget, IntegrationWidget, PodContext, extension.json, work center plugins, hotkeys in POD, phase actions, SFC actions. Expert in ES6 class-based POD 2.0 development. CRITICAL: Never creates webapp/ folder. Files generated at working directory root."
-version: 30.7.0
+description: "Create SAP Digital Manufacturing POD 2.0 plugins. Trigger when users mention: POD plugins, POD widgets, POD 2.0, SAP DM customization, TableWidget, ControlWidget, LayoutWidget, ComponentWidget, IntegrationWidget, PodContext, extension.json, work center plugins, hotkeys in POD, phase actions, SFC actions, line monitor widgets, indicator widgets, IndicatorSubscriptionManager, LineMonitorModelPath. Expert in ES6 class-based POD 2.0 development. CRITICAL: Never creates webapp/ folder. Files generated at working directory root."
+version: 30.8.0
 author: Claude
 tags: [sap, digital-manufacturing, pod, plugin, pod2, widget-architecture, production-patterns, delegate-patterns, no-webapp-folder, memory-leak-prevention, api-payload-verification, component-widget, integration-widget, hotkey-manager, phase-actions]
 compatibility:
@@ -36,6 +36,7 @@ Expert guide for SAP Digital Manufacturing POD 2.0 plugin development.
 - [podcontext-api-reference.md](references/podcontext-api-reference.md) - ⭐ PodContext deep reference (source-derived): all getters/setters, subscribe/unsubscribe, custom paths, WorkListItem/OperationActivity object shapes, common mistakes
 - [delegates-reference.md](references/delegates-reference.md) - ⭐ All data delegates (source-derived): WorkListDelegate, OperationActivityDelegate, ActivityConfirmationDelegate, QuantityConfirmationDelegate, WorkInstructionDelegate, QualityInspectionDelegate, ComponentConsumptionDelegate — public APIs, auto-subscribe behaviours, common mistakes
 - [utilities-reference.md](references/utilities-reference.md) - ⭐ All utilities (source-derived): DateTimeUtils (locale formatting methods DO exist), Utilities (array/sort/module/DOM helpers), Logger, ValidationUtils, DialogUtils, LanguageUtils
+- [linemonitor-patterns.md](references/linemonitor-patterns.md) - ⭐ **For Line Monitor widgets**: `IndicatorSubscriptionManager` (WebSocket singleton for live sensor data), `LineMonitorModelPath` (work center/time range context), `IndicatorApiClient`, `IndicatorValueHelpPropertyEditor`, `WidgetCategory.LineMonitor`, complete widget example
 - [sapdm-api-reference.md](references/sapdm-api-reference.md) - SAP DM REST APIs
 - [sap-dm-languages.md](references/sap-dm-languages.md) - All 28 supported languages with ISO codes
 - [sapui5-control-apis.md](references/sapui5-control-apis.md) - SAPUI5 control quirks and styling patterns
@@ -119,6 +120,7 @@ See [Mistake #14](references/common-mistakes.md#mistake-14) for full details and
 | SAPUI5 Component.js + manifest.json | `ComponentWidget` | Must implement `static getComponentName()` |
 | Third-party framework (React, Vue, etc.) | `IntegrationWidget` | Must implement `static getEntryPoint()` |
 | Business logic only, no UI | `ContentHandler` | N/A |
+| Line Monitor sensor/indicator display | `Widget` (with `WidgetCategory.LineMonitor`) | Uses `IndicatorSubscriptionManager` for live data |
 
 **See**: [action-patterns.md](references/action-patterns.md) for Action development guide.  
 **See**: [widget-patterns.md](references/widget-patterns.md) for ComponentWidget and IntegrationWidget patterns.
